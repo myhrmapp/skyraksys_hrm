@@ -54,6 +54,11 @@ readonly BACKUP_DIR="/opt/skyraksys-hrm/backups"
 readonly NGINX_CONFIG="/etc/nginx/conf.d/skyraksys-hrm.conf"
 readonly SSL_CERT_DIR="/etc/nginx/ssl"
 
+# PostgreSQL Configuration (will be set dynamically)
+PG_VERSION="17"  # Default, will be detected/overridden
+PG_DATA_DIR="/var/lib/pgsql/17/data"  # Default, will be set based on version
+PG_SERVICE="postgresql-17"  # Default, will be set based on version
+
 # RHEL Package Configuration
 readonly RHEL_PACKAGES=(
     "epel-release"
@@ -176,15 +181,10 @@ validate_line_endings() {
 configure_npm_security() {
     print_info "Configuring global npm security settings..."
     
-    # Set npm security configurations
-    npm config set audit-level moderate >> "$LOGFILE" 2>&1
-    npm config set fund false >> "$LOGFILE" 2>&1
-    npm config set update-notifier false >> "$LOGFILE" 2>&1
-    npm config set save-exact true >> "$LOGFILE" 2>&1
-    npm config set package-lock true >> "$LOGFILE" 2>&1
-    
-    # Set production environment
+    # Set only essential, safe npm configurations for npm 11.6.3
     export NODE_ENV=production
+    npm config set fund false >> "$LOGFILE" 2>&1 || true
+    npm config set audit-level moderate >> "$LOGFILE" 2>&1 || true
     
     print_success "npm security settings configured"
 }
@@ -325,31 +325,13 @@ install_nodejs() {
     # Clean npm cache for fresh start
     npm cache clean --force >> "$LOGFILE" 2>&1 || print_warning "npm cache clean failed"
     
-    # Set cache and performance configurations
-    npm config set cache ~/.npm-cache >> "$LOGFILE" 2>&1
-    npm config set fetch-retry-mintimeout 20000 >> "$LOGFILE" 2>&1
-    npm config set fetch-retry-maxtimeout 120000 >> "$LOGFILE" 2>&1
-    npm config set fetch-retries 3 >> "$LOGFILE" 2>&1
-    
-    # Install PM2 globally with optimized settings
+    # Install PM2 globally with minimal settings
     print_info "Installing PM2 process manager..."
     npm install -g pm2 --no-audit --no-fund >> "$LOGFILE" 2>&1 || error_exit "PM2 installation failed"
     
-    # Configure npm for production security and performance
-    print_info "Configuring npm for production security and performance..."
-    npm config set audit-level moderate >> "$LOGFILE" 2>&1
-    npm config set fund false >> "$LOGFILE" 2>&1
-    npm config set update-notifier false >> "$LOGFILE" 2>&1
-    npm config set progress false >> "$LOGFILE" 2>&1
-    npm config set loglevel error >> "$LOGFILE" 2>&1
-    npm config set maxsockets 20 >> "$LOGFILE" 2>&1
-    npm config set registry https://registry.npmjs.org/ >> "$LOGFILE" 2>&1
-    
-    # Additional performance optimizations for memory-constrained environments
-    npm config set prefer-offline true >> "$LOGFILE" 2>&1
-    npm config set shrinkwrap false >> "$LOGFILE" 2>&1
-    npm config set package-lock true >> "$LOGFILE" 2>&1
-    npm config set save-exact true >> "$LOGFILE" 2>&1
+    # Configure only essential npm settings for npm 11.6.3 compatibility
+    print_info "Configuring npm for production (minimal safe config)..."
+    export NODE_ENV=production
     
     # Setup PM2 startup script for RHEL
     print_info "Configuring PM2 startup for RHEL..."
@@ -772,11 +754,8 @@ finalize_npm_security() {
     
     # Set npm configuration for security with minimal output
     print_info "Configuring npm security settings..."
-    npm config set audit-level moderate
-    npm config set fund false
-    npm config set update-notifier false
-    npm config set progress false
-    npm config set loglevel warn
+    export NODE_ENV=production
+    # Skip npm config to avoid compatibility issues with npm 11.6.3
     
     # Run security fixes in background with timeout to avoid hanging
     {
@@ -1710,8 +1689,12 @@ show_deployment_summary() {
 # =============================================================================
 
 main() {
-    print_header "SkyrakSys HRM Production Deployment v4.0"
-    print_info "🔥 DEPLOYMENT SCRIPT v5.0 - BACKEND-FIRST STRATEGY 🔥"
+    print_header "SkyrakSys HRM Production Deployment v5.0"
+    if [[ "$DRY_RUN" == "true" ]]; then
+        print_info "🧪 TESTING MODE - Showing deployment steps without execution"
+    else
+        print_info "🔥 DEPLOYMENT SCRIPT v5.0 - BACKEND-FIRST STRATEGY 🔥"
+    fi
     print_info "✅ Backend deployed first for immediate availability"
     print_info "✅ Database backup disabled for faster deployment"
     print_info "✅ Enhanced npm security fixes included"
@@ -1788,6 +1771,27 @@ verify_backend_service() {
 # =============================================================================
 # SCRIPT EXECUTION
 # =============================================================================
+
+# Check for dry-run mode
+DRY_RUN=false
+if [[ "${1:-}" == "--dry-run" || "${1:-}" == "-n" ]]; then
+    DRY_RUN=true
+    print_info "🧪 DRY RUN MODE - No actual changes will be made"
+    echo ""
+fi
+
+# Override commands for dry-run
+if [[ "$DRY_RUN" == "true" ]]; then
+    # Override destructive commands with echo
+    function dnf() { echo "[DRY-RUN] Would run: dnf $*"; }
+    function systemctl() { echo "[DRY-RUN] Would run: systemctl $*"; }
+    function npm() { echo "[DRY-RUN] Would run: npm $*"; }
+    function pm2() { echo "[DRY-RUN] Would run: pm2 $*"; }
+    function git() { echo "[DRY-RUN] Would run: git $*"; }
+    function chown() { echo "[DRY-RUN] Would run: chown $*"; }
+    function chmod() { echo "[DRY-RUN] Would run: chmod $*"; }
+    function firewall-cmd() { echo "[DRY-RUN] Would run: firewall-cmd $*"; }
+fi
 
 # Trap errors
 trap 'error_exit "Script failed at line $LINENO"' ERR
