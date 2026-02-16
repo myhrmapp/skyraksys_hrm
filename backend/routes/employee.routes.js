@@ -144,7 +144,7 @@ router.get('/managers', isAdminOrHR, async (req, res, next) => {
  */
 router.get('/export', isAdminOrHR, async (req, res, next) => {
   try {
-    const csvData = await bulkService.exportEmployees(req.query);
+    const csvData = await bulkService.exportToCSV(req.query);
     res.header('Content-Type', 'text/csv');
     res.header('Content-Disposition', 'attachment; filename="employees.csv"');
     res.send(csvData);

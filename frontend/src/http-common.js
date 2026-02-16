@@ -53,6 +53,12 @@ http.interceptors.response.use(
         return Promise.reject(error);
       }
 
+      // Don't try to refresh for auth check endpoints (these are just checking auth status)
+      if (originalRequest.url?.includes('/auth/me')) {
+        // Auth check failed — this is expected after logout, don't spam refresh attempts
+        return Promise.reject(error);
+      }
+
       // If a refresh is already in flight, queue this request
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
