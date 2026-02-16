@@ -333,6 +333,11 @@ async function initializeDatabase() {
 }
 
 // Routes
+// Simple health check for Docker (no database check for faster response)
+app.get('/health', (req, res) => {
+  res.status(200).send('healthy');
+});
+
 // Health check endpoint (for monitoring and load balancers)
 app.get('/api/health', async (req, res) => {
   try {
