@@ -26,9 +26,9 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
-import EmployeeService from '../../services/EmployeeService';
-import LeaveService from '../../services/LeaveService';
-import TimesheetService from '../../services/TimesheetService';
+import { employeeService } from '../../services/employee.service';
+import { leaveService } from '../../services/leave.service';
+import { timesheetService } from '../../services/timesheet.service';
 import ManagerLeaveApproval from './ManagerLeaveApproval';
 import ManagerTimesheetApproval from './ManagerTimesheetApproval';
 import TeamMembersList from './TeamMembersList';
@@ -53,20 +53,20 @@ const ManagerDashboard = () => {
     setLoading('manager-dashboard', true);
     try {
       // Get team members (employees where managerId = current user's employeeId)
-      const teamResponse = await EmployeeService.getTeamMembers();
+      const teamResponse = await employeeService.getTeamMembers(user.id);
       const teamMembers = teamResponse.data || [];
 
       // Get pending leave requests for team members
-      const pendingLeavesResponse = await LeaveService.getPendingForManager();
-      const pendingLeaves = pendingLeavesResponse.data || [];
+      const pendingLeavesResponse = await leaveService.getPendingForManager();
+      const pendingLeaves = pendingLeavesResponse || [];
 
       // Get pending timesheets for team members
-      const pendingTimesheetsResponse = await TimesheetService.getPendingForManager();
+      const pendingTimesheetsResponse = await timesheetService.getPendingApprovals();
       const pendingTimesheets = pendingTimesheetsResponse.data || [];
 
       // Get recent approvals
-      const recentApprovalsResponse = await LeaveService.getRecentApprovals();
-      const recentApprovals = recentApprovalsResponse.data || [];
+      const recentApprovalsResponse = await leaveService.getRecentApprovals();
+      const recentApprovals = recentApprovalsResponse || [];
 
       setDashboardData({
         teamMembers,

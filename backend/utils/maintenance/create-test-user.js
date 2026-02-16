@@ -1,6 +1,12 @@
 // Create test user for timesheet testing
+require('dotenv').config();
 const bcrypt = require('bcryptjs'); // Use bcryptjs instead
 const { User, Employee, Department } = require('./models');
+
+if (process.env.NODE_ENV === 'production') {
+  console.error('\u274c ERROR: This script must NOT be run in production!');
+  process.exit(1);
+}
 
 async function createTestUser() {
   console.log('\n=== Creating Test User ===\n');
@@ -23,7 +29,8 @@ async function createTestUser() {
       console.log('✅ Test user already exists');
     } else {
       // Create test user
-      const hashedPassword = await bcrypt.hash('password123', 10);
+      const defaultPwd = process.env.DEV_DEFAULT_PASSWORD || 'DevReset@2026!';
+      const hashedPassword = await bcrypt.hash(defaultPwd, 12);
       user = await User.create({
         firstName: 'Test',
         lastName: 'Employee',
@@ -56,7 +63,7 @@ async function createTestUser() {
 
     console.log('\n📋 Test User Details:');
     console.log(`   Email: ${user.email}`);
-    console.log(`   Password: password123`);
+    console.log(`   Password: ${process.env.DEV_DEFAULT_PASSWORD ? '(from DEV_DEFAULT_PASSWORD env)' : 'DevReset@2026!'}`);
     console.log(`   Role: ${user.role}`);
     console.log(`   Employee ID: ${employee.employeeId}`);
     console.log(`   Name: ${employee.firstName} ${employee.lastName}`);

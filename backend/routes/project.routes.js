@@ -1,13 +1,11 @@
 const express = require('express');
-const { authenticateToken } = require('../middleware/auth.simple');
-const { projectSchema } = require('../middleware/validation');
+const { authenticateToken, authorize } = require('../middleware/auth');
+const { projectSchema } = require('../middleware/validators/project.validator');
+const logger = require('../utils/logger');
 const db = require('../models');
 const { Op } = require('sequelize');
 
 const router = express.Router();
-
-// Helper: Check if user can modify projects
-const canModifyProjects = (role) => ['admin', 'manager'].includes(role);
 
 /**
  * @swagger
@@ -96,10 +94,10 @@ const canModifyProjects = (role) => ['admin', 'manager'].includes(role);
  *       403:
  *         $ref: '#/components/responses/ForbiddenError'
  */
-// Get all projects
-router.get('/', authenticateToken, async (req, res) => {
+// Get all projects (with optional pagination)
+router.get('/', authenticateToken, async (req, res, next) => {
   try {
-    const { status, managerId } = req.query;
+    const { status, managerId, page, limit } = req.query;
     
     let whereCondition = { isActive: true };
     if (status) whereCondition.status = status;
@@ -126,7 +124,7 @@ router.get('/', authenticateToken, async (req, res) => {
       };
     }
 
-    const projects = await db.Project.findAll({
+    const queryOptions = {
       where: whereCondition,
       include: [
         {
@@ -137,18 +135,34 @@ router.get('/', authenticateToken, async (req, res) => {
         taskInclude
       ],
       order: [['createdAt', 'DESC']]
-    });
+    };
 
-    console.log(`✅ Fetched ${projects.length} projects for role: ${req.userRole}`);
+    // If pagination params provided, use findAndCountAll
+    if (page && limit) {
+      const pageNum = Math.max(1, parseInt(page));
+      const pageSize = Math.min(200, Math.max(1, parseInt(limit)));
+      queryOptions.limit = pageSize;
+      queryOptions.offset = (pageNum - 1) * pageSize;
+
+      const result = await db.Project.findAndCountAll(queryOptions);
+      return res.json({
+        success: true,
+        data: result.rows,
+        totalCount: result.count,
+        totalPages: Math.ceil(result.count / pageSize),
+        currentPage: pageNum
+      });
+    }
+
+    // No pagination — return all (backward compatible)
+    const projects = await db.Project.findAll(queryOptions);
+
+    logger.info(`Fetched ${projects.length} projects for role: ${req.userRole}`);
 
     res.json({ success: true, data: projects });
   } catch (error) {
-    console.error('❌ Error fetching projects:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch projects',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    logger.error('Error fetching projects:', { detail: error });
+    next(error);
   }
 });
 
@@ -265,7 +279,7 @@ router.get('/', authenticateToken, async (req, res) => {
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', authenticateToken, async (req, res, next) => {
   try {
     const project = await db.Project.findByPk(req.params.id, {
       include: [
@@ -297,24 +311,14 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
     res.json({ success: true, data: project });
   } catch (error) {
-    console.error('❌ Error fetching project:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch project'
-    });
+    logger.error('Error fetching project:', { detail: error });
+    next(error);
   }
 });
 
 // Create new project (admin/manager only)
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, authorize('admin', 'manager'), async (req, res, next) => {
   try {
-    if (!canModifyProjects(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Insufficient permissions to create projects'
-      });
-    }
-
     // Validate input
     const { error, value } = projectSchema.create.validate(req.body, { abortEarly: false });
     
@@ -348,6 +352,21 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
+    // Check for duplicate project name (active projects only)
+    const existing = await db.Project.findOne({
+      where: {
+        name: value.name,
+        isActive: true
+      }
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: 'Project with this name already exists'
+      });
+    }
+
     // Create project
     const project = await db.Project.create(value);
 
@@ -366,7 +385,7 @@ router.post('/', authenticateToken, async (req, res) => {
       data: createdProject
     });
   } catch (error) {
-    console.error('❌ Error creating project:', error);
+    logger.error('Error creating project:', { detail: error });
     
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(409).json({
@@ -375,23 +394,13 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create project'
-    });
+    next(error);
   }
 });
 
 // Update project (admin/manager only)
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticateToken, authorize('admin', 'manager'), async (req, res, next) => {
   try {
-    if (!canModifyProjects(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Insufficient permissions to update projects'
-      });
-    }
-
     // Validate input
     const { error, value } = projectSchema.update.validate(req.body, { abortEarly: false });
     
@@ -454,7 +463,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
       data: updatedProject
     });
   } catch (error) {
-    console.error('❌ Error updating project:', error);
+    logger.error('Error updating project:', { detail: error });
     
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(409).json({
@@ -463,23 +472,13 @@ router.put('/:id', authenticateToken, async (req, res) => {
       });
     }
 
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update project'
-    });
+    next(error);
   }
 });
 
 // Delete project (admin only)
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, authorize('admin'), async (req, res, next) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Admin access required'
-      });
-    }
-
     const project = await db.Project.findByPk(req.params.id);
     if (!project) {
       return res.status(404).json({
@@ -502,16 +501,13 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       message: 'Project and associated tasks deleted successfully'
     });
   } catch (error) {
-    console.error('❌ Error deleting project:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete project'
-    });
+    logger.error('Error deleting project:', { detail: error });
+    next(error);
   }
 });
 
 // Get project statistics
-router.get('/:id/stats', authenticateToken, async (req, res) => {
+router.get('/:id/stats', authenticateToken, async (req, res, next) => {
   try {
     const project = await db.Project.findByPk(req.params.id);
     if (!project) {
@@ -543,11 +539,94 @@ router.get('/:id/stats', authenticateToken, async (req, res) => {
 
     res.json({ success: true, data: stats });
   } catch (error) {
-    console.error('❌ Error fetching project stats:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch project statistics'
+    logger.error('Error fetching project stats:', { detail: error });
+    next(error);
+  }
+});
+
+// Get project timeline
+router.get('/:id/timeline', authenticateToken, async (req, res, next) => {
+  try {
+    const project = await db.Project.findByPk(req.params.id, {
+      include: [{
+        model: db.Task,
+        as: 'tasks',
+        where: { isActive: true },
+        required: false,
+        order: [['createdAt', 'ASC']]
+      }]
     });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
+    // Calculate progress
+    const tasks = project.tasks || [];
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.status === 'Completed').length;
+    const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    // Calculate time metrics
+    const startDate = project.startDate ? new Date(project.startDate) : null;
+    const endDate = project.endDate ? new Date(project.endDate) : null;
+    const now = new Date();
+
+    let daysElapsed = 0;
+    let daysRemaining = null;
+    let totalDays = null;
+
+    if (startDate) {
+      daysElapsed = Math.max(0, Math.floor((now - startDate) / (1000 * 60 * 60 * 24)));
+    }
+
+    if (endDate) {
+      daysRemaining = Math.max(0, Math.floor((endDate - now) / (1000 * 60 * 60 * 24)));
+      if (startDate) {
+        totalDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
+      }
+    }
+
+    const timeline = {
+      project: {
+        id: project.id,
+        name: project.name,
+        status: project.status,
+        startDate: project.startDate,
+        endDate: project.endDate
+      },
+      progress: {
+        percentage: progress,
+        completedTasks,
+        totalTasks,
+        inProgressTasks: tasks.filter(t => t.status === 'In Progress').length,
+        notStartedTasks: tasks.filter(t => t.status === 'Not Started').length
+      },
+      timeline: {
+        daysElapsed,
+        daysRemaining,
+        totalDays,
+        isOverdue: endDate && now > endDate
+      },
+      tasks: tasks.map(t => ({
+        id: t.id,
+        name: t.name,
+        status: t.status,
+        priority: t.priority,
+        estimatedHours: t.estimatedHours,
+        actualHours: t.actualHours,
+        assignedTo: t.assignedTo,
+        createdAt: t.createdAt
+      }))
+    };
+
+    res.json({ success: true, data: timeline });
+  } catch (error) {
+    logger.error('Error fetching project timeline:', { detail: error });
+    next(error);
   }
 });
 

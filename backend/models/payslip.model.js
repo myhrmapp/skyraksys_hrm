@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     payrollDataId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
       references: {
         model: 'payroll_data',
@@ -305,8 +305,8 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
       beforeUpdate: async (payslip, options) => {
-        // Prevent updates if locked
-        if (payslip.isLocked && payslip.changed() && !options.force) {
+        // Prevent updates if ALREADY locked (unless forcing)
+        if (payslip.previous('isLocked') && payslip.changed() && !options.force) {
           throw new Error('Cannot modify locked payslip');
         }
         // Increment version on updates
@@ -422,6 +422,7 @@ module.exports = (sequelize, DataTypes) => {
       grossEarnings: payrollData.grossEarnings,
       totalDeductions: payrollData.totalDeductions,
       netPay: payrollData.netPay,
+      companyInfo: payrollData.employee?.department?.company || {},
       generatedBy
     }));
 

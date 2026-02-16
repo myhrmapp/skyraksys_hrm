@@ -6,6 +6,19 @@ const db = require('../models');
 const logService = require('../services/log.service');
 const configService = require('../services/config.service');
 const databaseService = require('../services/database.service');
+const { authenticateToken, authorize } = require('../middleware/auth');
+
+// ⚠️ SECURITY: Debug routes disabled in production and staging
+// These endpoints are for development/testing only
+const allowedEnvs = ['development', 'test'];
+if (!allowedEnvs.includes(process.env.NODE_ENV)) {
+    console.log('🔒 Debug routes disabled in ' + (process.env.NODE_ENV || 'unknown') + ' environment');
+    module.exports = router; // Return empty router
+} else {
+    console.log('⚠️ Debug routes enabled - Development/Test environment only');
+
+// All debug routes require admin authentication
+router.use(authenticateToken, authorize('admin'));
 
 const Employee = db.Employee;
 const User = db.User;
@@ -17,10 +30,8 @@ const Payslip = db.Payslip;
 const Project = db.Project;
 const Task = db.Task;
 
-// ⚠️ WARNING: NO AUTHENTICATION - INTERNAL TOOL ONLY
-// These endpoints are for the admin debug panel
-// Access is controlled by conditional registration in server.js
-// Only available when NODE_ENV !== 'production'
+// Debug endpoints — requires admin authentication
+// Access is also gated by environment check (development/test only)
 
 // Dashboard stats
 router.get('/stats', async (req, res) => {
@@ -863,5 +874,7 @@ function formatUptime(seconds) {
     
     return parts.join(' ') || '0m';
 }
+
+} // End of production check - close the else block
 
 module.exports = router;

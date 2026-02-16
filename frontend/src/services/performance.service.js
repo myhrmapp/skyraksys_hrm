@@ -1,4 +1,4 @@
-import api from '../api';
+import http from '../http-common';
 
 // Performance service for both client and server metrics
 class PerformanceService {
@@ -6,7 +6,7 @@ class PerformanceService {
   // Admin-only: Get detailed server performance metrics
   async getServerMetrics() {
     try {
-      const response = await api.get('/performance/server-metrics');
+      const response = await http.get('/performance/server-metrics');
       return response.data;
     } catch (error) {
       console.error('Failed to fetch server metrics:', error);
@@ -17,7 +17,7 @@ class PerformanceService {
   // Admin-only: Get API performance metrics
   async getAPIMetrics() {
     try {
-      const response = await api.get('/performance/api-metrics');
+      const response = await http.get('/performance/api-metrics');
       return response.data;
     } catch (error) {
       console.error('Failed to fetch API metrics:', error);
@@ -28,7 +28,7 @@ class PerformanceService {
   // All users: Get basic health metrics
   async getHealthMetrics() {
     try {
-      const response = await api.get('/performance/health-metrics');
+      const response = await http.get('/performance/health-metrics');
       return response.data;
     } catch (error) {
       console.error('Failed to fetch health metrics:', error);

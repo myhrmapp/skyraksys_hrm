@@ -12,6 +12,7 @@ import {
   Grid
 } from '@mui/material';
 import { Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
+import { CURRENCY_SYMBOL } from '../../utils/formatCurrency';
 
 // Validation Schema
 const employeeValidationSchema = Yup.object({
@@ -291,7 +292,7 @@ const ValidatedEmployeeForm = ({
                   helperText={touched.baseSalary && errors.baseSalary}
                   disabled={isSubmitting}
                   InputProps={{
-                    startAdornment: '₹'
+                    startAdornment: CURRENCY_SYMBOL
                   }}
                 />
               </Grid>

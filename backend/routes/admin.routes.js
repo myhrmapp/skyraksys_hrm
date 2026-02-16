@@ -3,13 +3,18 @@ const router = express.Router();
 const fs = require('fs').promises;
 const path = require('path');
 const nodemailer = require('nodemailer');
-const { authenticateToken, authorize } = require('../middleware/auth.simple');
+const { authenticateToken, authorize } = require('../middleware/auth');
+const logger = require('../utils/logger');
+const encryptionService = require('../utils/encryption');
+const { validate } = require('../middleware/validate');
+const { emailConfigSchema, testEmailSchema } = require('../middleware/validators/admin.validator');
+const db = require('../models'); // Add db import for SystemConfig model
 
 // Path to store email configuration
 const CONFIG_FILE = path.join(__dirname, '../config/email.config.json');
 
 // Get email configuration
-router.get('/email-config', authenticateToken, authorize('admin'), async (req, res) => {
+router.get('/email-config', authenticateToken, authorize('admin'), async (req, res, next) => {
     try {
         let config = {
             smtpHost: process.env.SMTP_HOST || '',
@@ -36,73 +41,78 @@ router.get('/email-config', authenticateToken, authorize('admin'), async (req, r
 
         res.json({
             success: true,
-            config,
+            data: config, // Changed from 'config' to 'data' for consistency
+            source: 'database', // Indicate source
             status
         });
     } catch (error) {
-        console.error('Error loading email config:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to load email configuration'
-        });
+        logger.error('Error loading email config:', { detail: error });
+        next(error);
     }
 });
 
 // Save email configuration
-router.post('/email-config', authenticateToken, authorize('admin'), async (req, res) => {
+router.post('/email-config', authenticateToken, authorize('admin'), validate(emailConfigSchema), async (req, res, next) => {
     try {
         const { smtpHost, smtpPort, smtpSecure, smtpUser, smtpPassword, emailFrom, enabled } = req.body;
 
-        // Validate required fields
-        if (!smtpHost || !smtpPort || !smtpUser || !smtpPassword || !emailFrom) {
-            return res.status(400).json({
-                success: false,
-                message: 'All fields are required'
-            });
-        }
+        // 🔐 ENCRYPT PASSWORD BEFORE SAVING (Phase 1, Week 1)
+        const encryptedPassword = encryptionService.encrypt(smtpPassword);
 
-        // Create config object
+        // Create config object with encrypted password
         const config = {
             smtpHost,
             smtpPort,
             smtpSecure,
             smtpUser,
-            smtpPassword,
+            smtpPassword: encryptedPassword, // Store encrypted object
             emailFrom,
             enabled,
             updatedAt: new Date().toISOString(),
             updatedBy: req.user.email
         };
 
-        // Ensure config directory exists
+        // SECURITY: Store config in database instead of .env file (Task 4.1)
+        // No restart required - config loaded from database dynamically
+        const savedConfig = await db.SystemConfig.create({
+            category: 'email',
+            key: 'smtp_config',
+            value: JSON.stringify(config),
+            changedBy: req.user.id,
+            version: (await db.SystemConfig.count({ where: { category: 'email' } })) + 1
+        });
+
+        // Also save to JSON file as backup (not .env)
         const configDir = path.dirname(CONFIG_FILE);
         try {
             await fs.access(configDir);
         } catch {
             await fs.mkdir(configDir, { recursive: true });
         }
-
-        // Save to JSON file
         await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
 
-        // Also update .env file for persistence
-        await updateEnvFile(config);
+        // Create audit log
+        await db.AuditLog.create({
+            userId: req.user.id,
+            action: 'EMAIL_CONFIG_UPDATED',
+            entityType: 'SystemConfig',
+            entityId: savedConfig.id,
+            details: { changes: config, ip: req.ip, userAgent: req.headers['user-agent'] },
+            success: true
+        });
 
         res.json({
             success: true,
-            message: 'Email configuration saved successfully. Please restart the backend server for changes to take effect.'
+            message: 'Email configuration saved to database successfully.'
         });
     } catch (error) {
-        console.error('Error saving email config:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to save email configuration'
-        });
+        logger.error('Error saving email config:', { detail: error });
+        next(error);
     }
 });
 
 // Test email connection
-router.post('/email-config/test', authenticateToken, authorize('admin'), async (req, res) => {
+router.post('/email-config/test', authenticateToken, authorize('admin'), async (req, res, next) => {
     try {
         const { smtpHost, smtpPort, smtpSecure, smtpUser, smtpPassword } = req.body;
 
@@ -128,7 +138,7 @@ router.post('/email-config/test', authenticateToken, authorize('admin'), async (
             message: 'SMTP connection successful!'
         });
     } catch (error) {
-        console.error('SMTP connection test failed:', error);
+        logger.error('SMTP connection test failed:', { detail: error });
         res.status(400).json({
             success: false,
             message: `Connection failed: ${error.message}`
@@ -137,16 +147,9 @@ router.post('/email-config/test', authenticateToken, authorize('admin'), async (
 });
 
 // Send test email
-router.post('/email-config/send-test', authenticateToken, authorize('admin'), async (req, res) => {
+router.post('/email-config/send-test', authenticateToken, authorize('admin'), validate(testEmailSchema), async (req, res, next) => {
     try {
         const { smtpHost, smtpPort, smtpSecure, smtpUser, smtpPassword, emailFrom, testEmail } = req.body;
-
-        if (!testEmail) {
-            return res.status(400).json({
-                success: false,
-                message: 'Test email address is required'
-            });
-        }
 
         // Create test transporter
         const transporter = nodemailer.createTransport({
@@ -204,7 +207,7 @@ router.post('/email-config/send-test', authenticateToken, authorize('admin'), as
             `
         });
 
-        console.log('Test email sent:', info.messageId);
+        logger.info('Test email sent:', { detail: info.messageId });
 
         res.json({
             success: true,
@@ -212,7 +215,7 @@ router.post('/email-config/send-test', authenticateToken, authorize('admin'), as
             messageId: info.messageId
         });
     } catch (error) {
-        console.error('Failed to send test email:', error);
+        logger.error('Failed to send test email:', { detail: error });
         res.status(400).json({
             success: false,
             message: `Failed to send test email: ${error.message}`
@@ -220,50 +223,149 @@ router.post('/email-config/send-test', authenticateToken, authorize('admin'), as
     }
 });
 
-// Helper function to update .env file
-async function updateEnvFile(config) {
+// Task 4.1: Get email config version history
+router.get('/email-config/history', authenticateToken, authorize('admin'), async (req, res, next) => {
     try {
-        const envPath = path.join(__dirname, '../.env');
-        let envContent = '';
-
-        // Try to read existing .env
-        try {
-            envContent = await fs.readFile(envPath, 'utf-8');
-        } catch {
-            envContent = '';
-        }
-
-        // Parse existing env
-        const envLines = envContent.split('\n');
-        const envVars = {};
-        envLines.forEach(line => {
-            const match = line.match(/^([^=]+)=(.*)$/);
-            if (match) {
-                envVars[match[1].trim()] = match[2].trim();
-            }
+        const configHistory = await db.SystemConfig.findAll({
+            where: { category: 'email', key: 'smtp_config' },
+            order: [['version', 'DESC']],
+            include: [{ model: db.User, as: 'changedByUser', attributes: ['id', 'email'] }]
         });
 
-        // Update email config
-        envVars.SMTP_HOST = config.smtpHost;
-        envVars.SMTP_PORT = config.smtpPort;
-        envVars.SMTP_SECURE = config.smtpSecure.toString();
-        envVars.SMTP_USER = config.smtpUser;
-        envVars.SMTP_PASSWORD = config.smtpPassword;
-        envVars.EMAIL_FROM = config.emailFrom;
-
-        // Rebuild .env content
-        const newEnvContent = Object.entries(envVars)
-            .map(([key, value]) => `${key}=${value}`)
-            .join('\n');
-
-        // Write back to .env
-        await fs.writeFile(envPath, newEnvContent, 'utf-8');
-
-        console.log('✅ .env file updated successfully');
+        res.json({
+            success: true,
+            message: 'Email config history retrieved successfully',
+            data: {
+                versions: configHistory.map(config => ({
+                    version: config.version,
+                    value: JSON.parse(config.value),
+                    changedBy: config.changedBy, // Return UUID, not email
+                    changedByEmail: config.changedByUser?.email || 'Unknown',
+                    changedAt: config.createdAt
+                }))
+            },
+            source: 'database'
+        });
     } catch (error) {
-        console.error('⚠️ Failed to update .env file:', error.message);
-        // Don't throw error, as config is already saved to JSON file
+        next(error);
     }
-}
+});
+
+// Task 4.1: Rollback to previous email config version
+router.post('/email-config/rollback', authenticateToken, authorize('admin'), async (req, res, next) => {
+    try {
+        const { version } = req.body;
+
+        if (!version) {
+            return res.status(400).json({
+                success: false,
+                message: 'Version number required'
+            });
+        }
+
+        const targetConfig = await db.SystemConfig.findOne({
+            where: { category: 'email', key: 'smtp_config', version: version }
+        });
+
+        if (!targetConfig) {
+            return res.status(404).json({
+                success: false,
+                message: `Config version ${version} not found`
+            });
+        }
+
+        // Create new version with rollback data
+        const latestVersion = await db.SystemConfig.max('version', {
+            where: { category: 'email', key: 'smtp_config' }
+        }) || 0;
+
+        await db.SystemConfig.create({
+            category: 'email',
+            key: 'smtp_config',
+            value: targetConfig.value,
+            changedBy: req.userId,
+            version: latestVersion + 1
+        });
+
+        // Audit log
+        await db.AuditLog.create({
+            userId: req.userId,
+            action: 'UPDATED',
+            entityType: 'SystemConfig',
+            entityId: targetConfig.id,
+            details: {
+                rolledBackFrom: latestVersion,
+                rolledBackTo: version,
+                ip: req.ip,
+                userAgent: req.headers['user-agent']
+            },
+            success: true
+        });
+
+        res.json({
+            success: true,
+            message: `Email config rolled back to version ${version}`,
+            data: { newVersion: latestVersion + 1 }
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Task 4.3: Audit logs endpoint for email config changes
+router.get('/email-config/audit', authenticateToken, authorize('admin'), async (req, res, next) => {
+    try {
+        const logs = await db.AuditLog.findAll({
+            where: {
+                entityType: 'SystemConfig',
+                action: 'EMAIL_CONFIG_UPDATED'
+            },
+            limit: 100,
+            order: [['createdAt', 'DESC']],
+            include: [{
+                model: db.User,
+                as: 'user',
+                attributes: ['id', 'email', 'firstName', 'lastName']
+            }]
+        });
+        
+        res.json({
+            success: true,
+            data: { logs }
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Task 4.3: Audit logs endpoint for retrieving audit trail
+router.get('/audit-logs', authenticateToken, authorize('admin'), async (req, res, next) => {
+    try {
+        const { action, entityType, userId, limit = 100 } = req.query;
+        
+        const where = {};
+        if (action) where.action = action;
+        if (entityType) where.entityType = entityType;
+        if (userId) where.userId = userId;
+        
+        const logs = await db.AuditLog.findAll({
+            where,
+            limit: parseInt(limit),
+            order: [['createdAt', 'DESC']],
+            include: [{
+                model: db.User,
+                as: 'user',
+                attributes: ['id', 'email', 'firstName', 'lastName']
+            }]
+        });
+        
+        res.json({
+            success: true,
+            data: { logs }
+        });
+    } catch (error) {
+        next(error);
+    }
+});
 
 module.exports = router;

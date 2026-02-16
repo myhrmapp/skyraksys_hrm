@@ -15,7 +15,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     allowances: {
       type: DataTypes.DECIMAL(10, 2),
-      defaultValue: 0
+      defaultValue: 0,
+      comment: 'Total allowances amount'
     },
     pfContribution: {
       type: DataTypes.DECIMAL(10, 2),
@@ -47,7 +48,19 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     tableName: 'salary_structures',
-    timestamps: true
+    timestamps: true,
+    paranoid: true,
+    indexes: [
+      {
+        fields: ['employeeId'],
+        name: 'idx_salary_structures_employee_id'
+      },
+      {
+        unique: true,
+        fields: ['employeeId', 'effectiveFrom'],
+        name: 'uq_salary_structures_employee_effective'
+      }
+    ]
   });
 
   SalaryStructure.associate = function(models) {

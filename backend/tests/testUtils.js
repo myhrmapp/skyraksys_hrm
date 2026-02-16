@@ -42,7 +42,7 @@ const seedTestData = async () => {
   });
 
   // Create test users
-  const hashedPassword = await bcrypt.hash('password123', 12);
+  const hashedPassword = await bcrypt.hash('Password123!', 12);
   
   const adminUser = await db.User.create({
     firstName: 'Admin',
@@ -98,7 +98,11 @@ const seedTestData = async () => {
 // Auth helpers
 const generateTestToken = (userId, role = 'employee') => {
   return jwt.sign(
-    { userId, role },
+    { 
+      id: userId,
+      email: `test.user.${userId}@example.com`,
+      role: role
+    },
     process.env.JWT_SECRET || 'test-secret',
     { expiresIn: '1h' }
   );

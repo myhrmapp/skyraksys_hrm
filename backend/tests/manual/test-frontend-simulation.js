@@ -8,7 +8,7 @@ async function simulateFrontendCall() {
         console.log('1. Simulating frontend login...');
         const loginResponse = await axios.post('http://localhost:8080/api/auth/login', {
             email: 'employee@company.com',
-            password: 'password123'
+            password: 'Password123!'
         });
 
         if (!loginResponse.data.success) {

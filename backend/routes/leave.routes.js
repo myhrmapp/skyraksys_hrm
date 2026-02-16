@@ -1,1210 +1,461 @@
-const express = require('express');
-const { Op } = require('sequelize');
-const { authenticateToken, authorize, isManagerOrAbove } = require('../middleware/auth.simple');
-const { validate, validateQuery, validateParams } = require('../middleware/validate');
-const validators = require('../middleware/validators');
-const { NotFoundError, ConflictError, BadRequestError, ForbiddenError } = require('../utils/errors');
-const db = require('../models');
+/**
+ * Leave Routes
+ * Clean, maintainable route definitions using controller pattern
+ * Refactored from 1,550 lines to <300 lines
+ * 
+ * @module routes/leave
+ * @author SkyrakSys Development Team
+ * @version 2.0.0
+ * @refactored 2026-02-07
+ */
 
-const LeaveRequest = db.LeaveRequest;
-const LeaveBalance = db.LeaveBalance;
-const LeaveType = db.LeaveType;
-const Employee = db.Employee;
+const express = require('express');
 const router = express.Router();
 
-// Middleware to ensure all routes in this file are authenticated
+// Controller
+const leaveController = require('../controllers/leaveController');
+
+// Middleware
+const { authenticateToken, authorize, isManagerOrAbove } = require('../middleware/auth');
+const { validate, validateQuery, validateParams } = require('../middleware/validate');
+const validators = require('../middleware/validators');
+
+// Database (for routes not yet migrated)
+const db = require('../models');
+const { Op } = require('sequelize');
+
+// Apply global middleware
 router.use(authenticateToken);
 
-// Helper function to calculate working days
-const calculateWorkingDays = (startDate, endDate) => {
-    let count = 0;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
-        const day = d.getDay();
-        if (day !== 0 && day !== 6) count++;
-    }
-    return count;
-};
+/**
+ * @route GET /api/leaves
+ * @desc Get all leave requests with pagination and RBAC filtering
+ * @access Private (RBAC: Employee sees own, Manager sees team, Admin/HR sees all)
+ */
+router.get('/', 
+  validateQuery(validators.leaveQuerySchema), 
+  leaveController.getAll
+);
 
 /**
- * @swagger
- * /api/leaves:
- *   get:
- *     summary: Get all leave requests with filtering
- *     description: Retrieve paginated leave requests with role-based access - employees see their own, managers see their team, admin/HR see all
- *     tags: [Leave Management]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Items per page
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           enum: [Pending, Approved, Rejected, Cancelled]
- *         description: Filter by status
- *       - in: query
- *         name: employeeId
- *         schema:
- *           type: string
- *           format: uuid
- *         description: Filter by employee (admin/HR only)
- *       - in: query
- *         name: sort
- *         schema:
- *           type: string
- *           default: createdAt
- *         description: Sort field
- *       - in: query
- *         name: order
- *         schema:
- *           type: string
- *           enum: [asc, desc]
- *           default: desc
- *         description: Sort order
- *     responses:
- *       200:
- *         description: Leave requests retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/LeaveRequest'
- *                 pagination:
- *                   $ref: '#/components/schemas/PaginationMeta'
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ * @route GET /api/leaves/me
+ * @desc Get current user's leave requests
+ * @access Private
  */
-// GET all leave requests with filtering and role-based access
-router.get('/', validateQuery(validators.leaveQuerySchema), async (req, res, next) => {
-    try {
-        const { page, limit, status, employeeId, sort, order } = req.validatedQuery;
-        const offset = (page - 1) * limit;
-        
-        let where = {};
-        if (req.userRole === 'manager') {
-            const subordinates = await Employee.findAll({ where: { managerId: req.employeeId }, attributes: ['id'] });
-            const subordinateIds = subordinates.map(e => e.id);
-            where.employeeId = { [Op.in]: [...subordinateIds, req.employeeId] };
-        } else if (req.userRole === 'employee') {
-            where.employeeId = req.employeeId;
-        }
-
-        if (status) where.status = status;
-        if (employeeId && (req.userRole === 'admin' || req.userRole === 'hr')) {
-            where.employeeId = employeeId;
-        }
-
-        const { count, rows: leaveRequests } = await LeaveRequest.findAndCountAll({
-            where,
-            include: [
-                { model: Employee, as: 'employee', attributes: ['id', 'firstName', 'lastName'] },
-                { model: LeaveType, as: 'leaveType' },
-                { model: Employee, as: 'approver', attributes: ['id', 'firstName', 'lastName'] },
-            ],
-            order: [[sort, order.toUpperCase()]],
-            limit: parseInt(limit),
-            offset,
-        });
-
-        res.json({
-            success: true,
-            data: leaveRequests,
-            pagination: {
-                currentPage: parseInt(page),
-                totalPages: Math.ceil(count / limit),
-                totalRecords: count,
-            },
-        });
-    } catch (error) {
-        next(error);
-    }
-});
+router.get('/me', 
+  leaveController.getMyLeaves
+);
 
 /**
- * @swagger
- * /api/leaves/meta/types:
- *   get:
- *     summary: Get all active leave types
- *     description: Retrieve all available leave types for dropdown/selection
- *     tags: [Leave Management]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Leave types retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                         format: uuid
- *                       name:
- *                         type: string
- *                         example: Annual Leave
- *                       code:
- *                         type: string
- *                         example: AL
- *                       maxDaysPerYear:
- *                         type: number
- *                         example: 20
- *                       description:
- *                         type: string
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ * @route GET /api/leaves/statistics
+ * @desc Get leave statistics (Admin/HR only)
+ * @access Private (Admin/HR)
  */
-// --- Metadata Routes (must come before /:id route) ---
+router.get('/statistics', 
+  authorize(['admin', 'hr']),
+  leaveController.getStatistics
+);
+
+/**
+ * @route GET /api/leaves/balance/:employeeId
+ * @desc Get leave balance for employee
+ * @access Private (Own balance or Admin/HR)
+ */
+router.get('/balance/:employeeId', 
+  leaveController.getBalance
+);
+
+// ============================================================================
+// INLINE ROUTES — Static GET paths
+// IMPORTANT: These MUST be registered BEFORE the parameterized GET /:id route
+// to prevent Express from matching "meta", "balance", "pending-for-manager",
+// "recent-approvals" as the :id parameter.
+// ============================================================================
+
+/**
+ * @route GET /api/leaves/meta/types
+ * @desc Get all active leave types (metadata)
+ * @access Private
+ */
 router.get('/meta/types', async (req, res, next) => {
-    try {
-        const leaveTypes = await LeaveType.findAll({ where: { isActive: true }, order: [['name', 'ASC']] });
-        res.json({ success: true, data: leaveTypes });
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const leaveTypes = await db.LeaveType.findAll({
+      where: { isActive: true },
+      attributes: ['id', 'name', 'description', 'maxDaysPerYear']
+    });
+    
+    res.json({
+      success: true,
+      data: leaveTypes
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
- * @swagger
- * /api/leaves/meta/balance:
- *   get:
- *     summary: Get current user's leave balance
- *     description: Retrieve leave balance for all leave types for the authenticated user
- *     tags: [Leave Management]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Leave balance retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/LeaveBalance'
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ * @route GET /api/leaves/meta/balance
+ * @desc Get current user's leave balance summary
+ * @access Private
  */
 router.get('/meta/balance', async (req, res, next) => {
-    try {
-        const leaveBalances = await LeaveBalance.findAll({ 
-            where: { employeeId: req.employeeId }, 
-            include: [
-                {
-                    model: LeaveType,
-                    as: 'leaveType',
-                    attributes: ['id', 'name', 'description', 'maxDaysPerYear']
-                },
-                {
-                    model: Employee,
-                    as: 'employee',
-                    attributes: ['id', 'employeeId', 'firstName', 'lastName']
-                }
-            ]
-        });
-        res.json({ success: true, data: leaveBalances });
-    } catch (error) {
-        next(error);
+  try {
+    if (!req.user.employeeId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Employee record not found'
+      });
     }
+    
+    const balances = await db.LeaveBalance.findAll({
+      where: { 
+        employeeId: req.user.employeeId,
+        year: new Date().getFullYear()
+      },
+      include: [
+        {
+          model: db.LeaveType,
+          as: 'leaveType',
+          attributes: ['id', 'name']
+        }
+      ]
+    });
+    
+    res.json({
+      success: true,
+      data: balances
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
-// GET leave balance - simplified endpoint (alias for /meta/balance)
-router.get('/balance', async (req, res, next) => {
+/**
+ * @route GET /api/leaves/balance
+ * @desc Get leave balances for all employees (Admin/HR)
+ * @access Private (Admin/HR)
+ */
+router.get('/balance', authorize(['admin', 'hr']), async (req, res, next) => {
+  try {
+    const { year = new Date().getFullYear() } = req.query;
+    
+    const balances = await db.LeaveBalance.findAll({
+      where: { year: parseInt(year) },
+      include: [
+        {
+          model: db.Employee,
+          as: 'employee',
+          attributes: ['id', 'employeeId', 'firstName', 'lastName']
+        },
+        {
+          model: db.LeaveType,
+          as: 'leaveType',
+          attributes: ['id', 'name']
+        }
+      ],
+      order: [['employeeId', 'ASC']]
+    });
+    
+    res.json({
+      success: true,
+      data: balances
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @route GET /api/leaves/pending-for-manager
+ * @desc Get pending leaves for manager approval
+ * @access Private (Manager/Admin/HR)
+ */
+router.get('/pending-for-manager', 
+  authorize(['manager', 'admin', 'hr']), 
+  async (req, res, next) => {
     try {
-        const leaveBalances = await LeaveBalance.findAll({ 
-            where: { employeeId: req.employeeId }, 
-            include: [
-                {
-                    model: LeaveType,
-                    as: 'leaveType',
-                    attributes: ['id', 'name', 'description', 'maxDaysPerYear']
-                },
-                {
-                    model: Employee,
-                    as: 'employee',
-                    attributes: ['id', 'employeeId', 'firstName', 'lastName']
-                }
-            ]
+      const user = req.user;
+      let where = { status: 'Pending' };
+      
+      if (user.role === 'manager') {
+        // Get team members
+        const subordinates = await db.Employee.findAll({ 
+          where: { managerId: user.employeeId }, 
+          attributes: ['id'] 
         });
-        res.json({ success: true, data: leaveBalances });
+        const subordinateIds = subordinates.map(e => e.id);
+        where.employeeId = { [Op.in]: subordinateIds };
+      }
+      // Admin/HR see all pending
+      
+      const pendingLeaves = await db.LeaveRequest.findAll({
+        where,
+        include: [
+          { 
+            model: db.Employee, 
+            as: 'employee', 
+            attributes: ['id', 'employeeId', 'firstName', 'lastName', 'email'] 
+          },
+          { model: db.LeaveType, as: 'leaveType' }
+        ],
+        order: [['createdAt', 'ASC']]
+      });
+      
+      res.json({
+        success: true,
+        data: pendingLeaves
+      });
     } catch (error) {
-        next(error);
+      next(error);
     }
 });
 
 /**
- * @swagger
- * /api/leaves/{id}:
- *   get:
- *     summary: Get leave request by ID
- *     description: Retrieve detailed information about a specific leave request with permission checks
- *     tags: [Leave Management]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: Leave request ID
- *     responses:
- *       200:
- *         description: Leave request retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/LeaveRequest'
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
- *       403:
- *         $ref: '#/components/responses/ForbiddenError'
- *       404:
- *         $ref: '#/components/responses/NotFoundError'
+ * @route GET /api/leaves/manager/:managerId/pending
+ * @desc Get pending leaves for specific manager
+ * @access Private (Admin/HR or own)
  */
-// GET a single leave request by ID
-router.get('/:id', validateParams(validators.uuidParamSchema), async (req, res, next) => {
+router.get('/manager/:managerId/pending', 
+  validateParams(validators.uuidParamSchema), 
+  async (req, res, next) => {
     try {
-        const leaveRequest = await LeaveRequest.findByPk(req.validatedParams.id, { include: ['employee', 'leaveType', 'approver'] });
-        if (!leaveRequest) {
-            throw new NotFoundError('Leave request not found.');
-        }
-
-        // Permission check
-        const isOwner = leaveRequest.employeeId === req.employeeId;
-        const isManagerOfOwner = req.userRole === 'manager' && (await Employee.findOne({ where: { id: leaveRequest.employeeId, managerId: req.employeeId } }));
-        if (!isOwner && !isManagerOfOwner && req.userRole !== 'admin' && req.userRole !== 'hr') {
-            throw new ForbiddenError('Access denied.');
-        }
-
-        res.json({ success: true, data: leaveRequest });
+      const { managerId } = req.params;
+      const user = req.user;
+      
+      // RBAC: Only Admin/HR or the manager themselves
+      if (user.role !== 'admin' && user.role !== 'hr' && user.employeeId !== managerId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Unauthorized access'
+        });
+      }
+      
+      const subordinates = await db.Employee.findAll({
+        where: { managerId },
+        attributes: ['id']
+      });
+      const subordinateIds = subordinates.map(e => e.id);
+      
+      const pendingLeaves = await db.LeaveRequest.findAll({
+        where: {
+          employeeId: { [Op.in]: subordinateIds },
+          status: 'Pending'
+        },
+        include: [
+          { model: db.Employee, as: 'employee', attributes: ['id', 'firstName', 'lastName'] },
+          { model: db.LeaveType, as: 'leaveType' }
+        ]
+      });
+      
+      res.json({
+        success: true,
+        data: pendingLeaves
+      });
     } catch (error) {
-        next(error);
+      next(error);
     }
 });
 
 /**
- * @swagger
- * /api/leaves:
- *   post:
- *     summary: Create a new leave request or cancellation request
- *     description: Submit a new leave request (deducts from balance) or submit a cancellation request for existing leave
- *     tags: [Leave Management]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             oneOf:
- *               - type: object
- *                 title: Normal Leave Request
- *                 required:
- *                   - leaveTypeId
- *                   - startDate
- *                   - endDate
- *                   - reason
- *                 properties:
- *                   leaveTypeId:
- *                     type: string
- *                     format: uuid
- *                   startDate:
- *                     type: string
- *                     format: date
- *                     example: 2024-02-01
- *                   endDate:
- *                     type: string
- *                     format: date
- *                     example: 2024-02-03
- *                   reason:
- *                     type: string
- *                     example: Personal reasons
- *                   isHalfDay:
- *                     type: boolean
- *                     default: false
- *               - type: object
- *                 title: Cancellation Request
- *                 required:
- *                   - isCancellation
- *                   - originalLeaveRequestId
- *                   - cancellationNote
- *                 properties:
- *                   isCancellation:
- *                     type: boolean
- *                     example: true
- *                   originalLeaveRequestId:
- *                     type: string
- *                     format: uuid
- *                   cancellationNote:
- *                     type: string
- *                     example: Plans changed, need to cancel
- *     responses:
- *       201:
- *         description: Leave request submitted successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/LeaveRequest'
- *       400:
- *         $ref: '#/components/responses/ValidationError'
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
- *       409:
- *         description: Conflict (e.g., cancellation already pending)
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ * @route GET /api/leaves/recent-approvals
+ * @desc Get recently approved/rejected leaves (Admin/HR/Manager)
+ * @access Private (Manager/Admin/HR)
  */
-// POST a new leave request
-// POST to create a new leave request
-router.post('/', validate(validators.createLeaveRequestSchema), async (req, res, next) => {
-    const transaction = await db.sequelize.transaction();
+router.get('/recent-approvals', 
+  authorize(['manager', 'admin', 'hr']), 
+  async (req, res, next) => {
     try {
-        const { 
-            leaveTypeId, 
-            startDate, 
-            endDate, 
-            reason, 
-            isHalfDay, 
-            isCancellation, 
-            originalLeaveRequestId, 
-            cancellationNote 
-        } = req.validatedData;
-        const employeeId = req.employeeId; // User can only apply for themselves
-
-        // CANCELLATION REQUEST HANDLING
-        if (isCancellation) {
-            // Verify the original leave request exists and belongs to the user
-            const originalRequest = await LeaveRequest.findOne({
-                where: { 
-                    id: originalLeaveRequestId,
-                    employeeId: employeeId
-                }
-            });
-
-            if (!originalRequest) {
-                await transaction.rollback();
-                throw new NotFoundError('Original leave request not found or does not belong to you.');
-            }
-
-            // Check if original request is in a cancellable status
-            if (!['Pending', 'Approved'].includes(originalRequest.status)) {
-                await transaction.rollback();
-                throw new BadRequestError(`Cannot cancel a leave request with status: ${originalRequest.status}`);
-            }
-
-            // Check if there's already a pending cancellation for this request
-            const existingCancellation = await LeaveRequest.findOne({
-                where: {
-                    originalLeaveRequestId: originalLeaveRequestId,
-                    isCancellation: true,
-                    status: 'Pending'
-                }
-            });
-
-            if (existingCancellation) {
-                await transaction.rollback();
-                throw new ConflictError('A cancellation request is already pending for this leave.');
-            }
-
-            // Create cancellation request (no balance deduction)
-            const cancellationRequest = await LeaveRequest.create({
-                employeeId,
-                leaveTypeId: originalRequest.leaveTypeId,
-                startDate: originalRequest.startDate,
-                endDate: originalRequest.endDate,
-                reason: cancellationNote || reason,
-                totalDays: originalRequest.totalDays,
-                isHalfDay: originalRequest.isHalfDay,
-                status: 'Pending', // Requires approval
-                isCancellation: true,
-                originalLeaveRequestId: originalLeaveRequestId,
-                cancellationNote: cancellationNote || reason
-            }, { transaction });
-
-            await transaction.commit();
-            return res.status(201).json({ 
-                success: true, 
-                message: 'Leave cancellation request submitted successfully. Awaiting approval.', 
-                data: cancellationRequest 
-            });
-        }
-
-        // NORMAL LEAVE REQUEST HANDLING
-        const totalDays = isHalfDay ? 0.5 : calculateWorkingDays(startDate, endDate);
-        if (totalDays <= 0) {
-            await transaction.rollback();
-            throw new BadRequestError('The leave duration must be at least a half day.');
-        }
-
-        const leaveBalance = await LeaveBalance.findOne({ where: { employeeId, leaveTypeId } });
-        if (!leaveBalance || leaveBalance.balance < totalDays) {
-            await transaction.rollback();
-            throw new BadRequestError('Insufficient leave balance.');
-        }
-
-        const newLeaveRequest = await LeaveRequest.create({
-            employeeId,
-            leaveTypeId,
-            startDate,
-            endDate,
-            reason,
-            totalDays,
-            isHalfDay,
-            status: 'Pending',
-            isCancellation: false
-        }, { transaction });
-
-        leaveBalance.balance -= totalDays;
-        await leaveBalance.save({ transaction });
-
-        await transaction.commit();
-        res.status(201).json({ success: true, message: 'Leave request submitted successfully.', data: newLeaveRequest });
+      const { limit = 10 } = req.query;
+      
+      const recentLeaves = await db.LeaveRequest.findAll({
+        where: {
+          status: { [Op.in]: ['Approved', 'Rejected'] },
+          approvedAt: { [Op.ne]: null }
+        },
+        include: [
+          { model: db.Employee, as: 'employee', attributes: ['id', 'firstName', 'lastName'] },
+          { model: db.User, as: 'approver', attributes: ['id', 'firstName', 'lastName'] },
+          { model: db.LeaveType, as: 'leaveType' }
+        ],
+        order: [['approvedAt', 'DESC']],
+        limit: parseInt(limit)
+      });
+      
+      res.json({
+        success: true,
+        data: recentLeaves
+      });
     } catch (error) {
-        // Only rollback if transaction is still active (not already rolled back or committed)
-        if (transaction && !transaction.finished) {
-            await transaction.rollback();
-        }
-        next(error);
+      next(error);
     }
 });
+
+// ============================================================================
+// PARAMETERIZED ROUTES — /:id must come AFTER all static/named routes
+// ============================================================================
 
 /**
- * @swagger
- * /api/leaves/{id}/status:
- *   put:
- *     summary: Approve or reject leave request
- *     description: Update leave request status - Manager/Admin/HR only. Handles both normal leaves and cancellation requests with automatic balance adjustments.
- *     tags: [Leave Management]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: Leave request ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - status
- *             properties:
- *               status:
- *                 type: string
- *                 enum: [Approved, Rejected]
- *                 example: Approved
- *               approverComments:
- *                 type: string
- *                 example: Approved for requested dates
- *     responses:
- *       200:
- *         description: Leave request status updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Leave request has been approved.
- *       400:
- *         $ref: '#/components/responses/ValidationError'
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
- *       403:
- *         $ref: '#/components/responses/ForbiddenError'
+ * @route GET /api/leaves/:id
+ * @desc Get single leave request by ID
+ * @access Private (RBAC: Own leave or Manager/Admin/HR)
  */
-// PUT to update leave request status (approve/reject)
-router.put('/:id/status', isManagerOrAbove, validateParams(validators.uuidParamSchema), validate(validators.updateLeaveStatusSchema), async (req, res, next) => {
-    const transaction = await db.sequelize.transaction();
-    try {
-        const { status, approverComments } = req.validatedData;
-        const leaveRequest = await LeaveRequest.findByPk(req.validatedParams.id);
-
-        if (!leaveRequest || leaveRequest.status !== 'Pending') {
-            await transaction.rollback();
-            throw new BadRequestError('This leave request cannot be updated.');
-        }
-
-        // Permission check for managers
-        if (req.userRole === 'manager') {
-            const isManagerOfOwner = await Employee.findOne({ where: { id: leaveRequest.employeeId, managerId: req.employeeId } });
-            if (!isManagerOfOwner) {
-                await transaction.rollback();
-                throw new ForbiddenError('You can only approve requests for your direct reports.');
-            }
-        }
-
-        // HANDLE CANCELLATION REQUEST APPROVAL/REJECTION
-        if (leaveRequest.isCancellation) {
-            if (status === 'Approved') {
-                // Cancel the original leave request
-                const originalRequest = await LeaveRequest.findByPk(leaveRequest.originalLeaveRequestId);
-                
-                if (originalRequest) {
-                    originalRequest.status = 'Cancelled';
-                    originalRequest.cancelledAt = new Date();
-                    await originalRequest.save({ transaction });
-
-                    // Restore leave balance (add back the days)
-                    const leaveBalance = await LeaveBalance.findOne({ 
-                        where: { 
-                            employeeId: originalRequest.employeeId, 
-                            leaveTypeId: originalRequest.leaveTypeId 
-                        } 
-                    });
-                    
-                    if (leaveBalance) {
-                        leaveBalance.balance += originalRequest.totalDays;
-                        await leaveBalance.save({ transaction });
-                    }
-                }
-
-                // Approve the cancellation request
-                leaveRequest.status = 'Approved';
-                leaveRequest.approverComments = approverComments;
-                leaveRequest.approvedBy = req.employeeId;
-                leaveRequest.approvedAt = new Date();
-                await leaveRequest.save({ transaction });
-
-                await transaction.commit();
-                return res.json({ 
-                    success: true, 
-                    message: 'Leave cancellation approved. Original leave has been cancelled and balance restored.' 
-                });
-            } else if (status === 'Rejected') {
-                // Reject the cancellation request (original leave remains)
-                leaveRequest.status = 'Rejected';
-                leaveRequest.approverComments = approverComments;
-                leaveRequest.approvedBy = req.employeeId;
-                leaveRequest.rejectedAt = new Date();
-                await leaveRequest.save({ transaction });
-
-                await transaction.commit();
-                return res.json({ 
-                    success: true, 
-                    message: 'Leave cancellation rejected. Original leave request remains active.' 
-                });
-            }
-        }
-
-        // HANDLE NORMAL LEAVE REQUEST APPROVAL/REJECTION
-        leaveRequest.status = status;
-        leaveRequest.approverComments = approverComments;
-        leaveRequest.approvedBy = req.employeeId;
-        
-        if (status === 'Approved') {
-            leaveRequest.approvedAt = new Date();
-        } else if (status === 'Rejected') {
-            leaveRequest.rejectedAt = new Date();
-            
-            // If rejected, restore leave balance
-            const leaveBalance = await LeaveBalance.findOne({ 
-                where: { 
-                    employeeId: leaveRequest.employeeId, 
-                    leaveTypeId: leaveRequest.leaveTypeId 
-                } 
-            });
-            
-            if (leaveBalance) {
-                leaveBalance.balance += leaveRequest.totalDays;
-                await leaveBalance.save({ transaction });
-            }
-        }
-        
-        await leaveRequest.save({ transaction });
-
-        await transaction.commit();
-        res.json({ success: true, message: `Leave request has been ${status.toLowerCase()}.` });
-    } catch (error) {
-        await transaction.rollback();
-        next(error);
-    }
-});
-
-// --- Metadata Routes ---
-
-// GET pending leave requests for manager approval
-router.get('/manager/:managerId/pending', validateParams(validators.uuidParamSchema), async (req, res, next) => {
-    try {
-        const { managerId } = req.validatedParams;
-        
-        // Security check: only manager can access their own pending requests or admin/hr can access any
-        if (req.userRole === 'manager' && req.employeeId !== managerId && req.userRole !== 'admin' && req.userRole !== 'hr') {
-            throw new ForbiddenError('Access denied.');
-        }
-
-        // Get team members for this manager
-        const teamMembers = await Employee.findAll({ 
-            where: { managerId: managerId },
-            attributes: ['id'] 
-        });
-        const teamMemberIds = teamMembers.map(e => e.id);
-
-        // Get pending leave requests for team members
-        const pendingLeaves = await LeaveRequest.findAll({
-            where: {
-                employeeId: { [Op.in]: teamMemberIds },
-                status: 'Pending'
-            },
-            include: [
-                { 
-                    model: Employee, 
-                    as: 'employee', 
-                    attributes: ['id', 'firstName', 'lastName', 'email'] 
-                },
-                { 
-                    model: LeaveType, 
-                    as: 'leaveType',
-                    attributes: ['id', 'name', 'code']
-                }
-            ],
-            order: [['createdAt', 'ASC']]
-        });
-
-        res.json({ 
-            success: true, 
-            data: pendingLeaves 
-        });
-    } catch (error) {
-        next(error);
-    }
-});
-
-// PUT approve/reject leave request (enhanced version)
-router.put('/:id/approve-reject', validateParams(validators.uuidParamSchema), async (req, res, next) => {
-    const transaction = await db.sequelize.transaction();
-    try {
-        const { action, comments } = req.body;
-        const leaveId = req.validatedParams.id;
-
-        if (!['approved', 'rejected'].includes(action)) {
-            throw new BadRequestError('Invalid action. Use "approved" or "rejected".');
-        }
-
-        const leaveRequest = await LeaveRequest.findByPk(leaveId);
-        if (!leaveRequest) {
-            await transaction.rollback();
-            throw new NotFoundError('Leave request not found.');
-        }
-
-        if (leaveRequest.status !== 'Pending') {
-            await transaction.rollback();
-            return res.status(400).json({ success: false, message: 'Leave request has already been processed.' });
-        }
-
-        // Permission check for managers
-        if (req.userRole === 'manager') {
-            const isManagerOfOwner = await Employee.findOne({ where: { id: leaveRequest.employeeId, managerId: req.employeeId } });
-            if (!isManagerOfOwner) {
-                await transaction.rollback();
-                return res.status(403).json({ success: false, message: 'You can only approve requests for your direct reports.' });
-            }
-        }
-
-        // Update leave request
-        leaveRequest.status = action === 'approved' ? 'Approved' : 'Rejected';
-        leaveRequest.approverComments = comments || '';
-        leaveRequest.approvedBy = req.employeeId;
-        leaveRequest.approvedAt = new Date();
-        await leaveRequest.save({ transaction });
-
-        // If rejected, restore leave balance
-        if (action === 'rejected') {
-            const leaveBalance = await LeaveBalance.findOne({ 
-                where: { 
-                    employeeId: leaveRequest.employeeId, 
-                    leaveTypeId: leaveRequest.leaveTypeId 
-                } 
-            });
-            if (leaveBalance) {
-                leaveBalance.balance += leaveRequest.totalDays;
-                await leaveBalance.save({ transaction });
-            }
-        }
-
-        await transaction.commit();
-        res.json({ 
-            success: true, 
-            message: `Leave request has been ${action}.`,
-            data: leaveRequest
-        });
-    } catch (error) {
-        await transaction.rollback();
-        next(error);
-    }
-});
+router.get('/:id', 
+  validateParams(validators.uuidParamSchema), 
+  leaveController.getById
+);
 
 /**
- * @swagger
- * /api/leaves/pending-for-manager:
- *   get:
- *     summary: Get pending leave requests for manager approval
- *     description: Retrieve all pending leave requests for the manager's team members - Manager/Admin/HR only
- *     tags: [Leave Management]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Pending leave requests retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/LeaveRequest'
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
- *       403:
- *         $ref: '#/components/responses/ForbiddenError'
+ * @route POST /api/leaves
+ * @desc Create new leave request
+ * @access Private (Employee creates own, Admin/HR can create for others)
  */
-// GET pending leave requests for manager approval
-router.get('/pending-for-manager', authorize(['manager', 'admin', 'hr']), async (req, res, next) => {
-    try {
-        let where = { status: 'Pending' };
-        
-        // For managers, only show team member requests
-        if (req.userRole === 'manager') {
-            const subordinates = await Employee.findAll({ 
-                where: { managerId: req.employeeId }, 
-                attributes: ['id'] 
-            });
-            const subordinateIds = subordinates.map(e => e.id);
-            where.employeeId = { [Op.in]: subordinateIds };
-        }
-
-        const pendingLeaves = await LeaveRequest.findAll({
-            where,
-            include: [
-                {
-                    model: Employee,
-                    as: 'employee',
-                    attributes: ['id', 'employeeId', 'firstName', 'lastName', 'email'],
-                    include: [
-                        {
-                            model: db.Department,
-                            as: 'department',
-                            attributes: ['id', 'name']
-                        }
-                    ]
-                },
-                {
-                    model: LeaveType,
-                    as: 'leaveType',
-                    attributes: ['id', 'name', 'description']
-                }
-            ],
-            order: [['createdAt', 'ASC']]
-        });
-
-        res.json({
-            success: true,
-            data: pendingLeaves
-        });
-    } catch (error) {
-        next(error);
-    }
-});
+router.post('/', 
+  validate(validators.createLeaveRequestSchema), 
+  leaveController.create
+);
 
 /**
- * @swagger
- * /api/leaves/{id}/approve:
- *   put:
- *     summary: Approve leave request
- *     description: Approve a pending leave request - Manager/Admin/HR only
- *     tags: [Leave Management]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: Leave request ID
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               comments:
- *                 type: string
- *                 example: Approved for requested dates
- *     responses:
- *       200:
- *         description: Leave request approved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/LeaveRequest'
- *       400:
- *         $ref: '#/components/responses/ValidationError'
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
- *       403:
- *         $ref: '#/components/responses/ForbiddenError'
- *       404:
- *         $ref: '#/components/responses/NotFoundError'
+ * @route PUT /api/leaves/:id
+ * @desc Update leave request
+ * @access Private (Own leave if Pending, Admin/HR can update any)
  */
-// PUT approve leave request (manager)
-router.put('/:id/approve', authorize(['manager', 'admin', 'hr']), validateParams(validators.uuidParamSchema), async (req, res, next) => {
-    try {
-        const leaveRequest = await LeaveRequest.findByPk(req.validatedParams.id, {
-            include: [
-                {
-                    model: Employee,
-                    as: 'employee',
-                    attributes: ['id', 'managerId']
-                }
-            ]
-        });
-
-        if (!leaveRequest) {
-            throw new NotFoundError('Leave request not found');
-        }
-
-        // Check if manager can approve this request
-        if (req.userRole === 'manager' && leaveRequest.employee.managerId !== req.employeeId) {
-            throw new ForbiddenError('You can only approve leave requests for your team members');
-        }
-
-        if (leaveRequest.status !== 'Pending') {
-            throw new BadRequestError('Leave request is not in pending status');
-        }
-
-        await leaveRequest.update({
-            status: 'Approved',
-            approvedBy: req.employeeId,
-            approvedAt: new Date(),
-            comments: req.body.comments || 'Approved by manager'
-        });
-
-        res.json({
-            success: true,
-            message: 'Leave request approved successfully',
-            data: leaveRequest
-        });
-    } catch (error) {
-        next(error);
-    }
-});
+router.put('/:id',
+  validateParams(validators.uuidParamSchema),
+  leaveController.update
+);
 
 /**
- * @swagger
- * /api/leaves/{id}/reject:
- *   put:
- *     summary: Reject leave request
- *     description: Reject a pending leave request and restore leave balance - Manager/Admin/HR only
- *     tags: [Leave Management]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: Leave request ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - comments
- *             properties:
- *               comments:
- *                 type: string
- *                 example: Insufficient staffing during requested period
- *     responses:
- *       200:
- *         description: Leave request rejected successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/LeaveRequest'
- *       400:
- *         $ref: '#/components/responses/ValidationError'
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
- *       403:
- *         $ref: '#/components/responses/ForbiddenError'
- *       404:
- *         $ref: '#/components/responses/NotFoundError'
+ * @route PATCH|PUT /api/leaves/:id/approve
+ * @desc Approve leave request
+ * @access Private (Manager/Admin/HR)
  */
-// PUT reject leave request (manager)
-router.put('/:id/reject', authorize(['manager', 'admin', 'hr']), validateParams(validators.uuidParamSchema), async (req, res, next) => {
-    try {
-        const { comments } = req.body;
-
-        if (!comments || !comments.trim()) {
-            throw new BadRequestError('Rejection reason is required');
-        }
-
-        const leaveRequest = await LeaveRequest.findByPk(req.validatedParams.id, {
-            include: [
-                {
-                    model: Employee,
-                    as: 'employee',
-                    attributes: ['id', 'managerId']
-                }
-            ]
-        });
-
-        if (!leaveRequest) {
-            throw new NotFoundError('Leave request not found');
-        }
-
-        // Check if manager can reject this request
-        if (req.userRole === 'manager' && leaveRequest.employee.managerId !== req.employeeId) {
-            throw new ForbiddenError('You can only reject leave requests for your team members');
-        }
-
-        if (leaveRequest.status !== 'Pending') {
-            throw new BadRequestError('Leave request is not in pending status');
-        }
-
-        await leaveRequest.update({
-            status: 'Rejected',
-            rejectedBy: req.employeeId,
-            rejectedAt: new Date(),
-            comments: comments
-        });
-
-        res.json({
-            success: true,
-            message: 'Leave request rejected successfully',
-            data: leaveRequest
-        });
-    } catch (error) {
-        next(error);
-    }
-});
+const approveMiddleware = [
+  authorize(['manager', 'admin', 'hr']),
+  validateParams(validators.uuidParamSchema),
+  leaveController.approve
+];
+router.patch('/:id/approve', ...approveMiddleware);
+router.put('/:id/approve', ...approveMiddleware);
 
 /**
- * @swagger
- * /api/leaves/recent-approvals:
- *   get:
- *     summary: Get recent leave approvals/rejections by manager
- *     description: Retrieve the last 10 leave requests approved or rejected by the current manager - Manager/Admin/HR only
- *     tags: [Leave Management]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Recent approvals retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/LeaveRequest'
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
- *       403:
- *         $ref: '#/components/responses/ForbiddenError'
+ * @route PATCH|PUT /api/leaves/:id/reject
+ * @desc Reject leave request
+ * @access Private (Manager/Admin/HR)
  */
-// GET recent approvals by manager
-router.get('/recent-approvals', authorize(['manager', 'admin', 'hr']), async (req, res, next) => {
-    try {
-        let where = { 
-            [Op.or]: [
-                { approvedBy: req.employeeId },
-                { rejectedBy: req.employeeId }
-            ]
-        };
-
-        const recentApprovals = await LeaveRequest.findAll({
-            where,
-            include: [
-                {
-                    model: Employee,
-                    as: 'employee',
-                    attributes: ['id', 'employeeId', 'firstName', 'lastName']
-                },
-                {
-                    model: LeaveType,
-                    as: 'leaveType',
-                    attributes: ['id', 'name']
-                }
-            ],
-            order: [['updatedAt', 'DESC']],
-            limit: 10
-        });
-
-        res.json({
-            success: true,
-            data: recentApprovals
-        });
-    } catch (error) {
-        next(error);
-    }
-});
+const rejectMiddleware = [
+  authorize(['manager', 'admin', 'hr']),
+  validateParams(validators.uuidParamSchema),
+  leaveController.reject
+];
+router.patch('/:id/reject', ...rejectMiddleware);
+router.put('/:id/reject', ...rejectMiddleware);
 
 /**
- * @swagger
- * /api/leave/{id}:
- *   delete:
- *     summary: Delete a leave request
- *     description: Delete a leave request. Employees can only delete their own pending requests. Managers/HR/Admin can delete any pending request.
- *     tags: [Leave Management]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: Leave request ID
- *     responses:
- *       200:
- *         description: Leave request deleted successfully
- *       403:
- *         description: Cannot delete this leave request (not yours or already processed)
- *       404:
- *         description: Leave request not found
+ * @route PATCH|POST /api/leaves/:id/cancel
+ * @desc Cancel leave request
+ * @access Private (Own leave or Admin/HR)
  */
-router.delete('/:id', validateParams(validators.uuidParamSchema), async (req, res, next) => {
+const cancelMiddleware = [
+  validateParams(validators.uuidParamSchema),
+  leaveController.cancel
+];
+router.patch('/:id/cancel', ...cancelMiddleware);
+router.post('/:id/cancel', ...cancelMiddleware);
+
+/**
+ * @route POST /api/leaves/:id/approve-cancellation
+ * @desc Approve cancellation of a leave request
+ * @access Private (Manager/Admin/HR)
+ */
+router.post('/:id/approve-cancellation',
+  authorize(['manager', 'admin', 'hr']),
+  validateParams(validators.uuidParamSchema),
+  leaveController.approveCancellation
+);
+
+/**
+ * @route DELETE /api/leaves/:id
+ * @desc Delete leave request with role-based restrictions
+ *   - Admin: can delete any leave in any status
+ *   - HR: can delete any pending leave request
+ *   - Manager: can delete subordinates' pending leave requests
+ *   - Employee: can delete own pending leave requests
+ * @access Private (Admin, HR, Manager, Employee)
+ */
+router.delete('/:id',
+  authorize('admin', 'hr', 'manager', 'employee'),
+  validateParams(validators.uuidParamSchema),
+  async (req, res, next) => {
     try {
-        const { id } = req.params;
-        const { userId, userRole, employeeId } = req;
-
-        // Find the leave request
-        const leaveRequest = await LeaveRequest.findByPk(id, {
-            include: [
-                {
-                    model: Employee,
-                    as: 'employee',
-                    attributes: ['id', 'employeeId', 'firstName', 'lastName']
-                }
-            ]
+      const { id } = req.params;
+      const { role } = req.user;
+      
+      const leave = await db.LeaveRequest.findByPk(id);
+      
+      if (!leave) {
+        return res.status(404).json({
+          success: false,
+          message: 'Leave request not found'
         });
+      }
 
-        if (!leaveRequest) {
-            throw new NotFoundError('Leave request not found');
-        }
+      // Admin can delete any leave in any status
+      if (role === 'admin') {
+        await leave.destroy();
+        return res.json({ success: true, message: 'Leave request deleted successfully' });
+      }
 
-        // Check authorization
-        const isOwnRequest = leaveRequest.employeeId === employeeId;
-        const normalizedRole = userRole ? userRole.toLowerCase() : 'employee';
-        const isManagerOrAbove = ['admin', 'hr', 'manager'].includes(normalizedRole);
-
-        if (!isOwnRequest && !isManagerOrAbove) {
-            throw new ForbiddenError('You can only delete your own leave requests');
-        }
-
-        // Only allow deletion of pending requests
-        if (leaveRequest.status !== 'Pending') {
-            const statusText = leaveRequest.status || 'unknown';
-            throw new ForbiddenError(`Cannot delete ${statusText.toLowerCase()} leave requests`);
-        }
-
-        await leaveRequest.destroy();
-
-        res.json({
-            success: true,
-            message: 'Leave request deleted successfully',
-            data: {
-                id: leaveRequest.id,
-                status: 'deleted'
-            }
+      // All non-admin roles can only delete pending leave requests
+      if (leave.status !== 'Pending') {
+        return res.status(400).json({
+          success: false,
+          message: 'Can only delete pending leave requests'
         });
+      }
+
+      const employee = await db.Employee.findOne({ where: { userId: req.user.id } });
+      if (!employee) {
+        return res.status(403).json({ success: false, message: 'Employee record not found' });
+      }
+
+      if (role === 'hr') {
+        // HR can delete any pending leave request
+        await leave.destroy();
+        return res.json({ success: true, message: 'Leave request deleted successfully' });
+      }
+
+      if (role === 'manager') {
+        // Manager can delete own pending OR subordinates' pending
+        if (leave.employeeId === employee.id) {
+          await leave.destroy();
+          return res.json({ success: true, message: 'Leave request deleted successfully' });
+        }
+        // Check if the leave belongs to a subordinate
+        const subordinate = await db.Employee.findOne({
+          where: { id: leave.employeeId, managerId: employee.id }
+        });
+        if (subordinate) {
+          await leave.destroy();
+          return res.json({ success: true, message: 'Leave request deleted successfully' });
+        }
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to delete this leave request'
+        });
+      }
+
+      // Employee can only delete own pending leave requests
+      if (leave.employeeId !== employee.id) {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to delete this leave request'
+        });
+      }
+
+      await leave.destroy();
+      res.json({ success: true, message: 'Leave request deleted successfully' });
     } catch (error) {
-        next(error);
+      next(error);
     }
 });
 

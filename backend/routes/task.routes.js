@@ -1,8 +1,9 @@
 const express = require('express');
-const { authenticateToken } = require('../middleware/auth.simple');
-const { taskSchema } = require('../middleware/validation');
+const { authenticateToken, authorize } = require('../middleware/auth');
+const { taskSchema } = require('../middleware/validators/task.validator');
 const db = require('../models');
 const { Op } = require('sequelize');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -109,10 +110,10 @@ const canAccessTask = async (task, userId, role) => {
  *       403:
  *         $ref: '#/components/responses/ForbiddenError'
  */
-// Get all tasks (with optional project filtering)
-router.get('/', authenticateToken, async (req, res) => {
+// Get all tasks (with optional pagination and project filtering)
+router.get('/', authenticateToken, async (req, res, next) => {
   try {
-    const { projectId, status, priority } = req.query;
+    const { projectId, status, priority, page, limit } = req.query;
     
     let whereCondition = { isActive: true };
     
@@ -129,14 +130,7 @@ router.get('/', authenticateToken, async (req, res) => {
       ];
     }
 
-    console.log('📋 Fetching tasks with conditions:', {
-      role: req.userRole,
-      employeeId: req.employeeId,
-      whereCondition,
-      filters: { projectId, status, priority }
-    });
-
-    const tasks = await db.Task.findAll({
+    const queryOptions = {
       where: whereCondition,
       include: [
         {
@@ -151,18 +145,32 @@ router.get('/', authenticateToken, async (req, res) => {
         }
       ],
       order: [['createdAt', 'DESC']]
-    });
+    };
 
-    console.log(`✅ Fetched ${tasks.length} tasks`);
+    // If pagination params provided, use findAndCountAll
+    if (page && limit) {
+      const pageNum = Math.max(1, parseInt(page));
+      const pageSize = Math.min(200, Math.max(1, parseInt(limit)));
+      queryOptions.limit = pageSize;
+      queryOptions.offset = (pageNum - 1) * pageSize;
+
+      const result = await db.Task.findAndCountAll(queryOptions);
+      return res.json({
+        success: true,
+        data: result.rows,
+        totalCount: result.count,
+        totalPages: Math.ceil(result.count / pageSize),
+        currentPage: pageNum
+      });
+    }
+
+    // No pagination — return all (backward compatible)
+    const tasks = await db.Task.findAll(queryOptions);
 
     res.json({ success: true, data: tasks });
   } catch (error) {
-    console.error('❌ Error fetching tasks:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch tasks',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    logger.error('Error fetching tasks:', { detail: error });
+    next(error);
   }
 });
 
@@ -252,7 +260,45 @@ router.get('/', authenticateToken, async (req, res) => {
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.get('/:id', authenticateToken, async (req, res) => {
+
+// Get current user's assigned tasks
+router.get('/my-tasks', authenticateToken, async (req, res, next) => {
+  try {
+    const employee = await db.Employee.findOne({ where: { userId: req.user.id } });
+    
+    if (!employee) {
+      return res.status(404).json({
+        success: false,
+        message: 'Employee profile not found'
+      });
+    }
+
+    const tasks = await db.Task.findAll({
+      where: {
+        [Op.or]: [
+          { assignedTo: employee.id },
+          { availableToAll: true }
+        ],
+        isActive: true
+      },
+      include: [
+        {
+          model: db.Project,
+          as: 'project',
+          attributes: ['id', 'name', 'status', 'description']
+        }
+      ],
+      order: [['priority', 'DESC'], ['createdAt', 'DESC']]
+    });
+
+    res.json({ success: true, data: tasks });
+  } catch (error) {
+    logger.error('Error fetching user tasks:', { detail: error });
+    next(error);
+  }
+});
+
+router.get('/:id', authenticateToken, async (req, res, next) => {
   try {
     const task = await db.Task.findByPk(req.params.id, {
       include: [
@@ -286,24 +332,14 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
     res.json({ success: true, data: task });
   } catch (error) {
-    console.error('❌ Error fetching task:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch task'
-    });
+    logger.error('Error fetching task:', { detail: error });
+    next(error);
   }
 });
 
 // Create new task (admin/manager only)
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, authorize('admin', 'manager'), async (req, res, next) => {
   try {
-    if (!canModifyTasks(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Insufficient permissions to create tasks'
-      });
-    }
-
     // Validate input
     const { error, value } = taskSchema.create.validate(req.body, { abortEarly: false });
     
@@ -360,7 +396,7 @@ router.post('/', authenticateToken, async (req, res) => {
       data: createdTask
     });
   } catch (error) {
-    console.error('❌ Error creating task:', error);
+    logger.error('Error creating task:', { detail: error });
     
     if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeForeignKeyConstraintError') {
       return res.status(400).json({
@@ -370,15 +406,12 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create task'
-    });
+    next(error);
   }
 });
 
 // Update task
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res, next) => {
   try {
     // Validate input
     const { error, value } = taskSchema.update.validate(req.body, { abortEarly: false });
@@ -459,7 +492,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
       data: updatedTask
     });
   } catch (error) {
-    console.error('❌ Error updating task:', error);
+    logger.error('Error updating task:', { detail: error });
     
     if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeForeignKeyConstraintError') {
       return res.status(400).json({
@@ -469,23 +502,13 @@ router.put('/:id', authenticateToken, async (req, res) => {
       });
     }
 
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update task'
-    });
+    next(error);
   }
 });
 
 // Delete task (admin/manager only)
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, authorize('admin', 'manager'), async (req, res, next) => {
   try {
-    if (!canModifyTasks(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Admin or Manager access required'
-      });
-    }
-
     const task = await db.Task.findByPk(req.params.id);
     if (!task) {
       return res.status(404).json({
@@ -502,24 +525,53 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       message: 'Task deleted successfully'
     });
   } catch (error) {
-    console.error('❌ Error deleting task:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete task'
+    logger.error('Error deleting task:', { detail: error });
+    next(error);
+  }
+});
+
+// Update task progress
+router.patch('/:id/progress', authenticateToken, async (req, res, next) => {
+  try {
+    const { progress, actualHours } = req.body;
+    
+    const task = await db.Task.findByPk(req.params.id);
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: 'Task not found'
+      });
+    }
+
+    // Check access permission
+    if (!await canAccessTask(task, req.user.id, req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied to this task'
+      });
+    }
+
+    // Update fields
+    const updates = {};
+    if (progress !== undefined) updates.progress = progress;
+    if (actualHours !== undefined) updates.actualHours = actualHours;
+
+    await task.update(updates);
+
+    res.json({
+      success: true,
+      message: 'Task progress updated successfully',
+      data: task
     });
+  } catch (error) {
+    logger.error('Error updating task progress:', { detail: error });
+    next(error);
   }
 });
 
 // Bulk create tasks (admin/manager only)
-router.post('/bulk', authenticateToken, async (req, res) => {
+router.post('/bulk', authenticateToken, authorize('admin', 'manager'), async (req, res, next) => {
   try {
-    if (!canModifyTasks(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Insufficient permissions'
-      });
-    }
-
     const { tasks } = req.body;
     
     if (!Array.isArray(tasks) || tasks.length === 0) {
@@ -555,11 +607,62 @@ router.post('/bulk', authenticateToken, async (req, res) => {
       data: createdTasks
     });
   } catch (error) {
-    console.error('❌ Error bulk creating tasks:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create tasks'
+    logger.error('Error bulk creating tasks:', { detail: error });
+    next(error);
+  }
+});
+
+// Get employee workload
+router.get('/workload/:employeeId', authenticateToken, async (req, res, next) => {
+  try {
+    const { employeeId } = req.params;
+    
+    // Check permission - only admin, manager, or the employee themselves
+    if (req.user.role === 'employee') {
+      const employee = await db.Employee.findOne({ where: { userId: req.user.id } });
+      if (!employee || employee.id !== employeeId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied'
+        });
+      }
+    }
+
+    // Get all tasks for employee
+    const tasks = await db.Task.findAll({
+      where: {
+        [Op.or]: [
+          { assignedTo: employeeId },
+          { availableToAll: true }
+        ],
+        isActive: true
+      },
+      include: [{
+        model: db.Project,
+        as: 'project',
+        attributes: ['id', 'name', 'status']
+      }]
     });
+
+    // Calculate workload statistics
+    const workload = {
+      totalTasks: tasks.length,
+      completedTasks: tasks.filter(t => t.status === 'Completed').length,
+      inProgressTasks: tasks.filter(t => t.status === 'In Progress').length,
+      notStartedTasks: tasks.filter(t => t.status === 'Not Started').length,
+      onHoldTasks: tasks.filter(t => t.status === 'On Hold').length,
+      totalEstimatedHours: tasks.reduce((sum, t) => sum + Number.parseFloat(t.estimatedHours || 0), 0),
+      totalActualHours: tasks.reduce((sum, t) => sum + Number.parseFloat(t.actualHours || 0), 0),
+      tasks: tasks
+    };
+
+    res.json({
+      success: true,
+      data: workload
+    });
+  } catch (error) {
+    logger.error('Error fetching workload:', { detail: error });
+    next(error);
   }
 });
 

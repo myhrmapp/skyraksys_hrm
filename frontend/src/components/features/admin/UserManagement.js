@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLoading } from '../../../contexts/LoadingContext';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -32,13 +32,22 @@ import {
   Save as SaveIcon,
   ArrowBack as ArrowBackIcon,
   PersonAdd as PersonAddIcon,
-  Business as BusinessIcon
+  Business as BusinessIcon,
+  Lightbulb as LightbulbIcon
 } from '@mui/icons-material';
 import { authService } from '../../../services/auth.service';
 
-const UserManagement = () => {
+const UserManagement = ({ embedded } = {}) => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const navTimerRef = useRef(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+    };
+  }, []);
   
   const [formData, setFormData] = useState({
     email: '',
@@ -85,8 +94,15 @@ const UserManagement = () => {
       return false;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return false;
+    }
+
+    // Backend requires complexity: uppercase, lowercase, digit, special char
+    const complexityRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
+    if (!complexityRegex.test(formData.password)) {
+      setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)');
       return false;
     }
 
@@ -115,9 +131,8 @@ const UserManagement = () => {
 
       if (result.success) {
         setSuccess('User created successfully!');
-        setTimeout(() => {
-          navigate('/employees');
-        }, 2000);
+        // Navigate after brief delay to show success message
+        navTimerRef.current = setTimeout(() => navigate('/employees'), 2000);
       } else {
         setError(result.message || 'Failed to create user');
       }
@@ -140,11 +155,15 @@ const UserManagement = () => {
     setSuccess('');
   };
 
+  const Wrapper = embedded ? React.Fragment : Container;
+  const wrapperProps = embedded ? {} : { maxWidth: 'md', sx: { py: 4 } };
+
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Wrapper {...wrapperProps}>
       <Fade in timeout={600}>
         <Box>
           {/* Header */}
+          {!embedded && (
           <Paper
             elevation={0}
             sx={{
@@ -182,6 +201,7 @@ const UserManagement = () => {
               Back to Employees
             </Button>
           </Paper>
+          )}
 
           {/* Main Form */}
           <Card elevation={3} sx={{ borderRadius: 3 }}>
@@ -352,8 +372,8 @@ const UserManagement = () => {
                   {/* Password Requirements */}
                   <Grid item xs={12}>
                     <Box sx={{ p: 2, bgcolor: alpha(theme.palette.info.main, 0.1), borderRadius: 2 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        💡 <strong>Password Requirements:</strong> Minimum 6 characters
+                      <Typography variant="caption" color="text.secondary" component="div" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <LightbulbIcon fontSize="small" /> <strong>Password Requirements:</strong> Minimum 8 characters, including uppercase, lowercase, number, and special character (@$!%*?&)
                       </Typography>
                     </Box>
                   </Grid>
@@ -413,7 +433,7 @@ const UserManagement = () => {
           </Card>
         </Box>
       </Fade>
-    </Container>
+    </Wrapper>
   );
 };
 

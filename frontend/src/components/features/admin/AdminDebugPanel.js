@@ -52,28 +52,22 @@ import {
   DataObject as DatabaseIcon
 } from '@mui/icons-material';
 import http from '../../../http-common';
+import ConfirmDialog from '../../common/ConfirmDialog';
+import useConfirmDialog from '../../../hooks/useConfirmDialog';
 import EnvironmentSelector from './components/EnvironmentSelector';
 import DatabaseToolsTab from './tabs/DatabaseToolsTab';
-
-function TabPanel({ children, value, index }) {
-  return (
-    <div hidden={value !== index} style={{ padding: '24px 0' }}>
-      {value === index && children}
-    </div>
-  );
-}
+import { TabPanel } from '../../common/TabbedPage';
 
 const AdminDebugPanel = () => {
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
+  const { dialogProps, confirm } = useConfirmDialog();
   
   // Environment State
   const [selectedEnvironment, setSelectedEnvironment] = useState(() => {
     return localStorage.getItem('admin_selected_environment') || 'LOCAL';
   });
-  const [apiBaseUrl, setApiBaseUrl] = useState('');
-
   // System Info State
   const [systemInfo, setSystemInfo] = useState(null);
   const [databaseInfo, setDatabaseInfo] = useState(null);
@@ -98,7 +92,6 @@ const AdminDebugPanel = () => {
   
   const handleEnvironmentChange = (envName, envApiUrl) => {
     setSelectedEnvironment(envName);
-    setApiBaseUrl(envApiUrl);
     localStorage.setItem('admin_selected_environment', envName);
     showNotification(`Switched to ${envName} environment`, 'success');
   };
@@ -215,24 +208,27 @@ const AdminDebugPanel = () => {
     }
   };
 
-  const restoreBackup = async (backupFile) => {
-    if (!window.confirm(`Restore configuration from ${backupFile}? This will overwrite current settings.`)) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await http.post('/debug/config/restore', { backupFile });
-      if (response.data.success) {
-        showNotification('Configuration restored! Server restart required.', 'success');
-        await loadConfiguration();
+  const restoreBackup = (backupFile) => {
+    confirm({
+      title: 'Restore Backup',
+      message: `Restore configuration from ${backupFile}? This will overwrite current settings.`,
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          const response = await http.post('/debug/config/restore', { backupFile });
+          if (response.data.success) {
+            showNotification('Configuration restored! Server restart required.', 'success');
+            await loadConfiguration();
+          }
+        } catch (error) {
+          console.error('Error restoring backup:', error);
+          showNotification('Failed to restore backup', 'error');
+        } finally {
+          setLoading(false);
+        }
       }
-    } catch (error) {
-      console.error('Error restoring backup:', error);
-      showNotification('Failed to restore backup', 'error');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   // ==========================================
@@ -273,25 +269,28 @@ const AdminDebugPanel = () => {
     }
   };
 
-  const clearLog = async (logType) => {
-    if (!window.confirm(`Clear all entries in ${logType} log?`)) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await http.delete(`/debug/logs/${logType}`);
-      if (response.data.success) {
-        showNotification(`${logType} log cleared successfully`, 'success');
-        await loadLogs();
-        await loadLogFiles();
+  const clearLog = (logType) => {
+    confirm({
+      title: 'Clear Log',
+      message: `Clear all entries in ${logType} log?`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          const response = await http.delete(`/debug/logs/${logType}`);
+          if (response.data.success) {
+            showNotification(`${logType} log cleared successfully`, 'success');
+            await loadLogs();
+            await loadLogFiles();
+          }
+        } catch (error) {
+          console.error('Error clearing log:', error);
+          showNotification('Failed to clear log', 'error');
+        } finally {
+          setLoading(false);
+        }
       }
-    } catch (error) {
-      console.error('Error clearing log:', error);
-      showNotification('Failed to clear log', 'error');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   useEffect(() => {
@@ -789,6 +788,7 @@ const AdminDebugPanel = () => {
           </TabPanel>
         </Box>
       </Card>
+      <ConfirmDialog {...dialogProps} />
     </Box>
   );
 };

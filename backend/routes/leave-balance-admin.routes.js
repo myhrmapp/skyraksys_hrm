@@ -1,6 +1,9 @@
 const express = require('express');
-const { authenticateToken, authorize } = require('../middleware/auth.simple');
+const { authenticateToken, authorize } = require('../middleware/auth');
 const db = require('../models');
+const auditService = require('../services/audit.service');
+const leaveBalanceValidation = require('../services/leave-balance-validation.service');
+const logger = require('../utils/logger');
 
 const LeaveBalance = db.LeaveBalance;
 const LeaveType = db.LeaveType;
@@ -9,17 +12,10 @@ const router = express.Router();
 
 // Middleware to ensure all routes are authenticated and admin/HR only
 router.use(authenticateToken);
-// Temporarily disable strict authorization for admin users to allow data creation
-router.use((req, res, next) => {
-  console.log('User role check:', req.userRole);
-  if (req.userRole === 'admin' || req.userRole === 'hr') {
-    return next();
-  }
-  return res.status(403).json({ success: false, message: 'Access denied. Insufficient permissions.' });
-});
+router.use(authorize('admin', 'hr'));
 
 // GET all leave balances with filtering and pagination
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
     try {
         const { 
             page = 1, 
@@ -70,16 +66,13 @@ router.get('/', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Error fetching leave balances:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch leave balances'
-        });
+        logger.error('Error fetching leave balances:', { detail: error });
+        next(error);
     }
 });
 
 // GET specific leave balance
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
     try {
         const balance = await LeaveBalance.findByPk(req.params.id, {
             include: [
@@ -108,16 +101,13 @@ router.get('/:id', async (req, res) => {
             data: balance
         });
     } catch (error) {
-        console.error('Error fetching leave balance:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch leave balance'
-        });
+        logger.error('Error fetching leave balance:', { detail: error });
+        next(error);
     }
 });
 
 // POST create new leave balance
-router.post('/', async (req, res) => {
+router.post('/', async (req, res, next) => {
     try {
         const { 
             employeeId, 
@@ -164,7 +154,23 @@ router.post('/', async (req, res) => {
             });
         }
 
-        const balance = totalAccrued + carryForward;
+        // Validate leave balance data
+        const validation = leaveBalanceValidation.validateLeaveBalance({
+            totalAccrued,
+            totalTaken: 0,
+            totalPending: 0,
+            carryForward
+        });
+
+        if (!validation.valid) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid leave balance data',
+                errors: validation.errors
+            });
+        }
+
+        const balance = validation.calculatedBalance;
 
         const leaveBalance = await LeaveBalance.create({
             employeeId,
@@ -192,22 +198,36 @@ router.post('/', async (req, res) => {
             ]
         });
 
+        // Audit log: Leave balance creation
+        await auditService.log({
+            action: 'CREATED',
+            entityType: 'LeaveBalance',
+            entityId: createdBalance.id,
+            userId: req.user.id,
+            newValues: {
+                employeeId,
+                leaveTypeId,
+                year,
+                totalAccrued,
+                balance
+            },
+            reason: req.body.reason || 'Admin created leave balance',
+            req
+        });
+
         res.status(201).json({
             success: true,
             message: 'Leave balance created successfully',
             data: createdBalance
         });
     } catch (error) {
-        console.error('Error creating leave balance:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to create leave balance'
-        });
+        logger.error('Error creating leave balance:', { detail: error });
+        next(error);
     }
 });
 
 // PUT update leave balance
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req, res, next) => {
     try {
         const { 
             totalAccrued, 
@@ -224,12 +244,39 @@ router.put('/:id', async (req, res) => {
             });
         }
 
-        // Calculate new balance
+        // Capture old values for audit
+        const oldValues = {
+            totalAccrued: leaveBalance.totalAccrued,
+            totalTaken: leaveBalance.totalTaken,
+            totalPending: leaveBalance.totalPending,
+            balance: leaveBalance.balance,
+            carryForward: leaveBalance.carryForward
+        };
+
+        // Prepare adjustment data
+        const adjustment = {};
+        if (totalAccrued !== undefined) adjustment.totalAccrued = totalAccrued;
+        if (totalTaken !== undefined) adjustment.totalTaken = totalTaken;
+        if (totalPending !== undefined) adjustment.totalPending = totalPending;
+        if (carryForward !== undefined) adjustment.carryForward = carryForward;
+
+        // Validate balance adjustment
+        const validation = leaveBalanceValidation.validateBalanceAdjustment(leaveBalance, adjustment);
+
+        if (!validation.valid) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid balance adjustment',
+                errors: validation.errors
+            });
+        }
+
+        // Calculate new balance values
         const newTotalAccrued = totalAccrued !== undefined ? totalAccrued : leaveBalance.totalAccrued;
         const newCarryForward = carryForward !== undefined ? carryForward : leaveBalance.carryForward;
         const newTotalTaken = totalTaken !== undefined ? totalTaken : leaveBalance.totalTaken;
         const newTotalPending = totalPending !== undefined ? totalPending : leaveBalance.totalPending;
-        const newBalance = newTotalAccrued + newCarryForward - newTotalTaken - newTotalPending;
+        const newBalance = validation.newBalance;
 
         await leaveBalance.update({
             totalAccrued: newTotalAccrued,
@@ -254,24 +301,53 @@ router.put('/:id', async (req, res) => {
             ]
         });
 
+        // Audit log: Leave balance update
+        await auditService.log({
+            action: 'BALANCE_ADJUSTED',
+            entityType: 'LeaveBalance',
+            entityId: req.params.id,
+            userId: req.user.id,
+            oldValues,
+            newValues: {
+                totalAccrued: newTotalAccrued,
+                totalTaken: newTotalTaken,
+                totalPending: newTotalPending,
+                balance: newBalance,
+                carryForward: newCarryForward
+            },
+            reason: req.body.reason || 'Admin adjusted leave balance',
+            req
+        });
+
         res.json({
             success: true,
             message: 'Leave balance updated successfully',
             data: updatedBalance
         });
     } catch (error) {
-        console.error('Error updating leave balance:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to update leave balance'
-        });
+        logger.error('Error updating leave balance:', { detail: error });
+        next(error);
     }
 });
 
 // DELETE leave balance
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req, res, next) => {
     try {
-        const leaveBalance = await LeaveBalance.findByPk(req.params.id);
+        const leaveBalance = await LeaveBalance.findByPk(req.params.id, {
+            include: [
+                {
+                    model: Employee,
+                    as: 'employee',
+                    attributes: ['id', 'employeeId', 'firstName', 'lastName']
+                },
+                {
+                    model: LeaveType,
+                    as: 'leaveType',
+                    attributes: ['id', 'name']
+                }
+            ]
+        });
+        
         if (!leaveBalance) {
             return res.status(404).json({
                 success: false,
@@ -279,23 +355,41 @@ router.delete('/:id', async (req, res) => {
             });
         }
 
+        // Capture data for audit before deletion
+        const oldValues = {
+            employeeId: leaveBalance.employeeId,
+            leaveTypeId: leaveBalance.leaveTypeId,
+            year: leaveBalance.year,
+            totalAccrued: leaveBalance.totalAccrued,
+            totalTaken: leaveBalance.totalTaken,
+            balance: leaveBalance.balance
+        };
+
         await leaveBalance.destroy();
+
+        // Audit log: Leave balance deletion
+        await auditService.log({
+            action: 'DELETED',
+            entityType: 'LeaveBalance',
+            entityId: req.params.id,
+            userId: req.user.id,
+            oldValues,
+            reason: req.body.reason || 'Admin deleted leave balance',
+            req
+        });
 
         res.json({
             success: true,
             message: 'Leave balance deleted successfully'
         });
     } catch (error) {
-        console.error('Error deleting leave balance:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to delete leave balance'
-        });
+        logger.error('Error deleting leave balance:', { detail: error });
+        next(error);
     }
 });
 
 // POST bulk create leave balances for all employees
-router.post('/bulk/initialize', async (req, res) => {
+router.post('/bulk/initialize', async (req, res, next) => {
     try {
         const { 
             year = new Date().getFullYear(),
@@ -399,16 +493,13 @@ router.post('/bulk/initialize', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Error initializing leave balances:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to initialize leave balances'
-        });
+        logger.error('Error initializing leave balances:', { detail: error });
+        next(error);
     }
 });
 
 // GET leave balance summary
-router.get('/summary/overview', async (req, res) => {
+router.get('/summary/overview', async (req, res, next) => {
     try {
         const { year = new Date().getFullYear() } = req.query;
 
@@ -442,11 +533,8 @@ router.get('/summary/overview', async (req, res) => {
             data: summary
         });
     } catch (error) {
-        console.error('Error fetching leave balance summary:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch leave balance summary'
-        });
+        logger.error('Error fetching leave balance summary:', { detail: error });
+        next(error);
     }
 });
 

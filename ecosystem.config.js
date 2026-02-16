@@ -2,7 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'skyraksys-hrm',
-      script: 'backend/server.js',
+      script: 'server.js',
+      cwd: './backend',
       instances: 2,
       exec_mode: 'cluster',
       env: {
@@ -30,11 +31,11 @@ module.exports = {
   deploy: {
     production: {
       user: 'deploy',
-      host: 'your-server.com',
+      host: '46.225.73.94',
       ref: 'origin/main',
       repo: 'git@github.com:your-username/skyraksys_hrm.git',
       path: '/var/www/skyraksys_hrm',
-      'post-deploy': 'npm install && npm run build && pm2 reload ecosystem.config.js --env production'
+      'post-deploy': 'cd backend && npm ci --production && cd ../frontend && npm ci && npm run build && cd .. && pm2 reload ecosystem.config.js --env production'
     }
   }
 };

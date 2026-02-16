@@ -57,16 +57,20 @@ import {
   People as PeopleIcon,
   MoreVert as MoreVertIcon,
   LockOpen as LockOpenIcon,
-  Send as SendIcon
+  Send as SendIcon,
+  Lightbulb as LightbulbIcon
 } from '@mui/icons-material';
 import Menu from '@mui/material/Menu';
 import Checkbox from '@mui/material/Checkbox';
 import { authService } from '../../../services/auth.service';
 import { useAuth } from '../../../contexts/AuthContext';
+import ConfirmDialog from '../../common/ConfirmDialog';
+import useConfirmDialog from '../../../hooks/useConfirmDialog';
 
 const UserManagementEnhanced = () => {
   const theme = useTheme();
   const { user: currentUser } = useAuth();
+  const { dialogProps, confirm } = useConfirmDialog();
   
   // Tab state
   const [activeTab, setActiveTab] = useState(0);
@@ -177,6 +181,12 @@ const UserManagementEnhanced = () => {
       return false;
     }
 
+    // Enforce complexity: uppercase, lowercase, digit, special character
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/.test(formData.password)) {
+      setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)');
+      return false;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return false;
@@ -206,10 +216,12 @@ const UserManagementEnhanced = () => {
         setSuccess('User created successfully!');
         handleReset();
         // Switch to users list tab
-        setTimeout(() => {
+        const timer = setTimeout(() => {
           setActiveTab(1);
           loadUsers();
         }, 1500);
+        // Cleanup timer on component lifecycle
+        return () => clearTimeout(timer);
       } else {
         setError(result.message || 'Failed to create user');
       }
@@ -490,52 +502,60 @@ const UserManagementEnhanced = () => {
   };
   
   // Lock/Unlock Account Handler
-  const handleLockAccount = async (user) => {
+  const handleLockAccount = (user) => {
     const isCurrentlyLocked = user.isLocked || false;
     const action = isCurrentlyLocked ? 'unlock' : 'lock';
     
-    if (!window.confirm(`Are you sure you want to ${action} ${user.email}'s account?`)) {
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const reason = isCurrentlyLocked ? '' : prompt('Reason for locking account (optional):') || 'Security';
-      const result = await authService.lockUserAccount(user.id, !isCurrentlyLocked, reason);
-      
-      if (result.success) {
-        setSuccess(`User account ${action}ed successfully`);
-        loadUsers();
-      } else {
-        setError(result.message || `Failed to ${action} account`);
+    confirm({
+      title: `${isCurrentlyLocked ? 'Unlock' : 'Lock'} Account`,
+      message: `Are you sure you want to ${action} ${user.email}'s account?`,
+      variant: 'warning',
+      confirmText: isCurrentlyLocked ? 'Unlock' : 'Lock',
+      onConfirm: async () => {
+        setLoading(true);
+        try {
+          const reason = isCurrentlyLocked ? '' : 'Security';
+          const result = await authService.lockUserAccount(user.id, !isCurrentlyLocked, reason);
+          
+          if (result.success) {
+            setSuccess(`User account ${action}ed successfully`);
+            loadUsers();
+          } else {
+            setError(result.message || `Failed to ${action} account`);
+          }
+        } catch (err) {
+          setError(`Failed to ${action} account`);
+        } finally {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      setError(`Failed to ${action} account`);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
   
   // Send Welcome Email Handler
-  const handleSendEmail = async (user) => {
-    if (!window.confirm(`Send welcome email to ${user.email}?`)) {
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const result = await authService.sendWelcomeEmail(user.id, false);
-      
-      if (result.success) {
-        setSuccess('Welcome email sent successfully');
-      } else {
-        setError(result.message || 'Failed to send email');
+  const handleSendEmail = (user) => {
+    confirm({
+      title: 'Send Welcome Email',
+      message: `Send welcome email to ${user.email}?`,
+      variant: 'info',
+      confirmText: 'Send',
+      onConfirm: async () => {
+        setLoading(true);
+        try {
+          const result = await authService.sendWelcomeEmail(user.id, false);
+          
+          if (result.success) {
+            setSuccess('Welcome email sent successfully');
+          } else {
+            setError(result.message || 'Failed to send email');
+          }
+        } catch (err) {
+          setError('Failed to send email. Email service may not be configured.');
+        } finally {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      setError('Failed to send email. Email service may not be configured.');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   return (
@@ -723,6 +743,7 @@ const UserManagementEnhanced = () => {
                               <IconButton
                                 onClick={() => setShowPassword(!showPassword)}
                                 edge="end"
+                                aria-label={showPassword ? 'Hide password' : 'Show password'}
                               >
                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                               </IconButton>
@@ -753,6 +774,7 @@ const UserManagementEnhanced = () => {
                               <IconButton
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                 edge="end"
+                                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                               >
                                 {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                               </IconButton>
@@ -765,8 +787,8 @@ const UserManagementEnhanced = () => {
                     {/* Password Requirements */}
                     <Grid item xs={12}>
                       <Box sx={{ p: 2, bgcolor: alpha(theme.palette.info.main, 0.1), borderRadius: 2 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          💡 <strong>Password Requirements:</strong> Minimum 8 characters
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <LightbulbIcon fontSize="small" /> <strong>Password Requirements:</strong> Minimum 8 characters, must include uppercase, lowercase, number, and special character (@$!%*?&amp;)
                         </Typography>
                       </Box>
                     </Grid>
@@ -1211,6 +1233,7 @@ const UserManagementEnhanced = () => {
           </Dialog>
         </Box>
       </Fade>
+      <ConfirmDialog {...dialogProps} />
     </Container>
   );
 };

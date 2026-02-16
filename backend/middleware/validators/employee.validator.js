@@ -8,14 +8,17 @@ const Joi = require('joi');
 
 /**
  * Schema for creating a new employee
+ *
+ * Note: employeeId is optional on create. If provided, it must match
+ * SKYT + exactly 4 digits; if omitted, the backend will auto-generate one.
  */
 const createEmployeeSchema = Joi.object({
   employeeId: Joi.string()
-    .required()
-    .pattern(/^SKYT\d{3,}$/)
+    .optional()
+    .allow('', null)
+    .pattern(/^SKYT\d{4}$/)
     .messages({
-      'string.pattern.base': 'Employee ID must start with SKYT followed by at least 3 digits',
-      'any.required': 'Employee ID is required'
+      'string.pattern.base': 'Employee ID must be in format SKYT#### (SKYT followed by exactly 4 digits)'
     }),
 
   firstName: Joi.string()
@@ -49,9 +52,9 @@ const createEmployeeSchema = Joi.object({
   phone: Joi.string()
     .optional()
     .allow('', null)
-    .pattern(/^\d{10}$/)
+    .pattern(/^[0-9+]{10,15}$/)
     .messages({
-      'string.pattern.base': 'Phone number must be exactly 10 digits'
+      'string.pattern.base': 'Phone number must be between 10 and 15 digits (can include +)'
     }),
 
   dateOfBirth: Joi.date()
@@ -336,13 +339,35 @@ const createEmployeeSchema = Joi.object({
   nationality: Joi.string()
     .max(50)
     .optional()
-    .default('Indian')
+    .default('Indian'),
+  
+  // User account fields (for employee creation with user account)
+  password: Joi.string()
+    .optional()
+    .min(8)
+    .max(100)
+    .pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
+    .messages({
+      'string.min': 'Password must be at least 8 characters',
+      'string.max': 'Password must not exceed 100 characters',
+      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)'
+    }),
+  
+  role: Joi.string()
+    .valid('admin', 'hr', 'manager', 'employee')
+    .optional()
+    .default('employee')
+    .messages({
+      'any.only': 'Role must be one of: admin, hr, manager, employee'
+    })
 });
 
 /**
  * Schema for updating an employee (all fields optional)
  */
 const updateEmployeeSchema = Joi.object({
+  // Note: employeeId is intentionally excluded here to prevent
+  // accidental changes to the primary employee identifier after creation.
   firstName: Joi.string()
     .min(2)
     .max(50)
@@ -356,12 +381,13 @@ const updateEmployeeSchema = Joi.object({
     .optional(),
 
   phone: Joi.string()
-    .pattern(/^\d{10}$/)
-    .optional(),
+    .pattern(/^[0-9+]{10,15}$/)
+    .optional()
+    .allow('', null),
 
   dateOfBirth: Joi.date()
     .optional()
-    .allow(null)
+    .allow('', null)
     .max('now')
     .custom((value, helpers) => {
       if (!value) return value;
@@ -374,39 +400,48 @@ const updateEmployeeSchema = Joi.object({
 
   gender: Joi.string()
     .valid('Male', 'Female', 'Other')
-    .optional(),
+    .optional()
+    .allow('', null),
 
   maritalStatus: Joi.string()
     .valid('Single', 'Married', 'Divorced', 'Widowed')
-    .optional(),
+    .optional()
+    .allow('', null),
 
   address: Joi.string()
     .max(200)
-    .optional(),
+    .optional()
+    .allow('', null),
 
   city: Joi.string()
     .max(50)
-    .optional(),
+    .optional()
+    .allow('', null),
 
   state: Joi.string()
     .max(50)
-    .optional(),
+    .optional()
+    .allow('', null),
 
   pinCode: Joi.string()
     .pattern(/^\d{6}$/)
-    .optional(),
+    .optional()
+    .allow('', null),
 
   country: Joi.string()
     .max(50)
-    .optional(),
+    .optional()
+    .allow('', null),
 
   departmentId: Joi.string()
     .uuid()
-    .optional(),
+    .optional()
+    .allow(null),
 
   positionId: Joi.string()
     .uuid()
-    .optional(),
+    .optional()
+    .allow(null),
 
   hireDate: Joi.date()
     .optional()
@@ -419,7 +454,8 @@ const updateEmployeeSchema = Joi.object({
 
   employmentType: Joi.string()
     .valid('Full-time', 'Part-time', 'Contract', 'Intern')
-    .optional(),
+    .optional()
+    .allow('', null),
 
   status: Joi.string()
     .valid('Active', 'Inactive', 'On Leave', 'Terminated')
@@ -438,27 +474,32 @@ const updateEmployeeSchema = Joi.object({
     .integer()
     .min(0)
     .max(24)
-    .optional(),
+    .optional()
+    .allow(null),
 
   noticePeriod: Joi.number()
     .integer()
     .min(0)
     .max(365)
-    .optional(),
+    .optional()
+    .allow(null),
 
   basicSalary: Joi.number()
     .min(0)
     .max(10000000)
     .precision(2)
-    .optional(),
+    .optional()
+    .allow(null),
 
   bankName: Joi.string()
     .max(100)
-    .optional(),
+    .optional()
+    .allow('', null),
 
   accountNumber: Joi.string()
     .max(20)
-    .optional(),
+    .optional()
+    .allow('', null),
     
   bankAccountNumber: Joi.string()
     .max(20)
@@ -467,12 +508,14 @@ const updateEmployeeSchema = Joi.object({
 
   ifscCode: Joi.string()
     .pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)
-    .optional(),
+    .optional()
+    .allow('', null),
 
   panNumber: Joi.string()
     .pattern(/^[A-Z]{5}\d{4}[A-Z]$/)
     .uppercase()
-    .optional(),
+    .optional()
+    .allow('', null),
 
   aadhaarNumber: Joi.string()
     .pattern(/^\d{12}$/)
@@ -545,7 +588,8 @@ const updateEmployeeSchema = Joi.object({
 
   nationality: Joi.string()
     .max(50)
-    .optional(),
+    .optional()
+    .allow('', null),
 
   // Comprehensive salary structure (new format)
   salary: Joi.object({
@@ -630,12 +674,24 @@ const employeeQuerySchema = Joi.object({
     .uuid()
     .optional(),
 
+  departmentId: Joi.string()
+    .uuid()
+    .optional(),
+
   position: Joi.string()
     .uuid()
     .optional(),
 
   status: Joi.string()
-    .valid('Active', 'Inactive', 'On Leave', 'Terminated')
+    .valid('Active', 'Inactive', 'On Leave', 'Terminated', 'active', 'inactive', 'on_leave', 'terminated')
+    .optional(),
+
+  employmentType: Joi.string()
+    .valid('Full-time', 'Part-time', 'Contract', 'Intern')
+    .optional(),
+
+  workLocation: Joi.string()
+    .max(100)
     .optional(),
 
   sort: Joi.string()
@@ -685,10 +741,10 @@ const updateCompensationSchema = Joi.object({
  */
 const updateStatusSchema = Joi.object({
   status: Joi.string()
-    .valid('Active', 'Inactive', 'On-Leave', 'Terminated')
+    .valid('Active', 'Inactive', 'On Leave', 'Terminated')
     .required()
     .messages({
-      'any.only': 'Status must be one of: Active, Inactive, On-Leave, Terminated',
+      'any.only': 'Status must be one of: Active, Inactive, On Leave, Terminated',
       'any.required': 'Status is a required field'
     })
 });

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   Grid,
   Paper,
@@ -32,55 +33,40 @@ import {
   Schedule as ClockIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useLoading } from '../../../contexts/LoadingContext';
 import { dashboardService } from '../../../services/dashboard.service';
 
 const EmployeeDashboard = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isLoading: isLoadingFn, setLoading } = useLoading();
-  const isLoading = isLoadingFn('employee-dashboard');
-  const [employeeStats, setEmployeeStats] = useState({
-    leaveBalance: {},
-    pendingRequests: { leaves: 0, timesheets: 0 },
-    recentActivity: [],
-    upcomingLeaves: [],
-    currentMonth: { hoursWorked: 0, expectedHours: 0, daysWorked: 0, efficiency: 0 }
+
+  // Fetch employee dashboard stats using React Query
+  const { data: employeeStatsData, isLoading } = useQuery({
+    queryKey: ['dashboard-stats', 'employee', user?.employeeId || user?.id],
+    queryFn: async () => {
+      const response = await dashboardService.getEmployeeStats();
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return null;
+    },
+    enabled: !!user
   });
 
-  useEffect(() => {
-    loadEmployeeData();
-  }, []);
-
-  const loadEmployeeData = async () => {
-    try {
-      setLoading(true);
-      const response = await dashboardService.getEmployeeStats();
-      
-      if (response.success && response.data) {
-        // Merge with default structure to ensure all properties exist
-        setEmployeeStats(prevStats => ({
-          leaveBalance: response.data.leaveBalance || {},
-          pendingRequests: {
-            leaves: response.data.pendingRequests?.leaves || 0,
-            timesheets: response.data.pendingRequests?.timesheets || 0
-          },
-          recentActivity: response.data.recentActivity || [],
-          upcomingLeaves: response.data.upcomingLeaves || [],
-          currentMonth: {
-            hoursWorked: response.data.currentMonth?.hoursWorked || 0,
-            expectedHours: response.data.currentMonth?.expectedHours || 0,
-            daysWorked: response.data.currentMonth?.daysWorked || 0,
-            efficiency: response.data.currentMonth?.efficiency || 0
-          }
-        }));
-      }
-    } catch (error) {
-      console.error('Error loading employee data:', error);
-      // Keep default structure on error - don't overwrite
-    } finally {
-      setLoading(false);
+  // Derive stats with defaults
+  const employeeStats = {
+    leaveBalance: employeeStatsData?.leaveBalance || {},
+    pendingRequests: {
+      leaves: employeeStatsData?.pendingRequests?.leaves || 0,
+      timesheets: employeeStatsData?.pendingRequests?.timesheets || 0
+    },
+    recentActivity: employeeStatsData?.recentActivity || [],
+    upcomingLeaves: employeeStatsData?.upcomingLeaves || [],
+    currentMonth: {
+      hoursWorked: employeeStatsData?.currentMonth?.hoursWorked || 0,
+      expectedHours: employeeStatsData?.currentMonth?.expectedHours || 0,
+      daysWorked: employeeStatsData?.currentMonth?.daysWorked || 0,
+      efficiency: employeeStatsData?.currentMonth?.efficiency || 0
     }
   };
 

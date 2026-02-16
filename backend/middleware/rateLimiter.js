@@ -1,97 +1,73 @@
 const rateLimit = require('express-rate-limit');
 
 /**
- * Rate limiting middleware configurations
- * Prevents API abuse and DoS attacks
+ * Route-specific rate limiting middleware
+ * 
+ * Global rate limiting (generalLimiter, authLimiter) is configured in server.js.
+ * Per-user login tracking (checkRateLimit, trackLoginAttempt) is in login-rate-limiter.js.
+ * This file provides additional route-specific limiters only where needed.
  */
 
-// Standard rate limit for regular API endpoints
-const standardLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: {
-    success: false,
-    message: 'Too many requests from this IP, please try again after 15 minutes.',
-    retryAfter: '15 minutes'
-  },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-});
-
-// Strict rate limit for bulk operations
+// Strict rate limit for bulk operations (timesheet bulk submit)
 const bulkOperationLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Limit to 20 bulk operations per 15 minutes
+  max: 20,
   message: {
     success: false,
     message: 'Too many bulk operations from this IP. Please try again after 15 minutes.',
-    retryAfter: '15 minutes',
-    hint: 'Bulk operations are rate-limited to prevent system overload. If you need to process more data, please contact your administrator.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: false, // Count all requests, even successful ones
-  skip: (req) => {
-    // Skip rate limiting for admin users (optional)
-    return req.userRole === 'admin';
-  }
-});
-
-// Very strict rate limit for authentication endpoints
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit to 5 attempts per 15 minutes
-  message: {
-    success: false,
-    message: 'Too many authentication attempts from this IP. Please try again after 15 minutes.',
     retryAfter: '15 minutes'
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: true, // Don't count successful authentication attempts
+  skip: (req) => process.env.NODE_ENV === 'test' || req.user?.role === 'admin'
 });
 
-// General API limiter
-const apiLimiter = rateLimit({
+// Password reset rate limiter (very strict)
+const passwordResetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3,
+  message: {
+    success: false,
+    message: 'Too many password reset attempts. Please try again after 1 hour.',
+    retryAfter: '1 hour'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === 'test'
+});
+
+// Profile update rate limiter
+const profileUpdateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per window
+  max: 20,
   message: {
     success: false,
-    message: 'Too many requests, please try again later.'
+    message: 'Too many profile update attempts. Please try again later.',
+    retryAfter: '15 minutes'
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === 'test'
 });
 
-// Dashboard rate limiter (moderate)
-const dashboardLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 30, // 30 requests per minute
-  message: {
-    success: false,
-    message: 'Too many dashboard requests, please slow down.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Create/Update rate limiter (more restrictive for POST/PUT/DELETE)
-const createLimiter = rateLimit({
+// Strict limiter for password re-authentication endpoints
+// Prevents brute-force on verify-password and config view/update
+const passwordReauthLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // 50 create/update operations per window
+  max: 5,
   message: {
     success: false,
-    message: 'Too many create/update operations, please try again later.'
+    message: 'Too many password verification attempts. Please try again after 15 minutes.',
+    retryAfter: '15 minutes'
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === 'test'
 });
 
 module.exports = {
-  standardLimiter,
   bulkOperationLimiter,
-  authLimiter,
-  apiLimiter,
-  dashboardLimiter,
-  createLimiter
+  passwordResetLimiter,
+  profileUpdateLimiter,
+  passwordReauthLimiter
 };

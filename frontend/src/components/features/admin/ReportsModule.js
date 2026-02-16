@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSnackbar } from 'notistack';
 import {
   Container,
   Paper,
@@ -56,29 +57,23 @@ import {
   Pending as PendingIcon
 } from '@mui/icons-material';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell,
-  LineChart,
-  Line
+  Cell
 } from 'recharts';
 import { useAuth } from '../../../contexts/AuthContext';
-import employeeService from '../../../services/EmployeeService';
-import leaveService from '../../../services/LeaveService';
-import timesheetService from '../../../services/TimesheetService';
+import { employeeService } from '../../../services/employee.service';
+import { leaveService } from '../../../services/leave.service';
+import { timesheetService } from '../../../services/timesheet.service';
 import { dashboardService } from '../../../services/dashboard.service';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 const ReportsModule = () => {
   const theme = useTheme();
   const { user, isAdmin, isHR } = useAuth();
+  const { enqueueSnackbar } = useSnackbar();
   
   // State management
   const [loading, setLoading] = useState(true);
@@ -98,10 +93,33 @@ const ReportsModule = () => {
   const [generatingReport, setGeneratingReport] = useState(false);
 
   useEffect(() => {
-    if (isAdmin() || isHR()) {
+    if (isAdmin || isHR) {
       loadReportData();
     }
   }, [filters]);
+
+  // Compute date range boundaries from filter
+  const getDateBounds = () => {
+    const now = new Date();
+    let start = new Date();
+    switch (filters.dateRange) {
+      case 'week':
+        start.setDate(now.getDate() - 7);
+        break;
+      case 'month':
+        start.setMonth(now.getMonth() - 1);
+        break;
+      case 'quarter':
+        start.setMonth(now.getMonth() - 3);
+        break;
+      case 'year':
+        start.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        start.setMonth(now.getMonth() - 1);
+    }
+    return { start, end: now };
+  };
 
   const loadReportData = async () => {
     try {
@@ -110,24 +128,71 @@ const ReportsModule = () => {
       // Load dashboard statistics
       const dashboardResponse = await dashboardService.getStats();
       
-      // Load additional report-specific data
+      // Build server-side filter params to avoid fetching all records
+      const employeeParams = { limit: 500 };
+      if (filters.department !== 'all') {
+        employeeParams.department = filters.department;
+      }
+      if (filters.status !== 'all') {
+        employeeParams.status = filters.status === 'active' ? 'Active' : 'Inactive';
+      }
+
+      const leaveParams = { limit: 500 };
+      if (filters.status !== 'all') {
+        leaveParams.status = filters.status === 'active' ? 'Approved' : filters.status;
+      }
+
+      const timesheetParams = { limit: 500 };
+      if (filters.status !== 'all') {
+        timesheetParams.status = filters.status === 'active' ? 'Approved' : filters.status;
+      }
+
+      // Load additional report-specific data with server-side filters
       const [employeesResponse, leavesResponse, timesheetsResponse] = await Promise.all([
-        employeeService.getAll(),
-        leaveService.getAll(),
-        timesheetService.getAll()
+        employeeService.getAll(employeeParams),
+        leaveService.getAll(leaveParams),
+        timesheetService.getAll(timesheetParams)
       ]);
+
+      // Apply filters to the raw data
+      const { start, end } = getDateBounds();
+      const rawEmployees = Array.isArray(employeesResponse.data) ? employeesResponse.data : (employeesResponse.data?.data || []);
+      const rawLeaves = Array.isArray(leavesResponse.data) ? leavesResponse.data : (leavesResponse.data?.data || []);
+      const rawTimesheets = Array.isArray(timesheetsResponse.data) ? timesheetsResponse.data : (timesheetsResponse.data?.data || []);
+
+      // Filter employees by department and status
+      let filteredEmployees = rawEmployees;
+      if (filters.department !== 'all') {
+        filteredEmployees = filteredEmployees.filter(e => (e.department?.name || 'Unassigned') === filters.department);
+      }
+      if (filters.status !== 'all') {
+        filteredEmployees = filteredEmployees.filter(e => (filters.status === 'active' ? e.status === 'active' : e.status !== 'active'));
+      }
+
+      // Filter leaves by date range
+      const filteredLeaves = rawLeaves.filter(l => {
+        const d = new Date(l.createdAt || l.startDate);
+        return d >= start && d <= end;
+      });
+
+      // Filter timesheets by date range
+      const filteredTimesheets = rawTimesheets.filter(ts => {
+        const d = new Date(ts.weekStartDate || ts.createdAt);
+        return d >= start && d <= end;
+      });
 
       // Process and structure the data for reports
       const processedData = {
-        employee: processEmployeeData(employeesResponse.data || []),
-        leave: processLeaveData(leavesResponse.data || []),
-        timesheet: processTimesheetData(timesheetsResponse.data || []),
+        employee: processEmployeeData(filteredEmployees),
+        leave: processLeaveData(filteredLeaves),
+        timesheet: processTimesheetData(filteredTimesheets),
         payroll: dashboardResponse.data?.stats?.payroll || {}
       };
 
       setReportData(processedData);
     } catch (error) {
       console.error('Error loading report data:', error);
+      enqueueSnackbar('Failed to load report data', { variant: 'error' });
     } finally {
       setLoading(false);
     }
@@ -231,14 +296,58 @@ const ReportsModule = () => {
   const generateReport = async (reportType) => {
     setGeneratingReport(true);
     try {
-      // This would typically call a backend endpoint to generate a PDF/Excel report
-      // For now, we'll simulate the process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // In a real implementation, you would download the generated file here
-      alert(`${reportType} report generated successfully!`);
+      let csvRows = [];
+      let filename = `${reportType.toLowerCase()}-report-${new Date().toISOString().slice(0,10)}.csv`;
+
+      const escCsv = (val) => {
+        const s = String(val ?? '');
+        return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+
+      if (reportType === 'Consolidated' || reportType === 'Employee') {
+        csvRows.push('Name,Email,Department,Position,Status');
+        (reportData.employee.employees || []).forEach(e => {
+          csvRows.push([escCsv(`${e.firstName || ''} ${e.lastName || ''}`), escCsv(e.email), escCsv(e.department?.name), escCsv(e.position?.title), escCsv(e.status)].join(','));
+        });
+      }
+
+      if (reportType === 'Consolidated' || reportType === 'Leave') {
+        if (csvRows.length) csvRows.push(''); // separator
+        csvRows.push('Employee,Leave Type,Start Date,End Date,Days,Status');
+        (reportData.leave.leaves || []).forEach(l => {
+          csvRows.push([escCsv(`${l.employee?.firstName || ''} ${l.employee?.lastName || ''}`), escCsv(l.leaveType?.name), escCsv(l.startDate), escCsv(l.endDate), escCsv(l.totalDays), escCsv(l.status)].join(','));
+        });
+      }
+
+      if (reportType === 'Consolidated' || reportType === 'Timesheet') {
+        if (csvRows.length) csvRows.push('');
+        csvRows.push('Employee,Project,Task,Week Start,Hours,Status');
+        (reportData.timesheet.timesheets || []).forEach(ts => {
+          csvRows.push([escCsv(`${ts.employee?.firstName || ''} ${ts.employee?.lastName || ''}`), escCsv(ts.project?.name), escCsv(ts.task?.name), escCsv(ts.weekStartDate), escCsv(ts.totalHoursWorked || ts.hoursWorked), escCsv(ts.status)].join(','));
+        });
+      }
+
+      if (reportType === 'Payroll') {
+        csvRows.push('Metric,Value');
+        csvRows.push(`Processed,${reportData.payroll.processed || 0}`);
+        csvRows.push(`Pending,${reportData.payroll.pending || 0}`);
+        csvRows.push(`Total Amount,${reportData.payroll.total || 0}`);
+      }
+
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      enqueueSnackbar(`${reportType} report exported successfully!`, { variant: 'success' });
     } catch (error) {
       console.error('Error generating report:', error);
+      enqueueSnackbar('Failed to generate report', { variant: 'error' });
     } finally {
       setGeneratingReport(false);
     }
@@ -282,7 +391,7 @@ const ReportsModule = () => {
     </Card>
   );
 
-  if (!isAdmin() && !isHR()) {
+  if (!isAdmin && !isHR) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Alert severity="error">
@@ -482,9 +591,18 @@ const ReportsModule = () => {
                           dataKey="value"
                           label={({name, percentage}) => `${name}: ${percentage}%`}
                         >
-                          {reportData.employee.chartData?.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={theme.palette.primary.main} />
-                          ))}
+                          {reportData.employee.chartData?.map((entry, index) => {
+                            const CHART_COLORS = [
+                              theme.palette.primary.main,
+                              theme.palette.secondary.main,
+                              theme.palette.success.main,
+                              theme.palette.warning.main,
+                              theme.palette.error.main,
+                              theme.palette.info.main,
+                              '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe', '#00c49f'
+                            ];
+                            return <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />;
+                          })}
                         </Pie>
                         <Tooltip />
                       </PieChart>
@@ -746,7 +864,7 @@ const ReportsModule = () => {
                 <Grid item xs={12} sm={6} md={3}>
                   <ReportCard
                     title="Total Amount"
-                    value={`₹${(reportData.payroll.total || 0).toLocaleString()}`}
+                    value={formatCurrency(reportData.payroll.total || 0)}
                     icon={<PayrollIcon />}
                     color={theme.palette.primary.main}
                     subtitle="Total payroll amount"

@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, authorize } = require('../middleware/auth.simple');
+const { authenticateToken, authorize } = require('../middleware/auth');
 const { seedAllDemoData, purgeDemoData } = require('../utils/demoSeed');
+const logger = require('../utils/logger');
 
 // Protect all routes: admin only
 router.use(authenticateToken, authorize('admin'));
@@ -78,7 +79,7 @@ router.get('/', (req, res) => {
  *         description: Seeding flag toggled
  */
 // POST toggle seeding flag in-memory (for current process only)
-router.post('/toggle-seeding', async (req, res) => {
+router.post('/toggle-seeding', async (req, res, next) => {
   const desired = req.body?.enabled;
   if (typeof desired !== 'boolean') {
     return res.status(400).json({ success: false, message: 'Body must include { "enabled": boolean }' });
@@ -100,13 +101,13 @@ router.post('/toggle-seeding', async (req, res) => {
  *         description: Seeding executed
  */
 // POST run seeding now (idempotent-ish; will insert known keys)
-router.post('/seed-now', async (req, res) => {
+router.post('/seed-now', async (req, res, next) => {
   try {
     await seedAllDemoData();
     res.json({ success: true, message: 'Demo data seed executed' });
   } catch (err) {
-    console.error('Seeding error:', err);
-    res.status(500).json({ success: false, message: 'Seeding failed', error: err.message });
+    logger.error('Seeding error:', { detail: err });
+    next(error);
   }
 });
 
@@ -123,13 +124,13 @@ router.post('/seed-now', async (req, res) => {
  *         description: Demo data purged
  */
 // POST purge demo data (destructive for known seeded entities)
-router.post('/purge-demo', async (req, res) => {
+router.post('/purge-demo', async (req, res, next) => {
   try {
     await purgeDemoData();
     res.json({ success: true, message: 'Demo data purged' });
   } catch (err) {
-    console.error('Purge error:', err);
-    res.status(500).json({ success: false, message: 'Purge failed', error: err.message });
+    logger.error('Purge error:', { detail: err });
+    next(error);
   }
 });
 

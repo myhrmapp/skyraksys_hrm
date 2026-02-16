@@ -32,9 +32,10 @@ import {
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
-import axios from 'axios';
+import http from '../../../http-common';
+import PropTypes from 'prop-types';
 
-const EmailConfiguration = () => {
+const EmailConfiguration = ({ embedded } = {}) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -97,9 +98,9 @@ const EmailConfiguration = () => {
   const loadConfiguration = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/admin/email-config');
+      const response = await http.get('/admin/email-config');
       if (response.data.success) {
-        setConfig(response.data.config);
+        setConfig(response.data.data);
         setConnectionStatus(response.data.status);
       }
     } catch (err) {
@@ -128,12 +129,37 @@ const EmailConfiguration = () => {
   };
 
   const handleSave = async () => {
-    setLoading(true);
     setError('');
     setSuccess('');
 
+    // Validate SMTP fields
+    if (config.enabled) {
+      if (!config.smtpHost?.trim()) {
+        setError('SMTP Host is required');
+        return;
+      }
+      const port = Number(config.smtpPort);
+      if (!config.smtpPort || isNaN(port) || port < 1 || port > 65535) {
+        setError('SMTP Port must be a number between 1 and 65535');
+        return;
+      }
+      if (!config.smtpUser?.trim()) {
+        setError('SMTP Username is required');
+        return;
+      }
+      if (config.emailFrom) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(config.emailFrom)) {
+          setError('From Email must be a valid email address');
+          return;
+        }
+      }
+    }
+
+    setLoading(true);
+
     try {
-      const response = await axios.post('/api/admin/email-config', config);
+      const response = await http.post('/admin/email-config', config);
       if (response.data.success) {
         setSuccess('Email configuration saved successfully! Please restart the backend server for changes to take effect.');
         setConnectionStatus(null);
@@ -153,7 +179,7 @@ const EmailConfiguration = () => {
     setSuccess('');
 
     try {
-      const response = await axios.post('/api/admin/email-config/test', config);
+      const response = await http.post('/admin/email-config/test', config);
       if (response.data.success) {
         setSuccess('Connection successful! SMTP configuration is working.');
         setConnectionStatus('connected');
@@ -180,7 +206,7 @@ const EmailConfiguration = () => {
     setSuccess('');
 
     try {
-      const response = await axios.post('/api/admin/email-config/send-test', {
+      const response = await http.post('/admin/email-config/send-test', {
         ...config,
         testEmail
       });
@@ -197,8 +223,9 @@ const EmailConfiguration = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: embedded ? 0 : 4 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
+        {!embedded && (
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <EmailIcon sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
           <Box>
@@ -210,6 +237,7 @@ const EmailConfiguration = () => {
             </Typography>
           </Box>
         </Box>
+        )}
 
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
@@ -356,6 +384,7 @@ const EmailConfiguration = () => {
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
                     >
@@ -460,6 +489,10 @@ const EmailConfiguration = () => {
       </Paper>
     </Container>
   );
+};
+
+EmailConfiguration.propTypes = {
+  embedded: PropTypes.bool,
 };
 
 export default EmailConfiguration;

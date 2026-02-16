@@ -79,6 +79,26 @@ backend/test-screenshots/
 # Backup files
 *.backup
 *.bak
+*.broken
+*.deprecated
+
+# Archive moved to workspace root (d:\skyraksys_hrm1\archive)
+# archive/
+
+# Test output files
+*.txt
+!README.txt
+test-results/
+playwright-report/
+test-screenshots/
+
+# Temporary markdown files
+contexttmp.md
+
+# Server credentials (NEVER commit)
+.server-credentials.ini
+**/deploy/.server-credentials.ini
+*.bak
 
 # Archive folders
 archive/

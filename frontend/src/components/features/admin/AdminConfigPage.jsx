@@ -5,7 +5,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import PlayCircleFilledWhiteIcon from '@mui/icons-material/PlayCircleFilledWhite';
 import ReportGmailerrorredIcon from '@mui/icons-material/ReportGmailerrorred';
-import api from '../../../api';
+import http from '../../../http-common';
 import { useAuth } from '../../../contexts/AuthContext';
 
 const InfoRow = ({ label, value }) => (
@@ -21,12 +21,12 @@ export default function AdminConfigPage() {
   const [loading, setLoading] = useState(false);
   const [diag, setDiag] = useState({ running: false, results: [] });
 
-  const apiBase = useMemo(() => process.env.REACT_APP_API_URL || 'http://localhost:5000/api', []);
+  const apiBase = useMemo(() => process.env.REACT_APP_API_URL || '/api', []);
 
   const loadConfig = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/admin/config');
+      const res = await http.get('/admin/config');
       setConfig(res.data.data || {});
     } catch (e) {
       console.error('Failed to load config', e);
@@ -42,7 +42,7 @@ export default function AdminConfigPage() {
 
   const toggleSeeding = async (enabled) => {
     try {
-      await api.post('/admin/config/toggle-seeding', { enabled });
+      await http.post('/admin/config/toggle-seeding', { enabled });
       await loadConfig();
     } catch (e) {
       console.error('Toggle seeding failed', e);
@@ -51,7 +51,7 @@ export default function AdminConfigPage() {
 
   const seedNow = async () => {
     try {
-      await api.post('/admin/config/seed-now');
+      await http.post('/admin/config/seed-now');
     } catch (e) {
       console.error('Seed now failed', e);
     }
@@ -59,7 +59,7 @@ export default function AdminConfigPage() {
 
   const purgeDemo = async () => {
     try {
-      await api.post('/admin/config/purge-demo');
+      await http.post('/admin/config/purge-demo');
     } catch (e) {
       console.error('Purge demo failed', e);
     }
@@ -72,7 +72,7 @@ export default function AdminConfigPage() {
     try {
       // 1) Health
       try {
-        const h = await api.get('/health');
+        const h = await http.get('/health');
         push('API Health', 'ok', h.data);
       } catch (e) {
         push('API Health', 'fail', e?.response?.data || e.message);
@@ -80,7 +80,7 @@ export default function AdminConfigPage() {
 
       // 2) Auth preflight (no creds) - should return 401/403 but not CORS/network error
       try {
-        await api.get('/admin/config');
+        await http.get('/admin/config');
         push('Auth Protection', 'warn', 'Endpoint accessible unexpectedly (should be protected)');
       } catch (e) {
         const code = e?.response?.status;

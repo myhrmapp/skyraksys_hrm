@@ -3,13 +3,14 @@ const router = express.Router();
 const emailService = require('../services/email.service');
 const { User, Employee } = require('../models');
 const { authenticateToken, authorize } = require('../middleware/auth');
+const logger = require('../utils/logger');
 
 /**
  * @route   POST /api/email/welcome/:userId
  * @desc    Send welcome email to user with login credentials
  * @access  Private (Admin, HR)
  */
-router.post('/welcome/:userId', authenticateToken, authorize(['admin', 'hr']), async (req, res) => {
+router.post('/welcome/:userId', authenticateToken, authorize(['admin', 'hr']), async (req, res, next) => {
   try {
     const { userId } = req.params;
     const { tempPassword } = req.body;
@@ -62,11 +63,8 @@ router.post('/welcome/:userId', authenticateToken, authorize(['admin', 'hr']), a
       data: result
     });
   } catch (error) {
-    console.error('Error sending welcome email:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to send welcome email'
-    });
+    logger.error('Error sending welcome email:', { detail: error });
+    next(error);
   }
 });
 
@@ -75,7 +73,7 @@ router.post('/welcome/:userId', authenticateToken, authorize(['admin', 'hr']), a
  * @desc    Send password reset email to user
  * @access  Private (Admin, HR)
  */
-router.post('/password-reset/:userId', authenticateToken, authorize(['admin', 'hr']), async (req, res) => {
+router.post('/password-reset/:userId', authenticateToken, authorize(['admin', 'hr']), async (req, res, next) => {
   try {
     const { userId } = req.params;
     const { tempPassword } = req.body;
@@ -119,7 +117,7 @@ router.post('/password-reset/:userId', authenticateToken, authorize(['admin', 'h
     };
 
     // Send password reset email
-    const result = await emailService.sendPasswordResetEmail(userData, tempPassword);
+    const result = await emailService.sendPasswordResetWithTempPassword(userData, tempPassword);
 
     res.json({
       success: true,
@@ -127,11 +125,8 @@ router.post('/password-reset/:userId', authenticateToken, authorize(['admin', 'h
       data: result
     });
   } catch (error) {
-    console.error('Error sending password reset email:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to send password reset email'
-    });
+    logger.error('Error sending password reset email:', { detail: error });
+    next(error);
   }
 });
 
@@ -140,7 +135,7 @@ router.post('/password-reset/:userId', authenticateToken, authorize(['admin', 'h
  * @desc    Send account status change notification email
  * @access  Private (Admin, HR)
  */
-router.post('/account-status/:userId', authenticateToken, authorize(['admin', 'hr']), async (req, res) => {
+router.post('/account-status/:userId', authenticateToken, authorize(['admin', 'hr']), async (req, res, next) => {
   try {
     const { userId } = req.params;
     const { isActive } = req.body;
@@ -192,11 +187,8 @@ router.post('/account-status/:userId', authenticateToken, authorize(['admin', 'h
       data: result
     });
   } catch (error) {
-    console.error('Error sending account status email:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to send account status email'
-    });
+    logger.error('Error sending account status email:', { detail: error });
+    next(error);
   }
 });
 

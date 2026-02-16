@@ -1,0 +1,14 @@
+{
+  "smtpHost": "smtp.audit-test.com",
+  "smtpPort": 587,
+  "smtpSecure": false,
+  "smtpUser": "audit@test.com",
+  "smtpPassword": {
+    "encrypted": "564040f0f128afd690",
+    "iv": "f9425db209cc99604e14743f0b47ff0a",
+    "authTag": "4f091b1cd43f04207ce7881f04bfbd89"
+  },
+  "emailFrom": "audit@test.com",
+  "updatedAt": "2026-02-16T07:54:08.547Z",
+  "updatedBy": "admin@env-test.com"
+}

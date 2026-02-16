@@ -3,11 +3,16 @@
  * This ensures all fields are properly validated before submission
  */
 
+import { DEFAULT_CURRENCY_CODE } from './formatCurrency';
+
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Phone validation regex (10-15 digits)
-const PHONE_REGEX = /^[0-9]{10,15}$/;
+// Phone validation regex (10-15 digits to match backend)
+const PHONE_REGEX = /^[0-9+]{10,15}$/;
+
+// Emergency Phone validation regex (10-15 digits)
+const EMERGENCY_PHONE_REGEX = /^[0-9]{10,15}$/;
 
 // PAN Number validation regex (India)
 const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
@@ -65,25 +70,15 @@ export const validateEmployeeForm = (formData, options = {}) => {
     errors.email = 'Please enter a valid email address';
   }
   
-  // Employee ID - Required for create, optional for edit (usually shouldn't change)
-  if (!isEditMode) {
-    if (!formData.employeeId?.trim()) {
-      errors.employeeId = 'Employee ID is required';
-    } else if (formData.employeeId.trim().length < 3) {
-      errors.employeeId = 'Employee ID must be at least 3 characters';
-    } else if (formData.employeeId.trim().length > 20) {
-      errors.employeeId = 'Employee ID must not exceed 20 characters';
-    } else if (!/^[A-Z0-9]+$/.test(formData.employeeId.trim())) {
-      errors.employeeId = 'Employee ID must contain only uppercase letters and numbers';
-    }
-  } else if (formData.employeeId?.trim()) {
-    // In edit mode, validate format if provided
+  // Employee ID - Optional on create (auto-generated if missing),
+  // validated if provided in either create or edit mode
+  if (formData.employeeId?.trim()) {
     if (formData.employeeId.trim().length < 3) {
       errors.employeeId = 'Employee ID must be at least 3 characters';
     } else if (formData.employeeId.trim().length > 20) {
       errors.employeeId = 'Employee ID must not exceed 20 characters';
-    } else if (!/^[A-Z0-9]+$/.test(formData.employeeId.trim())) {
-      errors.employeeId = 'Employee ID must contain only uppercase letters and numbers';
+    } else if (!/^SKYT\d{4}$/.test(formData.employeeId.trim())) {
+      errors.employeeId = 'Employee ID must be in SKYT#### format (SKYT + exactly 4 digits)';
     }
   }
   
@@ -112,43 +107,50 @@ export const validateEmployeeForm = (formData, options = {}) => {
   
   // ========== OPTIONAL BUT VALIDATED FIELDS ==========
   
-  // Phone - Optional, but if provided must be 10-15 digits
+  // Phone - Optional, but if provided must be 10 digits
   if (formData.phone?.trim()) {
     if (!PHONE_REGEX.test(formData.phone)) {
-      errors.phone = 'Phone number must be 10-15 digits only';
+      errors.phone = 'Phone number must be exactly 10 digits';
     }
   }
   
-  // Date of Birth - Optional, but if provided must be in past and not too old
+  // Date of Birth - Optional, but if provided must be in past and at least 18 years
   if (formData.dateOfBirth?.trim()) {
     const dob = new Date(formData.dateOfBirth);
     const today = new Date();
-    const age = today.getFullYear() - dob.getFullYear();
+    const ageYears = (today - dob) / (365.25 * 24 * 60 * 60 * 1000);
     
     if (dob >= today) {
       errors.dateOfBirth = 'Date of birth must be in the past';
-    } else if (age > 100) {
+    } else if (ageYears > 100) {
       errors.dateOfBirth = 'Please enter a valid date of birth';
-    } else if (age < 16) {
-      errors.dateOfBirth = 'Employee must be at least 16 years old';
+    } else if (ageYears < 18) {
+      errors.dateOfBirth = 'Employee must be at least 18 years old';
     }
   }
   
   // Gender - Optional, but if provided must be valid value
-  if (formData.gender?.trim() && !['Male', 'Female', 'Other', 'male', 'female', 'other'].includes(formData.gender)) {
+  if (formData.gender?.trim() && !['Male', 'Female', 'Other'].includes(formData.gender)) {
     errors.gender = 'Please select a valid gender';
   }
   
   // Marital Status - Optional, but if provided must be valid value
-  const validMaritalStatus = ['Single', 'Married', 'Divorced', 'Widowed', 'single', 'married', 'divorced', 'widowed'];
+  const validMaritalStatus = ['Single', 'Married', 'Divorced', 'Widowed'];
   if (formData.maritalStatus?.trim() && !validMaritalStatus.includes(formData.maritalStatus)) {
     errors.maritalStatus = 'Please select a valid marital status';
   }
   
   // Employment Type - Optional, but if provided must be valid value
-  const validEmploymentTypes = ['Full-time', 'Part-time', 'Contract', 'Internship', 'Consultant', 'full-time', 'part-time', 'contract', 'internship', 'consultant'];
+  // Backend Enum: 'Full-time', 'Part-time', 'Contract', 'Intern'
+  const validEmploymentTypes = ['Full-time', 'Part-time', 'Contract', 'Intern'];
   if (formData.employmentType?.trim() && !validEmploymentTypes.includes(formData.employmentType)) {
     errors.employmentType = 'Please select a valid employment type';
+  }
+  
+  // Status - Must be a valid enum value matching backend and DB
+  const validStatuses = ['Active', 'Inactive', 'On Leave', 'Terminated'];
+  if (formData.status?.trim() && !validStatuses.includes(formData.status)) {
+    errors.status = 'Please select a valid status (Active, Inactive, On Leave, Terminated)';
   }
   
   // PIN Code - Optional, but if provided must be 6 digits
@@ -193,7 +195,7 @@ export const validateEmployeeForm = (formData, options = {}) => {
   // ========== EMERGENCY CONTACT ==========
   
   // Emergency Contact Phone - Optional, but if provided must be valid
-  if (formData.emergencyContactPhone?.trim() && !PHONE_REGEX.test(formData.emergencyContactPhone)) {
+  if (formData.emergencyContactPhone?.trim() && !EMERGENCY_PHONE_REGEX.test(formData.emergencyContactPhone)) {
     errors.emergencyContactPhone = 'Emergency contact phone must be 10-15 digits only';
   }
   
@@ -229,11 +231,11 @@ export const validateEmployeeForm = (formData, options = {}) => {
     }
   }
   
-  // Notice Period - Optional, but if provided must be 0-90 days (converted to days for more accurate validation)
+  // Notice Period - Optional, but if provided must be 0-365 days (to match backend)
   if (formData.noticePeriod !== undefined && formData.noticePeriod !== null && formData.noticePeriod !== '') {
     const notice = Number(formData.noticePeriod);
-    if (isNaN(notice) || notice < 0 || notice > 90) {
-      errors.noticePeriod = 'Notice period must be between 0-90 days';
+    if (isNaN(notice) || notice < 0 || notice > 365) {
+      errors.noticePeriod = 'Notice period must be between 0-365 days';
     }
   }
   
@@ -252,10 +254,11 @@ export const validateEmployeeForm = (formData, options = {}) => {
   // ========== SALARY VALIDATION ==========
   
   // Salary is completely optional - only validate if basic salary is provided
-  if (formData.salary?.basicSalary && Number(formData.salary.basicSalary) > 0) {
-    // If basic salary is provided, validate it's a positive number
-    const basicSalary = Number(formData.salary.basicSalary);
-    if (isNaN(basicSalary) || basicSalary <= 0) {
+  const basicSalaryVal = formData.salary?.basicSalary;
+  if (basicSalaryVal !== undefined && basicSalaryVal !== null && basicSalaryVal !== '') {
+    // If basic salary is provided, validate it's a positive number (or zero)
+    const basicSalary = Number(basicSalaryVal);
+    if (isNaN(basicSalary) || basicSalary < 0) {
       errors['salary.basicSalary'] = 'Basic salary must be a positive number';
     }
     
@@ -373,6 +376,8 @@ export const transformEmployeeDataForAPI = (formData) => {
   // Add optional fields only if they have values
   addIfNotEmpty(transformedData, 'employeeId', formData.employeeId?.trim());
   addIfNotEmpty(transformedData, 'hireDate', formData.hireDate);
+  // Note: backend EmployeeBusinessService.prepareEmployeeData() automatically
+  // sets joiningDate = hireDate, so no duplicate mapping needed here.
   addIfNotEmpty(transformedData, 'departmentId', formData.departmentId ? String(formData.departmentId) : null);
   addIfNotEmpty(transformedData, 'positionId', formData.positionId ? String(formData.positionId) : null);
   
@@ -383,53 +388,44 @@ export const transformEmployeeDataForAPI = (formData) => {
   }
   
   // Date of Birth: only add if it's a valid, non-empty date string
-  console.log('🔍 dateOfBirth raw value:', formData.dateOfBirth);
-  console.log('🔍 dateOfBirth type:', typeof formData.dateOfBirth);
-  
   if (formData.dateOfBirth && typeof formData.dateOfBirth === 'string' && formData.dateOfBirth.trim()) {
     const dobStr = formData.dateOfBirth.trim();
-    console.log('🔍 dateOfBirth trimmed:', dobStr);
-    
-    // Check if it's not just whitespace or placeholder text
     if (dobStr && dobStr !== 'Invalid Date' && dobStr !== 'null' && dobStr !== 'undefined') {
       const dob = new Date(dobStr);
-      console.log('🔍 dateOfBirth parsed:', dob);
-      console.log('🔍 dateOfBirth isValid:', !isNaN(dob.getTime()));
-      console.log('🔍 dateOfBirth isInPast:', dob < new Date());
-      
-      // Verify it's a valid date and in the past
       if (!isNaN(dob.getTime()) && dob < new Date()) {
-        // Format as YYYY-MM-DD for backend
         const formattedDate = dob.toISOString().split('T')[0];
-        console.log('✅ dateOfBirth formatted for backend:', formattedDate);
         transformedData.dateOfBirth = formattedDate;
-      } else {
-        console.warn('⚠️ dateOfBirth validation failed - not adding to payload');
       }
     }
-  } else {
-    console.log('ℹ️ dateOfBirth is empty or invalid type - skipping');
   }
   addIfNotEmpty(transformedData, 'gender', formData.gender);
   addIfNotEmpty(transformedData, 'address', formData.address);
   addIfNotEmpty(transformedData, 'city', formData.city);
   addIfNotEmpty(transformedData, 'state', formData.state);
   addIfNotEmpty(transformedData, 'pinCode', formData.pinCode);
+  // Map nationality correctly
   addIfNotEmpty(transformedData, 'nationality', formData.nationality || 'Indian');
+  // Backend validator expects country (defaults to India), but DB doesn't store it. 
+  // We can send it for completeness if needed by other middleware.
+  addIfNotEmpty(transformedData, 'country', 'India'); 
   addIfNotEmpty(transformedData, 'maritalStatus', formData.maritalStatus);
   
   // Optional employment fields
-  addIfNotEmpty(transformedData, 'employmentType', formData.employmentType || 'Full-time');
+  // Map 'Internship' to 'Intern' for backend compatibility
+  let employmentType = formData.employmentType || 'Full-time';
+  if (employmentType === 'Internship') employmentType = 'Intern';
+  
+  addIfNotEmpty(transformedData, 'employmentType', employmentType);
   addIfNotEmpty(transformedData, 'workLocation', formData.workLocation);
   addIfNotEmpty(transformedData, 'joiningDate', formData.joiningDate);
   addIfNotEmpty(transformedData, 'confirmationDate', formData.confirmationDate);
   addIfNotEmpty(transformedData, 'resignationDate', formData.resignationDate);
   addIfNotEmpty(transformedData, 'lastWorkingDate', formData.lastWorkingDate);
   
-  if (formData.probationPeriod) {
+  if (formData.probationPeriod !== undefined && formData.probationPeriod !== null && formData.probationPeriod !== '') {
     transformedData.probationPeriod = Number(formData.probationPeriod);
   }
-  if (formData.noticePeriod) {
+  if (formData.noticePeriod !== undefined && formData.noticePeriod !== null && formData.noticePeriod !== '') {
     transformedData.noticePeriod = Number(formData.noticePeriod);
   }
   addIfNotEmpty(transformedData, 'managerId', formData.managerId);
@@ -457,12 +453,14 @@ export const transformEmployeeDataForAPI = (formData) => {
   addIfNotEmpty(transformedData, 'photoUrl', formData.photoUrl);
   
   // Comprehensive salary structure - only include if basicSalary is provided and valid
-  // Convert empty string to number, only include if > 0
-  const basicSalary = Number(formData.salary?.basicSalary);
-  if (basicSalary && basicSalary > 0) {
+  // Convert empty string to number, only include if >= 0
+  const basicSalaryVal = formData.salary?.basicSalary;
+  if (basicSalaryVal !== undefined && basicSalaryVal !== null && basicSalaryVal !== '') {
+    const basicSalary = Number(basicSalaryVal);
+    if (!isNaN(basicSalary) && basicSalary >= 0) {
     transformedData.salary = {
       basicSalary: basicSalary,
-      currency: formData.salary.currency || 'INR',
+      currency: formData.salary.currency || DEFAULT_CURRENCY_CODE,
       payFrequency: (formData.salary.payFrequency || 'monthly').toLowerCase(),
       effectiveFrom: formData.salary.effectiveFrom || null,
       allowances: {
@@ -493,6 +491,7 @@ export const transformEmployeeDataForAPI = (formData) => {
       },
       salaryNotes: formData.salary.salaryNotes || ''
     };
+  }
   }
 
   // Note: userAccount is handled separately in user creation flow

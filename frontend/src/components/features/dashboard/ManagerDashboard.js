@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Container,
   Paper,
@@ -38,103 +39,115 @@ import {
   TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useLoading } from '../../../contexts/LoadingContext';
-import leaveService from '../../../services/LeaveService';
-import timesheetService from '../../../services/TimesheetService';
-import employeeService from '../../../services/EmployeeService';
+import { leaveService } from '../../../services/leave.service';
+import { timesheetService } from '../../../services/timesheet.service';
+import { employeeService } from '../../../services/employee.service';
 
 const ManagerDashboard = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   
   // State management
-  // Loading state managed by LoadingContext
-  const { isLoading: isLoadingFn, setLoading } = useLoading();
-  const isLoading = isLoadingFn('manager-dashboard');
   const [activeTab, setActiveTab] = useState(0);
-  const [teamMembers, setTeamMembers] = useState([]);
-  const [pendingLeaves, setPendingLeaves] = useState([]);
-  const [pendingTimesheets, setPendingTimesheets] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [approvalDialog, setApprovalDialog] = useState(false);
   const [approvalAction, setApprovalAction] = useState('');
   const [approvalComments, setApprovalComments] = useState('');
-  const [actionLoading, setActionLoading] = useState(false);
-  
-  // Statistics
-  const [stats, setStats] = useState({
-    totalTeamMembers: 0,
-    pendingLeaveApprovals: 0,
-    pendingTimesheetApprovals: 0,
-    teamOnLeave: 0
+
+  // Fetch team members using React Query
+  const { data: teamMembersData, isLoading: isLoadingTeam } = useQuery({
+    queryKey: ['team-members', user?.employee?.id],
+    queryFn: async () => {
+      const response = await employeeService.getTeamMembers(user.employee.id);
+      return response.data || [];
+    },
+    enabled: !!user?.employee?.id
   });
 
-  useEffect(() => {
-    loadManagerData();
-  }, []);
+  // Fetch pending leaves
+  const { data: pendingLeavesData, isLoading: isLoadingLeaves } = useQuery({
+    queryKey: ['pending-leaves', 'manager', user?.id],
+    queryFn: async () => {
+      const response = await leaveService.getPendingForManager(user.id);
+      return response || [];
+    },
+    enabled: !!user?.id
+  });
 
-  const loadManagerData = async () => {
-    try {
-      setLoading(true);
-      
-      // Load team members managed by current user
-      const teamResponse = await employeeService.getTeamMembers(user.id);
-      setTeamMembers(teamResponse.data || []);
-      
-      // Load pending leave requests for team members
-      const leavesResponse = await leaveService.getPendingForManager(user.id);
-      setPendingLeaves(leavesResponse.data || []);
-      
-      // Load pending timesheets for team members
-      const timesheetsResponse = await timesheetService.getPendingForManager(user.id);
-      setPendingTimesheets(timesheetsResponse.data || []);
-      
-      // Calculate statistics
-      setStats({
-        totalTeamMembers: teamResponse.data?.length || 0,
-        pendingLeaveApprovals: leavesResponse.data?.length || 0,
-        pendingTimesheetApprovals: timesheetsResponse.data?.length || 0,
-        teamOnLeave: teamResponse.data?.filter(member => member.isOnLeave)?.length || 0
-      });
-      
-    } catch (error) {
-      console.error('Error loading manager data:', error);
-    } finally {
-      setLoading(false);
-    }
+  // Fetch pending timesheets
+  const { data: pendingTimesheetsData, isLoading: isLoadingTimesheets } = useQuery({
+    queryKey: ['pending-timesheets', 'manager'],
+    queryFn: async () => {
+      const response = await timesheetService.getPendingApprovals();
+      return response.data || [];
+    },
+    enabled: !!user?.id
+  });
+
+  // Derive data
+  const teamMembers = teamMembersData || [];
+  const pendingLeaves = pendingLeavesData || [];
+  const pendingTimesheets = pendingTimesheetsData || [];
+  const isLoading = isLoadingTeam || isLoadingLeaves || isLoadingTimesheets;
+
+  // Calculate statistics
+  const stats = {
+    totalTeamMembers: teamMembers.length,
+    pendingLeaveApprovals: pendingLeaves.length,
+    pendingTimesheetApprovals: pendingTimesheets.length,
+    teamOnLeave: teamMembers.filter(member => member.isOnLeave)?.length || 0
   };
 
-  const handleApproval = async () => {
-    if (!selectedItem || !approvalAction) return;
-    
-    try {
-      setActionLoading(true);
-      
-      if (activeTab === 1) { // Leave approval
-        await leaveService.approveReject(selectedItem.id, {
-          action: approvalAction,
-          comments: approvalComments
-        });
-      } else if (activeTab === 2) { // Timesheet approval
-        await timesheetService.approveReject(selectedItem.id, {
-          action: approvalAction,
-          comments: approvalComments
-        });
+  // Leave approval mutation
+  const leaveApprovalMutation = useMutation({
+    mutationFn: async ({ id, action, comments }) => {
+      if (action === 'approved') {
+        return await leaveService.approveLeave(id, comments);
+      } else {
+        return await leaveService.rejectLeave(id, comments);
       }
-      
-      // Reload data
-      await loadManagerData();
-      
-      // Close dialog
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pending-leaves'] });
+      queryClient.invalidateQueries({ queryKey: ['team-members'] });
       setApprovalDialog(false);
       setSelectedItem(null);
       setApprovalComments('');
-      
-    } catch (error) {
-      console.error('Error processing approval:', error);
-    } finally {
-      setActionLoading(false);
+    }
+  });
+
+  // Timesheet approval mutation
+  const timesheetApprovalMutation = useMutation({
+    mutationFn: async ({ id, action, comments }) => {
+      const apiAction = action === 'approved' ? 'approve' : 'reject';
+      return await timesheetService.approve(id, {
+        action: apiAction,
+        approverComments: comments
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pending-timesheets'] });
+      setApprovalDialog(false);
+      setSelectedItem(null);
+      setApprovalComments('');
+    }
+  });
+
+  const handleApproval = () => {
+    if (!selectedItem || !approvalAction) return;
+    
+    const mutationData = {
+      id: selectedItem.id,
+      action: approvalAction,
+      comments: approvalComments
+    };
+
+    if (activeTab === 1) { // Leave approval
+      leaveApprovalMutation.mutate(mutationData);
+    } else if (activeTab === 2) { // Timesheet approval
+      timesheetApprovalMutation.mutate(mutationData);
     }
   };
 
@@ -387,9 +400,9 @@ const ManagerDashboard = () => {
                     </Card>
                   ))}
                   {teamMembers.length > 5 && (
-                    <Typography variant="caption" color="text.secondary" align="center">
-                      +{teamMembers.length - 5} more team members
-                    </Typography>
+                    <Button size="small" onClick={() => navigate('/employees')} sx={{ mt: 1 }}>
+                      View all {teamMembers.length} team members
+                    </Button>
                   )}
                 </Stack>
               )}
@@ -446,9 +459,9 @@ const ManagerDashboard = () => {
                     </Card>
                   ))}
                   {pendingLeaves.length > 3 && (
-                    <Typography variant="caption" color="text.secondary" align="center">
-                      +{pendingLeaves.length - 3} more pending requests
-                    </Typography>
+                    <Button size="small" onClick={() => navigate('/leave-management')} sx={{ mt: 1 }}>
+                      View all {pendingLeaves.length} pending requests
+                    </Button>
                   )}
                 </Stack>
               )}
@@ -507,9 +520,9 @@ const ManagerDashboard = () => {
                     </Card>
                   ))}
                   {pendingTimesheets.length > 3 && (
-                    <Typography variant="caption" color="text.secondary" align="center">
-                      +{pendingTimesheets.length - 3} more pending timesheets
-                    </Typography>
+                    <Button size="small" onClick={() => navigate('/timesheets?view=approvals')} sx={{ mt: 1 }}>
+                      View all {pendingTimesheets.length} pending timesheets
+                    </Button>
                   )}
                 </Stack>
               )}
@@ -550,8 +563,12 @@ const ManagerDashboard = () => {
             onClick={handleApproval}
             variant="contained"
             color={approvalAction === 'approved' ? 'success' : 'error'}
-            disabled={actionLoading}
-            startIcon={actionLoading ? <CircularProgress size={20} /> : null}
+            disabled={leaveApprovalMutation.isPending || timesheetApprovalMutation.isPending}
+            startIcon={
+              (leaveApprovalMutation.isPending || timesheetApprovalMutation.isPending) 
+                ? <CircularProgress size={20} /> 
+                : null
+            }
           >
             {approvalAction === 'approved' ? 'Approve' : 'Reject'}
           </Button>

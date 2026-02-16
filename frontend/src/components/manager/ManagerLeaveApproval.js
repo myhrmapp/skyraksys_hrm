@@ -26,10 +26,10 @@ import {
   Person as PersonIcon,
   Schedule as ScheduleIcon
 } from '@mui/icons-material';
-import { format, parseISO, differenceInDays } from 'date-fns';
+import dayjs from 'dayjs';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useLoading } from '../../contexts/LoadingContext';
-import leaveService from '../../services/LeaveService';
+import { leaveService } from '../../services/leave.service';
 
 const ManagerLeaveApproval = ({ pendingLeaves, onApprovalUpdate }) => {
   const theme = useTheme();
@@ -119,7 +119,7 @@ const ManagerLeaveApproval = ({ pendingLeaves, onApprovalUpdate }) => {
 
   const calculateLeaveDays = (startDate, endDate) => {
     try {
-      return differenceInDays(parseISO(endDate), parseISO(startDate)) + 1;
+      return dayjs(endDate).diff(dayjs(startDate), 'day') + 1;
     } catch (error) {
       return 0;
     }
@@ -173,7 +173,7 @@ const ManagerLeaveApproval = ({ pendingLeaves, onApprovalUpdate }) => {
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <CalendarIcon sx={{ mr: 1, fontSize: 20, color: 'text.secondary' }} />
                     <Typography variant="body2">
-                      <strong>Duration:</strong> {format(parseISO(leave.startDate), 'MMM dd, yyyy')} - {format(parseISO(leave.endDate), 'MMM dd, yyyy')}
+                      <strong>Duration:</strong> {dayjs(leave.startDate).format('MMM DD, YYYY')} - {dayjs(leave.endDate).format('MMM DD, YYYY')}
                     </Typography>
                   </Box>
                   
@@ -197,7 +197,7 @@ const ManagerLeaveApproval = ({ pendingLeaves, onApprovalUpdate }) => {
 
                   <Box>
                     <Typography variant="body2" color="text.secondary">
-                      Submitted: {format(parseISO(leave.createdAt), 'MMM dd, yyyy HH:mm')}
+                      Submitted: {dayjs(leave.createdAt).format('MMM DD, YYYY HH:mm')}
                     </Typography>
                   </Box>
                 </Stack>
@@ -248,7 +248,7 @@ const ManagerLeaveApproval = ({ pendingLeaves, onApprovalUpdate }) => {
                   <strong>Leave Type:</strong> {selectedLeave.leaveType?.name}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Duration:</strong> {format(parseISO(selectedLeave.startDate), 'MMM dd, yyyy')} - {format(parseISO(selectedLeave.endDate), 'MMM dd, yyyy')}
+                  <strong>Duration:</strong> {dayjs(selectedLeave.startDate).format('MMM DD, YYYY')} - {dayjs(selectedLeave.endDate).format('MMM DD, YYYY')}
                 </Typography>
                 <Typography variant="body2">
                   <strong>Days:</strong> {calculateLeaveDays(selectedLeave.startDate, selectedLeave.endDate)} day(s)
@@ -287,7 +287,7 @@ const ManagerLeaveApproval = ({ pendingLeaves, onApprovalUpdate }) => {
                   <strong>Leave Type:</strong> {selectedLeave.leaveType?.name}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Duration:</strong> {format(parseISO(selectedLeave.startDate), 'MMM dd, yyyy')} - {format(parseISO(selectedLeave.endDate), 'MMM dd, yyyy')}
+                  <strong>Duration:</strong> {dayjs(selectedLeave.startDate).format('MMM DD, YYYY')} - {dayjs(selectedLeave.endDate).format('MMM DD, YYYY')}
                 </Typography>
               </Box>
               <TextField

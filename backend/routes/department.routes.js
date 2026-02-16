@@ -1,6 +1,8 @@
 const express = require('express');
-const { authenticateToken, authorize } = require('../middleware/auth.simple');
+const { authenticateToken, authorize } = require('../middleware/auth');
+const { departmentSchema } = require('../middleware/validators/department.validator');
 const db = require('../models');
+const logger = require('../utils/logger');
 
 const Department = db.Department;
 const Employee = db.Employee;
@@ -34,11 +36,17 @@ const router = express.Router();
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  */
-// Get all departments
-router.get('/', authenticateToken, async (req, res) => {
+// Get all departments (with optional pagination)
+router.get('/', authenticateToken, async (req, res, next) => {
   try {
-    const departments = await Department.findAll({
+    const { page, limit } = req.query;
+    const queryOptions = {
       include: [
+        {
+          model: Employee,
+          as: 'manager',
+          attributes: ['id', 'firstName', 'lastName', 'email', 'photoUrl']
+        },
         {
           model: Employee,
           as: 'employees',
@@ -50,18 +58,35 @@ router.get('/', authenticateToken, async (req, res) => {
           attributes: ['id', 'title', 'description']
         }
       ]
-    });
+    };
+
+    // If pagination params provided, use findAndCountAll
+    if (page && limit) {
+      const pageNum = Math.max(1, parseInt(page));
+      const pageSize = Math.min(200, Math.max(1, parseInt(limit)));
+      queryOptions.limit = pageSize;
+      queryOptions.offset = (pageNum - 1) * pageSize;
+
+      const result = await Department.findAndCountAll(queryOptions);
+      return res.json({
+        success: true,
+        data: result.rows,
+        totalCount: result.count,
+        totalPages: Math.ceil(result.count / pageSize),
+        currentPage: pageNum
+      });
+    }
+
+    // No pagination — return all (backward compatible)
+    const departments = await Department.findAll(queryOptions);
 
     res.json({
       success: true,
       data: departments
     });
   } catch (error) {
-    console.error('Error fetching departments:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch departments'
-    });
+    logger.error('Error fetching departments:', { detail: error });
+    next(error);
   }
 });
 
@@ -99,10 +124,15 @@ router.get('/', authenticateToken, async (req, res) => {
  *         $ref: '#/components/responses/NotFoundError'
  */
 // Get department by ID
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', authenticateToken, async (req, res, next) => {
   try {
     const department = await Department.findByPk(req.params.id, {
       include: [
+        {
+          model: Employee,
+          as: 'manager',
+          attributes: ['id', 'firstName', 'lastName', 'email', 'photoUrl']
+        },
         {
           model: Employee,
           as: 'employees',
@@ -128,11 +158,8 @@ router.get('/:id', authenticateToken, async (req, res) => {
       data: department
     });
   } catch (error) {
-    console.error('Error fetching department:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch department'
-    });
+    logger.error('Error fetching department:', { detail: error });
+    next(error);
   }
 });
 
@@ -182,27 +209,24 @@ router.get('/:id', authenticateToken, async (req, res) => {
  *         $ref: '#/components/responses/ForbiddenError'
  */
 // Create new department (admin/hr only)
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, authorize('admin', 'hr'), async (req, res, next) => {
   try {
-    if (!['admin', 'hr'].includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Admin or HR access required'
-      });
-    }
-
-    const { name, description } = req.body;
-
-    if (!name) {
+    // Validate input
+    const { error, value } = departmentSchema.create.validate(req.body, { abortEarly: false, stripUnknown: true });
+    if (error) {
       return res.status(400).json({
         success: false,
-        message: 'Department name is required'
+        message: 'Validation failed',
+        errors: error.details.map(d => d.message)
       });
     }
+
+    const { name, description, managerId } = value;
 
     const department = await Department.create({
       name,
-      description
+      description,
+      managerId: managerId || null
     });
 
     res.status(201).json({
@@ -211,11 +235,8 @@ router.post('/', authenticateToken, async (req, res) => {
       data: department
     });
   } catch (error) {
-    console.error('Error creating department:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create department'
-    });
+    logger.error('Error creating department:', { detail: error });
+    next(error);
   }
 });
 
@@ -268,16 +289,19 @@ router.post('/', authenticateToken, async (req, res) => {
  *         $ref: '#/components/responses/NotFoundError'
  */
 // Update department (admin/hr only)
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticateToken, authorize('admin', 'hr'), async (req, res, next) => {
   try {
-    if (!['admin', 'hr'].includes(req.user.role)) {
-      return res.status(403).json({
+    // Validate input
+    const { error, value } = departmentSchema.update.validate(req.body, { abortEarly: false, stripUnknown: true });
+    if (error) {
+      return res.status(400).json({
         success: false,
-        message: 'Admin or HR access required'
+        message: 'Validation failed',
+        errors: error.details.map(d => d.message)
       });
     }
 
-    const { name, description } = req.body;
+    const { name, description, managerId } = value;
     
     const department = await Department.findByPk(req.params.id);
     if (!department) {
@@ -289,7 +313,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
 
     await department.update({
       name: name || department.name,
-      description: description || department.description
+      description: description || department.description,
+      managerId: managerId !== undefined ? managerId : department.managerId
     });
 
     res.json({
@@ -298,11 +323,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
       data: department
     });
   } catch (error) {
-    console.error('Error updating department:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update department'
-    });
+    logger.error('Error updating department:', { detail: error });
+    next(error);
   }
 });
 
@@ -342,20 +364,22 @@ router.put('/:id', authenticateToken, async (req, res) => {
  *         $ref: '#/components/responses/NotFoundError'
  */
 // Delete department (admin only)
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, authorize('admin'), async (req, res, next) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Admin access required'
-      });
-    }
-
     const department = await Department.findByPk(req.params.id);
     if (!department) {
       return res.status(404).json({
         success: false,
         message: 'Department not found'
+      });
+    }
+
+    // Check if department has employees
+    const employeeCount = await Employee.count({ where: { departmentId: req.params.id } });
+    if (employeeCount > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete department with ${employeeCount} active employees. Please reassign them first.`
       });
     }
 
@@ -366,11 +390,8 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       message: 'Department deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting department:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete department'
-    });
+    logger.error('Error deleting department:', { detail: error });
+    next(error);
   }
 });
 

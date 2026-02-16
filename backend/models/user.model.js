@@ -43,24 +43,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: true
     },
-    isLocked: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
-    lockedAt: {
-      type: DataTypes.DATE,
-      allowNull: true
-    },
-    lockedReason: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    loginAttempts: {
+    failedLoginAttempts: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
       allowNull: false
     },
-    lockUntil: {
+    lockoutUntil: {
       type: DataTypes.DATE,
       allowNull: true
     },

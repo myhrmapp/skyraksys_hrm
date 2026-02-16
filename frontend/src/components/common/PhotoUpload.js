@@ -21,6 +21,7 @@ import {
   Person as PersonIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import http from '../../http-common';
 
 const PhotoUpload = ({ 
   employeeId, 
@@ -47,8 +48,7 @@ const PhotoUpload = ({
       // If currentPhotoUrl is a relative path, convert to full URL
       const isRelativePath = currentPhotoUrl.startsWith('/');
       if (isRelativePath) {
-        const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-        const serverBaseUrl = baseUrl.replace('/api', ''); // Remove /api suffix
+        const serverBaseUrl = process.env.REACT_APP_BACKEND_URL || '';
         setPreviewUrl(`${serverBaseUrl}${currentPhotoUrl}`);
       } else {
         setPreviewUrl(currentPhotoUrl);
@@ -100,27 +100,18 @@ const PhotoUpload = ({
       const formData = new FormData();
       formData.append('photo', selectedFile);
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/employees/${employeeId}/photo`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: formData
+      const response = await http.post(`/employees/${employeeId}/photo`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Upload failed');
-      }
+      const data = response.data;
 
       setSuccess('Photo uploaded successfully!');
       setSelectedFile(null);
       
       // Update the preview URL with the server URL
       // Note: Uploads are served from /uploads (not /api/uploads)
-      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
-      const serverBaseUrl = baseUrl.replace('/api', ''); // Remove /api suffix
+      const serverBaseUrl = process.env.REACT_APP_BACKEND_URL || '';
       const serverPhotoUrl = `${serverBaseUrl}${data.data.photoUrl}`;
       setPreviewUrl(serverPhotoUrl);
 
@@ -157,20 +148,8 @@ const PhotoUpload = ({
     setSuccess('');
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/employees/${employeeId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify({ photoUrl: null })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to delete photo');
-      }
+      const response = await http.put(`/employees/${employeeId}`, { photoUrl: null });
+      const data = response.data;
 
       setSuccess('Photo removed successfully!');
       setPreviewUrl('');

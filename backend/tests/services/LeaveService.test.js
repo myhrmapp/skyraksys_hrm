@@ -25,9 +25,10 @@ describe('LeaveService', () => {
     await db.LeaveBalance.create({
       employeeId: testEmployee.id,
       leaveTypeId: testLeaveType.id,
-      totalDays: 20,
-      usedDays: 0,
-      availableDays: 20
+      totalAccrued: 20,
+      totalTaken: 0,
+      balance: 20,
+      year: new Date().getFullYear()
     });
   });
 
@@ -51,7 +52,7 @@ describe('LeaveService', () => {
       expect(result).toBeDefined();
       expect(result.employeeId).toBe(testEmployee.id);
       expect(result.status).toBe('Pending');
-      expect(result.days).toBe(3); // 3 days leave
+      expect(result.totalDays).toBe(3); // 3 days leave
     });
 
     it('should reject overlapping leave requests', async () => {
@@ -106,7 +107,12 @@ describe('LeaveService', () => {
     });
 
     it('should approve a pending leave request', async () => {
-      const approverId = 1;
+      const approver = await testDataHelpers.createTestEmployee({
+        firstName: 'Approver',
+        lastName: 'Manager',
+        email: 'approver@test.com'
+      });
+      const approverId = approver.id; // FK references employees.id
       const comments = 'Approved for vacation';
 
       const result = await LeaveService.approveLeaveRequest(
@@ -116,24 +122,30 @@ describe('LeaveService', () => {
       );
 
       expect(result.status).toBe('Approved');
-      expect(result.approverId).toBe(approverId);
+      expect(result.approvedBy).toBe(approverId);
       expect(result.approverComments).toBe(comments);
       expect(result.approvedAt).toBeDefined();
     });
 
     it('should reject non-pending leave requests', async () => {
+      const approver = await testDataHelpers.createTestEmployee({
+        firstName: 'Approver',
+        lastName: 'Manager',
+        email: 'approver2@test.com'
+      });
+      
       // First approve the leave
-      await LeaveService.approveLeaveRequest(testLeaveRequest.id, 1, 'Approved');
+      await LeaveService.approveLeaveRequest(testLeaveRequest.id, approver.id, 'Approved');
 
       // Try to approve again
-      await expect(LeaveService.approveLeaveRequest(testLeaveRequest.id, 1, 'Approved again'))
+      await expect(LeaveService.approveLeaveRequest(testLeaveRequest.id, approver.id, 'Approved again'))
         .rejects.toThrow('Leave request is not in pending status');
     });
   });
 
   describe('getLeaveStats', () => {
     beforeEach(async () => {
-      const currentYear = new Date().getFullYear();
+      const currentYear = new Date().getFullYear() + 1;
       
       // Create various leave requests for the year
       await LeaveService.createLeaveRequest({
@@ -152,12 +164,19 @@ describe('LeaveService', () => {
         reason: 'Leave 2'
       });
 
-      // Approve one leave
-      await LeaveService.approveLeaveRequest(leave2.id, 1, 'Approved');
+      const approver = await testDataHelpers.createTestEmployee({
+        firstName: 'Approver',
+        lastName: 'Manager',
+        email: 'approver3@test.com'
+      });
+
+      // Approve one leave (approvedBy FK references employees.id)
+      await LeaveService.approveLeaveRequest(leave2.id, approver.id, 'Approved');
     });
 
     it('should return correct leave statistics', async () => {
-      const stats = await LeaveService.getLeaveStats(testEmployee.id);
+      const nextYear = new Date().getFullYear() + 1;
+      const stats = await LeaveService.getLeaveStats(testEmployee.id, nextYear);
 
       expect(stats.total).toBe(2);
       expect(stats.approved).toBe(1);
@@ -185,7 +204,7 @@ describe('LeaveService', () => {
 
     it('should reject invalid employee ID', async () => {
       const leaveData = {
-        employeeId: 99999,
+        employeeId: '00000000-0000-0000-0000-000000000000',
         leaveTypeId: testLeaveType.id,
         startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000)

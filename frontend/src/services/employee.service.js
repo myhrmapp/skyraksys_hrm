@@ -1,38 +1,23 @@
 import http from '../http-common';
+import { normalizeResponse } from './serviceHelpers';
 
 class EmployeeService {
   // Get all employees (filtered by role)
   async getAll(params = {}) {
-    console.log('🔧 EmployeeService.getAll called with params:', params);
-    console.log('🔧 Making GET request to /employees with params:', JSON.stringify(params));
     const response = await http.get('/employees', { params });
-    console.log('🔧 EmployeeService.getAll raw axios response:', response);
-    console.log('🔧 EmployeeService.getAll config:', response.config);
-    console.log('🔧 EmployeeService.getAll URL:', response.config.url);
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Get employee by ID
-  async get(id) {
-    const response = await http.get(`/employees/${id}`);
-    return response.data;
-  }
-
-  // Get employee by ID (alias for compatibility)
   async getById(id) {
-    console.log('getById called with ID:', id);
     const response = await http.get(`/employees/${id}`);
-    console.log('getById response:', response.data);
-    // Backend returns { success: true, data: employee }, extract the employee object
-    return response.data?.data || response.data;
+    return normalizeResponse(response);
   }
 
   // Get current user's employee profile
   async getMyProfile() {
-    console.log('getMyProfile called');
     const response = await http.get('/employees/me');
-    console.log('getMyProfile response:', response.data);
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Get audit history for employee (placeholder)
@@ -49,7 +34,7 @@ class EmployeeService {
   // Create new employee
   async create(data) {
     const response = await http.post('/employees', data);
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Create new employee with photo
@@ -101,55 +86,68 @@ class EmployeeService {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Update employee
   async update(id, data) {
-    console.log('EmployeeService update called with ID:', id, 'data:', data);
     const response = await http.put(`/employees/${id}`, data);
-    console.log('Update response:', response.data);
-    // Backend returns { success: true, data: employee }, extract the employee object
-    return response.data?.data || response.data;
+    return normalizeResponse(response);
   }
 
   // Update employee compensation (salary)
   async updateCompensation(id, salary) {
-    console.log('EmployeeService updateCompensation called with ID:', id, 'salary:', salary);
     const response = await http.put(`/employees/${id}/compensation`, { salary });
-    console.log('UpdateCompensation response:', response.data);
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Delete/deactivate employee
   async delete(id) {
     const response = await http.delete(`/employees/${id}`);
-    return response.data;
-  }
-
-  // Get employee dashboard stats
-  async getDashboardStats() {
-    const response = await http.get('/employees/dashboard');
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Get departments
   async getDepartments() {
     const response = await http.get('/employees/departments');
-    return response;
+    return normalizeResponse(response);
   }
 
   // Get positions
   async getPositions() {
     const response = await http.get('/employees/meta/positions');
-    return response;
+    return normalizeResponse(response);
   }
 
   // Search employees
   async search(query, filters = {}) {
     const params = { search: query, ...filters };
     const response = await http.get('/employees', { params });
-    return response.data;
+    return normalizeResponse(response);
+  }
+
+  // Check if an employee email already exists (async uniqueness)
+  async checkEmailExists(email) {
+    if (!email) return false;
+    try {
+      const res = await this.search(email);
+      const list = res?.data || res || [];
+      return Array.isArray(list) && list.some(emp => (emp.email || '').toLowerCase() === email.toLowerCase());
+    } catch {
+      return false; // fail-open to avoid blocking
+    }
+  }
+
+  // Check if an employeeId already exists
+  async checkEmployeeIdExists(employeeId) {
+    if (!employeeId) return false;
+    try {
+      const res = await http.get(`/employees/by-employee-id/${employeeId}`);
+      const data = res?.data?.data || res?.data;
+      return !!data; // exists if data returned
+    } catch {
+      return false;
+    }
   }
 
   // Get employee statistics
@@ -200,7 +198,7 @@ class EmployeeService {
   async getManagers() {
     try {
       const response = await http.get('/employees/managers');
-      return response;
+      return { data: { data: response.data?.data || response.data } };
     } catch (error) {
       console.error('Error fetching managers:', error);
       // Fallback: get all employees and filter managers
@@ -233,6 +231,24 @@ class EmployeeService {
   async getByEmployeeId(employeeId) {
     const response = await http.get(`/employees/by-employee-id/${employeeId}`);
     return response.data;
+  }
+
+  // --- Consolidated Methods from EmployeeService.js ---
+
+  // Get team members for a manager
+  async getTeamMembers(managerId) {
+    const response = await http.get(`/employees/manager/${managerId}/team`);
+    return response.data;
+  }
+
+  // Get active employees
+  async getActiveEmployees() {
+    return this.getAll({ status: 'Active' });
+  }
+
+  // Get current user profile (alias)
+  async getCurrentProfile() {
+    return this.getMyProfile();
   }
 }
 

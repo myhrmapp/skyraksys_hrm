@@ -1,6 +1,13 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
+// SAFETY: Prevent accidental execution in production
+if (process.env.NODE_ENV === 'production') {
+  console.error('\n❌ FATAL: reset-database.js cannot be run in production!');
+  console.error('   Set NODE_ENV to development or test to use this script.');
+  process.exit(1);
+}
+
 // Database configuration
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'skyraksys_hrm',
@@ -124,10 +131,12 @@ async function resetDatabase() {
     console.log('✅ Leave types created');
 
     // Create users with strong passwords
-    const bcrypt = require('bcrypt');
-    const adminPassword = await bcrypt.hash('Admin@123!', 10);
-    const hrPassword = await bcrypt.hash('HR@123!', 10);
-    const employeePassword = await bcrypt.hash('Employee@123!', 10);
+    const bcrypt = require('bcryptjs');
+    const defaultDevPassword = process.env.DEV_DEFAULT_PASSWORD || 'DevReset@2026!';
+    const adminPassword = await bcrypt.hash(defaultDevPassword, 12);
+    const hrPassword = await bcrypt.hash(defaultDevPassword, 12);
+    const employeePassword = await bcrypt.hash(defaultDevPassword, 12);
+    console.log(`ℹ️  All users created with password from DEV_DEFAULT_PASSWORD env var (or default dev password)`);
 
     const users = await User.bulkCreate([
       {
@@ -377,10 +386,11 @@ async function resetDatabase() {
     console.log(`   📁 Projects: ${projects.length}`);
     console.log(`   📋 Tasks: ${tasks.length}`);
 
+    const displayPwd = process.env.DEV_DEFAULT_PASSWORD ? '(from DEV_DEFAULT_PASSWORD env)' : 'DevReset@2026!';
     console.log('\n🔐 Login Credentials:');
-    console.log('   Admin: admin@company.com / Admin@123!');
-    console.log('   HR: hr@company.com / HR@123!');
-    console.log('   Employee: employee@company.com / Employee@123!');
+    console.log(`   Admin: admin@company.com / ${displayPwd}`);
+    console.log(`   HR: hr@company.com / ${displayPwd}`);
+    console.log(`   Employee: employee@company.com / ${displayPwd}`);
 
   } catch (error) {
     console.error('❌ Database reset failed:', error);

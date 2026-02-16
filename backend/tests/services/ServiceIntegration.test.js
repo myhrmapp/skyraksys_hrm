@@ -1,4 +1,4 @@
-const { EmployeeService, LeaveService, TimesheetService, PayrollService } = require('../services');
+const { EmployeeService, LeaveService, TimesheetService, PayrollService } = require('../../services');
 
 describe('Service Layer Integration', () => {
   it('should load all services correctly', () => {
@@ -21,8 +21,8 @@ describe('Service Layer Integration', () => {
     expect(typeof LeaveService.approveLeaveRequest).toBe('function');
     expect(typeof LeaveService.validateLeaveRequest).toBe('function');
 
-    // Check TimesheetService methods
-    expect(typeof TimesheetService.createTimeEntry).toBe('function');
+    // Check TimesheetService methods (weekly schema — createTimeEntry was replaced with inherited .create)
+    expect(typeof TimesheetService.create).toBe('function');
     expect(typeof TimesheetService.submitTimesheet).toBe('function');
     expect(typeof TimesheetService.approveTimesheet).toBe('function');
 

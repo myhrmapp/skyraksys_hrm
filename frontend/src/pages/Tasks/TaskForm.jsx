@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import TaskService from '../../services/TaskService';
 import ProjectService from '../../services/ProjectService';
-import EmployeeService from '../../services/EmployeeService';
+import { employeeService as EmployeeService } from '../../services/employee.service';
 
 const TaskForm = ({ task, projectId, onSave, onCancel }) => {
   const [formData, setFormData] = useState({

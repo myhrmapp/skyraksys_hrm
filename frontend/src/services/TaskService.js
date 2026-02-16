@@ -1,15 +1,8 @@
 import http from "../http-common";
 
-class TaskDataService {
+class TaskService {
   getAll(params = {}) {
-    const queryParams = new URLSearchParams();
-    
-    if (params.projectId) queryParams.append('projectId', params.projectId);
-    if (params.status) queryParams.append('status', params.status);
-    if (params.priority) queryParams.append('priority', params.priority);
-    
-    const queryString = queryParams.toString();
-    return http.get(`/tasks${queryString ? `?${queryString}` : ''}`);
+    return http.get('/tasks', { params });
   }
 
   get(id) {
@@ -56,5 +49,5 @@ class TaskDataService {
   }
 }
 
-const taskDataService = new TaskDataService();
-export default taskDataService;
+export const taskService = new TaskService();
+export default taskService;

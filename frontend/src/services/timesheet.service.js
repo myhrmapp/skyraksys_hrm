@@ -20,35 +20,22 @@ class TimesheetService {
     return response.data.data;
   }
 
-  // Create and submit timesheet entry
-  async createAndSubmit(data) {
-    const response = await http.post('/timesheets/submit', data);
-    return response.data.data;
-  }
-
   // Update timesheet status (approve/reject)
   async updateStatus(id, status, comments = '') {
-    // Map status values to match backend expectations
-    const action = status === 'approved' ? 'approve' : status === 'rejected' ? 'reject' : status;
+    // Route to correct endpoint based on action
+    const endpoint = (status === 'rejected' || status === 'reject')
+      ? `/timesheets/${id}/reject`
+      : `/timesheets/${id}/approve`;
     
-    const response = await http.put(`/timesheets/${id}/approve`, {
-      action,
-      comments
+    const response = await http.post(endpoint, {
+      comments // Backend expects 'comments' in body for approve/reject
     });
     return response.data.data;
   }
 
   // Submit timesheet for approval
   async submit(id) {
-    const response = await http.put(`/timesheets/${id}/submit`);
-    return response.data.data;
-  }
-
-  // Resubmit rejected timesheet
-  async resubmit(id, comments = '') {
-    const response = await http.put(`/timesheets/${id}/resubmit`, {
-      comments
-    });
+    const response = await http.patch(`/timesheets/${id}/submit`);
     return response.data.data;
   }
 
@@ -60,10 +47,12 @@ class TimesheetService {
 
   // Get timesheet summary
   async getSummary(employeeId = null, params = {}) {
-    const url = employeeId 
-      ? `/timesheets/employee/${employeeId}/summary` 
-      : '/timesheets/summary';
-    const response = await http.get(url, { params });
+    const url = '/timesheets/stats/summary';
+    const queryParams = { ...params };
+    if (employeeId) {
+      queryParams.employeeId = employeeId;
+    }
+    const response = await http.get(url, { params: queryParams });
     return response.data.data;
   }
 
@@ -79,31 +68,6 @@ class TimesheetService {
     return response.data.data;
   }
 
-  // Clock in/out
-  async clockIn(data) {
-    const response = await http.post('/timesheets/clock-in', data);
-    return response.data.data;
-  }
-
-  async clockOut(id, data) {
-    const response = await http.post(`/timesheets/${id}/clock-out`, data);
-    return response.data.data;
-  }
-
-  // Get weekly timesheet view
-  async getWeeklyView(employeeId = null, year = null, week = null) {
-    const url = employeeId 
-      ? `/timesheets/weekly/${employeeId}`
-      : '/timesheets/weekly';
-    
-    const params = {};
-    if (year) params.year = year;
-    if (week) params.week = week;
-    
-    const response = await http.get(url, { params });
-    return response.data.data;
-  }
-
   // Get timesheet history for an employee
   async getHistory(employeeId = null, params = {}) {
     const url = employeeId && (params.userRole === 'admin' || params.userRole === 'hr')
@@ -114,38 +78,20 @@ class TimesheetService {
     return response.data;
   }
 
-  // Get timesheets by date range
-  async getByDateRange(startDate, endDate) {
-    logger.debug('🔍 TimesheetService.getByDateRange called with:', { startDate, endDate });
-    const params = { startDate, endDate };
-    
-    const response = await http.get('/timesheets', { params });
-    logger.debug('📊 Date range response:', response);
-    
-    return response;
-  }
-
   // Get pending timesheets for approval
   async getPending() {
-    logger.debug('🔍 TimesheetService.getPending called');
     const response = await http.get('/timesheets', { params: { status: 'submitted' } });
-    logger.debug('📊 Pending timesheets response:', response);
-    
     return response;
   }
 
   // Create batch of timesheets
   async createBatch(timesheets) {
-    logger.debug('🔍 TimesheetService.createBatch called with:', timesheets);
-    const response = await http.post('/timesheets/bulk-save', { timesheets });
-    logger.debug('📊 Batch create response:', response);
-    
+    const response = await http.post('/timesheets/bulk-save', { entries: timesheets });
     return response;
   }
 
   // Get timesheets by week
   async getByWeek(weekStartDate, employeeId = null) {
-    logger.debug('🔍 TimesheetService.getByWeek called with:', { weekStartDate, employeeId });
     const params = { startDate: weekStartDate };
     
     // Include employeeId if provided (for admin users to filter specific employee)
@@ -153,40 +99,10 @@ class TimesheetService {
       params.employeeId = employeeId;
     }
     
-    logger.debug('📡 API call params:', params);
-    
     const response = await http.get('/timesheets', { params });
-    logger.debug('📊 Server response:', response);
-    logger.debug('📊 Raw response data:', response.data);
     
     // Detailed data analysis
     if (response.data && response.data.data && response.data.data.length > 0) {
-      logger.debug('📋 TIMESHEET DATA ANALYSIS for week:', weekStartDate);
-      logger.debug('📋 Total timesheets found:', response.data.data.length);
-      
-      response.data.data.forEach((timesheet, index) => {
-        logger.debug(`📋 Timesheet ${index + 1}:`, {
-          id: timesheet.id,
-          weekStartDate: timesheet.weekStartDate,
-          weekEndDate: timesheet.weekEndDate,
-          weekNumber: timesheet.weekNumber,
-          year: timesheet.year,
-          status: timesheet.status,
-          projectId: timesheet.projectId,
-          taskId: timesheet.taskId,
-          totalHours: timesheet.totalHoursWorked,
-          days: {
-            mon: timesheet.mondayHours,
-            tue: timesheet.tuesdayHours,
-            wed: timesheet.wednesdayHours,
-            thu: timesheet.thursdayHours,
-            fri: timesheet.fridayHours,
-            sat: timesheet.saturdayHours,
-            sun: timesheet.sundayHours
-          }
-        });
-      });
-      
       // Check if all timesheets belong to the requested week
       const requestedWeekStart = weekStartDate;
       const mismatchedTimesheets = response.data.data.filter(ts => ts.weekStartDate !== requestedWeekStart);
@@ -200,30 +116,9 @@ class TimesheetService {
           }))
         });
       }
-      
-      // Status summary
-      const statusCounts = response.data.data.reduce((acc, ts) => {
-        acc[ts.status] = (acc[ts.status] || 0) + 1;
-        return acc;
-      }, {});
-      logger.debug('📊 Status summary:', statusCounts);
     }
     
     return response;
-  }
-
-  // Get weekly timesheets for approval (managers/admin)
-  async getWeeklyForApproval(employeeId = null, year = null, week = null, status = 'Submitted') {
-    const url = employeeId 
-      ? `/timesheets/approval/weekly/${employeeId}`
-      : '/timesheets/approval/weekly';
-    
-    const params = { status };
-    if (year) params.year = year;
-    if (week) params.week = week;
-    
-    const response = await http.get(url, { params });
-    return response.data.data;
   }
 
   // Bulk submit multiple timesheets
@@ -237,7 +132,7 @@ class TimesheetService {
   // Bulk save multiple timesheets
   async bulkSave(timesheets) {
     const response = await http.post('/timesheets/bulk-save', {
-      timesheets
+      entries: timesheets
     });
     return response.data;
   }
@@ -245,7 +140,7 @@ class TimesheetService {
   // Bulk update multiple timesheets
   async bulkUpdate(timesheets) {
     const response = await http.put('/timesheets/bulk-update', {
-      timesheets
+      updates: timesheets
     });
     return response.data;
   }
@@ -254,7 +149,7 @@ class TimesheetService {
   async bulkApprove(timesheetIds, comments = '') {
     const response = await http.post('/timesheets/bulk-approve', {
       timesheetIds,
-      approverComments: comments
+      comments
     });
     return response.data;
   }
@@ -263,7 +158,7 @@ class TimesheetService {
   async bulkReject(timesheetIds, comments) {
     const response = await http.post('/timesheets/bulk-reject', {
       timesheetIds,
-      approverComments: comments
+      comments
     });
     return response.data;
   }
@@ -276,7 +171,7 @@ class TimesheetService {
 
   // Approve a timesheet
   async approve(id, data) {
-    const response = await http.put(`/timesheets/${id}/approve`, data);
+    const response = await http.post(`/timesheets/${id}/approve`, data);
     return response.data;
   }
 }

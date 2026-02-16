@@ -1,5 +1,11 @@
+require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const { User, Employee, Department, Position } = require('./models');
+
+if (process.env.NODE_ENV === 'production') {
+  console.error('\u274c ERROR: This script must NOT be run in production!');
+  process.exit(1);
+}
 
 async function setupProperManagerHierarchy() {
   try {
@@ -48,8 +54,8 @@ async function setupProperManagerHierarchy() {
         console.log(`  Creating new user account with role: ${userRole}`);
         
         // Generate default password
-        const defaultPassword = 'password123';
-        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+        const defaultPassword = process.env.DEV_DEFAULT_PASSWORD || 'DevReset@2026!';
+        const hashedPassword = await bcrypt.hash(defaultPassword, 12);
         
         user = await User.create({
           firstName: employee.firstName,
@@ -64,7 +70,7 @@ async function setupProperManagerHierarchy() {
         // Link employee to user
         await employee.update({ userId: user.id });
         
-        console.log(`  ✅ User created - Email: ${employee.email}, Password: ${defaultPassword}, Role: ${userRole}`);
+        console.log(`  ✅ User created - Email: ${employee.email}, Password: (default), Role: ${userRole}`);
       } else {
         // Update existing user role if needed
         if (user.role !== userRole) {
@@ -76,13 +82,13 @@ async function setupProperManagerHierarchy() {
         
         // Ensure password is set (update if empty or default)
         if (!user.password || user.password.length < 10) {
-          const defaultPassword = 'password123';
-          const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+          const defaultPassword = process.env.DEV_DEFAULT_PASSWORD || 'DevReset@2026!';
+          const hashedPassword = await bcrypt.hash(defaultPassword, 12);
           await user.update({ 
             password: hashedPassword,
             passwordChangedAt: new Date()
           });
-          console.log(`  ✅ Password set to: ${defaultPassword}`);
+          console.log(`  ✅ Password set to default`);
         }
       }
     }
@@ -164,7 +170,7 @@ async function setupProperManagerHierarchy() {
     console.log('✅ All employees now have user accounts with passwords');
     console.log('✅ Roles assigned based on position titles');
     console.log('✅ Manager hierarchy established');
-    console.log('✅ Default password for all new accounts: password123');
+    console.log('✅ Default password for all new accounts: (from DEV_DEFAULT_PASSWORD env or DevReset@2026!)');
     console.log('\n🔐 Users can now log in with their email and the default password!');
     
   } catch (error) {

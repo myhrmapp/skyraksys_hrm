@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Paper,
@@ -45,19 +45,36 @@ import {
   Send as SubmittedIcon,
   Download as DownloadIcon
 } from '@mui/icons-material';
+import { useQuery } from '@tanstack/react-query';
 import { timesheetService } from '../../../services/timesheet.service';
 import { useAuth } from '../../../contexts/AuthContext';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import PropTypes from 'prop-types';
 
 dayjs.extend(relativeTime);
 
-const TimesheetHistory = () => {
+const TimesheetHistory = ({ embedded } = {}) => {
   const theme = useTheme();
   const { user } = useAuth();
-  const [timesheets, setTimesheets] = useState([]);
+  const myEmployeeId = user?.employee?.id || user?.employeeId;
+  
+  const [apiPage, setApiPage] = useState(1);
+  const pageSize = 50;
+  
+  // React Query for timesheets — paginated
+  const { data: timesheetsData, isLoading: loading, refetch } = useQuery({
+    queryKey: ['timesheets', 'history', myEmployeeId, apiPage],
+    queryFn: () => timesheetService.getAll({ limit: pageSize, page: apiPage, employeeId: myEmployeeId }),
+    enabled: !!myEmployeeId,
+    select: (response) => {
+      const allTimesheets = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+      return allTimesheets.sort((a, b) => new Date(b.weekStartDate) - new Date(a.weekStartDate));
+    }
+  });
+  
+  const timesheets = useMemo(() => timesheetsData || [], [timesheetsData]);
   const [filteredTimesheets, setFilteredTimesheets] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [statusFilter, setStatusFilter] = useState('');
@@ -68,47 +85,8 @@ const TimesheetHistory = () => {
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
 
   useEffect(() => {
-    loadTimesheets();
-  }, []);
-
-  useEffect(() => {
     applyFilters();
   }, [timesheets, statusFilter, dateRange]);
-
-  const loadTimesheets = async () => {
-    setLoading(true);
-    try {
-      const response = await timesheetService.getAll({ limit: 1000, page: 1 });
-      const allTimesheets = Array.isArray(response.data) ? response.data : (response.data?.data || []);
-      
-      console.log('DEBUG: Current user:', user);
-      console.log('DEBUG: User employee ID:', user?.employee?.id);
-      console.log('DEBUG: All timesheets loaded:', allTimesheets.length);
-      console.log('DEBUG: Sample timesheet:', allTimesheets[0]);
-      
-      // Filter to show only current user's timesheets
-      // Try multiple possible employee ID fields
-      const myEmployeeId = user?.employee?.id || user?.employeeId;
-      const myTimesheets = allTimesheets.filter(ts => {
-        const matches = ts.employeeId === myEmployeeId;
-        if (allTimesheets.indexOf(ts) === 0) {
-          console.log('DEBUG: Comparing timesheet.employeeId', ts.employeeId, 'with user employee ID', myEmployeeId, '- Match:', matches);
-        }
-        return matches;
-      });
-      
-      console.log('DEBUG: Filtered timesheets for current user:', myTimesheets.length);
-      
-      setTimesheets(myTimesheets);
-      showAlert('success', `Loaded ${myTimesheets.length} timesheets`);
-    } catch (error) {
-      console.error('Error loading timesheets:', error);
-      showAlert('error', error.response?.data?.message || 'Failed to load timesheets');
-      setTimesheets([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const applyFilters = () => {
     let filtered = [...timesheets];
@@ -250,6 +228,7 @@ const TimesheetHistory = () => {
   };
 
   const exportToCSV = () => {
+    const escCsv = (v) => { const s = String(v ?? ''); return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s; };
     // Flatten grouped data for CSV export
     const csvRows = [];
     csvRows.push(['Week Start', 'Week End', 'Projects/Tasks', 'Total Hours', 'Status', 'Submitted Date', 'Response Date']);
@@ -260,13 +239,13 @@ const TimesheetHistory = () => {
       ).join('; ');
       
       csvRows.push([
-        formatDate(weekData.weekStartDate),
-        formatDate(weekData.weekEndDate),
-        tasksList,
-        weekData.totalWeekHours.toFixed(1),
-        weekData.overallStatus,
-        weekData.latestSubmitted ? formatDate(weekData.latestSubmitted) : '-',
-        weekData.latestResponse ? formatDate(weekData.latestResponse) : '-'
+        escCsv(formatDate(weekData.weekStartDate)),
+        escCsv(formatDate(weekData.weekEndDate)),
+        escCsv(tasksList),
+        escCsv(weekData.totalWeekHours.toFixed(1)),
+        escCsv(weekData.overallStatus),
+        escCsv(weekData.latestSubmitted ? formatDate(weekData.latestSubmitted) : '-'),
+        escCsv(weekData.latestResponse ? formatDate(weekData.latestResponse) : '-')
       ]);
     });
 
@@ -300,8 +279,9 @@ const TimesheetHistory = () => {
   const stats = getSummaryStats();
 
   return (
-    <Box sx={{ p: 2, maxWidth: 1400, mx: 'auto', minHeight: '100vh' }}>
+    <Box sx={{ p: embedded ? 0 : 2, maxWidth: 1400, mx: 'auto', minHeight: embedded ? 'auto' : '100vh' }}>
       {/* Minimal Header */}
+      {!embedded && (
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
           <Typography variant="h5" fontWeight={600} color="text.primary">
@@ -318,6 +298,7 @@ const TimesheetHistory = () => {
             onClick={() => setFilterOpen(!filterOpen)}
             size="small"
             sx={{ minWidth: 80 }}
+            data-testid="ts-history-filter-toggle"
           >
             Filter
           </Button>
@@ -328,11 +309,13 @@ const TimesheetHistory = () => {
             size="small"
             disabled={filteredTimesheets.length === 0}
             sx={{ minWidth: 80 }}
+            data-testid="ts-history-export"
           >
             Export
           </Button>
         </Stack>
       </Box>
+      )}
 
       {/* Alert */}
       <Collapse in={alert.show}>
@@ -355,6 +338,7 @@ const TimesheetHistory = () => {
                 value={statusFilter}
                 label="Status"
                 onChange={(e) => setStatusFilter(e.target.value)}
+                inputProps={{ 'data-testid': 'ts-history-status-select' }}
               >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="Draft">Draft</MenuItem>
@@ -371,6 +355,8 @@ const TimesheetHistory = () => {
               onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
               InputLabelProps={{ shrink: true }}
               sx={{ width: 140 }}
+              id="tsHistoryFrom"
+              inputProps={{ 'data-testid': 'ts-history-start-date' }}
             />
             <TextField
               size="small"
@@ -380,6 +366,8 @@ const TimesheetHistory = () => {
               onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
               InputLabelProps={{ shrink: true }}
               sx={{ width: 140 }}
+              id="tsHistoryTo"
+              inputProps={{ 'data-testid': 'ts-history-end-date' }}
             />
             <Button 
               variant="text" 
@@ -537,6 +525,7 @@ const TimesheetHistory = () => {
                     <Tooltip title="View Week Details">
                       <IconButton 
                         size="small" 
+                        aria-label="View week details"
                         onClick={() => handleViewDetails(weekData.timesheets[0])} // Pass first timesheet for backward compatibility
                         sx={{ 
                           bgcolor: 'action.hover',
@@ -702,6 +691,10 @@ const TimesheetHistory = () => {
       </Dialog>
     </Box>
   );
+};
+
+TimesheetHistory.propTypes = {
+  embedded: PropTypes.bool,
 };
 
 export default TimesheetHistory;

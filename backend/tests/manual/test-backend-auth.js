@@ -13,7 +13,7 @@ async function testBackendAuth() {
         console.log('\n2. Testing login with employee@company.com...');
         const loginResponse = await axios.post('http://localhost:8080/api/auth/login', {
             email: 'employee@company.com',
-            password: 'password123'
+            password: 'Password123!'
         });
 
         if (loginResponse.data.success) {

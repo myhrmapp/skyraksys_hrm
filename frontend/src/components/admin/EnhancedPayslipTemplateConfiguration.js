@@ -49,18 +49,24 @@ import {
   Visibility as VisibilityIcon,
   ExpandMore as ExpandMoreIcon,
   ContentCopy as CopyIcon,
-  Download as DownloadIcon
+  Download as DownloadIcon,
+  Lightbulb as LightbulbIcon
 } from '@mui/icons-material';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+// Disabled for migration - drag/drop needs alternative implementation
+// import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { payrollService } from '../../services/payroll.service';
+import ConfirmDialog from '../common/ConfirmDialog';
+import useConfirmDialog from '../../hooks/useConfirmDialog';
+import PayslipPreview from './PayslipPreview';
 
 const EnhancedPayslipTemplateConfiguration = () => {
   const { user } = useAuth();
   const { isLoading, setLoading } = useLoading();
   const { showNotification } = useNotification();
+  const { dialogProps, confirm } = useConfirmDialog();
 
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -106,14 +112,14 @@ const EnhancedPayslipTemplateConfiguration = () => {
       
       // Company Info (nested in styling)
       companyInfo: {
-        name: 'SKYRAKSYS TECHNOLOGIES LLP',
+        name: '',
         logo: null,
         logoPosition: 'left',
         logoSize: 'medium',
-        address: 'Plot-No: 27E, G.S.T. Road, Guduvanchery, Chennai',
-        email: 'info@skyraksys.com',
-        phone: '+91 89398 88577',
-        website: 'https://www.skyraksys.com',
+        address: '',
+        email: '',
+        phone: '',
+        website: '',
         gst: '',
         cin: '',
         pan: ''
@@ -244,14 +250,14 @@ const EnhancedPayslipTemplateConfiguration = () => {
         borderStyle: 'solid',
         customCSS: '',
         companyInfo: {
-          name: 'SKYRAKSYS TECHNOLOGIES LLP',
+          name: '',
           logo: null,
           logoPosition: 'left',
           logoSize: 'medium',
-          address: 'Plot-No: 27E, G.S.T. Road, Guduvanchery, Chennai',
-          email: 'info@skyraksys.com',
-          phone: '+91 89398 88577',
-          website: 'https://www.skyraksys.com',
+          address: '',
+          email: '',
+          phone: '',
+          website: '',
           gst: '',
           cin: '',
           pan: ''
@@ -371,22 +377,25 @@ const EnhancedPayslipTemplateConfiguration = () => {
     }
   };
 
-  const handleDeleteTemplate = async (templateId) => {
-    if (!window.confirm('Are you sure you want to delete this template?')) {
-      return;
-    }
-
-    setLoading('delete-template', true);
-    try {
-      await payrollService.deletePayslipTemplate(templateId);
-      showNotification('Template deleted successfully', 'success');
-      loadTemplates();
-    } catch (error) {
-      console.error('Failed to delete template:', error);
-      showNotification('Failed to delete template', 'error');
-    } finally {
-      setLoading('delete-template', false);
-    }
+  const handleDeleteTemplate = (templateId) => {
+    confirm({
+      title: 'Delete Template',
+      message: 'Are you sure you want to delete this template?',
+      variant: 'danger',
+      onConfirm: async () => {
+        setLoading('delete-template', true);
+        try {
+          await payrollService.deletePayslipTemplate(templateId);
+          showNotification('Template deleted successfully', 'success');
+          loadTemplates();
+        } catch (error) {
+          console.error('Failed to delete template:', error);
+          showNotification('Failed to delete template', 'error');
+        } finally {
+          setLoading('delete-template', false);
+        }
+      }
+    });
   };
 
   const addFieldToSection = (section, field) => {
@@ -463,76 +472,93 @@ const EnhancedPayslipTemplateConfiguration = () => {
           <strong>Step 2:</strong> Drag and drop selected fields below to reorder them
         </Typography>
         {templateForm[`${section}Fields`].length === 0 ? (
-          <Alert severity="info" icon={<Typography>💡</Typography>}>
+          <Alert severity="info" icon={<LightbulbIcon />}>
             No fields selected yet. Click on available fields above to add them to your template.
           </Alert>
         ) : (
-          <DragDropContext onDragEnd={(result) => handleDragEnd(result, section)}>
-            <Droppable droppableId={section}>
-              {(provided, snapshot) => (
-                <List 
-                  {...provided.droppableProps} 
-                  ref={provided.innerRef}
-                  sx={{
-                    bgcolor: snapshot.isDraggingOver ? 'action.hover' : 'transparent',
-                    borderRadius: 1,
-                    p: 1,
-                    transition: 'background-color 0.2s'
-                  }}
-                >
-                  {templateForm[`${section}Fields`].map((field, index) => (
-                    <Draggable key={field.id} draggableId={field.id} index={index}>
-                      {(provided, snapshot) => (
-                        <ListItem
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          sx={{ 
-                            border: 1, 
-                            borderColor: 'grey.300', 
-                            mb: 1, 
-                            borderRadius: 1,
-                            bgcolor: snapshot.isDragging ? 'action.selected' : 'background.paper',
-                            boxShadow: snapshot.isDragging ? 3 : 0,
-                            transition: 'all 0.2s',
-                            '&:hover': { bgcolor: 'action.hover' }
-                          }}
-                        >
-                          <Box {...provided.dragHandleProps} sx={{ mr: 1, cursor: 'grab', '&:active': { cursor: 'grabbing' } }}>
-                            <DragIcon color="action" />
-                          </Box>
-                          <ListItemText 
-                            primary={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography>{field.label}</Typography>
-                                {field.calculated && (
-                                  <Chip label="Auto-calculated" size="small" color="secondary" variant="outlined" />
-                                )}
-                              </Box>
-                            }
-                            secondary={`Type: ${field.type}`} 
-                          />
-                          <ListItemSecondaryAction>
-                            <Tooltip title="Remove field">
-                              <IconButton
-                                edge="end"
-                                onClick={() => removeFieldFromSection(section, index)}
-                                size="small"
-                                color="error"
-                                aria-label={`Remove ${field.label}`}
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </ListItemSecondaryAction>
-                        </ListItem>
+          <List
+            sx={{
+              bgcolor: 'transparent',
+              borderRadius: 1,
+              p: 1,
+            }}
+          >
+            {templateForm[`${section}Fields`].map((field, index) => (
+              <ListItem
+                key={field.id}
+                sx={{ 
+                  border: 1, 
+                  borderColor: 'grey.300', 
+                  mb: 1, 
+                  borderRadius: 1,
+                  bgcolor: 'background.paper',
+                  '&:hover': { bgcolor: 'action.hover' }
+                }}
+              >
+                <Box sx={{ mr: 1, cursor: 'grab', display: 'flex', alignItems: 'center' }}>
+                  <DragIcon color="action" />
+                </Box>
+                <ListItemText 
+                  primary={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography>{field.label}</Typography>
+                      {field.calculated && (
+                        <Chip label="Auto-calculated" size="small" color="secondary" variant="outlined" />
                       )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </List>
-              )}
-            </Droppable>
-          </DragDropContext>
+                    </Box>
+                  }
+                  secondary={`Type: ${field.type}`} 
+                />
+                <Box sx={{ display: 'flex', gap: 0.5, mr: 1 }}>
+                  <Tooltip title="Move up">
+                    <span>
+                      <IconButton
+                        size="small"
+                        disabled={index === 0}
+                        onClick={() => {
+                          const fields = [...templateForm[`${section}Fields`]];
+                          [fields[index - 1], fields[index]] = [fields[index], fields[index - 1]];
+                          setTemplateForm(prev => ({ ...prev, [`${section}Fields`]: fields }));
+                        }}
+                        aria-label={`Move ${field.label} up`}
+                      >
+                        <Typography sx={{ fontSize: 16 }}>▲</Typography>
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                  <Tooltip title="Move down">
+                    <span>
+                      <IconButton
+                        size="small"
+                        disabled={index === templateForm[`${section}Fields`].length - 1}
+                        onClick={() => {
+                          const fields = [...templateForm[`${section}Fields`]];
+                          [fields[index], fields[index + 1]] = [fields[index + 1], fields[index]];
+                          setTemplateForm(prev => ({ ...prev, [`${section}Fields`]: fields }));
+                        }}
+                        aria-label={`Move ${field.label} down`}
+                      >
+                        <Typography sx={{ fontSize: 16 }}>▼</Typography>
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                </Box>
+                <ListItemSecondaryAction>
+                  <Tooltip title="Remove field">
+                    <IconButton
+                      edge="end"
+                      onClick={() => removeFieldFromSection(section, index)}
+                      size="small"
+                      color="error"
+                      aria-label={`Remove ${field.label}`}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+          </List>
         )}
       </AccordionDetails>
     </Accordion>
@@ -1553,8 +1579,8 @@ const EnhancedPayslipTemplateConfiguration = () => {
         <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
             {/* Left side - Help text */}
-            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-              💡 Tip: Use Ctrl+← → to navigate tabs, Ctrl+S to save
+            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' }, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <LightbulbIcon fontSize="small" /> Tip: Use Ctrl+← → to navigate tabs, Ctrl+S to save
             </Typography>
 
             {/* Right side - Action buttons */}
@@ -1609,20 +1635,18 @@ const EnhancedPayslipTemplateConfiguration = () => {
         </DialogTitle>
         <DialogContent>
           {selectedTemplate && (
-            <Paper sx={{ p: 4, minHeight: 600 }}>
-              <Typography variant="h6" align="center">
-                {selectedTemplate.name}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                This is a simplified preview. Actual payslip will include employee data.
-              </Typography>
-            </Paper>
+            <Box sx={{ p: 2, bgcolor: '#f5f5f5', minHeight: 600, display: 'flex', justifyContent: 'center' }}>
+              <Box sx={{ width: '100%', maxWidth: '800px' }}>
+                <PayslipPreview template={selectedTemplate} />
+              </Box>
+            </Box>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPreviewDialog(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+      <ConfirmDialog {...dialogProps} />
     </Box>
   );
 };

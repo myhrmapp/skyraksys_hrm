@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -38,7 +38,6 @@ import {
   alpha,
   Fade,
   Tooltip,
-  useMediaQuery // ✅ ADD THIS IMPORT
 } from '@mui/material';
 import {
   CalendarToday as CalendarIcon,
@@ -54,103 +53,151 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNotification } from '../../../contexts/NotificationContext';
-import { useLoading } from '../../../contexts/LoadingContext';
-import ResponsiveTable, { LeaveRequestMobileCard } from '../../common/ResponsiveTable';
-import { leaveService } from '../../../services/leave.service';
+import { useLeaveRequests, useLeaveBalances, useLeaveTypes, useApproveLeaveRequest, useRejectLeaveRequest } from '../../../hooks/queries';
 
 const ModernLeaveManagement = () => {
   const { showSuccess, showError } = useNotification(); // ✅ Already destructured
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
-  const { user, isAdmin, isHR, isEmployee } = useAuth();
+  const { user, isEmployee } = useAuth();
   
   // Hooks must be called first, before any conditional logic
   const [activeTab, setActiveTab] = useState(0);
   const tabs = ['All', 'Pending', 'Approved', 'Rejected'];
-  // Loading state managed by LoadingContext
-  const { isLoading: isLoadingFn, setLoading } = useLoading();
-  const isLoading = isLoadingFn('leave-management');
-  const [leaveRequests, setLeaveRequests] = useState([]);
-  const [leaveBalances, setLeaveBalances] = useState([]);
+  
+  // 🚀 React Query hooks for data fetching
+  const { data: leaveRequestsData, isLoading: isLoadingRequests } = useLeaveRequests();
+  const { data: leaveBalancesData, isLoading: isLoadingBalances } = useLeaveBalances(user?.employeeId);
+  const { data: leaveTypesData } = useLeaveTypes();
+  
+  // 🚀 Mutations for approve/reject
+  const approveMutation = useApproveLeaveRequest();
+  const rejectMutation = useRejectLeaveRequest();
+  
+  // Derive data from queries
+  const leaveRequests = leaveRequestsData?.data || [];
+  const leaveBalances = leaveBalancesData || [];
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [approvalDialog, setApprovalDialog] = useState(false);
   const [approvalAction, setApprovalAction] = useState('');
   const [approvalComments, setApprovalComments] = useState('');
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [filterOpen, setFilterOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null); // { id, action: 'Approved'|'Rejected' }
   
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      
-      const [requestsResponse, balancesResponse] = await Promise.all([
-        leaveService.getAll(),
-        leaveService.getBalance()
-      ]);
+  // -- Helpers --
 
-      setLeaveRequests(requestsResponse.data || []);
-      setLeaveBalances(balancesResponse || []);
-      
-    } catch (error) {
-      console.error('Error loading leave data:', error);
-    } finally {
-      setLoading(false);
+  // CSV escape helper
+  const escCsv = (v) => {
+    const s = String(v ?? '');
+    return s.includes(',') || s.includes('"') || s.includes('\n')
+      ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  // Export leave requests to CSV
+  const handleExportRequests = () => {
+    if (!filteredRequests.length) {
+      showError('No leave requests to export');
+      return;
     }
+    const header = 'Employee,Leave Type,Start Date,End Date,Days,Status,Reason';
+    const rows = filteredRequests.map(r => [
+      escCsv(r.employeeName || `${r.employee?.firstName || ''} ${r.employee?.lastName || ''}`),
+      escCsv(r.leaveType?.name || r.leaveType || ''),
+      escCsv(r.startDate),
+      escCsv(r.endDate),
+      escCsv(r.totalDays ?? ''),
+      escCsv(r.status),
+      escCsv(r.reason)
+    ].join(','));
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leave-requests-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showSuccess('Leave requests exported');
+  };
+
+  // Export leave balances to CSV
+  const handleExportBalances = () => {
+    if (!leaveBalances.length) {
+      showError('No leave balances to export');
+      return;
+    }
+    const header = 'Employee,Employee ID,Department,Leave Type,Allocated,Used,Remaining';
+    const rows = leaveBalances.map(b => [
+      escCsv(`${b.employee?.firstName || ''} ${b.employee?.lastName || ''}`),
+      escCsv(b.employee?.employeeId || ''),
+      escCsv(b.employee?.department || ''),
+      escCsv(b.leaveType?.name || ''),
+      escCsv(b.allocated ?? ''),
+      escCsv(b.used ?? ''),
+      escCsv(b.remaining ?? '')
+    ].join(','));
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leave-balances-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showSuccess('Leave balances exported');
   };
   
-  useEffect(() => {
-    loadData();
-  }, []);
-  
   // Redirect employees to their personal leave page
-  if (isEmployee()) {
+  if (isEmployee) {
     navigate('/leave-requests');
     return null;
   }
 
-  const leaveTypes = [
-    { value: 'annual', label: 'Annual Leave', color: 'primary' },
-    { value: 'sick', label: 'Sick Leave', color: 'error' },
-    { value: 'personal', label: 'Personal Leave', color: 'warning' },
-    { value: 'maternity', label: 'Maternity Leave', color: 'secondary' },
-    { value: 'emergency', label: 'Emergency Leave', color: 'info' }
-  ];
-
-  const statusColors = {
-    pending: 'warning',
-    approved: 'success',
-    rejected: 'error',
-    cancelled: 'default'
+  // Derive leave types from API (with color mapping fallback)
+  const leaveTypeColorMap = {
+    annual: 'primary', sick: 'error', personal: 'warning',
+    maternity: 'secondary', emergency: 'info', paternity: 'secondary',
+    unpaid: 'default', compassionate: 'info'
   };
+  const leaveTypes = (leaveTypesData?.data || leaveTypesData || []).map(t => ({
+    value: t.name?.toLowerCase() || t.id,
+    label: t.name || 'Unknown',
+    color: leaveTypeColorMap[t.name?.toLowerCase()] || 'default',
+    id: t.id
+  }));
 
+
+  // 🚀 Use React Query mutations for approval/rejection
   const handleApprovalAction = async () => {
-    try {
-      await leaveService.updateStatus(selectedRequest.id, approvalAction, approvalComments);
-      
-      await loadData(); // Refresh data
-      
-      setApprovalDialog(false);
-      setApprovalComments('');
-      setSelectedRequest(null);
-    } catch (error) {
-      console.error('Error updating leave request:', error);
-    }
+    setActionLoading(true);
+    
+    const mutation = approvalAction === 'approved' ? approveMutation : rejectMutation;
+    
+    mutation.mutate(
+      { id: selectedRequest.id, comments: approvalComments },
+      {
+        onSuccess: () => {
+          showSuccess(`Leave request ${approvalAction} successfully`);
+          setApprovalDialog(false);
+          setApprovalComments('');
+          setSelectedRequest(null);
+          setActionLoading(false);
+        },
+        onError: (error) => {
+          console.error('Error updating leave request:', error);
+          showError(error.message || `Failed to ${approvalAction} leave request`);
+          setActionLoading(false);
+        }
+      }
+    );
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'approved': return <ApproveIcon color="success" />;
-      case 'rejected': return <RejectIcon color="error" />;
-      case 'pending': return <PendingIcon color="warning" />;
-      default: return <PendingIcon />;
-    }
-  };
 
   const getLeaveTypeInfo = (type) => {
     // Handle if type is an object (from API with associations)
@@ -185,16 +232,12 @@ const ModernLeaveManagement = () => {
       (request.employeeName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       (request.employeeId?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || request.status?.toLowerCase() === statusFilter?.toLowerCase();
     const matchesType = typeFilter === 'all' || request.leaveType === typeFilter;
     
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  const paginatedRequests = filteredRequests.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
 
   // ✅ ADD THIS FUNCTION - Calculate count by status
   const getCountByStatus = (status) => {
@@ -204,23 +247,26 @@ const ModernLeaveManagement = () => {
     return leaveRequests.filter(req => req.status === status).length;
   };
 
-  // ✅ ADD THIS FUNCTION - Handle status update
+  // 🚀 Handle status update using mutations
   const handleStatusUpdate = async (leaveId, newStatus) => {
-    try {
-      setLoading(true);
-      await leaveService.updateStatus(leaveId, {
-        status: newStatus,
-        approverComments: ''
-      });
-      
-      showSuccess(`Leave request ${newStatus.toLowerCase()} successfully`); // ✅ FIXED
-      await loadData();
-    } catch (error) {
-      console.error(`Error updating leave status:`, error);
-      showError(error.response?.data?.message || `Failed to ${newStatus.toLowerCase()} leave request`); // ✅ FIXED
-    } finally {
-      setLoading(false);
-    }
+    setActionLoading(true);
+    
+    const mutation = newStatus === 'Approved' ? approveMutation : rejectMutation;
+    
+    mutation.mutate(
+      { id: leaveId, comments: '' },
+      {
+        onSuccess: () => {
+          showSuccess(`Leave request ${newStatus.toLowerCase()} successfully`);
+          setActionLoading(false);
+        },
+        onError: (error) => {
+          console.error(`Error updating leave status:`, error);
+          showError(error.response?.data?.message || `Failed to ${newStatus.toLowerCase()} leave request`);
+          setActionLoading(false);
+        }
+      }
+    );
   };
 
   const LeaveRequestsTab = () => (
@@ -234,7 +280,7 @@ const ModernLeaveManagement = () => {
           <Button
             variant="outlined"
             startIcon={<DownloadIcon />}
-            onClick={() => console.log('Export leave requests')}
+            onClick={handleExportRequests}
           >
             Export
           </Button>
@@ -258,6 +304,8 @@ const ModernLeaveManagement = () => {
                 label="Search employee"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                id="leaveMgmtSearch"
+                inputProps={{ 'data-testid': 'leave-mgmt-search-input' }}
                 InputProps={{
                   startAdornment: <SearchIcon sx={{ mr: 1, color: 'action.active' }} />
                 }}
@@ -270,6 +318,7 @@ const ModernLeaveManagement = () => {
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   label="Status"
+                  inputProps={{ 'data-testid': 'leave-mgmt-status-select' }}
                 >
                   <MenuItem value="all">All Status</MenuItem>
                   <MenuItem value="pending">Pending</MenuItem>
@@ -285,6 +334,7 @@ const ModernLeaveManagement = () => {
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
                   label="Leave Type"
+                  inputProps={{ 'data-testid': 'leave-mgmt-type-select' }}
                 >
                   <MenuItem value="all">All Types</MenuItem>
                   {leaveTypes.map((type) => (
@@ -300,7 +350,7 @@ const ModernLeaveManagement = () => {
                 <Typography variant="body2" color="text.secondary">
                   {filteredRequests.length} requests
                 </Typography>
-                <Badge badgeContent={leaveRequests.filter(r => r.status === 'pending').length} color="warning">
+                <Badge badgeContent={leaveRequests.filter(r => r.status?.toLowerCase() === 'pending').length} color="warning">
                   <FilterIcon color="action" />
                 </Badge>
               </Box>
@@ -346,6 +396,7 @@ const ModernLeaveManagement = () => {
           startIcon={<FilterIcon />}
           onClick={() => setFilterOpen(true)}
           sx={{ borderRadius: 2 }}
+          data-testid="leave-mgmt-filters-button"
         >
           Filters
         </Button>
@@ -353,7 +404,7 @@ const ModernLeaveManagement = () => {
 
       {/* Requests Table */}
       <Card sx={{ border: '1px solid', borderColor: 'divider' }}>
-        <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+        <TableContainer component={Paper} sx={{ borderRadius: 2 }} data-testid="leave-mgmt-requests-table">
           <Table>
             <TableHead sx={{ bgcolor: 'grey.50' }}>
               <TableRow>
@@ -375,6 +426,7 @@ const ModernLeaveManagement = () => {
                                       (leave.employee ? `${leave.employee.firstName} ${leave.employee.lastName}` : '') ||
                                       'Unknown Employee';
                   const employeeId = leave.employeeId || leave.employee?.employeeId || 'N/A';
+                  const isCancellation = leave.isCancellation; // Check for cancellation flag
                   
                   return (
                     <Fade in timeout={200 + index * 50} key={leave.id}>
@@ -383,7 +435,8 @@ const ModernLeaveManagement = () => {
                         sx={{
                           '&:hover': {
                             bgcolor: alpha(theme.palette.primary.main, 0.02)
-                          }
+                          },
+                          bgcolor: isCancellation ? alpha(theme.palette.warning.main, 0.05) : 'inherit' // Highlight cancellation rows
                         }}
                       >
                         <TableCell>
@@ -406,12 +459,32 @@ const ModernLeaveManagement = () => {
                         </TableCell>
                         
                         <TableCell>
-                          <Chip
-                            label={leaveTypeInfo.label}
-                            color={leaveTypeInfo.color}
-                            size="small"
-                            variant="outlined"
-                          />
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Chip
+                              label={leaveTypeInfo.label}
+                              color={leaveTypeInfo.color}
+                              size="small"
+                              variant="outlined"
+                            />
+                            {isCancellation && (
+                              <Chip
+                                label="Cancellation"
+                                color="warning"
+                                size="small"
+                                variant="filled"
+                                sx={{ fontWeight: 'bold', height: 20, fontSize: '0.7rem' }}
+                              />
+                            )}
+                            {leave.isHalfDay && (
+                              <Chip
+                                label="Half Day"
+                                color="info"
+                                size="small"
+                                variant="outlined"
+                                sx={{ height: 20, fontSize: '0.7rem' }}
+                              />
+                            )}
+                          </Stack>
                         </TableCell>
                         
                         <TableCell>
@@ -468,7 +541,8 @@ const ModernLeaveManagement = () => {
                               <Tooltip title="Approve">
                                 <IconButton
                                   size="small"
-                                  onClick={() => handleStatusUpdate(leave.id, 'Approved')}
+                                  aria-label="Approve leave request"
+                                  onClick={() => setConfirmAction({ id: leave.id, action: 'Approved' })}
                                   sx={{
                                     bgcolor: alpha(theme.palette.success.main, 0.1),
                                     '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.2) }
@@ -481,7 +555,8 @@ const ModernLeaveManagement = () => {
                               <Tooltip title="Reject">
                                 <IconButton
                                   size="small"
-                                  onClick={() => handleStatusUpdate(leave.id, 'Rejected')}
+                                  aria-label="Reject leave request"
+                                  onClick={() => setConfirmAction({ id: leave.id, action: 'Rejected' })}
                                   sx={{
                                     bgcolor: alpha(theme.palette.error.main, 0.1),
                                     '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.2) }
@@ -527,7 +602,7 @@ const ModernLeaveManagement = () => {
         <Button
           variant="outlined"
           startIcon={<DownloadIcon />}
-          onClick={() => console.log('Export leave balances')}
+          onClick={handleExportBalances}
         >
           Export Report
         </Button>
@@ -683,7 +758,7 @@ const ModernLeaveManagement = () => {
             >
               <Tab
                 label={
-                  <Badge badgeContent={leaveRequests.filter(r => r.status === 'pending').length} color="warning">
+                  <Badge badgeContent={leaveRequests.filter(r => r.status?.toLowerCase() === 'pending').length} color="warning">
                     Leave Requests
                   </Badge>
                 }
@@ -731,13 +806,44 @@ const ModernLeaveManagement = () => {
               )}
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setApprovalDialog(false)} variant="outlined">Cancel</Button>
+              <Button onClick={() => setApprovalDialog(false)} variant="outlined" disabled={actionLoading}>Cancel</Button>
               <Button
                 variant="outlined"
                 color={approvalAction === 'approved' ? 'success' : 'error'}
-                onClick={() => handleApprovalAction(approvalAction)}
+                onClick={handleApprovalAction}
+                disabled={actionLoading}
               >
-                {approvalAction === 'approved' ? 'Approve' : 'Reject'}
+                {actionLoading ? 'Processing...' : (approvalAction === 'approved' ? 'Approve' : 'Reject')}
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Quick Action Confirmation Dialog */}
+          <Dialog
+            open={!!confirmAction}
+            onClose={() => setConfirmAction(null)}
+            maxWidth="xs"
+            fullWidth
+          >
+            <DialogTitle>
+              Confirm {confirmAction?.action === 'Approved' ? 'Approval' : 'Rejection'}
+            </DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to {confirmAction?.action === 'Approved' ? 'approve' : 'reject'} this leave request?
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setConfirmAction(null)} variant="outlined">Cancel</Button>
+              <Button
+                variant="contained"
+                color={confirmAction?.action === 'Approved' ? 'success' : 'error'}
+                onClick={() => {
+                  handleStatusUpdate(confirmAction.id, confirmAction.action);
+                  setConfirmAction(null);
+                }}
+              >
+                {confirmAction?.action === 'Approved' ? 'Approve' : 'Reject'}
               </Button>
             </DialogActions>
           </Dialog>

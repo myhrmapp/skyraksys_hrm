@@ -87,6 +87,14 @@ export const validateLeaveRequest = (values) => {
     errors.reason = 'Reason must be at least 10 characters long';
   }
 
+  if (values.isHalfDay) {
+    if (!values.halfDayType) {
+      errors.halfDayType = 'Please select half day type (First Half / Second Half)';
+    } else if (!['First Half', 'Second Half'].includes(values.halfDayType)) {
+      errors.halfDayType = 'Invalid half day type';
+    }
+  }
+
   return errors;
 };
 

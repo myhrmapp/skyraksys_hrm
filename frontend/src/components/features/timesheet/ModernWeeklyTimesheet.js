@@ -56,9 +56,12 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNotification } from '../../../contexts/NotificationContext';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { timesheetService } from '../../../services/timesheet.service';
 import ProjectDataService from '../../../services/ProjectService';
 import TaskDataService from '../../../services/TaskService';
+import logger from '../../../utils/logger';
+import PropTypes from 'prop-types';
 
 // Enable dayjs plugins
 dayjs.extend(weekday);
@@ -81,10 +84,11 @@ dayjs.extend(weekOfYear);
  * - Week navigation
  * - Role-based views (Employee, Manager, Admin)
  */
-const ModernWeeklyTimesheet = () => {
+const ModernWeeklyTimesheet = ({ embedded } = {}) => {
   const { user, isAdmin, isHR, isManager } = useAuth();
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Helper function to safely calculate total hours from timesheet object
   const calculateTimesheetTotal = (timesheet) => {
@@ -121,13 +125,46 @@ const ModernWeeklyTimesheet = () => {
   ]);
   
   // Loading states
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [dataLoading, setDataLoading] = useState(false);
   
-  // Projects and tasks
-  const [projects, setProjects] = useState([]);
-  const [allTasks, setAllTasks] = useState([]);
+  // 🚀 React Query for projects and tasks
+  const { data: projectsData, isLoading: isLoadingProjects } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => ProjectDataService.getAll(),
+    select: (response) => {
+      // Handle multiple response formats
+      if (Array.isArray(response.data)) return response.data;
+      if (response.data?.data && Array.isArray(response.data.data)) return response.data.data;
+      if (response.data?.projects && Array.isArray(response.data.projects)) return response.data.projects;
+      return [];
+    },
+    onError: (error) => {
+      logger.error('Error loading projects:', error);
+      showError('Failed to load projects: ' + (error.response?.data?.message || error.message));
+    }
+  });
+  
+  const { data: tasksData, isLoading: isLoadingTasks } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: () => TaskDataService.getAll(),
+    select: (response) => {
+      // Handle multiple response formats
+      if (Array.isArray(response.data)) return response.data;
+      if (response.data?.data && Array.isArray(response.data.data)) return response.data.data;
+      if (response.data?.tasks && Array.isArray(response.data.tasks)) return response.data.tasks;
+      return [];
+    },
+    onError: (error) => {
+      logger.error('Error loading tasks:', error);
+      showError('Failed to load tasks: ' + (error.response?.data?.message || error.message));
+    }
+  });
+  
+  const projects = projectsData || [];
+  const allTasks = tasksData || [];
+  const loading = isLoadingProjects || isLoadingTasks || dataLoading;
   
   // Timesheet metadata
   const [timesheetStatus, setTimesheetStatus] = useState('draft'); // 'draft', 'submitted', 'approved', 'rejected'
@@ -141,6 +178,7 @@ const ModernWeeklyTimesheet = () => {
   // Dialogs
   const [approvalDialog, setApprovalDialog] = useState(false);
   const [selectedTimesheet, setSelectedTimesheet] = useState(null);
+  const [selectedTimesheets, setSelectedTimesheets] = useState([]); // For bulk actions
   const [approvalAction, setApprovalAction] = useState('');
   const [approvalComments, setApprovalComments] = useState('');
   const [viewDialog, setViewDialog] = useState(false);
@@ -154,12 +192,6 @@ const ModernWeeklyTimesheet = () => {
 
   // ========== DATA LOADING ==========
   
-  // Load projects and tasks
-  useEffect(() => {
-    loadProjects();
-    loadTasks();
-  }, []);
-  
   // Load timesheet for current week
   useEffect(() => {
     if (activeTab === 0) {
@@ -171,115 +203,19 @@ const ModernWeeklyTimesheet = () => {
     }
   }, [currentWeek, activeTab]);
   
-  const loadProjects = async () => {
-    try {
-      console.log('Loading projects...');
-      const response = await ProjectDataService.getAll();
-      console.log('Projects response:', response);
-      
-      // Handle multiple response formats:
-      // 1. Direct array: response.data = [...]
-      // 2. Wrapped in data: response.data.data = [...]
-      // 3. Wrapped in projects: response.data.projects = [...]
-      let projectData = [];
-      if (Array.isArray(response.data)) {
-        projectData = response.data;
-      } else if (response.data?.data && Array.isArray(response.data.data)) {
-        projectData = response.data.data;
-      } else if (response.data?.projects && Array.isArray(response.data.projects)) {
-        projectData = response.data.projects;
-      }
-      
-      console.log('Setting projects:', projectData);
-      setProjects(projectData);
-    } catch (error) {
-      console.error('Error loading projects:', error);
-      console.error('Error details:', error.response?.data || error.message);
-      showError('Failed to load projects: ' + (error.response?.data?.message || error.message));
-      setProjects([]); // Ensure it's always an array
-    }
-  };
-  
-  const loadTasks = async () => {
-    try {
-      console.log('Loading tasks...');
-      const response = await TaskDataService.getAll();
-      console.log('Tasks response:', response);
-      
-      // Handle multiple response formats:
-      // 1. Direct array: response.data = [...]
-      // 2. Wrapped in data: response.data.data = [...]
-      // 3. Wrapped in tasks: response.data.tasks = [...]
-      let taskData = [];
-      if (Array.isArray(response.data)) {
-        taskData = response.data;
-      } else if (response.data?.data && Array.isArray(response.data.data)) {
-        taskData = response.data.data;
-      } else if (response.data?.tasks && Array.isArray(response.data.tasks)) {
-        taskData = response.data.tasks;
-      }
-      
-      console.log('Setting tasks:', taskData);
-      setAllTasks(taskData);
-    } catch (error) {
-      console.error('Error loading tasks:', error);
-      console.error('Error details:', error.response?.data || error.message);
-      showError('Failed to load tasks: ' + (error.response?.data?.message || error.message));
-      setAllTasks([]); // Ensure it's always an array
-    }
-  };
-  
   const loadWeekTimesheet = async () => {
     try {
-      setLoading(true);
+      setDataLoading(true);
       const weekStart = currentWeek.format('YYYY-MM-DD');
       const weekEnd = currentWeek.clone().endOf('isoWeek').format('YYYY-MM-DD');
       const weekNumber = currentWeek.isoWeek();
       const year = currentWeek.year();
       
-      console.log('🚀 LOADING TIMESHEET FOR WEEK:');
-      console.log('   Week Start:', weekStart);
-      console.log('   Week End:', weekEnd); 
-      console.log('   Week Number:', weekNumber);
-      console.log('   Year:', year);
-      console.log('   Current Week (formatted):', currentWeek.format('YYYY-MM-DD'));
-      console.log('   User Employee ID:', user?.employee?.id);
-      console.log('   Is Current Week?:', dayjs().startOf('isoWeek').format('YYYY-MM-DD') === weekStart);
-      
       // Use getByWeek instead of getByDateRange for more precise filtering
       // Pass employee ID to get timesheets for current user specifically
       const response = await timesheetService.getByWeek(weekStart, user?.employee?.id);
-      console.log('📡 API RESPONSE:', response);
-      console.log('   Response structure:', {
-        hasData: !!response.data,
-        hasDataData: !!(response.data && response.data.data),
-        dataLength: response.data?.data?.length || 0,
-        responseKeys: Object.keys(response.data || {}),
-        success: response.data?.success
-      });
       
       if (response.data && response.data.data && response.data.data.length > 0) {
-        // Debug: Log raw timesheet data for analysis
-        console.log('🔍 RAW TIMESHEET DATA DEBUG:');
-        console.log('   Expected week start:', weekStart);
-        console.log('   Expected employee ID:', user?.employee?.id);
-        console.log('   Total timesheets returned:', response.data.data.length);
-        
-        response.data.data.forEach((ts, i) => {
-          const tsWeekStart = dayjs(ts.weekStartDate).format('YYYY-MM-DD');
-          console.log(`   📋 Timesheet ${i + 1}:`);
-          console.log(`      ID: ${ts.id} (type: ${typeof ts.id})`);
-          console.log(`      Week: ${ts.weekStartDate} -> formatted: ${tsWeekStart}`);
-          console.log(`      Employee ID: ${ts.employeeId} (type: ${typeof ts.employeeId})`);
-          console.log(`      Status: ${ts.status}`);
-          console.log(`      Project ID: ${ts.projectId}`);
-          console.log(`      Task ID: ${ts.taskId}`);
-          console.log(`      Week matches? ${tsWeekStart === weekStart}`);
-          console.log(`      Employee matches? ${ts.employeeId === user?.employee?.id}`);
-          console.log(`      Both match? ${tsWeekStart === weekStart && ts.employeeId === user?.employee?.id}`);
-          console.log(`      Hours: Mon=${ts.mondayHours}, Tue=${ts.tuesdayHours}, Wed=${ts.wednesdayHours}, Thu=${ts.thursdayHours}, Fri=${ts.fridayHours}, Sat=${ts.saturdayHours}, Sun=${ts.sundayHours}`);
-        });
-        
         // Filter to ensure we only get timesheets for the selected week AND current user
         const weekTimesheets = response.data.data.filter(ts => {
           const tsWeekStart = dayjs(ts.weekStartDate).format('YYYY-MM-DD');
@@ -289,27 +225,7 @@ const ModernWeeklyTimesheet = () => {
           return matchesWeek && matchesEmployee;
         });
         
-        console.log('🎯 FILTERED RESULTS:', { 
-          total: response.data.data.length,
-          filtered: weekTimesheets.length,
-          weekStart,
-          employeeId: user?.employee?.id,
-          filterCriteria: {
-            expectedWeek: weekStart,
-            expectedEmployee: user?.employee?.id
-          }
-        });
-        
         if (weekTimesheets.length > 0) {
-          // Debug: Log timesheet IDs from backend
-          console.log('✅ FOUND EXISTING TIMESHEETS:', weekTimesheets.map(ts => ({ 
-            id: ts.id, 
-            type: typeof ts.id,
-            week: ts.weekStartDate,
-            status: ts.status,
-            projectId: ts.projectId,
-            taskId: ts.taskId
-          })));
           
           // Transform backend data to UI format
           const transformedTasks = weekTimesheets.map(ts => ({
@@ -328,12 +244,10 @@ const ModernWeeklyTimesheet = () => {
             notes: ts.description || ''
           }));
           
-          console.log('🔄 TRANSFORMED TASKS FOR UI:', transformedTasks);
           setTasks(transformedTasks);
           
           // Set status and determine if timesheet is editable
           const firstTimesheetStatus = weekTimesheets[0]?.status?.toLowerCase() || 'draft';
-          console.log('📊 SETTING TIMESHEET STATUS:', firstTimesheetStatus);
           setTimesheetStatus(firstTimesheetStatus);
           
           // Editable Logic:
@@ -342,48 +256,40 @@ const ModernWeeklyTimesheet = () => {
           // - Submitted: Read-only (cannot edit, awaiting approval)
           // - Approved: Read-only (cannot edit, finalized)
           const isEditable = firstTimesheetStatus === 'draft' || firstTimesheetStatus === 'rejected';
-          console.log('🔓 SETTING EDITABLE MODE:', isEditable, 'for status:', firstTimesheetStatus);
           setIsReadOnly(!isEditable);
+
+          // Show specific message for submitted/approved timesheets
+          if (firstTimesheetStatus === 'submitted') {
+            showInfo('This timesheet has been submitted and is pending approval. You cannot make changes.');
+          } else if (firstTimesheetStatus === 'approved') {
+            showSuccess('This timesheet has been approved. It is now read-only.');
+          }
           
-          console.log('✅ SUCCESSFULLY LOADED EXISTING TIMESHEET WITH', transformedTasks.length, 'TASKS');
         } else {
           // No timesheet for this specific week
-          console.log('⚠️ NO TIMESHEET MATCHES - WEEK OR EMPLOYEE FILTER FAILED');
-          console.log('   Available weeks in response:', response.data.data.map(ts => ({
-            week: ts.weekStartDate,
-            formatted: dayjs(ts.weekStartDate).format('YYYY-MM-DD'),
-            employee: ts.employeeId
-          })));
           resetTimesheet();
         }
       } else {
         // No timesheet exists, start fresh
-        console.log('❌ NO TIMESHEET DATA RETURNED FROM API');
-        console.log('   Response structure:', {
-          hasData: !!response.data,
-          hasDataData: !!(response.data && response.data.data),
-          dataLength: response.data?.data?.length || 0
-        });
         resetTimesheet();
       }
     } catch (error) {
-      console.error('💥 ERROR LOADING TIMESHEET:', error);
-      console.error('   Error details:', error.response?.data || error.message);
-      console.error('   Week being loaded:', currentWeek.format('YYYY-MM-DD'));
-      console.error('   Employee ID:', user?.employee?.id);
+      logger.error('💥 ERROR LOADING TIMESHEET:', error);
+      logger.error('   Error details:', error.response?.data || error.message);
+      logger.error('   Week being loaded:', currentWeek.format('YYYY-MM-DD'));
+      logger.error('   Employee ID:', user?.employee?.id);
       showError('Failed to load timesheet: ' + (error.response?.data?.message || error.message));
       resetTimesheet();
     } finally {
-      setLoading(false);
+      setDataLoading(false);
     }
   };
   
   const loadPendingApprovals = async () => {
     try {
-      setLoading(true);
-      console.log('Loading pending approvals...');
-      const response = await timesheetService.getPending();
-      console.log('Pending approvals response:', response);
+      setDataLoading(true);
+      // Use getPendingApprovals which correctly filters by manager's team via /approval/pending
+      const response = await timesheetService.getPendingApprovals();
       
       // Handle response format: response.data.data
       let pendingData = [];
@@ -393,22 +299,19 @@ const ModernWeeklyTimesheet = () => {
         pendingData = response.data.data;
       }
       
-      console.log('Setting pending timesheets:', pendingData);
       setPendingTimesheets(pendingData);
     } catch (error) {
-      console.error('Error loading pending approvals:', error);
+      logger.error('Error loading pending approvals:', error);
       showError('Failed to load pending timesheets');
     } finally {
-      setLoading(false);
+      setDataLoading(false);
     }
   };
   
   const loadHistory = async () => {
     try {
-      setLoading(true);
-      console.log('Loading history...');
+      setDataLoading(true);
       const response = await timesheetService.getAll();
-      console.log('History response:', response);
       
       // Handle response format: response.data or response.data.data
       let historyData = [];
@@ -420,13 +323,12 @@ const ModernWeeklyTimesheet = () => {
         historyData = response.data.data;
       }
       
-      console.log('Setting history timesheets:', historyData);
       setHistoryTimesheets(historyData);
     } catch (error) {
-      console.error('Error loading history:', error);
+      logger.error('Error loading history:', error);
       showError('Failed to load timesheet history');
     } finally {
-      setLoading(false);
+      setDataLoading(false);
     }
   };
   
@@ -497,26 +399,41 @@ const ModernWeeklyTimesheet = () => {
       }
       
       // Transform to backend format
+      const weekStart = currentWeek.format('YYYY-MM-DD');
+      const weekEnd = currentWeek.add(6, 'day').format('YYYY-MM-DD'); // Sunday = Monday + 6 days
+      const currentEmployeeId = user?.employee?.id || user?.employeeId || user?.id;
+      
       const timesheetData = tasks.map(task => {
         // Validate ID format - only accept proper UUIDs, not temporary or numeric IDs
         const isValidUUID = task.id && typeof task.id === 'string' && 
                           !task.id.startsWith('temp_') && 
                           /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(task.id);
         
+        const mondayHrs = parseFloat(task.hours.monday) || 0;
+        const tuesdayHrs = parseFloat(task.hours.tuesday) || 0;
+        const wednesdayHrs = parseFloat(task.hours.wednesday) || 0;
+        const thursdayHrs = parseFloat(task.hours.thursday) || 0;
+        const fridayHrs = parseFloat(task.hours.friday) || 0;
+        const saturdayHrs = parseFloat(task.hours.saturday) || 0;
+        const sundayHrs = parseFloat(task.hours.sunday) || 0;
+        
         return {
           id: isValidUUID ? task.id : undefined, // Include only valid UUID timesheet IDs
+          employeeId: currentEmployeeId, // Required by backend validator
           projectId: task.projectId,
           taskId: task.taskId,
-          weekStartDate: currentWeek.format('YYYY-MM-DD'),
-        mondayHours: parseFloat(task.hours.monday) || 0,
-        tuesdayHours: parseFloat(task.hours.tuesday) || 0,
-        wednesdayHours: parseFloat(task.hours.wednesday) || 0,
-        thursdayHours: parseFloat(task.hours.thursday) || 0,
-        fridayHours: parseFloat(task.hours.friday) || 0,
-        saturdayHours: parseFloat(task.hours.saturday) || 0,
-        sundayHours: parseFloat(task.hours.sunday) || 0,
-        description: task.notes || '',
-        status: 'draft'
+          weekStartDate: weekStart,
+          weekEndDate: weekEnd, // Required by backend validator (must be Sunday)
+          mondayHours: mondayHrs,
+          tuesdayHours: tuesdayHrs,
+          wednesdayHours: wednesdayHrs,
+          thursdayHours: thursdayHrs,
+          fridayHours: fridayHrs,
+          saturdayHours: saturdayHrs,
+          sundayHours: sundayHrs,
+          totalHours: mondayHrs + tuesdayHrs + wednesdayHrs + thursdayHrs + fridayHrs + saturdayHrs + sundayHrs,
+          description: task.notes || '',
+          status: 'Draft' // Backend expects PascalCase
         };
       });
       
@@ -548,7 +465,7 @@ const ModernWeeklyTimesheet = () => {
       setLastSaveTime(new Date());
       showSuccess('Timesheet saved as draft');
     } catch (error) {
-      console.error('Error saving timesheet:', error);
+      logger.error('Error saving timesheet:', error);
       showError('Failed to save timesheet. Please try again.');
     } finally {
       setSaving(false);
@@ -573,48 +490,38 @@ const ModernWeeklyTimesheet = () => {
       
       const weekStart = currentWeek.format('YYYY-MM-DD');
       
-      console.log('Submitting timesheet for week:', weekStart);
-      console.log('Current user:', user);
+
       
       // First, save all timesheets as drafts if they don't exist
       await saveDraft();
       
-      // Small delay to ensure save completes
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       // Get the current week's timesheets to submit
       const response = await timesheetService.getByWeek(weekStart);
       const weekTimesheets = response.data?.data || [];
-      
-      console.log('Week timesheets found:', weekTimesheets);
       
       if (weekTimesheets.length === 0) {
         showError('No timesheets found to submit. Please ensure your timesheet is saved first.');
         return;
       }
       
-      // Filter only draft timesheets that belong to the current user
+      // Filter only draft or rejected timesheets that belong to the current user
       // Handle case-insensitive status and flexible employee ID matching
       const currentUserId = user?.employee?.id || user?.id;
       const draftTimesheets = weekTimesheets.filter(ts => {
-        const isDraft = ts.status?.toLowerCase() === 'draft';
+        const status = ts.status?.toLowerCase();
+        const isDraftOrRejected = status === 'draft' || status === 'rejected';
         const isCurrentUser = ts.employeeId === currentUserId || ts.userId === currentUserId;
-        console.log(`Timesheet ${ts.id}: status=${ts.status}, isDraft=${isDraft}, employeeId=${ts.employeeId}, userId=${ts.userId}, currentUserId=${currentUserId}, isCurrentUser=${isCurrentUser}`);
-        return isDraft && isCurrentUser;
+        return isDraftOrRejected && isCurrentUser;
       });
       
-      console.log('Draft timesheets for current user:', draftTimesheets);
-      
       if (draftTimesheets.length === 0) {
-        showError('No draft timesheets found to submit. All timesheets may already be submitted.');
+        showError('No draft or rejected timesheets found to submit. All timesheets may already be submitted.');
         return;
       }
       
-      console.log('Submitting draft timesheets:', draftTimesheets);
-      
-      // Submit only the first timesheet - backend will automatically handle bulk submission
-      // when it detects multiple tasks for the same week
-      await timesheetService.submit(draftTimesheets[0].id);
+      // Use bulk submit to submit all timesheets for the week
+      const timesheetIds = draftTimesheets.map(ts => ts.id);
+      await timesheetService.bulkSubmit(timesheetIds);
       
       setTimesheetStatus('submitted');
       setIsReadOnly(true);
@@ -624,8 +531,8 @@ const ModernWeeklyTimesheet = () => {
       // Reload to get updated data
       loadWeekTimesheet();
     } catch (error) {
-      console.error('Error submitting timesheet:', error);
-      console.error('Error response:', error.response?.data);
+      logger.error('Error submitting timesheet:', error);
+      logger.error('Error response:', error.response?.data);
       showError('Failed to submit timesheet: ' + (error.response?.data?.message || error.message));
     } finally {
       setSubmitting(false);
@@ -680,8 +587,14 @@ const ModernWeeklyTimesheet = () => {
 
   // ========== MANAGER/ADMIN APPROVAL ==========
   
-  const handleApprovalClick = (timesheet, action) => {
-    setSelectedTimesheet(timesheet);
+  const handleApprovalClick = (timesheets, action) => {
+    // Handle both single timesheet and array of timesheets
+    const timesheetList = Array.isArray(timesheets) ? timesheets : [timesheets];
+    
+    setSelectedTimesheets(timesheetList);
+    // For display purposes in dialog, use the first one if available
+    setSelectedTimesheet(timesheetList[0]);
+    
     setApprovalAction(action);
     setApprovalComments('');
     setApprovalDialog(true);
@@ -689,19 +602,21 @@ const ModernWeeklyTimesheet = () => {
   
   const processApproval = async () => {
     try {
-      if (!selectedTimesheet) return;
+      if (selectedTimesheets.length === 0) return;
       
-      await timesheetService.updateStatus(
-        selectedTimesheet.id,
-        approvalAction === 'approve' ? 'approved' : 'rejected',
-        approvalComments
-      );
+      const timesheetIds = selectedTimesheets.map(t => t.id);
       
-      showSuccess(`Timesheet ${approvalAction === 'approve' ? 'approved' : 'rejected'} successfully`);
+      if (approvalAction === 'approve') {
+        await timesheetService.bulkApprove(timesheetIds, approvalComments);
+      } else {
+        await timesheetService.bulkReject(timesheetIds, approvalComments);
+      }
+      
+      showSuccess(`Timesheets ${approvalAction === 'approve' ? 'approved' : 'rejected'} successfully`);
       setApprovalDialog(false);
       loadPendingApprovals(); // Reload pending list
     } catch (error) {
-      console.error('Error processing approval:', error);
+      logger.error('Error processing approval:', error);
       showError('Failed to process approval');
     }
   };
@@ -795,7 +710,7 @@ const ModernWeeklyTimesheet = () => {
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
           <Stack direction="row" spacing={1} alignItems="center">
-            <IconButton size="small" onClick={goToPreviousWeek} disabled={loading}>
+            <IconButton size="small" onClick={goToPreviousWeek} disabled={loading} data-testid="timesheet-prev-week">
               <PrevIcon />
             </IconButton>
             <Box sx={{ minWidth: 200, textAlign: 'center' }}>
@@ -806,7 +721,7 @@ const ModernWeeklyTimesheet = () => {
                 {currentWeek.format('MMM DD')} - {currentWeek.endOf('isoWeek').format('MMM DD, YYYY')}
               </Typography>
             </Box>
-            <IconButton size="small" onClick={goToNextWeek} disabled={loading}>
+            <IconButton size="small" onClick={goToNextWeek} disabled={loading} data-testid="timesheet-next-week">
               <NextIcon />
             </IconButton>
             <Button
@@ -816,6 +731,7 @@ const ModernWeeklyTimesheet = () => {
               disabled={loading}
               variant="text"
               sx={{ ml: 2 }}
+              data-testid="timesheet-today-button"
             >
               Today
             </Button>
@@ -850,7 +766,7 @@ const ModernWeeklyTimesheet = () => {
       ) : (
         <>
           {/* Timesheet Table */}
-          <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 1, border: '1px solid', borderColor: 'divider', overflowX: 'auto' }}>
+          <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 1, border: '1px solid', borderColor: 'divider', overflowX: 'auto' }} data-testid="timesheet-entry-table">
             <Table size="medium" sx={{ minWidth: 1000 }}>
               <TableHead>
                 <TableRow sx={{ bgcolor: 'grey.25' }}>
@@ -877,6 +793,7 @@ const ModernWeeklyTimesheet = () => {
                           onChange={(e) => updateTask(task.id, 'projectId', e.target.value)}
                           disabled={isReadOnly}
                           displayEmpty
+                          inputProps={{ 'data-testid': `timesheet-project-select-${index}` }}
                         >
                           <MenuItem value="">
                             <em>Select Project</em>
@@ -898,6 +815,7 @@ const ModernWeeklyTimesheet = () => {
                           onChange={(e) => updateTask(task.id, 'taskId', e.target.value)}
                           disabled={isReadOnly || !task.projectId}
                           displayEmpty
+                          inputProps={{ 'data-testid': `timesheet-task-select-${index}` }}
                         >
                           <MenuItem value="">
                             <em>Select Task</em>
@@ -922,7 +840,9 @@ const ModernWeeklyTimesheet = () => {
                           disabled={isReadOnly}
                           error={!!fieldErrors[`${task.id}_${day}`]}
                           placeholder="0"
+                          id={`timesheet-hours-${index}-${day}`}
                           inputProps={{ 
+                            'data-testid': `timesheet-hours-${index}-${day}`,
                             min: 0, 
                             max: 24, 
                             step: 0.25,
@@ -974,6 +894,8 @@ const ModernWeeklyTimesheet = () => {
                         onChange={(e) => updateTask(task.id, 'notes', e.target.value)}
                         disabled={isReadOnly}
                         placeholder="Add notes..."
+                        id={`timesheet-notes-${index}`}
+                        inputProps={{ 'data-testid': `timesheet-notes-${index}` }}
                       />
                     </TableCell>
                     
@@ -984,6 +906,7 @@ const ModernWeeklyTimesheet = () => {
                           size="small"
                           onClick={() => deleteTask(task.id)}
                           color="error"
+                          data-testid={`timesheet-delete-task-${index}`}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -1020,6 +943,7 @@ const ModernWeeklyTimesheet = () => {
               onClick={addTask}
               sx={{ mt: 2, color: 'primary.main' }}
               variant="text"
+              data-testid="timesheet-add-task"
             >
               Add Task
             </Button>
@@ -1034,6 +958,7 @@ const ModernWeeklyTimesheet = () => {
                 onClick={saveDraft}
                 disabled={saving || submitting || !hasUnsavedChanges}
                 sx={{ color: 'text.secondary' }}
+                data-testid="timesheet-save-draft"
               >
                 {saving ? 'Saving...' : 'Save Draft'}
               </Button>
@@ -1048,6 +973,7 @@ const ModernWeeklyTimesheet = () => {
                   boxShadow: 'none',
                   '&:hover': { boxShadow: 1 }
                 }}
+                data-testid="timesheet-submit"
               >
                 {submitting ? 'Submitting...' : 'Submit for Approval'}
               </Button>
@@ -1182,7 +1108,7 @@ const ModernWeeklyTimesheet = () => {
                                 <IconButton 
                                   size="small" 
                                   color="success"
-                                  onClick={() => handleApprovalClick(weekData.timesheets[0], 'approve')}
+                                  onClick={() => handleApprovalClick(weekData.timesheets, 'approve')}
                                 >
                                   <ApproveIcon fontSize="small" />
                                 </IconButton>
@@ -1191,7 +1117,7 @@ const ModernWeeklyTimesheet = () => {
                                 <IconButton 
                                   size="small" 
                                   color="error"
-                                  onClick={() => handleApprovalClick(weekData.timesheets[0], 'reject')}
+                                  onClick={() => handleApprovalClick(weekData.timesheets, 'reject')}
                                 >
                                   <RejectIcon fontSize="small" />
                                 </IconButton>
@@ -1327,8 +1253,9 @@ const ModernWeeklyTimesheet = () => {
   // ========== MAIN RENDER ==========
   
   return (
-    <Box sx={{ p: 3, maxWidth: 1600, mx: 'auto' }}>
+    <Box sx={{ p: embedded ? 0 : 3, maxWidth: 1600, mx: 'auto' }}>
       {/* Header */}
+      {!embedded && (
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }}>
         <Box>
           <Typography variant="h4" fontWeight={400} gutterBottom>
@@ -1349,8 +1276,14 @@ const ModernWeeklyTimesheet = () => {
           Refresh
         </Button>
       </Stack>
+      )}
 
-      {/* Tabs */}
+      {/* Tabs — only show when NOT embedded (Hub provides its own tabs) */}
+      {embedded ? (
+        <Box sx={{ mb: 3 }}>
+          {renderTimesheetEntry()}
+        </Box>
+      ) : (
       <Box sx={{ mb: 3 }}>
         <Tabs 
           value={activeTab} 
@@ -1385,6 +1318,7 @@ const ModernWeeklyTimesheet = () => {
           {activeTab === 2 && renderHistory()}
         </Box>
       </Box>
+      )}
 
       {/* Approval Dialog */}
       <Dialog open={approvalDialog} onClose={() => setApprovalDialog(false)} maxWidth="sm" fullWidth>
@@ -1490,6 +1424,10 @@ const ModernWeeklyTimesheet = () => {
       </Dialog>
     </Box>
   );
+};
+
+ModernWeeklyTimesheet.propTypes = {
+  embedded: PropTypes.bool,
 };
 
 export default ModernWeeklyTimesheet;

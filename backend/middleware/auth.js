@@ -1,168 +1,204 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const db = require('../models');
+const authConfig = require('../config/auth.config');
+const LogHelper = require('../utils/logHelper');
+const logger = require('../utils/logger');
+const tokenBlacklist = require('../utils/tokenBlacklist');
 
 const User = db.User;
 const Employee = db.Employee;
 const RefreshToken = db.RefreshToken;
 
-// Generate access token
 const generateAccessToken = (user) => {
-  return jwt.sign(
-    { 
-      id: user.id, 
-      email: user.email, 
-      role: user.role,
-      employeeId: user.employee?.id
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
-  );
+  const payload = {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    employeeId: user.employee ? user.employee.id : null,
+    jti: crypto.randomBytes(8).toString('hex'), // Unique ID for this token
+  };
+  return jwt.sign(payload, authConfig.secret, {
+    expiresIn: authConfig.expiresIn, // 15 minutes
+  });
 };
 
-// Generate refresh token
-const generateRefreshToken = async (user, userAgent, ipAddress) => {
-  const token = jwt.sign(
-    { id: user.id, type: 'refresh' },
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
-  );
-
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7);
-
-  await RefreshToken.create({
-    token,
-    userId: user.id,
-    expiresAt,
-    userAgent,
-    ipAddress
+const generateRefreshToken = async (user, req) => {
+  const payload = {
+    id: user.id,
+    type: 'refresh',
+    jti: crypto.randomBytes(16).toString('hex') // Add unique identifier to prevent token collisions
+  };
+  
+  const token = jwt.sign(payload, authConfig.refreshSecret, {
+    expiresIn: authConfig.refreshExpiresIn, // 7 days
   });
+
+  // Store refresh token in database
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  
+  try {
+    await RefreshToken.create({
+      token,
+      userId: user.id,
+      expiresAt,
+      userAgent: req.headers['user-agent'] || 'Unknown',
+      ipAddress: req.ip || req.connection.remoteAddress || 'Unknown'
+    });
+  } catch (error) {
+    // Handle duplicate token edge case (very rare with jti, but possible)
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      logger.warn('Duplicate refresh token generated, retrying...');
+      return generateRefreshToken(user, req); // Retry once
+    }
+    throw error;
+  }
 
   return token;
 };
 
-// Auth middleware
 const authenticateToken = async (req, res, next) => {
-  try {
+  // Try to get token from cookie first, then fallback to Authorization header
+  let token = req.cookies?.accessToken;
+  
+  if (!token) {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    token = authHeader && authHeader.split(' ')[1];
+  }
 
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Access token required'
-      });
+  if (!token) {
+    LogHelper.logAuthEvent('token_missing', false, { 
+      reason: 'No token provided',
+      path: req.path 
+    }, req);
+    return res.status(401).json({ success: false, message: 'No token provided.' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, authConfig.secret);
+
+    // Check if token has been blacklisted (e.g. user logged out)
+    if (decoded.jti && tokenBlacklist.isBlacklisted(decoded.jti)) {
+      LogHelper.logAuthEvent('token_blacklisted', false, {
+        reason: 'Token has been revoked (user logged out)',
+        jti: decoded.jti
+      }, req);
+      return res.status(401).json({ success: false, message: 'Token has been revoked.' });
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     const user = await User.findByPk(decoded.id, {
-      include: [{
+      include: {
         model: Employee,
         as: 'employee',
-        include: [
-          { model: db.Department, as: 'department' },
-          { model: db.Position, as: 'position' }
-        ]
-      }]
+        attributes: ['id', 'managerId'],
+      },
     });
 
     if (!user || !user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid or inactive user'
-      });
+      LogHelper.logAuthEvent('token_invalid_user', false, {
+        reason: !user ? 'User not found' : 'User is inactive',
+        userId: decoded.id,
+        email: decoded.email
+      }, req);
+      return res.status(401).json({ success: false, message: 'User not found or is inactive.' });
     }
 
+    // Log successful authentication
+    LogHelper.logAuthEvent('token_verified', true, {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      employeeId: user.employee?.id
+    }, req);
+
     req.user = user;
+    req.user.employeeId = user.employee ? user.employee.id : null;
     req.userId = user.id;
     req.userRole = user.role;
-    req.employeeId = user.employee?.id;
+    req.employeeId = user.employee ? user.employee.id : null;
     
     next();
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        success: false,
-        message: 'Token expired'
-      });
+    if (error instanceof jwt.TokenExpiredError) {
+      LogHelper.logAuthEvent('token_expired', false, {
+        reason: 'Token has expired',
+        error: error.message
+      }, req);
+      return res.status(401).json({ success: false, message: 'Token has expired.' });
     }
-    
-    return res.status(403).json({
-      success: false,
-      message: 'Invalid token'
-    });
+    if (error instanceof jwt.JsonWebTokenError) {
+      LogHelper.logAuthEvent('token_invalid', false, {
+        reason: 'Invalid token',
+        error: error.message
+      }, req);
+      return res.status(401).json({ success: false, message: 'Invalid token.' });
+    }
+    LogHelper.logError(error, { context: 'token_authentication' }, req);
+    return res.status(500).json({ success: false, message: 'Failed to authenticate token.' });
   }
 };
 
-// Role-based authorization
-const authorize = (...roles) => {
+const authorize = (...allowedRoles) => {
   return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Authentication required'
-      });
-    }
-
-    // Use req.userRole since that's what gets set in authenticateToken
-    const userRole = req.userRole || req.user.role;
+    // Flatten the roles array if it's nested (handles both authorize('admin') and authorize(['admin', 'hr']))
+    const roles = allowedRoles.flat();
     
-    if (!roles.includes(userRole)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Insufficient permissions'
-      });
+    if (!req.userRole || !roles.includes(req.userRole)) {
+      LogHelper.logAuthzEvent('access_denied', false, {
+        userRole: req.userRole,
+        allowedRoles: roles,
+        resource: req.path,
+        action: req.method,
+        reason: 'Insufficient permissions'
+      }, req);
+      return res.status(403).json({ success: false, message: 'Access denied. Insufficient permissions.' });
     }
-
+    
+    LogHelper.logAuthzEvent('access_granted', true, {
+      userRole: req.userRole,
+      allowedRoles: roles,
+      resource: req.path,
+      action: req.method
+    }, req);
+    
     next();
   };
 };
 
-// Check if user is admin or HR
-const isAdminOrHR = (req, res, next) => {
-  return authorize('admin', 'hr')(req, res, next);
-};
+const isAdminOrHR = authorize('admin', 'hr');
 
-// Check if user is manager or above
-const isManagerOrAbove = (req, res, next) => {
-  return authorize('admin', 'hr', 'manager')(req, res, next);
-};
+const isManagerOrAbove = authorize('admin', 'hr', 'manager');
 
-// Check if user can access employee data (own data or if they're manager/admin/hr)
 const canAccessEmployee = async (req, res, next) => {
   try {
-    const employeeId = req.params.id || req.params.employeeId;
-    
-    // Admin and HR can access all employee data
-    if (['admin', 'hr'].includes(req.user.role)) {
-      return next();
-    }
+    const targetEmployeeId = req.params.id || req.params.employeeId;
 
-    // Users can access their own data
-    if (req.employeeId === employeeId) {
-      return next();
-    }
-
-    // Managers can access their subordinates' data
-    if (req.user.role === 'manager') {
-      const employee = await Employee.findByPk(employeeId);
-      if (employee && employee.managerId === req.employeeId) {
+    if (req.userRole === 'admin' || req.userRole === 'hr') {
         return next();
-      }
     }
 
-    return res.status(403).json({
-      success: false,
-      message: 'Access denied'
-    });
+    // Check if accessing own employee record (UUID string comparison)
+    if (req.employeeId && req.employeeId === targetEmployeeId) {
+        return next();
+    }
+
+    if (req.userRole === 'manager') {
+        const subordinate = await Employee.findOne({ where: { id: targetEmployeeId, managerId: req.employeeId } });
+        if (subordinate) {
+            return next();
+        }
+    }
+
+    LogHelper.logAuthzEvent('employee_access_denied', false, {
+        userRole: req.userRole,
+        userEmployeeId: req.employeeId,
+        targetEmployeeId: targetEmployeeId,
+        reason: 'User cannot access this employee record'
+    }, req);
+
+    return res.status(403).json({ success: false, message: 'You do not have permission to access this employee\'s data.' });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Error checking permissions'
-    });
+    next(error);
   }
 };
 
@@ -174,5 +210,4 @@ module.exports = {
   isAdminOrHR,
   isManagerOrAbove,
   canAccessEmployee,
-  bcrypt
 };

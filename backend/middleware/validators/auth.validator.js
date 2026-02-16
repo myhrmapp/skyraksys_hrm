@@ -82,6 +82,51 @@ const registerSchema = Joi.object({
 });
 
 /**
+ * Schema for admin-initiated user registration (simplified)
+ * Used when admin creates user accounts
+ */
+const adminRegisterSchema = Joi.object({
+  firstName: Joi.string()
+    .optional()
+    .min(2)
+    .max(50),
+
+  lastName: Joi.string()
+    .optional()
+    .min(2)
+    .max(50),
+
+  email: Joi.string()
+    .required()
+    .email()
+    .lowercase()
+    .messages({
+      'string.email': 'Please provide a valid email address',
+      'any.required': 'Email is required'
+    }),
+
+  password: Joi.string()
+    .required()
+    .min(8)
+    .max(128)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .messages({
+      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+      'string.min': 'Password must be at least 8 characters',
+      'string.max': 'Password cannot exceed 128 characters',
+      'any.required': 'Password is required'
+    }),
+
+  role: Joi.string()
+    .optional()
+    .valid('admin', 'hr', 'manager', 'employee')
+    .default('employee')
+    .messages({
+      'any.only': 'Role must be one of: admin, hr, manager, employee'
+    })
+});
+
+/**
  * Schema for password change
  */
 const changePasswordSchema = Joi.object({
@@ -210,8 +255,12 @@ const updateProfileSchema = Joi.object({
  */
 const updateRoleSchema = Joi.object({
   role: Joi.string()
-    .valid('Admin', 'HR', 'Manager', 'Employee')
+    .valid('admin', 'hr', 'manager', 'employee')
     .required()
+    .messages({
+      'any.only': 'Role must be one of: admin, hr, manager, employee',
+      'any.required': 'Role is required'
+    })
 });
 
 /**
@@ -220,6 +269,42 @@ const updateRoleSchema = Joi.object({
 const updateUserStatusSchema = Joi.object({
   isActive: Joi.boolean()
     .required()
+    .messages({
+      'any.required': 'isActive field is required'
+    })
+});
+
+/**
+ * Schema for admin account update (email and/or role)
+ */
+const adminUpdateAccountSchema = Joi.object({
+  email: Joi.string()
+    .email()
+    .lowercase()
+    .optional()
+    .messages({
+      'string.email': 'Please provide a valid email address'
+    }),
+
+  role: Joi.string()
+    .valid('admin', 'hr', 'manager', 'employee')
+    .optional()
+    .messages({
+      'any.only': 'Role must be one of: admin, hr, manager, employee'
+    })
+}).min(1).messages({
+  'object.min': 'At least one field (email or role) must be provided'
+});
+
+/**
+ * Schema for locking/unlocking user account (admin only)
+ */
+const adminLockSchema = Joi.object({
+  isLocked: Joi.boolean()
+    .required()
+    .messages({
+      'any.required': 'isLocked field is required'
+    })
 });
 
 /**
@@ -262,6 +347,7 @@ const employeeIdParamSchema = Joi.object({
 module.exports = {
   loginSchema,
   registerSchema,
+  adminRegisterSchema,
   changePasswordSchema,
   forgotPasswordSchema,
   adminResetPasswordSchema,
@@ -269,6 +355,8 @@ module.exports = {
   updateProfileSchema,
   updateRoleSchema,
   updateUserStatusSchema,
+  adminUpdateAccountSchema,
+  adminLockSchema,
   refreshTokenSchema,
   userIdParamSchema,
   employeeIdParamSchema

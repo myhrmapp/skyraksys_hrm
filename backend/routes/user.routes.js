@@ -2,15 +2,16 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
-const { authenticateToken, authorize } = require('../middleware/auth.simple');
+const { authenticateToken, authorize } = require('../middleware/auth');
 const db = require('../models');
+const logger = require('../utils/logger');
 
 const User = db.User;
 const Employee = db.Employee;
 const router = express.Router();
 
 // Get all users (admin only)
-router.get('/', authenticateToken, authorize('admin'), async (req, res) => {
+router.get('/', authenticateToken, authorize('admin'), async (req, res, next) => {
   try {
     const users = await User.findAll({
       attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'isActive', 'createdAt'],
@@ -27,16 +28,13 @@ router.get('/', authenticateToken, authorize('admin'), async (req, res) => {
       data: users
     });
   } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch users'
-    });
+    logger.error('Error fetching users:', { detail: error });
+    next(error);
   }
 });
 
 // Get current user profile
-router.get('/profile', authenticateToken, async (req, res) => {
+router.get('/profile', authenticateToken, async (req, res, next) => {
   try {
     const user = await User.findByPk(req.user.id, {
       attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'isActive', 'createdAt'],
@@ -60,16 +58,13 @@ router.get('/profile', authenticateToken, async (req, res) => {
       data: user
     });
   } catch (error) {
-    console.error('Error fetching user profile:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch user profile'
-    });
+    logger.error('Error fetching user profile:', { detail: error });
+    next(error);
   }
 });
 
 // Update user profile
-router.put('/profile', authenticateToken, async (req, res) => {
+router.put('/profile', authenticateToken, async (req, res, next) => {
   try {
     const { firstName, lastName, email } = req.body;
     
@@ -99,11 +94,8 @@ router.put('/profile', authenticateToken, async (req, res) => {
       data: updatedUser
     });
   } catch (error) {
-    console.error('Error updating user profile:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update profile'
-    });
+    logger.error('Error updating user profile:', { detail: error });
+    next(error);
   }
 });
 

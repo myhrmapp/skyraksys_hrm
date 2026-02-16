@@ -21,12 +21,18 @@ import {
   Delete as DeleteIcon,
   Save as SaveIcon
 } from '@mui/icons-material';
+import { useSnackbar } from 'notistack';
+import ConfirmDialog from '../../common/ConfirmDialog';
+import useConfirmDialog from '../../../hooks/useConfirmDialog';
 
 const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
   const [earnings, setEarnings] = useState({});
   const [deductions, setDeductions] = useState({});
   const [reason, setReason] = useState('');
   const [errors, setErrors] = useState({});
+  const [addComponentDialog, setAddComponentDialog] = useState({ open: false, type: null, name: '' });
+  const { dialogProps, confirm } = useConfirmDialog();
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     if (payslip) {
@@ -54,37 +60,49 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
   const { totalEarnings, totalDeductions, netPay } = calculateTotals();
 
   const handleAddComponent = (type) => {
-    const componentName = prompt(`Enter ${type} component name (e.g., "Special Allowance", "Advance Deduction"):`);
-    if (componentName && componentName.trim()) {
-      const key = componentName.trim().replace(/\s+/g, '');
+    setAddComponentDialog({ open: true, type, name: '' });
+  };
+
+  const handleConfirmAddComponent = () => {
+    const { type, name } = addComponentDialog;
+    if (name && name.trim()) {
+      const key = name.trim().replace(/\s+/g, '');
       if (type === 'earning') {
         if (earnings[key]) {
-          alert('Component already exists!');
+          enqueueSnackbar('Component already exists!', { variant: 'warning' });
+          setAddComponentDialog({ open: false, type: null, name: '' });
           return;
         }
         setEarnings({ ...earnings, [key]: 0 });
       } else {
         if (deductions[key]) {
-          alert('Component already exists!');
+          enqueueSnackbar('Component already exists!', { variant: 'warning' });
+          setAddComponentDialog({ open: false, type: null, name: '' });
           return;
         }
         setDeductions({ ...deductions, [key]: 0 });
       }
     }
+    setAddComponentDialog({ open: false, type: null, name: '' });
   };
 
   const handleRemoveComponent = (type, key) => {
-    if (window.confirm(`Remove "${formatLabel(key)}"?`)) {
-      if (type === 'earning') {
-        const newEarnings = { ...earnings };
-        delete newEarnings[key];
-        setEarnings(newEarnings);
-      } else {
-        const newDeductions = { ...deductions };
-        delete newDeductions[key];
-        setDeductions(newDeductions);
+    confirm({
+      title: 'Remove Component',
+      message: `Remove "${formatLabel(key)}"?`,
+      variant: 'warning',
+      onConfirm: async () => {
+        if (type === 'earning') {
+          const newEarnings = { ...earnings };
+          delete newEarnings[key];
+          setEarnings(newEarnings);
+        } else {
+          const newDeductions = { ...deductions };
+          delete newDeductions[key];
+          setDeductions(newDeductions);
+        }
       }
-    }
+    });
   };
 
   const handleEarningChange = (key, value) => {
@@ -141,6 +159,7 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
   if (!payslip) return null;
 
   return (
+    <>
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
         <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
@@ -361,6 +380,44 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
         </Button>
       </DialogActions>
     </Dialog>
+    <ConfirmDialog {...dialogProps} />
+
+    {/* Add Component Name Dialog */}
+    <Dialog
+      open={addComponentDialog.open}
+      onClose={() => setAddComponentDialog({ open: false, type: null, name: '' })}
+      maxWidth="xs"
+      fullWidth
+    >
+      <DialogTitle>
+        Add {addComponentDialog.type === 'earning' ? 'Earning' : 'Deduction'} Component
+      </DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          fullWidth
+          label="Component Name"
+          placeholder={addComponentDialog.type === 'earning' ? 'e.g., Special Allowance' : 'e.g., Advance Deduction'}
+          value={addComponentDialog.name}
+          onChange={(e) => setAddComponentDialog(prev => ({ ...prev, name: e.target.value }))}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleConfirmAddComponent(); }}
+          sx={{ mt: 1 }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setAddComponentDialog({ open: false, type: null, name: '' })}>
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleConfirmAddComponent}
+          disabled={!addComponentDialog.name?.trim()}
+        >
+          Add
+        </Button>
+      </DialogActions>
+    </Dialog>
+    </>
   );
 };
 

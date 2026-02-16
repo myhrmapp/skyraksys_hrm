@@ -21,7 +21,8 @@ import {
   Download as DownloadIcon,
   Close as CloseIcon,
   Visibility as ViewIcon,
-  Edit as EditIcon
+  Edit as EditIcon,
+  Lock as LockIcon
 } from '@mui/icons-material';
 import PayslipTemplate from './PayslipTemplate';
 import payslipService from '../../services/payslip/payslipService';
@@ -33,7 +34,7 @@ const PayslipViewer = ({
   onClose, 
   employee,
   initialMonth = null,
-  mode = 'view' // 'view', 'generate', 'edit'
+  mode = 'view' // 'view', 'generate'
 }) => {
   const { showNotification } = useNotifications();
   const { user } = useAuth();
@@ -42,43 +43,33 @@ const PayslipViewer = ({
   const [error, setError] = useState('');
   const [payslipData, setPayslipData] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(initialMonth || new Date());
-  const [salaryData, setSalaryData] = useState({
-    basicSalary: 15000,
-    houseRentAllowance: 0,
-    conveyanceAllowance: 0,
-    medicalAllowance: 0,
-    specialAllowance: 0,
-    lta: 0,
-    shiftAllowance: 0,
-    internetAllowance: 0,
-    arrears: 0,
-    medicalPremium: 0,
-    nps: 0,
-    voluntaryPF: 0
-  });
-  const [attendanceData, setAttendanceData] = useState({
-    totalWorkingDays: 21,
-    presentDays: 21,
-    lopDays: 0
-  });
-  const [editMode, setEditMode] = useState(mode === 'generate' || mode === 'edit');
+  const [editMode, setEditMode] = useState(mode === 'generate');
 
   // Load payslip data when component mounts or month changes
   useEffect(() => {
     if (employee && selectedMonth && mode === 'view') {
       loadPayslipData();
-    } else if (employee && (mode === 'generate' || mode === 'edit')) {
-      generatePayslipData();
     }
   }, [employee, selectedMonth, mode]);
 
   const loadPayslipData = async () => {
     setLoading(true);
     setError('');
+    setPayslipData(null);
     try {
-      const monthString = selectedMonth.toISOString().slice(0, 7); // YYYY-MM format
-      const data = await payslipService.generatePayslip(employee.id, monthString, salaryData);
-      setPayslipData(data);
+      // Fetch payslip history and find the one for the selected month
+      const history = await payslipService.getPayslipHistory(employee.id);
+      
+      const targetMonth = selectedMonth.getMonth() + 1;
+      const targetYear = selectedMonth.getFullYear();
+      
+      const foundPayslip = history.find(p => 
+        p.month === targetMonth && p.year === targetYear
+      );
+
+      if (foundPayslip) {
+        setPayslipData(foundPayslip);
+      }
     } catch (err) {
       setError('Failed to load payslip data. Please try again.');
       console.error('Error loading payslip:', err);
@@ -87,60 +78,47 @@ const PayslipViewer = ({
     }
   };
 
-  const generatePayslipData = () => {
+  const handleGenerate = async () => {
     setLoading(true);
+    setError('');
     try {
-      // Calculate payslip data locally
-      const calculatedData = payslipService.calculatePayslip(
-        employee,
-        salaryData,
-        attendanceData.totalWorkingDays,
-        attendanceData.presentDays
-      );
-
-      const monthString = selectedMonth.toLocaleDateString('en-US', {
-        month: 'long',
-        year: 'numeric'
-      });
-
-      setPayslipData({
-        ...calculatedData,
-        month: monthString,
-        paymentMode: 'Online Transfer',
-        disbursementDate: new Date().toLocaleDateString('en-GB')
-      });
+      const month = selectedMonth.getMonth() + 1;
+      const year = selectedMonth.getFullYear();
+      
+      const response = await payslipService.generatePayslip(employee.id, month, year);
+      
+      showNotification('Payslip generated successfully', 'success');
+      setEditMode(false);
+      
+      // If we have the data directly, set it, otherwise reload
+      if (response.data && response.data.payslips && response.data.payslips.length > 0) {
+         setPayslipData(response.data.payslips[0]);
+      } else {
+         await loadPayslipData();
+      }
+      
     } catch (err) {
-      setError('Failed to generate payslip data.');
+      setError(err.message || 'Failed to generate payslip.');
       console.error('Error generating payslip:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSalaryChange = (field, value) => {
-    setSalaryData(prev => ({
-      ...prev,
-      [field]: parseFloat(value) || 0
-    }));
-  };
-
-  const handleAttendanceChange = (field, value) => {
-    const numValue = parseInt(value) || 0;
-    setAttendanceData(prev => {
-      const updated = { ...prev, [field]: numValue };
-      
-      // Auto-calculate LOP days
-      if (field === 'totalWorkingDays' || field === 'presentDays') {
-        updated.lopDays = Math.max(0, updated.totalWorkingDays - updated.presentDays);
-      }
-      
-      return updated;
-    });
-  };
-
-  const handleGenerate = () => {
-    generatePayslipData();
-    setEditMode(false);
+  const handleFinalize = async () => {
+    if (!payslipData?.id) return;
+    
+    setLoading(true);
+    try {
+      await payslipService.finalizePayslip(payslipData.id);
+      showNotification('Payslip finalized successfully', 'success');
+      // Reload to get updated status
+      await loadPayslipData();
+    } catch (err) {
+      showNotification(err.message || 'Failed to finalize payslip', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePrint = () => {
@@ -152,21 +130,14 @@ const PayslipViewer = ({
   };
 
   const handleDownload = async () => {
+    if (!payslipData?.id) {
+      showNotification('No payslip data available to download', 'error');
+      return;
+    }
     try {
       setLoading(true);
-      const monthString = selectedMonth.toISOString().slice(0, 7);
-      const pdfBlob = await payslipService.downloadPayslipPDF(employee.id, monthString);
-      
-      // Create download link
-      const url = window.URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `payslip_${employee.firstName}_${employee.lastName}_${monthString}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
+      // Uses working GET /payslips/:id/pdf endpoint
+      await payslipService.downloadPayslipByIdPDF(payslipData.id);
       showNotification('Payslip downloaded successfully', 'success');
     } catch (err) {
       showNotification('Failed to download payslip', 'error');
@@ -205,8 +176,15 @@ const PayslipViewer = ({
                     <DownloadIcon />
                   </IconButton>
                 </Tooltip>
+                {canEdit && !payslipData.isLocked && (
+                   <Tooltip title="Finalize Payslip">
+                    <IconButton onClick={handleFinalize} size="small" color="warning">
+                      <LockIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
                 {canEdit && (
-                  <Tooltip title={editMode ? "View Mode" : "Edit Mode"}>
+                  <Tooltip title={editMode ? "View Mode" : "Generate New"}>
                     <IconButton 
                       onClick={() => setEditMode(!editMode)} 
                       size="small"
@@ -230,12 +208,12 @@ const PayslipViewer = ({
         {(editMode || mode === 'generate') && (
           <Paper sx={{ p: 3, m: 3, mb: 2, bgcolor: 'grey.50' }}>
             <Typography variant="h6" gutterBottom>
-              Payslip Configuration
+              Payslip Generation
             </Typography>
             
-            <Grid container spacing={3}>
+            <Grid container spacing={3} alignItems="center">
               {/* Month Selection */}
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   label="Select Month"
                   type="month"
@@ -256,94 +234,35 @@ const PayslipViewer = ({
                 />
               </Grid>
 
-              {/* Attendance Data */}
-              <Grid item xs={12} sm={6} md={3}>
-                <TextField
-                  label="Total Working Days"
-                  type="number"
-                  value={attendanceData.totalWorkingDays}
-                  onChange={(e) => handleAttendanceChange('totalWorkingDays', e.target.value)}
+              <Grid item xs={12} sm={6} md={4}>
+                <Button
+                  variant="contained"
+                  onClick={handleGenerate}
+                  disabled={loading}
                   fullWidth
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <TextField
-                  label="Present Days"
-                  type="number"
-                  value={attendanceData.presentDays}
-                  onChange={(e) => handleAttendanceChange('presentDays', e.target.value)}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <TextField
-                  label="LOP Days"
-                  type="number"
-                  value={attendanceData.lopDays}
-                  InputProps={{ readOnly: true }}
-                  fullWidth
-                />
+                  sx={{ height: '56px' }}
+                >
+                  {loading ? <CircularProgress size={20} /> : 'Generate Payslip'}
+                </Button>
               </Grid>
             </Grid>
+            
+            <Box sx={{ mt: 2 }}>
+               <Typography variant="body2" color="textSecondary">
+                  Note: Payslip generation uses the employee's active Salary Structure and approved Timesheets for the selected month.
+               </Typography>
+            </Box>
 
-            <Divider sx={{ my: 3 }} />
-
-            {/* Salary Configuration */}
-            <Typography variant="subtitle1" gutterBottom fontWeight={600}>
-              Earnings Configuration
-            </Typography>
-            <Grid container spacing={2}>
-              {Object.entries(salaryData).filter(([key]) => 
-                !['medicalPremium', 'nps', 'voluntaryPF'].includes(key)
-              ).map(([key, value]) => (
-                <Grid item xs={12} sm={6} md={4} key={key}>
-                  <TextField
-                    label={key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                    type="number"
-                    value={value}
-                    onChange={(e) => handleSalaryChange(key, e.target.value)}
-                    fullWidth
-                    size="small"
-                  />
-                </Grid>
-              ))}
-            </Grid>
-
-            <Typography variant="subtitle1" gutterBottom fontWeight={600} sx={{ mt: 2 }}>
-              Additional Deductions
-            </Typography>
-            <Grid container spacing={2}>
-              {['medicalPremium', 'nps', 'voluntaryPF'].map((key) => (
-                <Grid item xs={12} sm={6} md={4} key={key}>
-                  <TextField
-                    label={key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                    type="number"
-                    value={salaryData[key]}
-                    onChange={(e) => handleSalaryChange(key, e.target.value)}
-                    fullWidth
-                    size="small"
-                  />
-                </Grid>
-              ))}
-            </Grid>
-
-            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-              <Button
-                variant="contained"
-                onClick={handleGenerate}
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={20} /> : 'Generate Payslip'}
-              </Button>
-              {editMode && payslipData && (
+            {editMode && payslipData && (
+               <Box sx={{ mt: 2 }}>
                 <Button
                   variant="outlined"
                   onClick={() => setEditMode(false)}
                 >
-                  View Payslip
+                  Cancel / View Existing
                 </Button>
-              )}
-            </Box>
+               </Box>
+            )}
           </Paper>
         )}
 
@@ -367,8 +286,23 @@ const PayslipViewer = ({
             <PayslipTemplate
               employee={employee}
               payslipData={payslipData}
+              companyInfo={payslipData.companyInfo}
             />
           </Box>
+        )}
+        
+        {/* Empty State */}
+        {!loading && !payslipData && !editMode && !error && (
+           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 8 }}>
+              <Typography variant="h6" color="textSecondary" gutterBottom>
+                 No payslip found for this month.
+              </Typography>
+              {canEdit && (
+                 <Button variant="contained" onClick={() => setEditMode(true)}>
+                    Generate Payslip
+                 </Button>
+              )}
+           </Box>
         )}
       </DialogContent>
 

@@ -16,21 +16,18 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Check if user is authenticated on app startup
+  // Check if user is authenticated on app startup via httpOnly cookie
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-          // Validate token by fetching user profile
-          const userData = await authService.getProfile();
-          setUser(userData);
-          setIsAuthenticated(true);
-        }
+        // Cookie is sent automatically — just validate via /auth/me
+        const userData = await authService.getProfile();
+        setUser(userData);
+        setIsAuthenticated(true);
       } catch (error) {
-        console.error('Auth initialization failed:', error);
-        // Clear invalid tokens
-        localStorage.removeItem('accessToken');
+        // No valid session — user will need to log in
+        setUser(null);
+        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
@@ -42,10 +39,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authService.login(email, password);
-      const { user: userData, accessToken } = response;
-      
-      // Store token
-      localStorage.setItem('accessToken', accessToken);
+      // Backend sets httpOnly cookies; response contains user data only
+      const userData = response.user || response;
       
       // Update state
       setUser(userData);
@@ -76,12 +71,10 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await authService.logout();
+      await authService.logout(); // Clears httpOnly cookies on backend
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Clear local state regardless of API call success
-      localStorage.removeItem('accessToken');
       setUser(null);
       setIsAuthenticated(false);
     }
@@ -123,15 +116,16 @@ export const AuthProvider = ({ children }) => {
     return roles.includes(user?.role);
   };
 
-  const isAdmin = () => hasRole('admin');
-  const isHR = () => hasRole('hr');
-  const isManager = () => hasRole('manager');
-  const isEmployee = () => hasRole('employee');
+  // Computed booleans — safe to use with or without parentheses
+  const isAdmin = hasRole('admin');
+  const isHR = hasRole('hr');
+  const isManager = hasRole('manager');
+  const isEmployee = hasRole('employee');
 
-  const canManageEmployees = () => hasAnyRole(['admin', 'hr']);
-  const canApproveLeaves = () => hasAnyRole(['admin', 'hr', 'manager']);
-  const canViewPayroll = () => hasAnyRole(['admin', 'hr']);
-  const canManageSettings = () => hasAnyRole(['admin']);
+  const canManageEmployees = hasAnyRole(['admin', 'hr']);
+  const canApproveLeaves = hasAnyRole(['admin', 'hr', 'manager']);
+  const canViewPayroll = hasAnyRole(['admin', 'hr']);
+  const canManageSettings = hasAnyRole(['admin']);
 
   const value = {
     // State

@@ -34,6 +34,27 @@ import {
 import { useNotifications } from '../../../contexts/NotificationContext';
 import { authService } from '../../../services/auth.service';
 
+// Generate a secure random password
+const generateSecureDefaultPassword = () => {
+  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lower = 'abcdefghijklmnopqrstuvwxyz';
+  const digits = '0123456789';
+  const special = '@#$!%&';
+  const all = upper + lower + digits + special;
+  // Ensure at least one of each type
+  let password = [
+    upper[Math.floor(Math.random() * upper.length)],
+    lower[Math.floor(Math.random() * lower.length)],
+    digits[Math.floor(Math.random() * digits.length)],
+    special[Math.floor(Math.random() * special.length)]
+  ];
+  for (let i = 4; i < 12; i++) {
+    password.push(all[Math.floor(Math.random() * all.length)]);
+  }
+  // Shuffle
+  return password.sort(() => Math.random() - 0.5).join('');
+};
+
 const UserAccountManager = ({ 
   open, 
   onClose, 
@@ -56,13 +77,7 @@ const UserAccountManager = ({
 
   useEffect(() => {
     if (employee) {
-      console.log('🔍 UserAccountManager - Employee data:', employee);
-      console.log('📧 UserAccountManager - Employee email:', employee.email);
-      console.log('👤 UserAccountManager - Has user account:', !!employee.user);
-      console.log('🎯 UserAccountManager - Mode:', mode);
-      
       const employeeEmail = employee.email || '';
-      console.log('✅ UserAccountManager - Using email:', employeeEmail);
       
       setUserData({
         enableLogin: !!employee.user,
@@ -86,23 +101,17 @@ const UserAccountManager = ({
     const isEnabled = event.target.checked;
     const employeeEmail = employee?.email || '';
     
-    console.log('🔄 Toggle Enable Login:', isEnabled);
-    console.log('📧 Current email in state:', userData.email);
-    console.log('👤 Employee email:', employeeEmail);
-    console.log('📋 Previous state:', userData);
-    
     setUserData(prev => {
       const newState = {
         ...prev,
         enableLogin: isEnabled,
         // Always ensure email is set from employee when enabling login
         email: isEnabled ? (prev.email || employeeEmail) : prev.email,
-        // Set default password when enabling login for the first time
-        password: isEnabled && !employee?.user ? 'password123' : prev.password,
-        confirmPassword: isEnabled && !employee?.user ? 'password123' : prev.confirmPassword
+        // Generate a secure default password when enabling login for the first time
+        password: isEnabled && !employee?.user ? generateSecureDefaultPassword() : prev.password,
+        confirmPassword: isEnabled && !employee?.user ? generateSecureDefaultPassword() : prev.confirmPassword
       };
       
-      console.log('✅ New state after toggle:', newState);
       return newState;
     });
   };
@@ -122,7 +131,7 @@ const UserAccountManager = ({
     
     try {
       setLoading(true);
-      const newPassword = 'password123'; // Default reset password
+      const newPassword = generateSecureDefaultPassword();
       
       await authService.resetUserPassword(employee.user.id, newPassword);
       setUserData(prev => ({ 
@@ -178,19 +187,9 @@ const UserAccountManager = ({
         updateData.forcePasswordChange = userData.forcePasswordChange;
       }
 
-      console.log('💾 UserAccountManager - Saving user account');
-      console.log('📋 Mode:', mode);
-      console.log('👤 Employee:', employee);
-      console.log('🎭 Selected Role:', userData.role);
-      console.log('📦 Update Data being sent:', updateData);
-
       if (mode === 'create') {
-        // This will be handled by the parent component during employee creation
-        console.log('✅ Create mode - calling onUpdate with:', updateData);
         onUpdate(updateData);
       } else {
-        // Update existing employee's user account
-        console.log('✅ Edit mode - calling authService.updateUserAccount');
         await authService.updateUserAccount(employee.user?.id || employee.id, updateData);
         showNotification('User account updated successfully', 'success');
         onUpdate(updateData);
@@ -386,13 +385,13 @@ const UserAccountManager = ({
                     <Typography variant="subtitle1">Password Management</Typography>
                     <Box>
                       <Tooltip title="Generate Random Password">
-                        <IconButton onClick={generateRandomPassword} size="small">
+                        <IconButton onClick={generateRandomPassword} size="small" aria-label="Generate random password">
                           <RefreshIcon />
                         </IconButton>
                       </Tooltip>
                       {employee?.user && (
                         <Tooltip title="Reset to Default Password">
-                          <IconButton onClick={handleResetPassword} size="small" disabled={loading}>
+                          <IconButton onClick={handleResetPassword} size="small" disabled={loading} aria-label="Reset to default password">
                             <KeyIcon />
                           </IconButton>
                         </Tooltip>
@@ -413,6 +412,7 @@ const UserAccountManager = ({
                             <IconButton
                               onClick={() => setShowPassword(!showPassword)}
                               edge="end"
+                              aria-label={showPassword ? 'Hide password' : 'Show password'}
                             >
                               {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                             </IconButton>

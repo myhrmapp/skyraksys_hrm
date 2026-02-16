@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   Grid,
   Typography,
@@ -29,7 +30,6 @@ import {
   CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useLoading } from '../../../contexts/LoadingContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import EmployeeDashboard from './EmployeeDashboard';
 import ManagerDashboard from './ManagerDashboard';
@@ -41,61 +41,45 @@ const Dashboard = () => {
   const { user, isEmployee, isAdmin, isHR, isManager } = useAuth();
   const { showNotification } = useNotification();
   
-  const { isLoading: isLoadingFn, setLoading } = useLoading();
-  const isLoading = isLoadingFn('admin-dashboard');
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(null);
-  const [stats, setStats] = useState({
-    employees: { total: 0, active: 0, onLeave: 0, newHires: 0 },
-    leaves: { pending: 0, approved: 0, rejected: 0 },
-    timesheets: { pending: 0, submitted: 0, approved: 0 },
-    payroll: { processed: 0, pending: 0, total: 0 }
-  });
 
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  // Fetch dashboard stats using React Query
+  const { data: statsData, isLoading, refetch } = useQuery({
+    queryKey: ['dashboard-stats', 'admin'],
+    queryFn: async () => {
       const response = await dashboardService.getStats();
-      
       if (!response.success) {
         throw new Error(response.error || 'Failed to load dashboard data');
       }
-      
-      // ✅ CORRECT: Extract from nested structure
-      const stats = response.data?.data?.stats || {};
-      
-      setStats({
-        employees: stats.employees || { total: 0, active: 0, onLeave: 0, newHires: 0 },
-        leaves: stats.leaves || { pending: 0, approved: 0, rejected: 0 },
-        timesheets: stats.timesheets || { pending: 0, submitted: 0, approved: 0 },
-        payroll: stats.payroll || { processed: 0, pending: 0, total: 0 }
-      });
-      setLastUpdated(new Date());
-    } catch (error) {
-      console.error('❌ Dashboard error:', error);
-      setError(error.message || 'Failed to load dashboard data');
+      return response.data?.data?.stats || {};
+    },
+    enabled: isAdmin || isHR, // Only run when user is admin/HR
+    onError: (err) => {
+      setError(err.message || 'Failed to load dashboard data');
       showNotification('Failed to load dashboard data', 'error');
-    } finally {
-      setLoading(false);
+    },
+    onSuccess: () => {
+      setError(null);
     }
+  });
+
+  // Derive stats with defaults
+  const stats = {
+    employees: statsData?.employees || { total: 0, active: 0, onLeave: 0, newHires: 0 },
+    leaves: statsData?.leaves || { pending: 0, approved: 0, rejected: 0 },
+    timesheets: statsData?.timesheets || { pending: 0, submitted: 0, approved: 0 },
+    payroll: statsData?.payroll || { processed: 0, pending: 0, total: 0 }
   };
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadDashboardData();
+    await refetch();
     setRefreshing(false);
     if (!error) {
       showNotification('✅ Dashboard data refreshed successfully', 'success');
     }
   };
-
-  useEffect(() => {
-    if (isAdmin || isHR) {
-      loadDashboardData();
-    }
-  }, [isAdmin, isHR]);
 
   // Return employee or manager dashboard if not admin/HR
   if (isEmployee && !isAdmin && !isHR) {
@@ -212,7 +196,7 @@ const Dashboard = () => {
           severity="error" 
           sx={{ mb: 3 }}
           action={
-            <Button color="inherit" size="small" onClick={loadDashboardData}>
+            <Button color="inherit" size="small" onClick={() => refetch()}>
               Retry
             </Button>
           }

@@ -15,12 +15,6 @@ import {
   Alert,
   Breadcrumbs,
   Link,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -46,14 +40,11 @@ import {
   Refresh as RefreshIcon,
   Send as SendIcon,
   Logout as LogoutIcon,
-  History as HistoryIcon,
-  Computer as ComputerIcon,
-  Block as BlockIcon
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNotifications } from '../../../contexts/NotificationContext';
-import employeeService from '../../../services/EmployeeService';
+import { employeeService } from '../../../services/employee.service';
 import { authService } from '../../../services/auth.service';
 import UserAccountManager from './UserAccountManager';
 
@@ -63,14 +54,30 @@ const UserAccountManagementPage = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const { showNotification } = useNotifications();
+
+  // Generate a secure random password of given length
+  const generateSecurePassword = (length = 14) => {
+    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lower = 'abcdefghijklmnopqrstuvwxyz';
+    const digits = '0123456789';
+    const special = '@#$!%&';
+    const all = upper + lower + digits + special;
+    let password = [
+      upper[Math.floor(Math.random() * upper.length)],
+      lower[Math.floor(Math.random() * lower.length)],
+      digits[Math.floor(Math.random() * digits.length)],
+      special[Math.floor(Math.random() * special.length)]
+    ];
+    for (let i = 4; i < length; i++) {
+      password.push(all[Math.floor(Math.random() * all.length)]);
+    }
+    return password.sort(() => Math.random() - 0.5).join('');
+  };
   
   const [loading, setLoading] = useState(true);
   const [employee, setEmployee] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [error, setError] = useState(null);
-  const [loginHistory, setLoginHistory] = useState([]);
-  const [activeSessions, setActiveSessions] = useState([]);
-  const [auditLog, setAuditLog] = useState([]);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, action: null, title: '', message: '' });
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -91,9 +98,7 @@ const UserAccountManagementPage = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 Loading employee with ID:', id);
-      const response = await employeeService.get(id);
-      console.log('📦 Raw API Response:', response);
+      const response = await employeeService.getById(id);
       
       // Handle different response structures
       let employeeData;
@@ -108,41 +113,14 @@ const UserAccountManagementPage = () => {
         employeeData = response;
       }
       
-      console.log('👤 Extracted Employee Data:', employeeData);
-      console.log('📧 Employee Email:', employeeData?.email);
-      console.log('🏢 Employee Department:', employeeData?.department);
-      console.log('💼 Employee Position:', employeeData?.position);
-      
       setEmployee(employeeData);
       
-      // Note: Login history, active sessions, and audit logs would require backend API endpoints
-      // These features are currently not implemented in the backend
-      // Commenting out for now:
-      // loadLoginHistory();
-      // loadActiveSessions();
-      // loadAuditLog();
     } catch (err) {
-      console.error('❌ Error loading employee:', err);
-      console.error('Error details:', err.response?.data);
       setError(err.message || 'Failed to load employee');
       showNotification('Failed to load employee', 'error');
     } finally {
       setLoading(false);
     }
-  };
-
-  // Note: These features require backend API endpoints that are not yet implemented
-  // Keeping empty arrays for now to prevent UI errors
-  const loadLoginHistory = () => {
-    setLoginHistory([]);
-  };
-
-  const loadActiveSessions = () => {
-    setActiveSessions([]);
-  };
-
-  const loadAuditLog = () => {
-    setAuditLog([]);
   };
 
   // Quick Action Handlers
@@ -151,7 +129,7 @@ const UserAccountManagementPage = () => {
       open: true,
       action: 'resetPassword',
       title: 'Reset Password',
-      message: 'Are you sure you want to reset this user\'s password to the default (password123)? The user will be required to change it on next login.'
+      message: 'Are you sure you want to reset this user\'s password? A secure temporary password will be generated. The user will be required to change it on next login.'
     });
   };
 
@@ -185,18 +163,8 @@ const UserAccountManagementPage = () => {
     });
   };
 
-  const handleTerminateSession = (sessionId) => {
-    setConfirmDialog({
-      open: true,
-      action: 'terminateSession',
-      title: 'Terminate Session',
-      message: 'Are you sure you want to terminate this session? The user will be logged out from that device.',
-      sessionId
-    });
-  };
-
   const handleConfirmAction = async () => {
-    const { action, sessionId } = confirmDialog;
+    const { action } = confirmDialog;
     setActionLoading(true);
     
     try {
@@ -208,7 +176,7 @@ const UserAccountManagementPage = () => {
       switch (action) {
         case 'resetPassword':
           // Generate a temporary password and force password change
-          const tempPassword = 'Change@123'; // User will be forced to change this
+          const tempPassword = generateSecurePassword(14);
           await authService.resetUserPassword(userId, tempPassword);
           showNotification('Password reset successfully. User must change password on next login.', 'success');
           await loadEmployee();
@@ -216,9 +184,9 @@ const UserAccountManagementPage = () => {
           
         case 'lockAccount':
           // Toggle account lock status
-          const newStatus = !employee.user?.isLocked;
-          await authService.toggleUserStatus(userId, !newStatus);
-          showNotification(`Account ${newStatus ? 'locked' : 'unlocked'} successfully`, 'success');
+          const newLockStatus = !employee.user?.isLocked;
+          await authService.lockUserAccount(userId, newLockStatus);
+          showNotification(`Account ${newLockStatus ? 'locked' : 'unlocked'} successfully`, 'success');
           await loadEmployee();
           break;
           
@@ -266,21 +234,8 @@ const UserAccountManagementPage = () => {
 
   const handleUpdate = async (updatedData) => {
     try {
-      console.log('🔄 handleUpdate called with data:', updatedData);
-      console.log('👤 Current employee:', employee);
-      console.log('🎭 Has existing user account:', hasUserAccount);
-      
       if (hasUserAccount) {
-        // Update existing user account
         const userId = employee.user?.id || employee.userId;
-        
-        console.log('✏️ Updating existing user account');
-        console.log('📦 Sending to updateUserAccount:', {
-          userId: userId,
-          'employee.user': employee.user,
-          'employee.userId': employee.userId,
-          data: updatedData
-        });
         
         if (!userId) {
           throw new Error('User ID not found. Cannot update user account.');
@@ -289,13 +244,6 @@ const UserAccountManagementPage = () => {
         await authService.updateUserAccount(userId, updatedData);
         showNotification('User account updated successfully', 'success');
       } else {
-        // Create new user account
-        console.log('➕ Creating new user account');
-        console.log('📦 Sending to createUserAccount:', {
-          employeeId: employee.id,
-          data: updatedData
-        });
-        
         await authService.createUserAccount(employee.id, updatedData);
         showNotification('User account created successfully', 'success');
       }
@@ -303,8 +251,6 @@ const UserAccountManagementPage = () => {
       // Reload employee data to get latest user account status
       await loadEmployee();
     } catch (error) {
-      console.error('❌ Error in handleUpdate:', error);
-      console.error('Error response:', error.response?.data);
       showNotification(
         error.response?.data?.message || 'Failed to save user account', 
         'error'
@@ -971,161 +917,6 @@ const UserAccountManagementPage = () => {
                     </Tooltip>
                   </Grid>
                 </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-        )}
-
-        {/* Active Sessions */}
-        {hasUserAccount && activeSessions.length > 0 && (
-          <Grid item xs={12} lg={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <ComputerIcon />
-                  Active Sessions
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-                
-                <Stack spacing={2}>
-                  {activeSessions.map((session) => (
-                    <Paper key={session.id} sx={{ p: 2, bgcolor: session.current ? 'primary.50' : 'grey.50' }}>
-                      <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Box flex={1}>
-                          <Box display="flex" alignItems="center" gap={1}>
-                            <ComputerIcon fontSize="small" color="action" />
-                            <Typography variant="subtitle2">
-                              {session.device}
-                              {session.current && (
-                                <Chip label="Current" size="small" color="primary" sx={{ ml: 1 }} />
-                              )}
-                            </Typography>
-                          </Box>
-                          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                            📍 {session.location} • IP: {session.ipAddress}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Last active: {session.lastActive}
-                          </Typography>
-                        </Box>
-                        {!session.current && (
-                          <Tooltip title="Terminate this session">
-                            <IconButton
-                              color="error"
-                              onClick={() => handleTerminateSession(session.id)}
-                              disabled={actionLoading}
-                            >
-                              <BlockIcon />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                      </Box>
-                    </Paper>
-                  ))}
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        )}
-
-        {/* Login History */}
-        {hasUserAccount && loginHistory.length > 0 && (
-          <Grid item xs={12} lg={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <HistoryIcon />
-                  Recent Login Activity
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-                
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Time</TableCell>
-                        <TableCell>Device</TableCell>
-                        <TableCell>Location</TableCell>
-                        <TableCell align="center">Status</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {loginHistory.slice(0, 5).map((login) => (
-                        <TableRow key={login.id}>
-                          <TableCell>
-                            <Typography variant="body2">{login.timestamp}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2" noWrap>
-                              {login.device}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {login.ipAddress}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2">{login.location}</Typography>
-                          </TableCell>
-                          <TableCell align="center">
-                            <Chip
-                              label={login.success ? 'Success' : 'Failed'}
-                              color={login.success ? 'success' : 'error'}
-                              size="small"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </CardContent>
-            </Card>
-          </Grid>
-        )}
-
-        {/* Account Change History (Audit Log) */}
-        {hasUserAccount && auditLog.length > 0 && (
-          <Grid item xs={12}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  📋 Account Change History
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-                
-                <Stack spacing={2}>
-                  {auditLog.map((log) => (
-                    <Paper key={log.id} sx={{ p: 2, bgcolor: 'grey.50' }}>
-                      <Box display="flex" gap={2}>
-                        <Box
-                          sx={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: '50%',
-                            bgcolor: log.type === 'security' ? 'error.light' : 'primary.light',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0
-                          }}
-                        >
-                          {log.type === 'security' ? <SecurityIcon /> : <HistoryIcon />}
-                        </Box>
-                        <Box flex={1}>
-                          <Typography variant="subtitle2">{log.action}</Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            By {log.performedBy} • {log.timestamp}
-                          </Typography>
-                        </Box>
-                        <Chip
-                          label={log.type.replace('_', ' ').toUpperCase()}
-                          size="small"
-                          color={log.type === 'security' ? 'error' : 'default'}
-                        />
-                      </Box>
-                    </Paper>
-                  ))}
-                </Stack>
               </CardContent>
             </Card>
           </Grid>

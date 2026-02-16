@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Box,
   Paper,
@@ -52,6 +52,19 @@ const Login = () => {
     
     if (!formData.email || !formData.password) {
       setError('Please fill in all fields');
+      return;
+    }
+
+    // Email format validation (matching backend loginSchema)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    // Password min length (backend loginSchema requires min:6)
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
       return;
     }
 
@@ -309,6 +322,7 @@ const Login = () => {
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
                         disabled={loading}
+                        aria-label="toggle password visibility"
                         sx={{
                           color: theme.palette.primary.main,
                           '&:hover': {
@@ -368,12 +382,28 @@ const Login = () => {
               >
                 {loading ? 'Signing In...' : 'Sign In'}
               </Button>
+
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Typography
+                  component={Link}
+                  to="/forgot-password"
+                  variant="body2"
+                  color="primary"
+                  sx={{
+                    textDecoration: 'none',
+                    fontWeight: 500,
+                    '&:hover': { textDecoration: 'underline' }
+                  }}
+                >
+                  Forgot Password?
+                </Typography>
+              </Box>
             </Box>
 
             {/* Footer */}
             <Box sx={{ mt: 4, textAlign: 'center' }}>
               <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                © 2025 SKYRAKSYS HRM • All Rights Reserved
+                © {new Date().getFullYear()} SKYRAKSYS HRM • All Rights Reserved
               </Typography>
             </Box>
           </Paper>

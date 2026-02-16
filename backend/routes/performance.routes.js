@@ -2,21 +2,14 @@ const express = require('express');
 const router = express.Router();
 const os = require('os');
 const process = require('process');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, authorize } = require('../middleware/auth');
+const logger = require('../utils/logger');
 
-// Role check middleware
-const requireAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({
-      success: false,
-      message: 'Admin access required'
-    });
-  }
-  next();
-};
+// Use standard authorize middleware
+const requireAdmin = authorize('admin');
 
 // Get server performance metrics (Admin only)
-router.get('/server-metrics', authenticateToken, requireAdmin, async (req, res) => {
+router.get('/server-metrics', authenticateToken, requireAdmin, async (req, res, next) => {
   try {
     const cpus = os.cpus();
     const totalMem = os.totalmem();
@@ -65,7 +58,7 @@ router.get('/server-metrics', authenticateToken, requireAdmin, async (req, res) 
       dbMetrics.tableCount = results[0]?.table_count || 0;
       
     } catch (dbError) {
-      console.log('Database metrics error:', dbError.message);
+      logger.info('Database metrics error:', { detail: dbError.message });
       dbMetrics.error = dbError.message;
     }
 
@@ -89,7 +82,7 @@ router.get('/server-metrics', authenticateToken, requireAdmin, async (req, res) 
       systemInfo.loadStatus = loadAvgStatus;
       
     } catch (e) {
-      console.log('Could not get extended system info:', e.message);
+      logger.info('Could not get extended system info:', { detail: e.message });
     }
 
     const metrics = {
@@ -160,45 +153,76 @@ router.get('/server-metrics', authenticateToken, requireAdmin, async (req, res) 
     });
 
   } catch (error) {
-    console.error('Error fetching server metrics:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch server performance metrics',
-      error: error.message
-    });
+    logger.error('Error fetching server metrics:', { detail: error });
+    next(error);
   }
 });
 
 // Get API performance metrics (Admin only)
-router.get('/api-metrics', authenticateToken, requireAdmin, async (req, res) => {
+router.get('/api-metrics', authenticateToken, requireAdmin, async (req, res, next) => {
   try {
-    // In a real application, you would collect these metrics from a monitoring system
-    // For now, we'll simulate some basic metrics
-    
+    // Real server metrics from Node.js process & OS
+    const memUsage = process.memoryUsage();
+    const cpus = os.cpus();
+    const totalMem = os.totalmem();
+    const freeMem = os.freemem();
+    const loadAvg = os.loadavg();
+
+    // Calculate CPU usage percentage from os.cpus()
+    let totalIdle = 0, totalTick = 0;
+    cpus.forEach(cpu => {
+      for (const type in cpu.times) {
+        totalTick += cpu.times[type];
+      }
+      totalIdle += cpu.times.idle;
+    });
+    const cpuUsagePercent = ((1 - totalIdle / totalTick) * 100).toFixed(1);
+
     const apiMetrics = {
-      requests: {
-        total: Math.floor(Math.random() * 10000) + 1000,
-        successful: Math.floor(Math.random() * 9500) + 950,
-        failed: Math.floor(Math.random() * 500) + 50,
-        errorRate: (Math.random() * 5).toFixed(2) + '%'
+      server: {
+        cpuUsagePercent: parseFloat(cpuUsagePercent),
+        loadAverage: {
+          '1m': loadAvg[0].toFixed(2),
+          '5m': loadAvg[1].toFixed(2),
+          '15m': loadAvg[2].toFixed(2)
+        },
+        memory: {
+          totalMB: Math.round(totalMem / 1024 / 1024),
+          freeMB: Math.round(freeMem / 1024 / 1024),
+          usedPercent: ((1 - freeMem / totalMem) * 100).toFixed(1) + '%'
+        },
+        processMemory: {
+          rss: Math.round(memUsage.rss / 1024 / 1024) + ' MB',
+          heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024) + ' MB',
+          heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024) + ' MB',
+          external: Math.round(memUsage.external / 1024 / 1024) + ' MB'
+        },
+        uptime: process.uptime(),
+        nodeVersion: process.version,
+        platform: os.platform(),
+        cpuCores: cpus.length
       },
-      responseTime: {
-        average: Math.floor(Math.random() * 200) + 50, // ms
-        p95: Math.floor(Math.random() * 500) + 100, // ms
-        p99: Math.floor(Math.random() * 1000) + 200 // ms
-      },
-      endpoints: [
-        { path: '/api/auth/login', calls: Math.floor(Math.random() * 1000), avgTime: Math.floor(Math.random() * 100) + 20 },
-        { path: '/api/employees', calls: Math.floor(Math.random() * 800), avgTime: Math.floor(Math.random() * 150) + 30 },
-        { path: '/api/timesheet', calls: Math.floor(Math.random() * 600), avgTime: Math.floor(Math.random() * 200) + 40 },
-        { path: '/api/leaves', calls: Math.floor(Math.random() * 400), avgTime: Math.floor(Math.random() * 120) + 25 }
-      ],
-      cache: {
-        hitRate: (Math.random() * 40 + 60).toFixed(1) + '%', // 60-100%
-        missRate: (Math.random() * 40).toFixed(1) + '%'
+      database: {
+        status: 'unknown'
       },
       timestamp: new Date().toISOString()
     };
+
+    // Check DB connection latency
+    try {
+      const db = require('../models');
+      const dbStart = Date.now();
+      await db.sequelize.authenticate();
+      apiMetrics.database = {
+        status: 'connected',
+        latencyMs: Date.now() - dbStart
+      };
+    } catch (dbErr) {
+      apiMetrics.database = {
+        status: 'disconnected',
+        error: dbErr.message
+      };
+    }
 
     res.json({
       success: true,
@@ -206,17 +230,13 @@ router.get('/api-metrics', authenticateToken, requireAdmin, async (req, res) => 
     });
 
   } catch (error) {
-    console.error('Error fetching API metrics:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch API performance metrics',
-      error: error.message
-    });
+    logger.error('Error fetching API metrics:', { detail: error });
+    next(error);
   }
 });
 
 // Get basic health metrics (All authenticated users)
-router.get('/health-metrics', authenticateToken, async (req, res) => {
+router.get('/health-metrics', authenticateToken, async (req, res, next) => {
   try {
     const metrics = {
       server: {
@@ -244,11 +264,7 @@ router.get('/health-metrics', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch health metrics',
-      error: error.message
-    });
+    next(error);
   }
 });
 

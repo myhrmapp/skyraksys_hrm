@@ -1,16 +1,17 @@
 import React from 'react';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { formatCurrency, CURRENCY_SYMBOL } from '../../utils/formatCurrency';
 import './PayslipTemplate.css';
 
 const PayslipTemplate = ({ 
   employee, 
   payslipData, 
   companyInfo = {
-    name: "SKYRAKSYS TECHNOLOGIES LLP",
-    address: "Plot-No: 27E, G.S.T. Road, Guduvanchery, Chennai, Tamil Nadu, 603202 India",
-    email: "info@skyraksys.com",
-    website: "https://www.skyraksys.com",
-    contact: "+91 89398 88577"
+    name: '',
+    address: '',
+    email: '',
+    website: '',
+    contact: ''
   }
 }) => {
   // Default payslip data structure
@@ -20,52 +21,108 @@ const PayslipTemplate = ({
     lopDays: 0,
     paidDays: 21,
     earnings: {
-      basicSalary: 15000.00,
-      houseRentAllowance: 0,
-      conveyanceAllowance: 0,
+      basicSalary: 0,
+      hra: 0,
+      transportAllowance: 0,
       medicalAllowance: 0,
       specialAllowance: 0,
-      lta: 0,
-      shiftAllowance: 0,
-      internetAllowance: 0,
-      arrears: 0
+      foodAllowance: 0,
+      communicationAllowance: 0,
+      otherAllowances: 0
     },
     deductions: {
-      medicalPremium: 0,
-      nps: 0,
+      pfContribution: 0,
       professionalTax: 0,
-      providentFund: 0,
       tds: 0,
-      voluntaryPF: 0,
-      esic: 0
+      otherDeductions: 0
     },
     paymentMode: "Online Transfer",
     disbursementDate: new Date().toLocaleDateString('en-GB')
   };
 
-  const data = { ...defaultPayslipData, ...payslipData };
+  // Merge default data with provided payslipData
+  // Handle potential key mismatches if backend uses different keys
+  const mergedData = { ...defaultPayslipData, ...payslipData };
   
+  // Normalize earnings if needed (map backend keys to what we want to display if they differ)
+  const earnings = {
+    basicSalary: mergedData.earnings?.basicSalary || mergedData.earnings?.basic || 0,
+    hra: mergedData.earnings?.hra || mergedData.earnings?.houseRentAllowance || 0,
+    transportAllowance: mergedData.earnings?.transportAllowance || mergedData.earnings?.conveyanceAllowance || 0,
+    medicalAllowance: mergedData.earnings?.medicalAllowance || 0,
+    specialAllowance: mergedData.earnings?.specialAllowance || 0,
+    foodAllowance: mergedData.earnings?.foodAllowance || 0,
+    communicationAllowance: mergedData.earnings?.communicationAllowance || mergedData.earnings?.internetAllowance || 0,
+    otherAllowances: mergedData.earnings?.otherAllowances || mergedData.earnings?.allowances || 0
+  };
+
+  // Normalize deductions
+  const deductions = {
+    pfContribution: mergedData.deductions?.pfContribution || mergedData.deductions?.providentFund || 0,
+    professionalTax: mergedData.deductions?.professionalTax || 0,
+    tds: mergedData.deductions?.tds || 0,
+    otherDeductions: mergedData.deductions?.otherDeductions || 0
+  };
+
   // Calculate totals
-  const grossSalary = Object.values(data.earnings).reduce((sum, amount) => sum + (amount || 0), 0);
-  const totalDeductions = Object.values(data.deductions).reduce((sum, amount) => sum + (amount || 0), 0);
+  const grossSalary = Object.values(earnings).reduce((sum, amount) => sum + (Number(amount) || 0), 0);
+  const totalDeductions = Object.values(deductions).reduce((sum, amount) => sum + (Number(amount) || 0), 0);
   const netPay = grossSalary - totalDeductions;
 
-  // Convert number to words
+  // Convert number to words (Indian numbering: Thousand, Lakh, Crore)
   const numberToWords = (amount) => {
-    // Simple implementation - you can use a library like 'number-to-words' for more complex cases
-    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-    
-    if (amount === 0) return 'Zero Rupees Only';
-    if (amount === 15000) return 'Fifteen Thousand Rupees Only'; // Quick example
-    
-    return `${amount.toLocaleString()} Rupees Only`;
+    const ones = [
+      '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+      'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
+      'Seventeen', 'Eighteen', 'Nineteen'
+    ];
+    const tens = [
+      '', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
+    ];
+    const scales = ['', 'Thousand', 'Lakh', 'Crore'];
+
+    if (!amount || amount === 0) return 'Zero Rupees Only';
+
+    // Handle negative
+    const absAmount = Math.abs(Math.floor(amount));
+    if (absAmount === 0) return 'Zero Rupees Only';
+
+    let num = absAmount;
+    let result = '';
+    let scaleIndex = 0;
+
+    while (num > 0) {
+      let chunk;
+      if (scaleIndex === 0) {
+        chunk = num % 1000; // First chunk: ones, tens, hundreds
+        num = Math.floor(num / 1000);
+      } else {
+        chunk = num % 100; // Subsequent chunks (Indian: groups of 2)
+        num = Math.floor(num / 100);
+      }
+
+      if (chunk > 0) {
+        let chunkText = '';
+        if (chunk >= 100) {
+          chunkText += ones[Math.floor(chunk / 100)] + ' Hundred ';
+          chunk %= 100;
+        }
+        if (chunk >= 20) {
+          chunkText += tens[Math.floor(chunk / 10)] + ' ';
+          chunk %= 10;
+        }
+        if (chunk > 0) {
+          chunkText += ones[chunk] + ' ';
+        }
+        result = chunkText + scales[scaleIndex] + ' ' + result;
+      }
+      scaleIndex++;
+    }
+
+    return (amount < 0 ? 'Minus ' : '') + result.trim() + ' Rupees Only';
   };
 
-  const formatCurrency = (amount) => {
-    return amount > 0 ? `₹${amount.toFixed(2)}` : 'NA';
-  };
+  // formatCurrency is now imported from ../../utils/formatCurrency
 
   return (
     <div className="payslip-container" id="payslip-content">
@@ -90,7 +147,7 @@ const PayslipTemplate = ({
           Pay Slip
         </Typography>
         <Typography variant="h6" className="payslip-month">
-          {data.month}
+          {mergedData.month}
         </Typography>
       </div>
 
@@ -102,19 +159,19 @@ const PayslipTemplate = ({
               <TableCell>Employee Name</TableCell>
               <TableCell><strong>{employee?.firstName} {employee?.lastName}</strong></TableCell>
               <TableCell>Total Working Days</TableCell>
-              <TableCell><strong>{data.totalWorkingDays}</strong></TableCell>
+              <TableCell><strong>{mergedData.totalWorkingDays}</strong></TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Employee ID</TableCell>
               <TableCell><strong>{employee?.employeeId || 'N/A'}</strong></TableCell>
               <TableCell>LOP Days</TableCell>
-              <TableCell><strong>{data.lopDays}</strong></TableCell>
+              <TableCell><strong>{mergedData.lopDays}</strong></TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Designation</TableCell>
               <TableCell><strong>{employee?.position?.title || 'N/A'}</strong></TableCell>
               <TableCell>Paid Days</TableCell>
-              <TableCell><strong>{data.paidDays}</strong></TableCell>
+              <TableCell><strong>{mergedData.paidDays}</strong></TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Department</TableCell>
@@ -151,49 +208,45 @@ const PayslipTemplate = ({
           <TableHead>
             <TableRow>
               <TableCell><strong>Component</strong></TableCell>
-              <TableCell><strong>Amount (₹)</strong></TableCell>
+              <TableCell><strong>{`Amount (${CURRENCY_SYMBOL})`}</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <TableRow>
               <TableCell>Basic Salary</TableCell>
-              <TableCell>{formatCurrency(data.earnings.basicSalary)}</TableCell>
+              <TableCell>{formatCurrency(earnings.basicSalary)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>House Rent Allowances</TableCell>
-              <TableCell>{formatCurrency(data.earnings.houseRentAllowance)}</TableCell>
+              <TableCell>HRA</TableCell>
+              <TableCell>{formatCurrency(earnings.hra)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Conveyance Allowances</TableCell>
-              <TableCell>{formatCurrency(data.earnings.conveyanceAllowance)}</TableCell>
+              <TableCell>Transport Allowance</TableCell>
+              <TableCell>{formatCurrency(earnings.transportAllowance)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Medical Allowances</TableCell>
-              <TableCell>{formatCurrency(data.earnings.medicalAllowance)}</TableCell>
+              <TableCell>Medical Allowance</TableCell>
+              <TableCell>{formatCurrency(earnings.medicalAllowance)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Special Allowances</TableCell>
-              <TableCell>{formatCurrency(data.earnings.specialAllowance)}</TableCell>
+              <TableCell>Special Allowance</TableCell>
+              <TableCell>{formatCurrency(earnings.specialAllowance)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>LTA</TableCell>
-              <TableCell>{formatCurrency(data.earnings.lta)}</TableCell>
+              <TableCell>Food Allowance</TableCell>
+              <TableCell>{formatCurrency(earnings.foodAllowance)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Shift Allowances</TableCell>
-              <TableCell>{formatCurrency(data.earnings.shiftAllowance)}</TableCell>
+              <TableCell>Communication Allowance</TableCell>
+              <TableCell>{formatCurrency(earnings.communicationAllowance)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Internet Allowances</TableCell>
-              <TableCell>{formatCurrency(data.earnings.internetAllowance)}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Arrears</TableCell>
-              <TableCell>{formatCurrency(data.earnings.arrears)}</TableCell>
+              <TableCell>Other Allowances</TableCell>
+              <TableCell>{formatCurrency(earnings.otherAllowances)}</TableCell>
             </TableRow>
             <TableRow className="total-row">
               <TableCell><strong>Gross Salary</strong></TableCell>
-              <TableCell><strong>₹{grossSalary.toFixed(2)}</strong></TableCell>
+              <TableCell><strong>{formatCurrency(grossSalary)}</strong></TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -206,41 +259,29 @@ const PayslipTemplate = ({
           <TableHead>
             <TableRow>
               <TableCell><strong>Component</strong></TableCell>
-              <TableCell><strong>Amount (₹)</strong></TableCell>
+              <TableCell><strong>{`Amount (${CURRENCY_SYMBOL})`}</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <TableRow>
-              <TableCell>Medical Premium Deductions</TableCell>
-              <TableCell>{formatCurrency(data.deductions.medicalPremium)}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>NPS under 80 CCD (2)</TableCell>
-              <TableCell>{formatCurrency(data.deductions.nps)}</TableCell>
+              <TableCell>PF Contribution</TableCell>
+              <TableCell>{formatCurrency(deductions.pfContribution)}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Professional Tax</TableCell>
-              <TableCell>{formatCurrency(data.deductions.professionalTax)}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Provident Fund</TableCell>
-              <TableCell>{formatCurrency(data.deductions.providentFund)}</TableCell>
+              <TableCell>{formatCurrency(deductions.professionalTax)}</TableCell>
             </TableRow>
             <TableRow>
               <TableCell>TDS</TableCell>
-              <TableCell>{formatCurrency(data.deductions.tds)}</TableCell>
+              <TableCell>{formatCurrency(deductions.tds)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Voluntary Provident Fund</TableCell>
-              <TableCell>{formatCurrency(data.deductions.voluntaryPF)}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>ESIC</TableCell>
-              <TableCell>{formatCurrency(data.deductions.esic)}</TableCell>
+              <TableCell>Other Deductions</TableCell>
+              <TableCell>{formatCurrency(deductions.otherDeductions)}</TableCell>
             </TableRow>
             <TableRow className="total-row">
               <TableCell><strong>Total Deductions</strong></TableCell>
-              <TableCell><strong>₹{totalDeductions.toFixed(2)}</strong></TableCell>
+              <TableCell><strong>{formatCurrency(totalDeductions)}</strong></TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -253,7 +294,7 @@ const PayslipTemplate = ({
           <TableBody>
             <TableRow className="total-row net-pay-row">
               <TableCell><strong>Net Pay</strong></TableCell>
-              <TableCell><strong>₹{netPay.toFixed(2)}</strong></TableCell>
+              <TableCell><strong>{formatCurrency(netPay)}</strong></TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -270,11 +311,11 @@ const PayslipTemplate = ({
             </TableRow>
             <TableRow>
               <TableCell>Mode of Payment</TableCell>
-              <TableCell><strong>{data.paymentMode}</strong></TableCell>
+              <TableCell><strong>{mergedData.paymentMode}</strong></TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Disbursement Date</TableCell>
-              <TableCell><strong>{data.disbursementDate}</strong></TableCell>
+              <TableCell><strong>{mergedData.disbursementDate}</strong></TableCell>
             </TableRow>
           </TableBody>
         </Table>

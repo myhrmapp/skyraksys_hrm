@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Paper,
@@ -59,17 +59,56 @@ import {
   ArrowUpward as ArrowUpwardIcon,
   ArrowDownward as ArrowDownwardIcon
 } from '@mui/icons-material';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { timesheetService } from '../../../services/timesheet.service';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import ConfirmDialog from '../../common/ConfirmDialog';
+import useConfirmDialog from '../../../hooks/useConfirmDialog';
+import PropTypes from 'prop-types';
 
 dayjs.extend(relativeTime);
 
-const TimesheetApproval = () => {
+const TimesheetApproval = ({ embedded } = {}) => {
   const theme = useTheme();
-  const [timesheets, setTimesheets] = useState([]);
+  const queryClient = useQueryClient();
+  const { dialogProps, confirm } = useConfirmDialog();
+  
+  // 🚀 React Query for pending timesheets
+  const { data: timesheetsData, isLoading: loading, refetch } = useQuery({
+    queryKey: ['timesheets', 'pending'],
+    queryFn: () => timesheetService.getAll({ status: 'submitted' }),
+    select: (response) => {
+      const allTimesheets = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+      return allTimesheets.sort((a, b) => new Date(b.weekStartDate) - new Date(a.weekStartDate));
+    }
+  });
+  
+  const timesheets = useMemo(() => timesheetsData || [], [timesheetsData]);
+  
+  // 🚀 Mutations for approve/reject
+  const approveMutation = useMutation({
+    mutationFn: ({ ids, comments }) => timesheetService.bulkApprove(ids, comments),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+      showAlert('success', 'Timesheets approved successfully');
+    },
+    onError: (error) => {
+      showAlert('error', error.message || 'Failed to approve timesheets');
+    }
+  });
+  
+  const rejectMutation = useMutation({
+    mutationFn: ({ ids, comments }) => timesheetService.bulkReject(ids, comments),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+      showAlert('success', 'Timesheets rejected successfully');
+    },
+    onError: (error) => {
+      showAlert('error', error.message || 'Failed to reject timesheets');
+    }
+  });
   const [filteredTimesheets, setFilteredTimesheets] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedTimesheet, setSelectedTimesheet] = useState(null);
@@ -96,48 +135,15 @@ const TimesheetApproval = () => {
   });
 
   useEffect(() => {
-    loadTimesheets();
-  }, []);
-
-  useEffect(() => {
+    calculateSummary();
     applyFilters();
-  }, [timesheets, statusFilter, searchQuery, projectFilter, dateRange, orderBy, order]);
+  }, [timesheets, statusFilter, searchQuery, projectFilter, dateRange,orderBy, order]);
 
-  const loadTimesheets = async () => {
-    setLoading(true);
-    try {
-      const response = await timesheetService.getAll({ limit: 1000, page: 1 });
-      console.log('Raw API response:', response);
-      console.log('Response data:', response.data);
-      
-      // API returns { success: true, data: [...], pagination: {...} }
-      // So we need response.data (which is the array), not response.data.data
-      const allTimesheets = Array.isArray(response.data) ? response.data : (response.data?.data || []);
-      
-      console.log('Extracted timesheets:', allTimesheets);
-      console.log('Timesheets count:', allTimesheets.length);
-      setTimesheets(allTimesheets);
-      
-      // Calculate comprehensive summary
-      calculateSummary(allTimesheets);
-      
-      showAlert('success', `Timesheets loaded successfully (${allTimesheets.length} records)`);
-    } catch (error) {
-      console.error('Error loading timesheets:', error);
-      console.error('Error response data:', error.response?.data);
-      console.error('Error response errors:', error.response?.data?.errors);
-      showAlert('error', error.response?.data?.message || 'Failed to load timesheets');
-      setTimesheets([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const calculateSummary = (data) => {
-    const submitted = data.filter(ts => ts.status === 'Submitted');
-    const approved = data.filter(ts => ts.status === 'Approved');
-    const rejected = data.filter(ts => ts.status === 'Rejected');
-    const draft = data.filter(ts => ts.status === 'Draft');
+  const calculateSummary = () => {
+    const submitted = timesheets.filter(ts => ts.status === 'Submitted');
+    const approved = timesheets.filter(ts => ts.status === 'Approved');
+    const rejected = timesheets.filter(ts => ts.status === 'Rejected');
+    const draft = timesheets.filter(ts => ts.status === 'Draft');
     
     setSummary({
       totalPending: submitted.length,
@@ -150,16 +156,20 @@ const TimesheetApproval = () => {
   };
 
   const applyFilters = () => {
-    console.log('=== APPLYING FILTERS ===');
-    console.log('Total timesheets:', timesheets.length);
-    console.log('Filters:', { statusFilter, searchQuery, projectFilter, dateRange });
+    // Short-circuit: if no timesheets, just ensure filteredTimesheets is empty
+    if (timesheets.length === 0) {
+      if (filteredTimesheets.length > 0) {
+        setFilteredTimesheets([]);
+        setPage(0);
+      }
+      return;
+    }
     
     let filtered = [...timesheets];
 
     // Status filter
     if (statusFilter) {
       filtered = filtered.filter(ts => ts.status === statusFilter);
-      console.log('After status filter:', filtered.length);
     }
 
     // Search filter (employee name or ID)
@@ -170,13 +180,11 @@ const TimesheetApproval = () => {
         ts.employee?.lastName?.toLowerCase().includes(query) ||
         ts.employee?.employeeId?.toLowerCase().includes(query)
       );
-      console.log('After search filter:', filtered.length);
     }
 
     // Project filter
     if (projectFilter) {
       filtered = filtered.filter(ts => ts.projectId === projectFilter);
-      console.log('After project filter:', filtered.length);
     }
 
     // Date range filter
@@ -184,13 +192,11 @@ const TimesheetApproval = () => {
       filtered = filtered.filter(ts => 
         dayjs(ts.weekStartDate).isAfter(dayjs(dateRange.start).subtract(1, 'day'))
       );
-      console.log('After start date filter:', filtered.length);
     }
     if (dateRange.end) {
       filtered = filtered.filter(ts => 
         dayjs(ts.weekStartDate).isBefore(dayjs(dateRange.end).add(1, 'day'))
       );
-      console.log('After end date filter:', filtered.length);
     }
 
     // Sorting
@@ -226,10 +232,13 @@ const TimesheetApproval = () => {
       }
     });
 
-    console.log('Final filtered count:', filtered.length);
-    console.log('Setting filtered timesheets...');
-    setFilteredTimesheets(filtered);
-    setPage(0);
+    // Only update state if the result actually changed
+    const hasChanged = filtered.length !== filteredTimesheets.length ||
+      filtered.some((ts, i) => ts.id !== filteredTimesheets[i]?.id);
+    if (hasChanged) {
+      setFilteredTimesheets(filtered);
+      setPage(0);
+    }
   };
 
   const handleSort = (property) => {
@@ -251,43 +260,37 @@ const TimesheetApproval = () => {
   };
 
   const handleApprovalSubmit = async () => {
-    try {
-      await timesheetService.approve(selectedTimesheet.id, {
-        action: approvalAction,
-        comments: comments
-      });
-      
-      showAlert('success', `Timesheet ${approvalAction}d successfully`);
-      setApprovalDialogOpen(false);
-      setSelectedIds([]);
-      loadTimesheets();
-    } catch (error) {
-      console.error('Error processing approval:', error);
-      showAlert('error', error.response?.data?.message || 'Failed to process approval');
-    }
+    const mutation = approvalAction === 'approve' ? approveMutation : rejectMutation;
+    const ids = selectedTimesheet ? [selectedTimesheet.id] : selectedIds;
+    
+    mutation.mutate({ ids, comments }, {
+      onSuccess: () => {
+        setApprovalDialogOpen(false);
+        setSelectedIds([]);
+      }
+    });
   };
 
-  const handleBulkAction = async (action) => {
+  const handleBulkAction = (action) => {
     if (selectedIds.length === 0) {
       showAlert('warning', 'Please select at least one timesheet');
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to ${action} ${selectedIds.length} timesheet(s)?`)) {
-      return;
-    }
-
-    try {
-      for (const id of selectedIds) {
-        await timesheetService.approve(id, { action, comments: '' });
+    confirm({
+      title: `${action === 'approve' ? 'Approve' : 'Reject'} Timesheets`,
+      message: `Are you sure you want to ${action} ${selectedIds.length} timesheet(s)?`,
+      variant: 'warning',
+      confirmText: action === 'approve' ? 'Approve' : 'Reject',
+      onConfirm: async () => {
+        const mutation = action === 'approve' ? approveMutation : rejectMutation;
+        mutation.mutate({ ids: selectedIds, comments: '' }, {
+          onSuccess: () => {
+            setSelectedIds([]);
+          }
+        });
       }
-      showAlert('success', `${selectedIds.length} timesheet(s) ${action}d successfully`);
-      setSelectedIds([]);
-      loadTimesheets();
-    } catch (error) {
-      console.error('Error processing bulk action:', error);
-      showAlert('error', error.response?.data?.message || 'Failed to process bulk action');
-    }
+    });
   };
 
   const handleSelectAll = (event) => {
@@ -308,18 +311,19 @@ const TimesheetApproval = () => {
   };
 
   const handleExport = () => {
+    const escCsv = (v) => { const s = String(v ?? ''); return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s; };
     const csvContent = [
       ['Employee', 'Employee ID', 'Week Start', 'Week End', 'Project', 'Task', 'Hours', 'Status', 'Submitted Date'],
       ...filteredTimesheets.map(ts => [
-        `${ts.employee?.firstName} ${ts.employee?.lastName}`,
-        ts.employee?.employeeId,
-        formatDate(ts.weekStartDate),
-        formatDate(ts.weekEndDate),
-        ts.project?.name || 'N/A',
-        ts.task?.name || 'N/A',
-        ts.totalHoursWorked || calculateWeekTotal(ts),
-        ts.status,
-        ts.submittedAt ? formatDate(ts.submittedAt) : '-'
+        escCsv(`${ts.employee?.firstName} ${ts.employee?.lastName}`),
+        escCsv(ts.employee?.employeeId),
+        escCsv(formatDate(ts.weekStartDate)),
+        escCsv(formatDate(ts.weekEndDate)),
+        escCsv(ts.project?.name || 'N/A'),
+        escCsv(ts.task?.name || 'N/A'),
+        escCsv(ts.totalHoursWorked || calculateWeekTotal(ts)),
+        escCsv(ts.status),
+        escCsv(ts.submittedAt ? formatDate(ts.submittedAt) : '-')
       ])
     ].map(row => row.join(',')).join('\n');
 
@@ -442,8 +446,9 @@ const TimesheetApproval = () => {
   );
 
   return (
-    <Box sx={{ p: 3, bgcolor: theme.palette.background.default, minHeight: '100vh' }}>
+    <Box sx={{ p: embedded ? 0 : 3, bgcolor: embedded ? 'transparent' : theme.palette.background.default, minHeight: embedded ? 'auto' : '100vh' }}>
       {/* Header */}
+      {!embedded && (
       <Paper 
         elevation={0}
         sx={{ 
@@ -495,13 +500,14 @@ const TimesheetApproval = () => {
             <Button
               variant="outlined"
               startIcon={<RefreshIcon />}
-              onClick={loadTimesheets}
+              onClick={refetch}
             >
               Refresh
             </Button>
           </Stack>
         </Box>
       </Paper>
+      )}
 
       {/* Alert */}
       <Collapse in={alert.show}>
@@ -564,6 +570,8 @@ const TimesheetApproval = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               sx={{ flex: 1 }}
               size="small"
+              id="tsApprovalSearch"
+              inputProps={{ 'data-testid': 'ts-approval-search-input' }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -593,6 +601,8 @@ const TimesheetApproval = () => {
                     value={statusFilter}
                     label="Status"
                     onChange={(e) => setStatusFilter(e.target.value)}
+                    data-testid="ts-approval-status-select-wrapper"
+                    inputProps={{ 'data-testid': 'ts-approval-status-select' }}
                   >
                     <MenuItem value="">All Statuses</MenuItem>
                     <MenuItem value="Draft">Draft</MenuItem>
@@ -609,6 +619,8 @@ const TimesheetApproval = () => {
                     value={projectFilter}
                     label="Project"
                     onChange={(e) => setProjectFilter(e.target.value)}
+                    data-testid="ts-approval-project-select-wrapper"
+                    inputProps={{ 'data-testid': 'ts-approval-project-select' }}
                   >
                     <MenuItem value="">All Projects</MenuItem>
                     {getUniqueProjects().map(project => (
@@ -628,6 +640,8 @@ const TimesheetApproval = () => {
                   value={dateRange.start}
                   onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
                   InputLabelProps={{ shrink: true }}
+                  id="tsApprovalStartDate"
+                  inputProps={{ 'data-testid': 'ts-approval-start-date' }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
@@ -639,6 +653,8 @@ const TimesheetApproval = () => {
                   value={dateRange.end}
                   onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
                   InputLabelProps={{ shrink: true }}
+                  id="tsApprovalEndDate"
+                  inputProps={{ 'data-testid': 'ts-approval-end-date' }}
                 />
               </Grid>
             </Grid>
@@ -870,6 +886,7 @@ const TimesheetApproval = () => {
                       <Tooltip title="View Details">
                         <IconButton 
                           size="small" 
+                          aria-label="View details"
                           onClick={() => handleViewDetails(timesheet)}
                           sx={{ 
                             color: 'primary.main',
@@ -889,6 +906,7 @@ const TimesheetApproval = () => {
                           <Tooltip title="Approve">
                             <IconButton 
                               size="small" 
+                              aria-label="Approve timesheet"
                               onClick={() => handleApprovalClick(timesheet, 'approve')}
                               sx={{ 
                                 color: 'success.main',
@@ -906,6 +924,7 @@ const TimesheetApproval = () => {
                           <Tooltip title="Reject">
                             <IconButton 
                               size="small" 
+                              aria-label="Reject timesheet"
                               onClick={() => handleApprovalClick(timesheet, 'reject')}
                               sx={{ 
                                 color: 'error.main',
@@ -986,7 +1005,8 @@ const TimesheetApproval = () => {
                     Project / Task
                   </Typography>
                   <Typography variant="body2" fontWeight={500}>
-                    {selectedTimesheet.project?.name} / {selectedTimesheet.task?.name}
+                    {selectedTimesheet.project?.name || 'N/A'}
+                    {selectedTimesheet.task?.name || 'N/A'}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
@@ -1349,8 +1369,13 @@ const TimesheetApproval = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <ConfirmDialog {...dialogProps} />
     </Box>
   );
+};
+
+TimesheetApproval.propTypes = {
+  embedded: PropTypes.bool,
 };
 
 export default TimesheetApproval;

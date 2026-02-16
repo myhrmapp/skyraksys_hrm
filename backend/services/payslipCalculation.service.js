@@ -102,7 +102,7 @@ class PayslipCalculationService {
         }
       };
     } catch (error) {
-      console.error('Payslip calculation error:', error);
+      logger.error('Payslip calculation error:', { detail: error });
       return {
         success: false,
         error: error.message,
@@ -168,6 +168,18 @@ class PayslipCalculationService {
       const monthly = parseFloat(salaryStructure.allowances) || 0;
       earnings.allowances = this.roundAmount((monthly / totalWorkingDays) * payableDays);
     }
+    
+    // Process dynamic/custom allowances from JSON
+    if (salaryStructure.allowances && typeof salaryStructure.allowances === 'object' && !Array.isArray(salaryStructure.allowances)) {
+       const standardKeys = ['transport', 'medical', 'food', 'communication', 'special', 'other'];
+       Object.entries(salaryStructure.allowances).forEach(([key, value]) => {
+          if (!standardKeys.includes(key) && !earnings[key]) {
+              const monthly = parseFloat(value) || 0;
+              // Apply proration for all salary components
+              earnings[key] = this.roundAmount((monthly / totalWorkingDays) * payableDays);
+          }
+       });
+    }
 
     // Overtime Pay
     if (overtimeHours > 0) {
@@ -220,8 +232,17 @@ class PayslipCalculationService {
 
     // 4. TDS (Tax Deducted at Source)
     if (!options.skipTDS) {
-      const annualGross = grossSalary * 12;
-      deductions.tds = this.calculateTDS(annualGross, options);
+      // Support YTD-based TDS calculation for accuracy
+      const currentMonth = options.currentMonth || new Date().getMonth() + 1; // 1-12
+      const ytdIncome = options.ytdIncome || 0; // Total gross income earned in prior months of FY
+      const ytdTDS = options.ytdTDS || 0; // Total TDS already deducted in prior months of FY
+      const projectedAnnualGross = ytdIncome + grossSalary + (grossSalary * (12 - currentMonth));
+      deductions.tds = this.calculateTDS(projectedAnnualGross, {
+        ...options,
+        currentMonth,
+        ytdTDS,
+        remainingMonths: 12 - currentMonth + 1 // including current month
+      });
     }
 
     // 5. Employee Loan/Advance deductions
@@ -251,8 +272,19 @@ class PayslipCalculationService {
         parseFloat(structureDeductions.voluntaryPF || salaryStructure.voluntaryPF) || 0
       );
     }
+    
+    // Dynamic Deductions from SalaryStructure (Persistent)
+    if (structureDeductions && typeof structureDeductions === 'object' && !Array.isArray(structureDeductions)) {
+         const standardDedKeys = ['pf', 'tax', 'professionalTax', 'medicalPremium', 'nps', 'voluntaryPF'];
+         Object.entries(structureDeductions).forEach(([key, value]) => {
+             if (!standardDedKeys.includes(key) && !deductions[key]) {
+                  // Fixed monthly deduction (not prorated usually)
+                  deductions[key] = this.roundAmount(parseFloat(value) || 0);
+             }
+         });
+    }
 
-    // 7. Other deductions
+    // 7. Other deductions (One-time overrides)
     if (options.otherDeductions) {
       Object.entries(options.otherDeductions).forEach(([key, value]) => {
         deductions[key] = this.roundAmount(parseFloat(value) || 0);
@@ -293,13 +325,116 @@ class PayslipCalculationService {
       return 200;
     }
 
-    // Default: No PT
+    // Tamil Nadu PT slabs
+    if (state === 'Tamil Nadu') {
+      if (grossSalary <= 21000) return 0;
+      if (grossSalary <= 30000) return 135;
+      if (grossSalary <= 45000) return 315;
+      if (grossSalary <= 60000) return 690;
+      if (grossSalary <= 75000) return 1025;
+      return 1250;
+    }
+
+    // Gujarat PT slabs
+    if (state === 'Gujarat') {
+      if (grossSalary <= 12000) return 0;
+      return 200;
+    }
+
+    // Andhra Pradesh PT slabs
+    if (state === 'Andhra Pradesh') {
+      if (grossSalary <= 15000) return 0;
+      if (grossSalary <= 20000) return 150;
+      return 200;
+    }
+
+    // Telangana PT slabs
+    if (state === 'Telangana') {
+      if (grossSalary <= 15000) return 0;
+      if (grossSalary <= 20000) return 150;
+      return 200;
+    }
+
+    // Kerala PT slabs
+    if (state === 'Kerala') {
+      if (grossSalary <= 11999) return 0;
+      if (grossSalary <= 17999) return 120;
+      if (grossSalary <= 29999) return 180;
+      return 250;
+    }
+
+    // Madhya Pradesh PT slabs
+    if (state === 'Madhya Pradesh') {
+      if (grossSalary <= 18750) return 0;
+      if (grossSalary <= 25000) return 125;
+      return 208;
+    }
+
+    // Odisha PT slabs
+    if (state === 'Odisha') {
+      if (grossSalary <= 13304) return 0;
+      if (grossSalary <= 25000) return 125;
+      return 200;
+    }
+
+    // Assam PT slabs
+    if (state === 'Assam') {
+      if (grossSalary <= 10000) return 0;
+      if (grossSalary <= 15000) return 150;
+      return 208;
+    }
+
+    // Meghalaya PT slabs
+    if (state === 'Meghalaya') {
+      if (grossSalary <= 16667) return 0;
+      return 208;
+    }
+
+    // Jharkhand PT slabs
+    if (state === 'Jharkhand') {
+      if (grossSalary <= 25000) return 0;
+      if (grossSalary <= 41666) return 100;
+      if (grossSalary <= 66666) return 150;
+      if (grossSalary <= 83333) return 175;
+      return 208;
+    }
+
+    // Bihar PT slabs
+    if (state === 'Bihar') {
+      if (grossSalary <= 25000) return 0;
+      if (grossSalary <= 50000) return 100;
+      return 150;
+    }
+
+    // Tripura PT slabs
+    if (state === 'Tripura') {
+      if (grossSalary <= 7500) return 0;
+      if (grossSalary <= 10000) return 100;
+      return 150;
+    }
+
+    // Sikkim PT slabs
+    if (state === 'Sikkim') {
+      if (grossSalary <= 20000) return 0;
+      return 125;
+    }
+
+    // Chhattisgarh PT slabs
+    if (state === 'Chhattisgarh') {
+      if (grossSalary <= 12500) return 0;
+      if (grossSalary <= 16667) return 40;
+      return 150;
+    }
+
+    // Default: No PT (states like Rajasthan, Delhi, UP, etc. don't levy PT)
     return 0;
   }
 
   /**
    * Calculate TDS (simplified)
    * Supports both old and new tax regimes
+   * Supports YTD-based calculation: subtracts ytdTDS from annual liability 
+   * and divides remainder across remaining months for accuracy
    */
   calculateTDS(annualGross, options = {}) {
     const regime = options.taxRegime || 'old';
@@ -352,8 +487,15 @@ class PayslipCalculationService {
     // Add 4% cess
     annualTax = annualTax * 1.04;
 
-    // Monthly TDS
-    return this.roundAmount(annualTax / 12);
+    // YTD-aware monthly TDS calculation
+    const remainingMonths = options.remainingMonths || 12;
+    const ytdTDS = options.ytdTDS || 0;
+    
+    // Calculate remaining TDS liability for the fiscal year
+    const remainingTax = Math.max(0, annualTax - ytdTDS);
+    
+    // Spread remaining liability across remaining months
+    return this.roundAmount(remainingTax / remainingMonths);
   }
 
   /**

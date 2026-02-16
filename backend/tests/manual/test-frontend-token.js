@@ -10,7 +10,7 @@ async function checkFrontendTokenMechanism() {
         // Get a valid token first
         const loginResponse = await axios.post('http://localhost:8080/api/auth/login', {
             email: 'employee@company.com',
-            password: 'password123'
+            password: 'Password123!'
         });
 
         const validToken = loginResponse.data.data.accessToken;

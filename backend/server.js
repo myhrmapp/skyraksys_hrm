@@ -129,33 +129,66 @@ app.use(responseTime((req, res, time) => {
 // Security middleware
 app.use(helmet());
 
+// XSS sanitization — strips script tags from request body/query/params
+// Uses sanitize-html instead of deprecated xss-clean
+const sanitizeHtml = require('sanitize-html');
+const xssSanitize = (obj) => {
+  if (typeof obj === 'string') {
+    return sanitizeHtml(obj, { allowedTags: [], allowedAttributes: {} });
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(xssSanitize);
+  }
+  if (obj && typeof obj === 'object') {
+    const sanitized = {};
+    for (const [key, value] of Object.entries(obj)) {
+      sanitized[key] = xssSanitize(value);
+    }
+    return sanitized;
+  }
+  return obj;
+};
+app.use((req, res, next) => {
+  if (req.body) req.body = xssSanitize(req.body);
+  if (req.query) req.query = xssSanitize(req.query);
+  if (req.params) req.params = xssSanitize(req.params);
+  next();
+});
+logger.info('XSS sanitization enabled');
+
+// HTTP Parameter Pollution protection
+try {
+  const hpp = require('hpp');
+  app.use(hpp());
+  logger.info('HPP protection enabled');
+} catch (e) {
+  logger.warn('hpp not installed — run: npm install hpp');
+}
+
 // Trust proxy (needed when behind Nginx/any reverse proxy)
 // Enables correct client IP detection (req.ip) for logging and rate limiting
 if (process.env.TRUST_PROXY === 'true' || process.env.TRUST_PROXY === '1') {
   // Trust the first proxy (e.g., Nginx on the same host 127.0.0.1)
   app.set('trust proxy', 1);
-  console.log('🔒 Express trust proxy enabled (trusting first proxy)');
+  logger.info('Express trust proxy enabled (trusting first proxy)');
 }
 
 // CORS configuration
-const allowedOrigins = [
+const devOrigins = process.env.NODE_ENV === 'production' ? [] : [
   'http://localhost:3000',
   'http://localhost:3001',
-  'http://localhost:5000', // Add this
-  'http://localhost:8080', // Admin debug panel
+  'http://localhost:5000',
+  'http://localhost:8080',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:3001',
-  'http://127.0.0.1:5000', // Add this
-  'http://127.0.0.1:8080', // Admin debug panel
-  // Production server IP (HTTP/HTTPS, default ports)
-  'http://95.216.14.232',
-  'https://95.216.14.232',
-  'http://95.216.14.232:3000',
-  'http://95.216.14.232:8080',
-  'https://95.216.14.232:3000',
-  'https://95.216.14.232:8080',
+  'http://127.0.0.1:5000',
+  'http://127.0.0.1:8080'
+];
+
+const allowedOrigins = [
+  ...devOrigins,
   process.env.FRONTEND_URL,
-  process.env.CORS_ORIGIN
+  ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [])
 ].filter(Boolean);
 
 app.use(cors({
@@ -163,8 +196,8 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps, curl, postman)
     if (!origin) return callback(null, true);
     
-    // Optional override for troubleshooting
-    if (process.env.CORS_ALLOW_ALL === 'true') {
+    // Optional override for troubleshooting in DEVELOPMENT ONLY
+    if (process.env.CORS_ALLOW_ALL === 'true' && process.env.NODE_ENV === 'development') {
       return callback(null, true);
     }
 
@@ -174,7 +207,7 @@ app.use(cors({
     if (allowedOrigins.indexOf(normalizedOrigin) !== -1) {
       callback(null, true);
     } else {
-      console.log('CORS blocked origin:', origin);
+      logger.warn('CORS blocked origin', { origin });
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -188,8 +221,8 @@ app.use(cors({
 // Handle preflight requests
 app.options('*', cors());
 
-// Rate limiting (configurable)
-if (process.env.RATE_LIMIT_ENABLED === 'true') {
+// Rate limiting (enabled by default; set RATE_LIMIT_DISABLED=true to disable in dev/test)
+if (process.env.RATE_LIMIT_DISABLED !== 'true') {
   const windowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS || `${15 * 60 * 1000}`, 10);
   const max = parseInt(process.env.RATE_LIMIT_MAX || '300', 10); // default 300 per 15m
   const generalLimiter = rateLimit({
@@ -214,12 +247,14 @@ if (process.env.RATE_LIMIT_ENABLED === 'true') {
     });
     app.use('/api/auth/', authLimiter);
   }
-  console.log(`🛡️  Rate limiting enabled (max=${process.env.RATE_LIMIT_MAX || '300'} per ${(windowMs/60000)}m)`);
+  logger.info(`Rate limiting enabled (max=${process.env.RATE_LIMIT_MAX || '300'} per ${(windowMs/60000)}m)`);
+} else {
+  logger.info('Rate limiting disabled (RATE_LIMIT_DISABLED=true)');
 }
 
 // Parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 // Cookie parser middleware for httpOnly cookies
 app.use(cookieParser());
@@ -245,15 +280,9 @@ logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
 logger.info(`Node Version: ${process.version}`);
 logger.info('='.repeat(80));
 
-// Static files with CORS headers
-app.use('/uploads', (req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-  next();
-});
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static files — authenticated access only (employee photos, documents)
+const { authenticateToken } = require('./middleware/auth');
+app.use('/uploads', authenticateToken, express.static(path.join(__dirname, 'uploads')));
 
 // Database connection
 const db = require('./models');
@@ -270,16 +299,16 @@ db.sequelize.authenticate()
       const username = cfg.username || process.env.DB_USER || process.env.DB_USERNAME || '(unknown_user)';
       const sslEnabled = !!(cfg.dialectOptions && (cfg.dialectOptions.ssl || cfg.dialectOptions?.sslmode));
       const pool = cfg.pool || {};
-      console.log(`✅ Database connection established: ${dialect}://${username}@${host}:${port}/${database}${sslEnabled ? ' (SSL enabled)' : ''}`);
+      logger.info(`Database connection established: ${dialect}://${username}@${host}:${port}/${database}${sslEnabled ? ' (SSL enabled)' : ''}`);
       if (dialect === 'postgres') {
-        console.log(`   • Pool: min=${pool.min ?? 0} max=${pool.max ?? 5} acquire=${pool.acquire ?? 60000} idle=${pool.idle ?? 10000}`);
+        logger.info(`Pool: min=${pool.min ?? 0} max=${pool.max ?? 5} acquire=${pool.acquire ?? 60000} idle=${pool.idle ?? 10000}`);
       }
     } catch (infoErr) {
-      console.log('✅ Database connection established (details unavailable due to introspection error)', infoErr?.message);
+      logger.info('Database connection established (details unavailable due to introspection error)', { detail: infoErr?.message });
     }
   })
   .catch(err => {
-    console.error('❌ Unable to connect to database:', err);
+    logger.error('Unable to connect to database', { error: err.message });
   });
 
 // Demo data seeding utilities
@@ -290,16 +319,16 @@ async function initializeDatabase() {
   try {
     // Skip sync in production since we use migrations
     // await db.sequelize.sync({ alter: false });
-    console.log('✅ Database connection verified (sync skipped - using migrations)');
+    logger.info('Database connection verified (sync skipped - using migrations)');
 
     if (process.env.SEED_DEMO_DATA === 'true') {
-      console.log('🌱 SEED_DEMO_DATA=true -> seeding demo users, projects, and tasks');
+      logger.info('SEED_DEMO_DATA=true -> seeding demo users, projects, and tasks');
       await seedAllDemoData();
     } else {
-      console.log('🌱 SEED_DEMO_DATA not enabled -> skipping demo data seeding');
+      logger.info('SEED_DEMO_DATA not enabled -> skipping demo data seeding');
     }
   } catch (error) {
-    console.error('❌ Database initialization failed:', error);
+    logger.error('Database initialization failed', { error: error.message });
   }
 }
 
@@ -337,9 +366,8 @@ const positionRoutes = require('./routes/position.routes');
 const timesheetRoutes = require('./routes/timesheet.routes');
 const leaveRoutes = require('./routes/leave.routes');
 const leaveBalanceAdminRoutes = require('./routes/leave-balance-admin.routes');
-const payrollRoutes = require('./routes/payroll.routes');
+const leaveTypeAdminRoutes = require('./routes/leave-type-admin.routes');
 const payslipRoutes = require('./routes/payslipRoutes');
-const payslipManagementRoutes = require('./routes/payslip-management.routes'); // Modern payslip management
 const payslipTemplateRoutes = require('./routes/payslipTemplateRoutes');
 const salaryStructureRoutes = require('./routes/salaryStructureRoutes');
 const payrollDataRoutes = require('./routes/payrollDataRoutes');
@@ -349,6 +377,11 @@ const debugRoutes = require('./routes/debug.routes');
 const emailRoutes = require('./routes/email.routes');
 const performanceRoutes = require('./routes/performance.routes');
 const adminRoutes = require('./routes/admin.routes');
+const restoreRoutes = require('./routes/restore.routes'); // Admin restore endpoints for soft-deleted records
+const employeeReviewRoutes = require('./routes/employee-review.routes'); // Employee performance reviews
+const holidayRoutes = require('./routes/holiday.routes'); // Holiday calendar (GAP 12.5)
+const attendanceRoutes = require('./routes/attendance.routes'); // Attendance tracking (GAP 12.1)
+const leaveAccrualRoutes = require('./routes/leave-accrual.routes'); // Leave accrual automation (GAP 12.2)
 
 // Swagger configuration
 const { specs, swaggerOptions } = require('./config/swagger');
@@ -363,29 +396,36 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/timesheets', timesheetRoutes);
 app.use('/api/leave', leaveRoutes);
-app.use('/api/leaves', leaveRoutes); // Alias for frontend compatibility
+app.use('/api/leaves', leaveRoutes); // Alias — frontend uses both /leave and /leaves
 app.use('/api/admin/leave-balances', leaveBalanceAdminRoutes);
-app.use('/api/payrolls', payrollRoutes);
-app.use('/api/payroll', payrollRoutes); // Alias for frontend compatibility
-// Modern payslip management routes (use this for new system)
-app.use('/api/payslips', payslipManagementRoutes);
-// Legacy payslip routes (for backward compatibility)
-app.use('/api/payslips/legacy', payslipRoutes);
+app.use('/api/admin/leave-types', leaveTypeAdminRoutes);
+app.use('/api/payroll', payrollDataRoutes);
+app.use('/api/payroll-data', payrollDataRoutes); // Alias — frontend uses both /payroll and /payroll-data
+app.use('/api/payslips', payslipRoutes);
 app.use('/api/payslip-templates', payslipTemplateRoutes);
 app.use('/api/salary-structures', salaryStructureRoutes);
-app.use('/api/payroll-data', payrollDataRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/admin', adminRoutes); // Admin configuration routes
+app.use('/api/restore', restoreRoutes); // Admin restore endpoints for soft-deleted records
+app.use('/api/employee-reviews', employeeReviewRoutes); // Employee performance reviews
+app.use('/api/holidays', holidayRoutes); // Holiday calendar (GAP 12.5)
+app.use('/api/attendance', attendanceRoutes); // Attendance tracking (GAP 12.1)
+app.use('/api/leave-accrual', leaveAccrualRoutes); // Leave accrual automation (GAP 12.2)
 
-// Debug Routes (conditionally enabled for development only)
-if (process.env.NODE_ENV !== 'production') {
+// System Config Routes (requires admin role + password re-authentication)
+const systemConfigRoutes = require('./routes/system-config.routes');
+app.use('/api/system-config', systemConfigRoutes);
+
+// Debug Routes (conditionally enabled for development/test only)
+const debugEnvs = ['development', 'test'];
+if (debugEnvs.includes(process.env.NODE_ENV)) {
   app.use('/api/debug', debugRoutes);
-  logger.warn('⚠️  Debug routes enabled (development mode only)');
+  logger.warn('⚠️  Debug routes enabled (development/test mode only)');
 } else {
-  logger.info('🔒 Debug routes disabled in production');
+  logger.info('🔒 Debug routes disabled in production/staging');
 }
 
 // Admin Config Routes (protected)
@@ -401,40 +441,10 @@ app.get('/api/docs.json', (req, res) => {
   res.send(specs);
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  // Environment-aware base URL for API responses
-  const baseUrl = process.env.NODE_ENV === 'production' 
-    ? (process.env.API_BASE_URL || `https://${process.env.DOMAIN || req.get('host')}`)
-    : `http://localhost:${PORT}`;
+// NOTE: Duplicate /api/health was removed (10.1) — the canonical definition is above with DB auth check.
 
-  res.json({ 
-    status: 'OK', 
-    message: 'HRM System API is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    database: 'PostgreSQL',
-    dbHost: process.env.DB_HOST,
-    dbPort: process.env.DB_PORT,
-    dbName: process.env.DB_NAME,
-    documentation: {
-      swagger: `${baseUrl}/api/docs`,
-      apiDocs: `${baseUrl}/api/docs.json`
-    },
-    endpoints: {
-      auth: '/api/auth/*',
-      employees: '/api/employees/*',
-      leaves: '/api/leave/*',
-      timesheets: '/api/timesheets/*',
-      payroll: '/api/payroll/*',
-      projects: '/api/projects/*',
-      dashboard: '/api/dashboard/*'
-    }
-  });
-});
-
-// Catch-all handler
-app.get('*', (req, res) => {
+// Catch-all handler (handles ALL HTTP methods, not just GET)
+app.all('*', (req, res) => {
   res.status(404).json({
     success: false,
     message: 'API endpoint not found',
@@ -492,6 +502,15 @@ app.use((error, req, res, next) => {
     });
   }
   
+  // Handle Sequelize foreign key constraint errors
+  if (error.name === 'SequelizeForeignKeyConstraintError') {
+    return res.status(409).json({
+      success: false,
+      message: 'Cannot complete this operation because the record is referenced by other data. Remove related records first.',
+      detail: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+  
   // Handle JWT errors
   if (error.name === 'JsonWebTokenError') {
     return res.status(401).json({
@@ -524,6 +543,14 @@ if (require.main === module) {
   initializeDatabase().then(() => {
     const dbInfo = `PostgreSQL (${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME})`;
     
+    // Initialize cron scheduler after DB is ready (GAP 12.2)
+    try {
+      const { initScheduler } = require('./services/scheduler');
+      initScheduler();
+    } catch (err) {
+      logger.warn('Scheduler initialization skipped', { error: err.message });
+    }
+    
     // Environment-aware base URL
     const baseUrl = process.env.NODE_ENV === 'production' 
       ? (process.env.API_BASE_URL || `https://${process.env.DOMAIN || 'localhost'}`)
@@ -536,24 +563,17 @@ if (require.main === module) {
       logger.info(`📚 API Documentation: ${baseUrl}/api/docs`);
       logger.info(`🩺 Health: ${baseUrl}/api/health`);
       logger.info(`💾 Database: ${dbInfo}`);
-      
-      console.log(logMessage);
-      console.log(`🌐 API Base URL: ${baseUrl}/api`);
-      console.log(`📚 API Documentation: ${baseUrl}/api/docs`);
-      console.log(`🩺 Health: ${baseUrl}/api/health`);
-      console.log(`🔍 Health Check: ${baseUrl}/api/health`);
-      console.log(`💾 Database: ${dbInfo}`);
-      console.log(`🗄️  PostgreSQL-only mode (SQLite permanently disabled)`);
-      console.log('\n📖 For comprehensive documentation, visit:');
-      console.log(`   - Interactive API Docs: ${baseUrl}/api-docs`);
-      console.log(`   - API JSON Schema: ${baseUrl}/api-docs.json`);
-      console.log(`   - Developer Guide: ../docs/README.md`);
+      logger.info('🗄  PostgreSQL-only mode (SQLite permanently disabled)');
+      logger.info('\n📖 For comprehensive documentation, visit:');
+      logger.info(`- Interactive API Docs: ${baseUrl}/api-docs`);
+      logger.info(`- API JSON Schema: ${baseUrl}/api-docs.json`);
+      logger.info('- Developer Guide: ../docs/README.md');
       
       // Production-specific logs
       if (process.env.NODE_ENV === 'production') {
-        console.log('\n🔐 Production Environment Detected');
-        console.log(`   - Set API_BASE_URL or DOMAIN environment variable for proper URLs`);
-        console.log(`   - Current base URL: ${baseUrl}`);
+        logger.info('\n🔐 Production Environment Detected');
+        logger.info('- Set API_BASE_URL or DOMAIN environment variable for proper URLs');
+        logger.info(`- Current base URL: ${baseUrl}`);
       }
     });
     
@@ -569,8 +589,7 @@ if (require.main === module) {
 
 // Production-safe error handling
 process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:', error);
-  console.error('Uncaught Exception:', error);
+  logger.error('Uncaught Exception', { error: error.message, stack: error.stack });
   
   // Graceful shutdown in production
   if (process.env.NODE_ENV === 'production') {
@@ -583,8 +602,7 @@ process.on('uncaughtException', (error) => {
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error('Unhandled Rejection', { reason: reason?.message || reason });
   
   // Don't crash in production for unhandled promises
   if (process.env.NODE_ENV === 'production') {
@@ -597,7 +615,6 @@ process.on('unhandledRejection', (reason, promise) => {
 // Graceful shutdown handling
 const gracefulShutdown = (signal) => {
   logger.info(`Received ${signal}. Shutting down gracefully...`);
-  console.log(`Received ${signal}. Shutting down gracefully...`);
   
   // Close server and database connections
   setTimeout(() => {

@@ -5,10 +5,9 @@ import { CssBaseline, Box, CircularProgress, Typography } from '@mui/material';
 import PropTypes from 'prop-types';
 import modernTheme from './theme/modernTheme';
 import { SnackbarProvider } from 'notistack';
-import { getDefaultDashboard } from './utils/roleConfig';
 
 // Context Providers
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 
@@ -17,6 +16,7 @@ import SmartErrorBoundary from './components/common/SmartErrorBoundary';
 
 // Core Components (loaded immediately)
 import Login from './components/common/Login';
+import ForgotPassword from './components/common/ForgotPassword';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import DashboardRedirect from './components/common/DashboardRedirect';
@@ -42,32 +42,53 @@ const SimpleValidationDiagnostic = React.lazy(() => import('./components/debug/S
 const LeaveManagement = lazy(() => import('./components/features/leave/LeaveManagement'));
 const EmployeeLeaveRequests = lazy(() => import('./components/features/leave/EmployeeLeaveRequests'));
 const LeaveBalance = lazy(() => import('./components/features/leave/LeaveBalanceModern'));
-const AddLeaveRequest = lazy(() => import('./components/features/leave/AddLeaveRequestModern'));
+const AddLeaveRequest = lazy(() => import('./components/features/leave/LeaveRequest'));
+const LeaveTypeManagement = lazy(() => import('./components/features/leave/LeaveTypeManagement'));
 
 // Timesheet Components (Consolidated)
 const ModernWeeklyTimesheet = lazy(() => import('./components/features/timesheet/ModernWeeklyTimesheet'));
 const TimesheetApproval = lazy(() => import('./components/features/timesheet/TimesheetApproval'));
 const TimesheetHistory = lazy(() => import('./components/features/timesheet/TimesheetHistory'));
+const TimesheetHub = lazy(() => import('./components/features/timesheet/TimesheetHub'));
 
 // Payroll Components
 const PayrollManagement = lazy(() => import('./components/features/payroll/ModernPayrollManagement'));
-const PayslipTemplateManager = lazy(() => import('./components/features/payroll/PayslipTemplateManager'));
 const EmployeePayslips = lazy(() => import('./components/features/payroll/EmployeePayslips'));
 
 // Admin Components
 const UserManagement = lazy(() => import('./components/features/admin/UserManagementEnhanced'));
 const EmailConfiguration = lazy(() => import('./components/features/admin/EmailConfiguration'));
 const PositionManagement = lazy(() => import('./components/features/admin/PositionManagement'));
+const DepartmentManagement = lazy(() => import('./components/features/admin/DepartmentManagement'));
 const SystemSettings = lazy(() => import('./components/features/admin/SystemSettings'));
 const ProjectTaskConfiguration = lazy(() => import('./components/features/admin/ProjectTaskConfiguration'));
 const ReportsModule = lazy(() => import('./components/features/admin/ReportsModule'));
-const PayslipTemplateConfiguration = lazy(() => import('./components/admin/PayslipTemplateConfiguration'));
 const EnhancedPayslipTemplateConfiguration = lazy(() => import('./components/admin/EnhancedPayslipTemplateConfiguration'));
-const PayslipManagement = lazy(() => import('./components/admin/PayslipManagement'));
-const ConsolidatedReports = lazy(() => import('./components/admin/ConsolidatedReports'));
-const AdminConfigPage = lazy(() => import('./components/features/admin/AdminConfigPage'));
+const HolidayCalendarPage = lazy(() => import('./components/admin/HolidayCalendarPage'));
+const MyAttendance = lazy(() => import('./components/features/attendance/MyAttendance'));
+const AttendanceManagement = lazy(() => import('./components/features/attendance/AttendanceManagement'));
+const MyTasks = lazy(() => import('./components/features/tasks/MyTasks'));
 // Enhanced Admin Debug Panel with Environment Selector, Database Tools, and Log Viewer
 const AdminDebugPanel = lazy(() => import('./components/features/admin/AdminDebugPanel'));
+// System Configuration Page (Admin Only - Password Re-auth Required)
+const SystemConfigPage = lazy(() => import('./components/admin/SystemConfigPage'));
+
+// Hub Pages (Tabbed page merges)
+const OrganizationSettings = lazy(() => import('./components/features/admin/OrganizationSettings'));
+const SystemSettingsHub = lazy(() => import('./components/features/admin/SystemSettingsHub'));
+
+// Projects Pages
+// ProjectList and ProjectDetails removed — ProjectTaskConfiguration is the canonical admin page
+// ProjectForm is still imported by ProjectTaskConfiguration directly
+
+// Employee Reviews
+const EmployeeReviewManagement = lazy(() => import('./components/features/reviews/EmployeeReviewManagement'));
+
+// Leave Accrual
+const LeaveAccrualManagement = lazy(() => import('./components/features/leave/LeaveAccrualManagement'));
+
+// Restore/Recovery
+const RestoreManagement = lazy(() => import('./components/features/admin/RestoreManagement'));
 
 // Material-UI Theme
 // Modern theme imported from theme/modernTheme.js
@@ -111,14 +132,20 @@ function App() {
               <AuthProvider>
                 <SmartErrorBoundary level="routing">
                   <Routes>
-                    {/* Admin Debug Panel - Enhanced version with Environment Selector, Database Tools, and Log Viewer */}
+                    {/* Admin Debug Panel - Only available in development */}
+                    {process.env.NODE_ENV !== 'production' && (
                     <Route path="/admin/debug" element={
                       <Suspense fallback={<EnhancedLoadingFallback text="Loading Debug Panel..." />}>
                         <AdminDebugPanel />
                       </Suspense>
                     } />
+                    )}
+                    
+                    {/* System Config Page - redirect to settings hub */}
+                    <Route path="/system-config" element={<Navigate to="/admin/settings-hub" replace />} />
                     
                     <Route path="/login" element={<Login />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/" element={
                       <ProtectedRoute>
                         <Layout />
@@ -160,13 +187,8 @@ function App() {
                         </SmartErrorBoundary>
                       } />
                       
-                      <Route path="performance" element={
-                        <SmartErrorBoundary level="page">
-                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Performance Dashboard..." />}>
-                            <PerformanceDashboard />
-                          </Suspense>
-                        </SmartErrorBoundary>
-                      } />
+                      {/* Legacy route - redirect to full name */}
+                      <Route path="performance" element={<Navigate to="/performance-dashboard" replace />} />
                       
                       {/* Employee Management Routes with Error Boundaries */}
                       <Route path="employees" element={
@@ -187,6 +209,13 @@ function App() {
                         <SmartErrorBoundary level="page">
                           <Suspense fallback={<EnhancedLoadingFallback text="Loading Employee Profile..." />}>
                             <EmployeeProfile />
+                          </Suspense>
+                        </SmartErrorBoundary>
+                      } />
+                      <Route path="employees/:id/edit" element={
+                        <SmartErrorBoundary level="page">
+                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Edit Employee..." />}>
+                            <EmployeeForm />
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
@@ -211,10 +240,14 @@ function App() {
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
-                      <Route path="add-employee" element={
+                      {/* Legacy route - redirect to RESTful pattern */}
+                      <Route path="add-employee" element={<Navigate to="/employees/add" replace />} />
+
+                      {/* Employee Reviews */}
+                      <Route path="employee-reviews" element={
                         <SmartErrorBoundary level="page">
-                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Add Employee..." />}>
-                            <EmployeeForm />
+                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Employee Reviews..." />}>
+                            <EmployeeReviewManagement />
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
@@ -248,12 +281,26 @@ function App() {
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
+                      <Route path="admin/leave-accrual" element={
+                        <SmartErrorBoundary level="page">
+                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Leave Accrual..." />}>
+                            <LeaveAccrualManagement />
+                          </Suspense>
+                        </SmartErrorBoundary>
+                      } />
+                      <Route path="admin/leave-types" element={
+                        <SmartErrorBoundary level="page">
+                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Leave Types..." />}>
+                            <LeaveTypeManagement />
+                          </Suspense>
+                        </SmartErrorBoundary>
+                      } />
                       
-                      {/* Timesheet Management Routes (Consolidated) */}
+                      {/* Timesheet Management Routes (Hub + deep links) */}
                       <Route path="timesheets" element={
                         <SmartErrorBoundary level="page">
                           <Suspense fallback={<EnhancedLoadingFallback text="Loading Timesheets..." />}>
-                            <ModernWeeklyTimesheet />
+                            <TimesheetHub />
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
@@ -264,20 +311,8 @@ function App() {
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
-                      <Route path="timesheets/approvals" element={
-                        <SmartErrorBoundary level="page">
-                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Timesheet Approvals..." />}>
-                            <TimesheetApproval />
-                          </Suspense>
-                        </SmartErrorBoundary>
-                      } />
-                      <Route path="timesheets/history" element={
-                        <SmartErrorBoundary level="page">
-                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Timesheet History..." />}>
-                            <TimesheetHistory />
-                          </Suspense>
-                        </SmartErrorBoundary>
-                      } />
+                      <Route path="timesheets/approvals" element={<Navigate to="/timesheets" replace />} />
+                      <Route path="timesheets/history" element={<Navigate to="/timesheets" replace />} />
                       
                       {/* Legacy timesheet routes - redirect to consolidated component */}
                       <Route path="timesheet-management" element={<Navigate to="/timesheets" replace />} />
@@ -285,6 +320,23 @@ function App() {
                       <Route path="weekly-timesheet" element={<Navigate to="/timesheets" replace />} />
                       <Route path="timesheet-history" element={<Navigate to="/timesheets/history" replace />} />
                       <Route path="timesheet-manager" element={<Navigate to="/timesheets" replace />} />
+
+                      {/* Attendance Routes */}
+                      <Route path="my-attendance" element={
+                        <SmartErrorBoundary level="page">
+                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Attendance..." />}>
+                            <MyAttendance />
+                          </Suspense>
+                        </SmartErrorBoundary>
+                      } />
+                      <Route path="attendance-management" element={
+                        <SmartErrorBoundary level="page">
+                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Attendance Management..." />}>
+                            <AttendanceManagement />
+                          </Suspense>
+                        </SmartErrorBoundary>
+                      } />
+
                       {/* Payroll Management Routes with Error Boundaries */}
                       <Route path="payroll-management" element={
                         <SmartErrorBoundary level="page">
@@ -309,17 +361,33 @@ function App() {
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
-                      <Route path="email-configuration" element={
+                      
+                      {/* Organization Hub (Departments + Positions + Holidays) */}
+                      <Route path="organization" element={
                         <SmartErrorBoundary level="page">
-                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Email Configuration..." />}>
-                            <EmailConfiguration />
+                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Organization Settings..." />}>
+                            <OrganizationSettings />
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
-                      <Route path="position-management" element={
+                      <Route path="department-management" element={<Navigate to="/organization" replace />} />
+                      <Route path="position-management" element={<Navigate to="/organization" replace />} />
+                      <Route path="admin/holidays" element={<Navigate to="/organization" replace />} />
+                      <Route path="email-configuration" element={<Navigate to="/admin/settings-hub" replace />} />
+                      
+                      {/* System Settings Hub (Email + Preferences + Advanced) */}
+                      <Route path="admin/settings-hub" element={
                         <SmartErrorBoundary level="page">
-                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Position Management..." />}>
-                            <PositionManagement />
+                          <Suspense fallback={<EnhancedLoadingFallback text="Loading System Settings..." />}>
+                            <SystemSettingsHub />
+                          </Suspense>
+                        </SmartErrorBoundary>
+                      } />
+                      <Route path="settings" element={<Navigate to="/admin/settings-hub" replace />} />
+                      <Route path="admin/restore" element={
+                        <SmartErrorBoundary level="page">
+                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Restore Management..." />}>
+                            <RestoreManagement />
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
@@ -330,24 +398,17 @@ function App() {
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
+                      <Route path="my-tasks" element={
+                        <SmartErrorBoundary level="page">
+                          <Suspense fallback={<EnhancedLoadingFallback text="Loading My Tasks..." />}>
+                            <MyTasks />
+                          </Suspense>
+                        </SmartErrorBoundary>
+                      } />
                       <Route path="reports" element={
                         <SmartErrorBoundary level="page">
                           <Suspense fallback={<EnhancedLoadingFallback text="Loading Reports..." />}>
                             <ReportsModule />
-                          </Suspense>
-                        </SmartErrorBoundary>
-                      } />
-                      <Route path="settings" element={
-                        <SmartErrorBoundary level="page">
-                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Settings..." />}>
-                            <SystemSettings />
-                          </Suspense>
-                        </SmartErrorBoundary>
-                      } />
-                      <Route path="admin/config" element={
-                        <SmartErrorBoundary level="page">
-                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Admin Config..." />}>
-                            <AdminConfigPage />
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
@@ -360,24 +421,10 @@ function App() {
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
-                      {/* Old template configuration (kept as fallback) */}
-                      <Route path="admin/payslip-templates-old" element={
-                        <SmartErrorBoundary level="page">
-                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Payslip Template Manager..." />}>
-                            <PayslipTemplateManager />
-                          </Suspense>
-                        </SmartErrorBoundary>
-                      } />
-                      {/* Removed: admin/payslip-management - Use /payroll-management instead */}
-                      <Route path="admin/consolidated-reports" element={
-                        <SmartErrorBoundary level="page">
-                          <Suspense fallback={<EnhancedLoadingFallback text="Loading Consolidated Reports..." />}>
-                            <ConsolidatedReports />
-                          </Suspense>
-                        </SmartErrorBoundary>
-                      } />
+
                       
-                      {/* Debug Routes */}
+                      {/* Debug Routes — development only */}
+                      {process.env.NODE_ENV !== 'production' && (
                       <Route path="debug/validation" element={
                         <SmartErrorBoundary level="page">
                           <Suspense fallback={<EnhancedLoadingFallback text="Loading Validation Diagnostic..." />}>
@@ -385,6 +432,9 @@ function App() {
                           </Suspense>
                         </SmartErrorBoundary>
                       } />
+                      )}
+
+                      {/* Projects Routes removed — FE-43: ProjectTaskConfiguration at /project-task-config is the canonical admin page */}
                     </Route>
                   </Routes>
                 </SmartErrorBoundary>

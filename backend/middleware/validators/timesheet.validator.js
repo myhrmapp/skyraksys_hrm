@@ -48,46 +48,46 @@ const timesheetEntrySchema = Joi.object({
  * Schema for creating a new timesheet
  */
 const createTimesheetSchema = Joi.object({
-  employeeId: Joi.string()
-    .required()
-    .uuid(),
+    employeeId: Joi.string()
+      .required()
+      .uuid(),
 
-  projectId: Joi.string()
-    .required()
-    .uuid(),
+    projectId: Joi.string()
+      .required()
+      .uuid(),
 
-  taskId: Joi.string()
-    .required()
-    .uuid(),
+    taskId: Joi.string()
+      .required()
+      .uuid(),
 
-  weekStartDate: Joi.date()
-    .required()
-    .custom((value, helpers) => {
-      // Validate that it's a Monday
-      const day = value.getDay();
-      if (day !== 1) {
-        return helpers.error('any.invalid', { message: 'Week start date must be a Monday' });
-      }
-      return value;
-    }),
+    weekStartDate: Joi.date()
+      .required()
+      .custom((value, helpers) => {
+        // Validate that it's a Monday
+        const day = value.getDay();
+        if (day !== 1) {
+          return helpers.error('any.invalid', { message: 'Week start date must be a Monday' });
+        }
+        return value;
+      }),
 
-  weekEndDate: Joi.date()
-    .required()
-    .custom((value, helpers) => {
-      // Validate that it's a Sunday
-      const day = value.getDay();
-      if (day !== 0) {
-        return helpers.error('any.invalid', { message: 'Week end date must be a Sunday' });
-      }
-      return value;
-    })
-    .greater(Joi.ref('weekStartDate'))
-    .messages({
-      'date.greater': 'Week end date must be after week start date'
-    }),
+    weekEndDate: Joi.date()
+      .required()
+      .custom((value, helpers) => {
+        // Validate that it's a Sunday
+        const day = value.getDay();
+        if (day !== 0) {
+          return helpers.error('any.invalid', { message: 'Week end date must be a Sunday' });
+        }
+        return value;
+      })
+      .greater(Joi.ref('weekStartDate'))
+      .messages({
+        'date.greater': 'Week end date must be after week start date'
+      }),
 
-  // Individual day hours (old format - matches route implementation)
-  mondayHours: Joi.number().min(0).max(24).default(0),
+    // Individual day hours
+    mondayHours: Joi.number().min(0).max(24).default(0),
   tuesdayHours: Joi.number().min(0).max(24).default(0),
   wednesdayHours: Joi.number().min(0).max(24).default(0),
   thursdayHours: Joi.number().min(0).max(24).default(0),
@@ -109,32 +109,26 @@ const createTimesheetSchema = Joi.object({
     .max(168) // Max hours in a week
     .precision(2)
     .optional()
-});
+    .custom((value, helpers) => {
+      // Prevent empty timesheets - must have at least 0.01 hours
+      if (value !== undefined && value === 0) {
+        return helpers.message('Timesheet must have at least 0.01 hours');
+      }
+      return value;
+    })
+  });
 
 /**
  * Schema for bulk timesheet submission
  */
 const bulkSubmitTimesheetSchema = Joi.object({
-  timesheets: Joi.array()
-    .items(
-      Joi.object({
-        projectId: Joi.string().uuid().required(),
-        weekStartDate: Joi.date().required(),
-        weekEndDate: Joi.date().required(),
-        entries: Joi.array()
-          .items(timesheetEntrySchema)
-          .min(1)
-          .required()
-      })
-    )
-    .min(1)
-    .max(10) // Limit bulk submissions to 10 timesheets
-    .required()
-    .messages({
-      'array.min': 'At least one timesheet is required',
-      'array.max': 'Cannot submit more than 10 timesheets at once'
-    })
-});
+  timesheetIds: Joi.array()
+    .items(Joi.string().uuid())
+    .optional(),
+    
+  weekStartDate: Joi.date()
+    .optional()
+}).or('timesheetIds', 'weekStartDate');
 
 /**
  * Schema for updating timesheet status
@@ -158,19 +152,45 @@ const updateTimesheetStatusSchema = Joi.object({
 
 /**
  * Schema for updating timesheet entries
+ * Note: employeeId and status cannot be changed via update (use dedicated endpoints)
  */
 const updateTimesheetSchema = Joi.object({
-  entries: Joi.array()
-    .items(timesheetEntrySchema)
-    .min(1)
+  // Explicitly forbid changing ownership
+  employeeId: Joi.forbidden(),
+  
+  // Explicitly forbid changing status (use dedicated submit/approve endpoints)
+  status: Joi.forbidden(),
+  
+  // Allow updating project/task assignments
+  projectId: Joi.string()
+    .uuid()
     .optional(),
 
+  taskId: Joi.string()
+    .uuid()
+    .optional(),
+
+  // Allow updating individual day hours
+  mondayHours: Joi.number().min(0).max(24).optional(),
+  tuesdayHours: Joi.number().min(0).max(24).optional(),
+  wednesdayHours: Joi.number().min(0).max(24).optional(),
+  thursdayHours: Joi.number().min(0).max(24).optional(),
+  fridayHours: Joi.number().min(0).max(24).optional(),
+  saturdayHours: Joi.number().min(0).max(24).optional(),
+  sundayHours: Joi.number().min(0).max(24).optional(),
+
+  // Allow updating description
+  description: Joi.string()
+    .max(500)
+    .optional(),
+
+  // Allow updating total hours
   totalHours: Joi.number()
     .min(0)
     .max(168)
     .precision(2)
     .optional()
-}).min(1);
+}).min(1); // At least one field must be provided
 
 /**
  * Schema for timesheet query parameters
@@ -184,7 +204,7 @@ const timesheetQuerySchema = Joi.object({
   limit: Joi.number()
     .integer()
     .min(1)
-    .max(10000)
+    .max(200)
     .default(10),
 
   employeeId: Joi.string()
@@ -252,7 +272,10 @@ const weekParamSchema = Joi.object({
 const timesheetApprovalSchema = Joi.object({
   action: Joi.string()
     .valid('approve', 'reject')
-    .required(),
+    .required()
+    .messages({
+      'any.required': 'Action (approve or reject) is required'
+    }),
 
   comments: Joi.string()
     .max(500)

@@ -16,8 +16,9 @@ import {
 } from '@mui/material';
 import { Save as SaveIcon, Upload as UploadIcon } from '@mui/icons-material';
 import settingsService from '../../../services/settings.service';
+import PropTypes from 'prop-types';
 
-const SystemSettings = () => {
+const SystemSettings = ({ embedded } = {}) => {
   const [settings, setSettings] = useState({
     companyName: '',
     companyAddress: '',
@@ -61,6 +62,10 @@ const SystemSettings = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+    // Clear validation error for this field
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleLogoChange = (e) => {
@@ -75,7 +80,22 @@ const SystemSettings = () => {
     }
   };
 
+  const [validationErrors, setValidationErrors] = useState({});
+
+  const validateSettings = () => {
+    const errors = {};
+    if (!settings.companyName?.trim()) {
+      errors.companyName = 'Company name is required';
+    }
+    if (!settings.companyAddress?.trim()) {
+      errors.companyAddress = 'Company address is required';
+    }
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
+    if (!validateSettings()) return;
     try {
       setSaving(true);
       setError('');
@@ -105,14 +125,18 @@ const SystemSettings = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: embedded ? 0 : 4 }}>
       <Paper sx={{ p: 4, borderRadius: 3 }}>
+        {!embedded && (
+        <>
         <Typography variant="h4" fontWeight="bold" gutterBottom>
           Payslip Template Settings
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
           Customize the appearance and content of the generated payslips.
         </Typography>
+        </>
+        )}
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
@@ -128,6 +152,9 @@ const SystemSettings = () => {
                 name="companyName"
                 value={settings.companyName}
                 onChange={handleInputChange}
+                required
+                error={!!validationErrors.companyName}
+                helperText={validationErrors.companyName}
               />
               <TextField
                 fullWidth
@@ -137,6 +164,9 @@ const SystemSettings = () => {
                 onChange={handleInputChange}
                 multiline
                 rows={3}
+                required
+                error={!!validationErrors.companyAddress}
+                helperText={validationErrors.companyAddress}
               />
               <TextField
                 fullWidth
@@ -212,6 +242,10 @@ const SystemSettings = () => {
       </Paper>
     </Container>
   );
+};
+
+SystemSettings.propTypes = {
+  embedded: PropTypes.bool,
 };
 
 export default SystemSettings;

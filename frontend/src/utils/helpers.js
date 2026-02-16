@@ -1,3 +1,6 @@
+// Re-export centralized formatCurrency for backward compatibility
+export { formatCurrency } from './formatCurrency';
+
 /**
  * Format date to readable format
  * @param {string|Date} date - Date to format
@@ -92,20 +95,7 @@ export const calculateTotalHours = (entries) => {
   return entries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0);
 };
 
-/**
- * Format currency
- * @param {number} amount - Amount to format
- * @param {string} currency - Currency code
- * @returns {string} - Formatted currency
- */
-export const formatCurrency = (amount, currency = 'USD') => {
-  if (typeof amount !== 'number') return '$0.00';
-  
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency
-  }).format(amount);
-};
+// formatCurrency is now re-exported from ./formatCurrency.js (see top of file)
 
 /**
  * Debounce function

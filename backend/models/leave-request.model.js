@@ -5,6 +5,22 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true
     },
+    employeeId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'employees',
+        key: 'id'
+      }
+    },
+    leaveTypeId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'leave_types',
+        key: 'id'
+      }
+    },
     startDate: {
       type: DataTypes.DATEONLY,
       allowNull: false
@@ -14,15 +30,27 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     totalDays: {
-      type: DataTypes.INTEGER,
-      allowNull: false
+      type: DataTypes.DECIMAL(4, 1),
+      allowNull: false,
+      validate: {
+        min: 0,
+        isPositive(value) {
+          if (parseFloat(value) < 0) {
+            throw new Error('Total days must be a positive number');
+          }
+        }
+      },
+      get() {
+        const rawValue = this.getDataValue('totalDays');
+        return rawValue ? parseFloat(rawValue) : null;
+      }
     },
     reason: {
       type: DataTypes.TEXT,
       allowNull: false
     },
     status: {
-      type: DataTypes.ENUM('Pending', 'Approved', 'Rejected', 'Cancelled'),
+      type: DataTypes.ENUM('Pending', 'Approved', 'Rejected', 'Cancelled', 'Cancellation Requested'),
       defaultValue: 'Pending'
     },
     approvedAt: {
@@ -33,6 +61,21 @@ module.exports = (sequelize, DataTypes) => {
     },
     approverComments: {
       type: DataTypes.TEXT
+    },
+    rejectionReason: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: 'Reason for rejection'
+    },
+    employeeComments: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: 'Additional comments from employee'
+    },
+    attachments: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: 'JSON array of attachment file references'
     },
     isHalfDay: {
       type: DataTypes.BOOLEAN,

@@ -57,11 +57,27 @@ const createLeaveRequestSchema = Joi.object({
       'string.max': 'Reason cannot exceed 500 characters'
     }),
 
+  isHalfDay: Joi.boolean()
+    .optional()
+    .default(false),
+
+  halfDayType: Joi.string()
+    .valid('First Half', 'Second Half')
+    .when('isHalfDay', {
+      is: true,
+      then: Joi.required(),
+      otherwise: Joi.optional()
+    })
+    .messages({
+      'any.required': 'Half day type is required when isHalfDay is true',
+      'any.only': 'Half day type must be either "First Half" or "Second Half"'
+    }),
+
   contactNumber: Joi.string()
-    .pattern(/^\d{10}$/)
+    .pattern(/^\d{10,15}$/)
     .optional()
     .messages({
-      'string.pattern.base': 'Contact number must be exactly 10 digits'
+      'string.pattern.base': 'Contact number must be between 10 and 15 digits'
     }),
 
   status: Joi.string()
@@ -90,11 +106,7 @@ const updateLeaveStatusSchema = Joi.object({
 
   approvedBy: Joi.string()
     .uuid()
-    .when('status', {
-      is: Joi.valid('Approved', 'Rejected'),
-      then: Joi.required(),
-      otherwise: Joi.optional()
-    })
+    .optional()
 });
 
 /**

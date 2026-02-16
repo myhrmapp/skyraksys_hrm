@@ -41,12 +41,16 @@ import {
 import { useSnackbar } from 'notistack';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useLoading } from '../../../contexts/LoadingContext';
-import api from '../../../api';
+import http from '../../../http-common';
+import ConfirmDialog from '../../common/ConfirmDialog';
+import useConfirmDialog from '../../../hooks/useConfirmDialog';
+import PropTypes from 'prop-types';
 
-const PositionManagement = () => {
+const PositionManagement = ({ embedded } = {}) => {
   const { user } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const { setLoading } = useLoading();
+  const { dialogProps, confirm } = useConfirmDialog();
   
   // State
   const [positions, setPositions] = useState([]);
@@ -67,18 +71,19 @@ const PositionManagement = () => {
     isActive: true
   });
   const [errors, setErrors] = useState({});
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
+  // Quick Create Department State
+  const [openDeptDialog, setOpenDeptDialog] = useState(false);
+  const [deptFormData, setDeptFormData] = useState({ name: '', description: '' });
 
   // Load data on component mount
   const loadPositions = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get('/positions');
+      const response = await http.get('/positions');
       setPositions(response.data.data || []);
     } catch (error) {
       console.error('Error loading positions:', error);
-      setError('Failed to load positions');
     } finally {
       setLoading(false);
     }
@@ -86,7 +91,7 @@ const PositionManagement = () => {
 
   const loadDepartments = useCallback(async () => {
     try {
-      const response = await api.get('/departments');
+      const response = await http.get('/departments');
       setDepartments(response.data.data || []);
     } catch (error) {
       console.error('Error loading departments:', error);
@@ -200,6 +205,54 @@ const PositionManagement = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleOpenDeptDialog = () => {
+    setDeptFormData({ name: '', description: '' });
+    setOpenDeptDialog(true);
+  };
+
+  const handleCloseDeptDialog = () => {
+    setOpenDeptDialog(false);
+  };
+
+  const handleCreateDepartment = async () => {
+    if (!deptFormData.name) {
+      enqueueSnackbar('Department name is required', { variant: 'error' });
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await http.post('/departments', {
+        ...deptFormData,
+        isActive: true
+      });
+      enqueueSnackbar('Department created successfully', { variant: 'success' });
+      
+      // Refresh departments
+      const deptResponse = await http.get('/departments');
+      const newDepartments = deptResponse.data.data || [];
+      setDepartments(newDepartments);
+      
+      // Select the new department if possible. 
+      // Assuming the created department is in the response or we can find it by name.
+      const createdDept = response.data.data || response.data;
+      if (createdDept && createdDept.id) {
+        handleInputChange('departmentId', createdDept.id);
+      } else {
+        // Fallback: find by name
+        const found = newDepartments.find(d => d.name === deptFormData.name);
+        if (found) handleInputChange('departmentId', found.id);
+      }
+      
+      handleCloseDeptDialog();
+    } catch (error) {
+      console.error('Error creating department:', error);
+      enqueueSnackbar('Failed to create department: ' + (error.response?.data?.message || error.message), { variant: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   const handleSubmit = async () => {
     if (!validateForm()) {
       return;
@@ -215,42 +268,42 @@ const PositionManagement = () => {
       };
 
       if (editingPosition) {
-        await api.put(`/positions/${editingPosition.id}`, submitData);
-        setSuccess('Position updated successfully');
+        await http.put(`/positions/${editingPosition.id}`, submitData);
       } else {
-        await api.post('/positions', submitData);
-        setSuccess('Position created successfully');
+        await http.post('/positions', submitData);
       }
       
       handleCloseDialog();
       loadPositions();
     } catch (error) {
       console.error('Error saving position:', error);
-      setError(error.response?.data?.message || 'Failed to save position');
+      enqueueSnackbar(error.response?.data?.message || 'Failed to save position', { variant: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (position) => {
-    if (!window.confirm(`Are you sure you want to delete the position "${position.title}"?`)) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await api.delete(`/positions/${position.id}`);
-      setSuccess('Position deleted successfully');
-      loadPositions();
-    } catch (error) {
-      console.error('Error deleting position:', error);
-      setError(error.response?.data?.message || 'Failed to delete position');
-    } finally {
-      setLoading(false);
-    }
+  const handleDelete = (position) => {
+    confirm({
+      title: 'Delete Position',
+      message: `Are you sure you want to delete the position "${position.title}"?`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          await http.delete(`/positions/${position.id}`);
+          loadPositions();
+        } catch (error) {
+          console.error('Error deleting position:', error);
+          enqueueSnackbar(error.response?.data?.message || 'Failed to delete position', { variant: 'error' });
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
   };
 
-  const levels = ['Entry Level', 'Junior', 'Mid Level', 'Senior', 'Lead', 'Manager', 'Director', 'Executive'];
+  const levels = ['Entry', 'Junior', 'Mid', 'Senior', 'Lead', 'Manager', 'Director'];
 
   // Check if user has admin or HR role
   const canManagePositions = user?.role === 'admin' || user?.role === 'hr';
@@ -266,8 +319,9 @@ const PositionManagement = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: embedded ? 0 : 4 }}>
       {/* Header */}
+      {!embedded && (
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
           <WorkIcon color="primary" />
@@ -277,6 +331,7 @@ const PositionManagement = () => {
           Manage organizational positions and job roles
         </Typography>
       </Box>
+      )}
 
       {/* Statistics Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -450,7 +505,8 @@ const PositionManagement = () => {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Position Title"
+                  id="positionTitle"
+                  label="Position Title (Required)"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   error={!!errors.title}
@@ -459,33 +515,47 @@ const PositionManagement = () => {
                 />
               </Grid>
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth error={!!errors.departmentId} required>
-                  <InputLabel>Department</InputLabel>
-                  <Select
-                    value={formData.departmentId}
-                    onChange={(e) => handleInputChange('departmentId', e.target.value)}
-                    label="Department"
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                  <FormControl fullWidth error={!!errors.departmentId} required>
+                    <InputLabel>Department (Required)</InputLabel>
+                    <Select
+                      id="positionDepartment"
+                      value={formData.departmentId}
+                      onChange={(e) => handleInputChange('departmentId', e.target.value)}
+                      label="Department (Required)"
+                      inputProps={{ 'data-testid': 'position-department-select' }}
+                    >
+                      {departments.map((dept) => (
+                        <MenuItem key={dept.id} value={dept.id}>
+                          {dept.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {errors.departmentId && (
+                      <Typography variant="caption" color="error" sx={{ ml: 2, mt: 0.5 }}>
+                        {errors.departmentId}
+                      </Typography>
+                    )}
+                  </FormControl>
+                  <IconButton 
+                    color="primary" 
+                    onClick={handleOpenDeptDialog}
+                    sx={{ mt: 1 }}
+                    title="Create New Department"
                   >
-                    {departments.map((dept) => (
-                      <MenuItem key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errors.departmentId && (
-                    <Typography variant="caption" color="error" sx={{ ml: 2, mt: 0.5 }}>
-                      {errors.departmentId}
-                    </Typography>
-                  )}
-                </FormControl>
+                    <AddIcon />
+                  </IconButton>
+                </Box>
               </Grid>
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth error={!!errors.level} required>
-                  <InputLabel>Level</InputLabel>
+                  <InputLabel>Level (Required)</InputLabel>
                   <Select
+                    id="positionLevel"
                     value={formData.level}
                     onChange={(e) => handleInputChange('level', e.target.value)}
-                    label="Level"
+                    label="Level (Required)"
+                    inputProps={{ 'data-testid': 'position-level-select' }}
                   >
                     {levels.map((level) => (
                       <MenuItem key={level} value={level}>
@@ -584,6 +654,35 @@ const PositionManagement = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Create New Department Dialog */}
+      <Dialog open={openDeptDialog} onClose={handleCloseDeptDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>Create New Department</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              autoFocus
+              label="Department Name"
+              fullWidth
+              value={deptFormData.name}
+              onChange={(e) => setDeptFormData({ ...deptFormData, name: e.target.value })}
+              required
+            />
+            <TextField
+              label="Description"
+              fullWidth
+              multiline
+              rows={3}
+              value={deptFormData.description}
+              onChange={(e) => setDeptFormData({ ...deptFormData, description: e.target.value })}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeptDialog}>Cancel</Button>
+          <Button onClick={handleCreateDepartment} variant="contained">Create</Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Floating Action Button for Mobile */}
       <Fab
         color="primary"
@@ -598,8 +697,13 @@ const PositionManagement = () => {
       >
         <AddIcon />
       </Fab>
+      <ConfirmDialog {...dialogProps} />
     </Container>
   );
+};
+
+PositionManagement.propTypes = {
+  embedded: PropTypes.bool,
 };
 
 export default PositionManagement;

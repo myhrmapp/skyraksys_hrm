@@ -1,5 +1,6 @@
 // Payslip Calculation Engine
 import { DEFAULT_PAYSLIP_TEMPLATE } from '../config/payslipTemplates';
+import { formatCurrency, LOCALE } from './formatCurrency';
 
 export class PayslipCalculationEngine {
   constructor(template = DEFAULT_PAYSLIP_TEMPLATE) {
@@ -366,16 +367,10 @@ export class PayslipCalculationEngine {
 export const payslipCalculator = new PayslipCalculationEngine();
 
 // Utility functions
-export const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 2
-  }).format(amount || 0);
-};
+export { formatCurrency } from './formatCurrency';
 
 export const formatNumber = (number) => {
-  return new Intl.NumberFormat('en-IN').format(number || 0);
+  return new Intl.NumberFormat(LOCALE).format(number || 0);
 };
 
 export const parseCSVNumber = (value) => {

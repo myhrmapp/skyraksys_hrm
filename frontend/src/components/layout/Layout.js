@@ -16,9 +16,6 @@ import {
   Menu,
   MenuItem,
   useTheme,
-  alpha,
-  Collapse,
-  Paper,
   Stack,
   Chip,
   Badge,
@@ -34,31 +31,20 @@ import {
   Settings as SettingsIcon,
   Assessment as ReportsIcon,
   SupervisorAccount as ManagerIcon,
-  ExpandLess,
   ExpandMore,
-  AdminPanelSettings as AdminIcon,
   Menu as MenuIcon,
-  Add,
   Folder,
-  Work as WorkIcon,
   Person as PersonIcon,
   AccountBalanceWallet,
-  ListAlt,
   CalendarToday,
-  History,
-  CheckCircle,
   CheckCircleOutline,
   Receipt,
-  Description,
   FileCopy,
-  Tune,
-  BugReport,
   Business as BusinessIcon,
   Notifications,
   Help,
   Logout as LogoutIcon,
-  Email as EmailIcon,
-  Assessment // ✅ ADD THIS LINE - Import Assessment separately for Performance icons
+  Assessment
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -72,16 +58,6 @@ const Layout = () => {
   // State management
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [openGroups, setOpenGroups] = useState({
-    dashboards: true,
-    employees: true,
-    leave: false,
-    timesheet: false,
-    payroll: false,
-    projects: false,
-    admin: false,
-    reports: false
-  });
 
   // Handler functions
   const handleDrawerToggle = () => {
@@ -101,20 +77,13 @@ const Layout = () => {
     logout();
   };
 
-  const handleGroupClick = (group) => {
-    setOpenGroups(prev => ({
-      ...prev,
-      [group]: !prev[group]
-    }));
-  };
-
   // Menu structure based on role
   const getMenuStructure = () => {
-    if (isAdmin() || isHR()) {
+    if (isAdmin || isHR) {
       return [
         {
-          id: 'dashboards',
-          label: 'Dashboards',
+          id: 'dashboard',
+          label: 'Dashboard',
           icon: <DashboardIcon />,
           items: [
             { label: 'Overview', path: '/admin-dashboard', icon: <DashboardIcon /> },
@@ -122,82 +91,70 @@ const Layout = () => {
           ]
         },
         {
-          id: 'employees',
-          label: 'Employee Management',
+          id: 'people',
+          label: 'People',
           icon: <PeopleIcon />,
           items: [
             { label: 'All Employees', path: '/employees', icon: <PeopleIcon /> },
-            { label: 'Add New Employee', path: '/employees/add', icon: <Add /> },
             { label: 'Employee Records', path: '/employee-records', icon: <Folder /> },
-            { label: 'Positions', path: '/position-management', icon: <WorkIcon /> }
+            { label: 'Employee Reviews', path: '/employee-reviews', icon: <Assessment /> },
+            { label: 'Organization', path: '/organization', icon: <BusinessIcon /> }
           ]
         },
         {
-          id: 'leave',
-          label: 'Leave Management',
-          icon: <LeaveIcon />,
+          id: 'work',
+          label: 'Work',
+          icon: <ProjectIcon />,
           items: [
             { label: 'Leave Requests', path: '/leave-management', icon: <CheckCircleOutline /> },
             { label: 'Leave Balances', path: '/admin/leave-balances', icon: <AccountBalanceWallet /> },
-            { label: 'My Leave Requests', path: '/leave-requests', icon: <ListAlt /> },
-            { label: 'Apply for Leave', path: '/add-leave-request', icon: <Add /> }
-          ]
-        },
-        {
-          id: 'timesheet',
-          label: 'Timesheet & Attendance',
-          icon: <TimesheetIcon />,
-          items: [
-            { label: 'Timesheet Approvals', path: '/timesheets/approvals', icon: <CheckCircleOutline /> },
-            { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
-            { label: 'Timesheet History', path: '/timesheets/history', icon: <History /> }
+            { label: 'Leave Accrual', path: '/admin/leave-accrual', icon: <AccountBalanceWallet /> },
+            { label: 'Leave Types', path: '/admin/leave-types', icon: <CheckCircleOutline /> },
+            { label: 'Timesheet Approvals', path: '/timesheets?view=approvals', icon: <TimesheetIcon /> },
+            { label: 'Attendance Mgmt', path: '/attendance-management', icon: <CalendarToday /> },
+            { label: 'Projects', path: '/project-task-config', icon: <ProjectIcon /> }
           ]
         },
         {
           id: 'payroll',
-          label: 'Payroll',
+          label: 'Payroll & Reports',
           icon: <PayrollIcon />,
           items: [
             { label: 'Payroll Management', path: '/payroll-management', icon: <PayrollIcon /> },
             { label: 'Payslip Templates', path: '/admin/payslip-templates', icon: <FileCopy /> },
-            { label: 'My Payslips', path: '/employee-payslips', icon: <Receipt /> }
+            { label: 'Reports', path: '/reports', icon: <ReportsIcon /> }
           ]
         },
         {
-          id: 'projects',
-          label: 'Projects & Tasks',
-          icon: <ProjectIcon />,
-          items: [
-            { label: 'All Projects', path: '/project-task-config', icon: <ProjectIcon /> }
-          ]
-        },
-        {
-          id: 'reports',
-          label: 'Reports & Analytics',
-          icon: <ReportsIcon />,
-          items: [
-            { label: 'All Reports', path: '/reports', icon: <ReportsIcon /> },
-            { label: 'Consolidated Reports', path: '/admin/consolidated-reports', icon: <Assessment /> }
-          ]
-        },
-        {
-          id: 'admin',
-          label: 'Administration',
-          icon: <AdminIcon />,
+          id: 'settings',
+          label: 'Settings',
+          icon: <SettingsIcon />,
           items: [
             { label: 'User Management', path: '/user-management', icon: <ManagerIcon /> },
-            { label: 'Email Configuration', path: '/email-configuration', icon: <EmailIcon /> },
-            { label: 'System Settings', path: '/settings', icon: <SettingsIcon /> },
+            { label: 'System Settings', path: '/admin/settings-hub', icon: <SettingsIcon /> },
+            { label: 'Restore Records', path: '/admin/restore', icon: <SettingsIcon /> }
+          ]
+        },
+        {
+          id: 'mystuff',
+          label: 'My Stuff',
+          icon: <PersonIcon />,
+          divider: true,
+          items: [
+            { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
+            { label: 'My Leave', path: '/leave-requests', icon: <LeaveIcon /> },
+            { label: 'My Payslips', path: '/employee-payslips', icon: <Receipt /> },
+            { label: 'My Attendance', path: '/my-attendance', icon: <CalendarToday /> },
             { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> }
           ]
         }
       ];
     }
 
-    if (isManager()) {
+    if (isManager) {
       return [
         {
-          id: 'dashboards',
+          id: 'dashboard',
           label: 'Dashboard',
           icon: <DashboardIcon />,
           items: [
@@ -206,55 +163,36 @@ const Layout = () => {
           ]
         },
         {
-          id: 'team',
+          id: 'people',
           label: 'My Team',
           icon: <PeopleIcon />,
           items: [
-            { label: 'Team Members', path: '/employees', icon: <PeopleIcon /> }
+            { label: 'Team Members', path: '/employees', icon: <PeopleIcon /> },
+            { label: 'Employee Reviews', path: '/employee-reviews', icon: <Assessment /> }
           ]
         },
         {
-          id: 'approvals',
-          label: 'Approvals',
+          id: 'work',
+          label: 'Approvals & Work',
           icon: <CheckCircleOutline />,
           items: [
             { label: 'Leave Requests', path: '/leave-management', icon: <LeaveIcon /> },
-            { label: 'Timesheets', path: '/timesheets/approvals', icon: <TimesheetIcon /> }
+            { label: 'Timesheet Approvals', path: '/timesheets?view=approvals', icon: <TimesheetIcon /> },
+            { label: 'Projects', path: '/project-task-config', icon: <ProjectIcon /> }
           ]
         },
         {
-          id: 'leave',
-          label: 'My Leave',
-          icon: <LeaveIcon />,
-          items: [
-            { label: 'My Leave Requests', path: '/leave-requests', icon: <ListAlt /> },
-            { label: 'Apply for Leave', path: '/add-leave-request', icon: <Add /> }
-          ]
-        },
-        {
-          id: 'timesheet',
-          label: 'My Timesheet',
-          icon: <TimesheetIcon />,
-          items: [
-            { label: 'Current Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
-            { label: 'History', path: '/timesheets/history', icon: <History /> }
-          ]
-        },
-        {
-          id: 'projects',
-          label: 'Projects',
-          icon: <ProjectIcon />,
-          items: [
-            { label: 'My Projects', path: '/project-task-config', icon: <ProjectIcon /> }
-          ]
-        },
-        {
-          id: 'profile',
-          label: 'My Profile',
+          id: 'mystuff',
+          label: 'My Stuff',
           icon: <PersonIcon />,
+          divider: true,
           items: [
-            { label: 'Personal Info', path: '/my-profile', icon: <PersonIcon /> },
-            { label: 'My Payslips', path: '/employee-payslips', icon: <Receipt /> }
+            { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
+            { label: 'My Leave', path: '/leave-requests', icon: <LeaveIcon /> },
+            { label: 'My Payslips', path: '/employee-payslips', icon: <Receipt /> },
+            { label: 'My Attendance', path: '/my-attendance', icon: <CalendarToday /> },
+            { label: 'My Tasks', path: '/my-tasks', icon: <ProjectIcon /> },
+            { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> }
           ]
         }
       ];
@@ -264,49 +202,28 @@ const Layout = () => {
     return [
       {
         id: 'dashboard',
-        label: 'My Dashboard',
+        label: 'Dashboard',
         icon: <DashboardIcon />,
         items: [
           { label: 'Overview', path: '/employee-dashboard', icon: <DashboardIcon /> }
         ]
       },
       {
-        id: 'profile',
-        label: 'My Profile',
+        id: 'mystuff',
+        label: 'My Stuff',
         icon: <PersonIcon />,
         items: [
-          { label: 'Personal Information', path: '/my-profile', icon: <PersonIcon /> },
-          { label: 'My Payslips', path: '/employee-payslips', icon: <PayrollIcon /> }
+          { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
+          { label: 'My Leave', path: '/leave-requests', icon: <LeaveIcon /> },
+          { label: 'My Payslips', path: '/employee-payslips', icon: <PayrollIcon /> },
+          { label: 'My Attendance', path: '/my-attendance', icon: <CalendarToday /> },
+          { label: 'My Reviews', path: '/employee-reviews', icon: <Assessment /> },
+          { label: 'My Tasks', path: '/my-tasks', icon: <ProjectIcon /> },
+          { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> }
         ]
-      },
-      {
-        id: 'leave',
-        label: 'Leave',
-        icon: <LeaveIcon />,
-        items: [
-          { label: 'My Leave Requests', path: '/leave-requests', icon: <LeaveIcon /> },
-          { label: 'Apply for Leave', path: '/add-leave-request', icon: <Add /> }
-          ]
-        },
-        {
-          id: 'timesheet',
-          label: 'Timesheet',
-          icon: <TimesheetIcon />,
-          items: [
-            { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
-            { label: 'Timesheet History', path: '/timesheets/history', icon: <History /> }
-          ]
-        },
-        {
-          id: 'tasks',
-          label: 'My Tasks',
-          icon: <ProjectIcon />,
-          items: [
-            { label: 'Assigned Tasks', path: '/project-task-config', icon: <ProjectIcon /> }
-          ]
-        }
-      ];
-    };
+      }
+    ];
+  };
 
     const menuStructure = getMenuStructure();
 
@@ -333,6 +250,9 @@ const Layout = () => {
           <List sx={{ py: 1 }}>
             {menuStructure.map((group) => (
               <React.Fragment key={group.id}>
+                {/* Optional divider before group */}
+                {group.divider && <Divider sx={{ my: 1 }} />}
+                
                 {/* Group Label */}
                 <Typography
                   variant="caption"
@@ -386,6 +306,14 @@ const Layout = () => {
                         fontWeight: 400
                       }}
                     />
+                    {item.badge && (
+                      <Chip
+                        label={item.badge}
+                        size="small"
+                        color={item.badgeColor || 'default'}
+                        sx={{ height: 20, fontSize: '0.65rem' }}
+                      />
+                    )}
                   </ListItemButton>
                 ))}
                 
@@ -407,6 +335,36 @@ const Layout = () => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Skip Navigation Link - visible only on focus for keyboard/screen-reader users */}
+      <Box
+        component="a"
+        href="#main-content"
+        sx={{
+          position: 'absolute',
+          left: '-9999px',
+          top: 'auto',
+          width: '1px',
+          height: '1px',
+          overflow: 'hidden',
+          '&:focus': {
+            position: 'fixed',
+            top: 8,
+            left: 8,
+            width: 'auto',
+            height: 'auto',
+            padding: '8px 16px',
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            zIndex: 9999,
+            borderRadius: 1,
+            textDecoration: 'none',
+            fontWeight: 600,
+          }
+        }}
+      >
+        Skip to main content
+      </Box>
+
       {/* Enhanced App Bar */}
       <AppBar
         position="fixed"
@@ -662,6 +620,7 @@ const Layout = () => {
       </Menu>
 
       <Box
+        id="main-content"
         component="main"
         sx={{
           flexGrow: 1,

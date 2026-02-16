@@ -1,182 +1,139 @@
-# SkyrakSys HRM - Production Ready
+# SkyrakSys HRM
 
-## 🚀 Quick Start
+Indian HR Management System — Employee lifecycle, payroll (EPF/ESI/TDS), leave, timesheets, attendance, and reviews.
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18.3, MUI 5.15, React Query 5.90, React Router 6.25, Axios 1.7 |
+| Backend | Express 4.18, Sequelize 6.35, PostgreSQL 15, JWT httpOnly cookies |
+| Testing | Jest 29, React Testing Library 16, Playwright 1.58, Supertest 6 |
+| Infra | PM2 (cluster ×2), Docker (PostgreSQL + pgAdmin) |
+
+## Quick Start
 
 ### Prerequisites
-- Node.js 16+ 
-- PostgreSQL 13+
-- npm or yarn
+- Node.js 18+
+- PostgreSQL 15+ (or Docker)
+- npm
 
-### Installation
+### Install & Run
+
 ```bash
-# Clone repository
-git clone <your-repo-url>
-cd skyraksys_hrm
+# Database (via Docker)
+docker-compose up -d
 
-# Install backend dependencies
+# Backend
 cd backend
 npm install
+npx sequelize-cli db:migrate
+npm run dev                    # http://localhost:5000
 
-# Install frontend dependencies  
-cd ../frontend
-npm install
-```
-
-### Environment Setup
-```bash
-# Copy environment template
-cp .env.production.template .env.production
-
-# Configure your environment variables:
-# - Database connection
-# - JWT secrets
-# - API keys
-```
-
-### Database Setup
-```bash
-# Run database migrations
-cd backend
-npm run migrate
-
-# Seed initial data
-npm run seed
-```
-
-### Running the Application
-
-#### Development
-```bash
-# Start backend (from root)
-npm run start:backend
-
-# Start frontend (from root) 
-npm run start:frontend
-```
-
-#### Production
-```bash
-# Build frontend
+# Frontend (new terminal)
 cd frontend
-npm run build
-
-# Start with PM2
-cd ..
-pm2 start ecosystem.config.js
+npm install
+npm start                      # http://localhost:3000
 ```
 
-## 📁 Project Structure
+### Environment Variables
 
-```
-skyraksys_hrm/
-├── backend/                 # Express.js backend
-│   ├── config/             # Database & app configuration
-│   ├── controllers/        # Route controllers
-│   ├── middleware/         # Authentication & validation
-│   ├── models/            # Sequelize models
-│   ├── routes/            # API routes
-│   ├── migrations/        # Database migrations (Sequelize)
-│   ├── seeders/           # Database seeders
-│   ├── README.md          # Backend documentation
-│   └── server.js          # Entry point
-│
-├── frontend/               # React frontend
-│   ├── public/            # Static assets
-│   ├── src/               # Source code
-│   └── e2e/               # Playwright E2E tests
-│       ├── README.md      # E2E testing guide
-│       └── QUICK_START.md # Quick reference
-│
-├── redhatprod/            # 🎯 Production deployment (RHEL 9.6)
-│   ├── START_HERE.md      # ⭐ Quick start
-│   ├── PRODUCTION_DEPLOYMENT_GUIDE.md  # Complete guide
-│   ├── MIGRATION_GUIDE.md # Database migrations
-│   ├── scripts/           # Automated deployment scripts
-│   └── templates/         # Configuration templates
-│
-├── docs/                  # 📚 Documentation
-│   ├── README.md          # Documentation index
-│   ├── api/               # API documentation
-│   ├── deployment/        # Deployment guides
-│   ├── development/       # Developer guides
-│   ├── features/          # Feature documentation
-│   └── production/        # Production checklists
-│
-├── admin-debug-panel/     # 🔧 Database debug tool (dev only)
-├── tests/                 # Backend test suites
-├── obsolete/              # 📦 Archived documentation
-│   └── README.md          # Archive index
-│
-├── README.md              # ⭐ This file
-├── CHANGELOG.md           # Version history
-└── .github/
-    └── copilot-instructions.md  # AI assistance config
+Copy `.env.example` to `.env` in `backend/`. Key variables:
+
+```env
+NODE_ENV=development
+PORT=5000
+DB_HOST=localhost
+DB_NAME=skyraksys_hrm
+DB_USER=postgres
+DB_PASSWORD=postgres
+JWT_SECRET=your-secret-key
+JWT_REFRESH_SECRET=your-refresh-secret
+FRONTEND_URL=http://localhost:3000
 ```
 
-## 📚 Documentation
+See [docs/07-CONFIGURATION.md](docs/07-CONFIGURATION.md) for all 50+ environment variables.
 
-### For Production Deployment
-🎯 **Start Here:** [`redhatprod/START_HERE.md`](redhatprod/START_HERE.md)
+### Production
 
-**Essential Guides:**
-- 📘 [Complete Deployment Guide](redhatprod/PRODUCTION_DEPLOYMENT_GUIDE.md)
-- 📘 [Database Migrations](redhatprod/MIGRATION_GUIDE.md)
-- 📘 [Manual Installation](redhatprod/MANUAL_INSTALLATION_GUIDE.md)
-
-**Automated Scripts:** [`redhatprod/scripts/`](redhatprod/scripts/)
-
-### For Development
-📖 **Backend:** [`backend/README.md`](backend/README.md)  
-📖 **Frontend E2E:** [`frontend/e2e/README.md`](frontend/e2e/README.md)  
-📖 **Admin Panel:** [`admin-debug-panel/README.md`](admin-debug-panel/README.md)
-
-### For Features & Guides
-📚 **Documentation:** [`docs/README.md`](docs/README.md)
-
-### Historical
-📦 **Archived:** [`obsolete/README.md`](obsolete/README.md) - Completed fixes and superseded guides
-
-## 🔧 Available Scripts
-
-### Backend
-- `npm start` - Start production server
-- `npm run dev` - Start development server
-- `npm run migrate` - Run database migrations
-- `npm run seed` - Seed database
-
-### Frontend  
-- `npm start` - Start development server
-- `npm run build` - Build for production
-- `npm test` - Run tests
-
-## 🚀 Deployment
-
-See `docs/deployment/` for detailed deployment guides:
-- Docker deployment
-- Cloud deployment (AWS, Azure, GCP)
-- CI/CD setup
-
-## 📚 Documentation
-
-- `docs/api/` - API documentation
-- `docs/development/` - Development guides
-- `docs/deployment/` - Deployment guides
-
-## 🧪 Testing
-
-Run development tests:
 ```bash
-node scripts/testing/quick-api-test.js
+cd frontend && npm run build
+pm2 start ecosystem.config.js --env production
 ```
 
-## 🔒 Security
+## Project Structure
 
-- JWT authentication
-- Role-based access control
-- Input validation
-- SQL injection protection
-- XSS protection
+```
+skyraksys_hrm_app/
+├── backend/
+│   ├── config/          # Database, auth, app configuration
+│   ├── controllers/     # Route controllers (~15 files)
+│   ├── middleware/       # Auth, RBAC, rate limiting, validation
+│   ├── models/          # Sequelize models (22 tables)
+│   ├── routes/          # API routes (~238 endpoints, 27 files)
+│   ├── migrations/      # Database migrations (9 files)
+│   ├── scripts/         # Utility scripts
+│   └── server.js        # Entry point (19-step middleware chain)
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/  # React components (common + feature modules)
+│   │   ├── contexts/    # AuthContext, LoadingContext, NotificationContext
+│   │   ├── hooks/       # 18 custom hooks + React Query hooks
+│   │   ├── services/    # 20 API service files
+│   │   ├── theme/       # MUI theme (modernTheme.js)
+│   │   ├── utils/       # 12 utility files (validation, RBAC, formatting)
+│   │   └── App.js       # 55+ routes
+│   ├── __tests__/       # Unit tests
+│   └── e2e/             # Playwright E2E tests
+│
+├── docs/                # Developer documentation (8 guides)
+├── database/            # Database scripts
+├── docker-compose.yml   # PostgreSQL + pgAdmin
+└── ecosystem.config.js  # PM2 configuration
+```
 
-## 📄 License
+## Documentation
 
-[Your License Here]
+### Developer Guides — [`docs/`](docs/README.md)
+
+| Guide | Description |
+|-------|-------------|
+| [Frontend Architecture](docs/01-FRONTEND_ARCHITECTURE.md) | Components, routing, state management, services, hooks |
+| [API Reference](docs/02-API_REFERENCE.md) | All ~238 endpoints with middleware and descriptions |
+| [Database Design](docs/03-DATABASE_DESIGN.md) | 22 models, associations, migrations |
+| [Business Rules](docs/04-BUSINESS_RULES.md) | Payroll calculations, leave rules, workflows |
+| [Security Architecture](docs/05-SECURITY_ARCHITECTURE.md) | Auth flow, RBAC matrix, rate limiting |
+| [UX & Design System](docs/06-UX_DESIGN_SYSTEM.md) | MUI theme, component patterns, conventions |
+| [Configuration](docs/07-CONFIGURATION.md) | All env vars, PM2, Docker, runtime config |
+| [Operations Runbook](docs/08-OPERATIONS_RUNBOOK.md) | Health checks, logging, cron, troubleshooting |
+
+### Other Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Architecture & Design](ARCHITECTURE_AND_DESIGN_DOCUMENT.md) | System architecture overview (1,400 lines) |
+| [Deployment Guide](DEPLOYMENT_GUIDE.md) | Production deployment instructions |
+| [Test Strategy](TEST_STRATEGY_AND_PLAN.md) | Testing plan with field matrices |
+| [Backend README](backend/README.md) | Backend-specific documentation |
+
+## Key Features
+
+- **Employee Management** — Full lifecycle (SKYT#### IDs, status transitions, photo upload)
+- **Payroll** — Indian statutory compliance (EPF, ESI, Professional Tax, TDS old/new regime)
+- **Leave Management** — 5 leave types, half-day support, cancellation workflow, automated accrual
+- **Timesheets** — Weekly project-task entries, bulk operations, approval workflow
+- **Attendance** — Check-in/out, multi-source, monthly reports
+- **Employee Reviews** — Quarterly/annual cycles, 5-dimension ratings, HR approval
+- **Security** — JWT httpOnly cookies, RBAC (4 roles), field-level permissions, audit logging
+- **Projects & Tasks** — Assignment, workload tracking, time logging
+
+## Default Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@skyraksys.com` | Set during setup |
+
+## License
+
+Proprietary — SkyrakSys

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Modern Payroll Management System - Admin/HR Interface
  * Comprehensive payslip generation, approval, payment processing, and reporting
  */
@@ -60,38 +60,103 @@ import {
   Refresh as RefreshIcon,
   FileDownload as ExportIcon
 } from '@mui/icons-material';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { useAuth } from '../../../contexts/AuthContext';
 import http from '../../../http-common';
 import EditPayslipDialog from './EditPayslipDialog';
+import ConfirmDialog from '../../common/ConfirmDialog';
+import useConfirmDialog from '../../../hooks/useConfirmDialog';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 const ModernPayrollManagement = () => {
   const { enqueueSnackbar } = useSnackbar();
   const { isAdmin, isHR } = useAuth();
+  const queryClient = useQueryClient();
+  const { dialogProps, confirm } = useConfirmDialog();
   
   const [activeTab, setActiveTab] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [payslips, setPayslips] = useState([]);
-  const [employees, setEmployees] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [templates, setTemplates] = useState([]);
+  const [paymentMethod, setPaymentMethod] = useState('');
   
-  // Pagination
+  // Loading state for non-query operations
+  const [operationLoading, setOperationLoading] = useState(false);
+  
+  // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
   
-  // Search
+  // Search state
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Filters
+  // Filters state
   const [filters, setFilters] = useState({
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
     departmentId: '',
     status: '',
-    templateId: '' // Add template filter
+    templateId: ''
   });
+  
+  // ðŸš€ React Query for payslips
+  const { data: payslipsData, isLoading: isLoadingPayslips, refetch: refetchPayslips } = useQuery({
+    queryKey: ['payslips', filters, page, rowsPerPage],
+    queryFn: async () => {
+      const params = {
+        month: filters.month,
+        year: filters.year,
+        page: page + 1,
+        limit: rowsPerPage,
+        ...(filters.status && { status: filters.status }),
+        ...(filters.departmentId && { departmentId: filters.departmentId })
+      };
+      const response = await http.get('/payslips', { params });
+      return response.data;
+    },
+    onError: (error) => {
+      console.error('Load payslips error:', error);
+      enqueueSnackbar('Failed to load payslips', { variant: 'error' });
+    }
+  });
+  
+  // ðŸš€ React Query for employees
+  const { data: employeesData } = useQuery({
+    queryKey: ['employees', 'active'],
+    queryFn: async () => {
+      const response = await http.get('/employees', {
+        params: { status: 'Active', limit: 1000 }
+      });
+      return response.data;
+    },
+    onError: (error) => console.error('Load employees error:', error)
+  });
+  
+  // ðŸš€ React Query for departments
+  const { data: departmentsData } = useQuery({
+    queryKey: ['departments'],
+    queryFn: async () => {
+      const response = await http.get('/departments');
+      return response.data;
+    },
+    onError: (error) => console.error('Load departments error:', error)
+  });
+  
+  // ðŸš€ React Query for templates
+  const { data: templatesData } = useQuery({
+    queryKey: ['payslip-templates', 'active'],
+    queryFn: async () => {
+      const response = await http.get('/payslip-templates/active');
+      return response.data;
+    },
+    onError: (error) => console.error('Load templates error:', error)
+  });
+  
+  // Derive data from queries
+  const payslips = payslipsData?.success ? payslipsData.data : [];
+  const totalRecords = payslipsData?.pagination?.totalRecords || 0;
+  const employees = employeesData?.success ? employeesData.data : [];
+  const departments = departmentsData?.success ? departmentsData.data : [];
+  const templates = templatesData?.success ? templatesData.data || [] : [];
+  const loading = isLoadingPayslips;
   
   // Dialogs
   const [generateDialog, setGenerateDialog] = useState(false);
@@ -117,77 +182,12 @@ const ModernPayrollManagement = () => {
     totalAmount: 0
   });
 
+  // Calculate stats when payslips change
   useEffect(() => {
-    loadPayslips();
-    loadEmployees();
-    loadDepartments();
-    loadTemplates();
-  }, [filters, page, rowsPerPage]);
-
-  const loadPayslips = async () => {
-    try {
-      setLoading(true);
-      const params = {
-        month: filters.month,
-        year: filters.year,
-        page: page + 1,
-        limit: rowsPerPage,
-        ...(filters.status && { status: filters.status }),
-        ...(filters.departmentId && { departmentId: filters.departmentId })
-      };
-      
-      const response = await http.get('/payslips', { params });
-      
-      if (response.data.success) {
-        setPayslips(response.data.data);
-        setTotalRecords(response.data.pagination?.totalRecords || 0);
-        
-        // Calculate stats
-        calculateStats(response.data.data);
-      }
-    } catch (error) {
-      console.error('Load payslips error:', error);
-      enqueueSnackbar('Failed to load payslips', { variant: 'error' });
-    } finally {
-      setLoading(false);
+    if (payslips.length > 0) {
+      calculateStats(payslips);
     }
-  };
-
-  const loadEmployees = async () => {
-    try {
-      const response = await http.get('/employees', {
-        params: { status: 'Active', limit: 1000 }
-      });
-      if (response.data.success) {
-        setEmployees(response.data.data);
-      }
-    } catch (error) {
-      console.error('Load employees error:', error);
-    }
-  };
-
-  const loadDepartments = async () => {
-    try {
-      const response = await http.get('/departments');
-      if (response.data.success) {
-        setDepartments(response.data.data);
-      }
-    } catch (error) {
-      console.error('Load departments error:', error);
-    }
-  };
-
-  const loadTemplates = async () => {
-    try {
-      const response = await http.get('/payslip-templates/active');
-      if (response.data.success) {
-        setTemplates(response.data.data || []);
-      }
-    } catch (error) {
-      console.error('Load templates error:', error);
-      // Don't show error to user, templates are optional
-    }
-  };
+  }, [payslips]);
 
   const calculateStats = (payslipList) => {
     const newStats = {
@@ -217,7 +217,7 @@ const ModernPayrollManagement = () => {
     }
 
     try {
-      setLoading(true);
+      setOperationLoading(true);
       const response = await http.post('/payslips/validate', {
         employeeIds: selectedEmployees,
         month: filters.month,
@@ -235,7 +235,7 @@ const ModernPayrollManagement = () => {
         { variant: 'error' }
       );
     } finally {
-      setLoading(false);
+      setOperationLoading(false);
     }
   };
 
@@ -267,7 +267,7 @@ const ModernPayrollManagement = () => {
     }
     
     try {
-      setLoading(true);
+      setOperationLoading(true);
       
       const payload = {
         employeeIds: idsToUse,
@@ -290,7 +290,7 @@ const ModernPayrollManagement = () => {
         setGenerateDialog(false);
         setSelectedEmployees([]);
         setValidationResults(null);
-        loadPayslips();
+        refetchPayslips();
       } else {
         enqueueSnackbar(response.data.message || 'Generation failed', { variant: 'error' });
       }
@@ -301,67 +301,69 @@ const ModernPayrollManagement = () => {
         { variant: 'error' }
       );
     } finally {
-      setLoading(false);
+      setOperationLoading(false);
     }
   };
 
-  const handleGenerateAll = async () => {
-    if (!window.confirm('Generate payslips for ALL active employees?')) {
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      
-      const response = await http.post('/payslips/generate-all', {
-        month: filters.month,
-        year: filters.year,
-        departmentId: filters.departmentId || undefined
-      });
-      
-      if (response.data.success) {
-        enqueueSnackbar('Payslips generated for all employees', { variant: 'success' });
-        loadPayslips();
+  const handleGenerateAll = () => {
+    confirm({
+      title: 'Generate All Payslips',
+      message: 'Generate payslips for ALL active employees? This may take a moment.',
+      variant: 'warning',
+      confirmText: 'Generate All',
+      onConfirm: async () => {
+        try {
+          setOperationLoading(true);
+          const response = await http.post('/payslips/generate-all', {
+            month: filters.month,
+            year: filters.year,
+            departmentId: filters.departmentId || undefined
+          });
+          if (response.data.success) {
+            enqueueSnackbar('Payslips generated for all employees', { variant: 'success' });
+            refetchPayslips();
+          }
+        } catch (error) {
+          console.error('Generate all error:', error);
+          enqueueSnackbar('Failed to generate payslips', { variant: 'error' });
+        } finally {
+          setOperationLoading(false);
+        }
       }
-    } catch (error) {
-      console.error('Generate all error:', error);
-      enqueueSnackbar('Failed to generate payslips', { variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const handleFinalizePayslip = async (payslipId) => {
     try {
-      setLoading(true);
+      setOperationLoading(true);
       const response = await http.put(`/payslips/${payslipId}/finalize`);
       
       if (response.data.success) {
         enqueueSnackbar('Payslip finalized successfully', { variant: 'success' });
-        loadPayslips();
+        refetchPayslips();
       }
     } catch (error) {
       console.error('Finalize error:', error);
       enqueueSnackbar('Failed to finalize payslip', { variant: 'error' });
     } finally {
-      setLoading(false);
+      setOperationLoading(false);
     }
   };
 
   const handleMarkAsPaid = async (payslipId) => {
     try {
-      setLoading(true);
+      setOperationLoading(true);
       const response = await http.put(`/payslips/${payslipId}/mark-paid`);
       
       if (response.data.success) {
         enqueueSnackbar('Payslip marked as paid', { variant: 'success' });
-        loadPayslips();
+        refetchPayslips();
       }
     } catch (error) {
       console.error('Mark paid error:', error);
       enqueueSnackbar('Failed to mark as paid', { variant: 'error' });
     } finally {
-      setLoading(false);
+      setOperationLoading(false);
     }
   };
 
@@ -455,39 +457,42 @@ const ModernPayrollManagement = () => {
       return;
     }
 
-    if (!window.confirm(`Finalize ${selectedPayslipIds.length} payslip(s)? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await http.post('/payslips/bulk-finalize', {
-        payslipIds: selectedPayslipIds
-      });
-
-      if (response.data.success) {
-        enqueueSnackbar(
-          `${response.data.successCount} payslip(s) finalized successfully`,
-          { variant: 'success' }
-        );
-        if (response.data.failedCount > 0) {
+    confirm({
+      title: 'Finalize Payslips',
+      message: `Finalize ${selectedPayslipIds.length} payslip(s)? This action cannot be undone.`,
+      variant: 'warning',
+      confirmText: 'Finalize',
+      onConfirm: async () => {
+        try {
+          setOperationLoading(true);
+          const response = await http.post('/payslips/bulk-finalize', {
+            payslipIds: selectedPayslipIds
+          });
+          if (response.data.success) {
+            enqueueSnackbar(
+              `${response.data.successCount} payslip(s) finalized successfully`,
+              { variant: 'success' }
+            );
+            if (response.data.failedCount > 0) {
+              enqueueSnackbar(
+                `${response.data.failedCount} payslip(s) failed (only drafts can be finalized)`,
+                { variant: 'warning' }
+              );
+            }
+            setSelectedPayslipIds([]);
+            refetchPayslips();
+          }
+        } catch (error) {
+          console.error('Bulk finalize error:', error);
           enqueueSnackbar(
-            `${response.data.failedCount} payslip(s) failed (only drafts can be finalized)`,
-            { variant: 'warning' }
+            error.response?.data?.message || 'Failed to finalize payslips',
+            { variant: 'error' }
           );
+        } finally {
+          setOperationLoading(false);
         }
-        setSelectedPayslipIds([]);
-        loadPayslips();
       }
-    } catch (error) {
-      console.error('Bulk finalize error:', error);
-      enqueueSnackbar(
-        error.response?.data?.message || 'Failed to finalize payslips',
-        { variant: 'error' }
-      );
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const handleBulkMarkPaid = async () => {
@@ -496,41 +501,44 @@ const ModernPayrollManagement = () => {
       return;
     }
 
-    if (!window.confirm(`Mark ${selectedPayslipIds.length} payslip(s) as paid?`)) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await http.post('/payslips/bulk-paid', {
-        payslipIds: selectedPayslipIds,
-        paymentDate: new Date().toISOString(),
-        paymentMethod: 'Bank Transfer'
-      });
-
-      if (response.data.success) {
-        enqueueSnackbar(
-          `${response.data.successCount} payslip(s) marked as paid`,
-          { variant: 'success' }
-        );
-        if (response.data.failedCount > 0) {
+    confirm({
+      title: 'Mark as Paid',
+      message: `Mark ${selectedPayslipIds.length} payslip(s) as paid?`,
+      variant: 'success',
+      confirmText: 'Mark Paid',
+      onConfirm: async () => {
+        try {
+          setOperationLoading(true);
+          const response = await http.post('/payslips/bulk-paid', {
+            payslipIds: selectedPayslipIds,
+            paymentDate: new Date().toISOString(),
+            paymentMethod
+          });
+          if (response.data.success) {
+            enqueueSnackbar(
+              `${response.data.successCount} payslip(s) marked as paid`,
+              { variant: 'success' }
+            );
+            if (response.data.failedCount > 0) {
+              enqueueSnackbar(
+                `${response.data.failedCount} payslip(s) failed (only finalized can be marked paid)`,
+                { variant: 'warning' }
+              );
+            }
+            setSelectedPayslipIds([]);
+            refetchPayslips();
+          }
+        } catch (error) {
+          console.error('Bulk mark paid error:', error);
           enqueueSnackbar(
-            `${response.data.failedCount} payslip(s) failed (only finalized can be marked paid)`,
-            { variant: 'warning' }
+            error.response?.data?.message || 'Failed to mark payslips as paid',
+            { variant: 'error' }
           );
+        } finally {
+          setOperationLoading(false);
         }
-        setSelectedPayslipIds([]);
-        loadPayslips();
       }
-    } catch (error) {
-      console.error('Bulk mark paid error:', error);
-      enqueueSnackbar(
-        error.response?.data?.message || 'Failed to mark payslips as paid',
-        { variant: 'error' }
-      );
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const handleBulkDelete = async () => {
@@ -539,36 +547,38 @@ const ModernPayrollManagement = () => {
       return;
     }
 
-    if (!window.confirm(`Delete ${selectedPayslipIds.length} payslip(s)? This action cannot be undone. Only draft payslips will be deleted.`)) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await http.delete('/payslips/bulk', {
-        data: { payslipIds: selectedPayslipIds }
-      });
-
-      if (response.data.success) {
-        enqueueSnackbar(
-          `${response.data.successCount} payslip(s) deleted`,
-          { variant: 'success' }
-        );
-        if (response.data.failedCount > 0) {
-          enqueueSnackbar(
-            `${response.data.failedCount} payslip(s) could not be deleted (only drafts can be deleted)`,
-            { variant: 'warning' }
-          );
+    confirm({
+      title: 'Delete Payslips',
+      message: `Delete ${selectedPayslipIds.length} payslip(s)? This action cannot be undone. Only draft payslips will be deleted.`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          setOperationLoading(true);
+          const response = await http.delete('/payslips/bulk', {
+            data: { payslipIds: selectedPayslipIds }
+          });
+          if (response.data.success) {
+            enqueueSnackbar(
+              `${response.data.successCount} payslip(s) deleted`,
+              { variant: 'success' }
+            );
+            if (response.data.failedCount > 0) {
+              enqueueSnackbar(
+                `${response.data.failedCount} payslip(s) could not be deleted (only drafts can be deleted)`,
+                { variant: 'warning' }
+              );
+            }
+            setSelectedPayslipIds([]);
+            refetchPayslips();
+          }
+        } catch (error) {
+          console.error('Error deleting payslips:', error);
+          enqueueSnackbar('Failed to delete payslips', { variant: 'error' });
+        } finally {
+          setOperationLoading(false);
         }
-        setSelectedPayslipIds([]);
-        loadPayslips();
       }
-    } catch (error) {
-      console.error('Error deleting payslips:', error);
-      enqueueSnackbar('Failed to delete payslips', { variant: 'error' });
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const handleEditPayslip = (payslip) => {
@@ -582,7 +592,7 @@ const ModernPayrollManagement = () => {
 
   const handleSaveEdit = async (editData) => {
     try {
-      setLoading(true);
+      setOperationLoading(true);
       const response = await http.put(`/payslips/${editData.payslipId}`, {
         earnings: editData.earnings,
         deductions: editData.deductions,
@@ -593,7 +603,7 @@ const ModernPayrollManagement = () => {
         enqueueSnackbar('Payslip updated successfully', { variant: 'success' });
         setEditDialog(false);
         setPayslipToEdit(null);
-        loadPayslips();
+        refetchPayslips();
       }
     } catch (error) {
       console.error('Error updating payslip:', error);
@@ -602,7 +612,7 @@ const ModernPayrollManagement = () => {
         { variant: 'error' }
       );
     } finally {
-      setLoading(false);
+      setOperationLoading(false);
     }
   };
 
@@ -664,7 +674,7 @@ const ModernPayrollManagement = () => {
                 Total Payout Amount
               </Typography>
               <Typography variant="h4">
-                ₹{stats.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                {formatCurrency(stats.totalAmount)}
               </Typography>
             </CardContent>
           </Card>
@@ -692,7 +702,7 @@ const ModernPayrollManagement = () => {
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
-            onClick={loadPayslips}
+            onClick={refetchPayslips}
           >
             Refresh
           </Button>
@@ -854,7 +864,7 @@ const ModernPayrollManagement = () => {
           InputProps={{
             startAdornment: (
               <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
-                🔍
+                ðŸ”
               </Box>
             )
           }}
@@ -1029,14 +1039,14 @@ const ModernPayrollManagement = () => {
                   </TableCell>
                   <TableCell>{payslip.payPeriod}</TableCell>
                   <TableCell align="right">
-                    ₹{parseFloat(payslip.grossEarnings || 0).toLocaleString('en-IN')}
+                    {formatCurrency(parseFloat(payslip.grossEarnings || 0))}
                   </TableCell>
                   <TableCell align="right">
-                    ₹{parseFloat(payslip.totalDeductions || 0).toLocaleString('en-IN')}
+                    {formatCurrency(parseFloat(payslip.totalDeductions || 0))}
                   </TableCell>
                   <TableCell align="right">
                     <Typography variant="body2" fontWeight="bold">
-                      ₹{parseFloat(payslip.netPay || 0).toLocaleString('en-IN')}
+                      {formatCurrency(parseFloat(payslip.netPay || 0))}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -1048,13 +1058,14 @@ const ModernPayrollManagement = () => {
                   </TableCell>
                   <TableCell align="right">
                     <Tooltip title="View Details">
-                      <IconButton size="small" onClick={() => handleViewPayslip(payslip)}>
+                      <IconButton size="small" aria-label="View details" onClick={() => handleViewPayslip(payslip)}>
                         <ViewIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Download PDF">
                       <IconButton
                         size="small"
+                        aria-label="Download PDF"
                         onClick={() => handleDownloadPDF(payslip.id, payslip.payslipNumber)}
                       >
                         <DownloadIcon fontSize="small" />
@@ -1064,6 +1075,7 @@ const ModernPayrollManagement = () => {
                       <Tooltip title="Finalize">
                         <IconButton
                           size="small"
+                          aria-label="Finalize payslip"
                           color="primary"
                           onClick={() => handleFinalizePayslip(payslip.id)}
                         >
@@ -1075,6 +1087,7 @@ const ModernPayrollManagement = () => {
                       <Tooltip title="Edit Payslip">
                         <IconButton
                           size="small"
+                          aria-label="Edit payslip"
                           color="warning"
                           onClick={() => handleEditPayslip(payslip)}
                         >
@@ -1086,6 +1099,7 @@ const ModernPayrollManagement = () => {
                       <Tooltip title="Mark as Paid">
                         <IconButton
                           size="small"
+                          aria-label="Mark as paid"
                           color="success"
                           onClick={() => handleMarkAsPaid(payslip.id)}
                         >
@@ -1156,13 +1170,13 @@ const ModernPayrollManagement = () => {
               {Object.entries(selectedPayslip.earnings || {}).map(([key, value]) => (
                 <Box key={key} display="flex" justifyContent="space-between">
                   <Typography variant="body2">{formatLabel(key)}</Typography>
-                  <Typography variant="body2">₹{parseFloat(value).toFixed(2)}</Typography>
+                  <Typography variant="body2">â‚¹{parseFloat(value).toFixed(2)}</Typography>
                 </Box>
               ))}
               <Box display="flex" justifyContent="space-between" mt={1}>
                 <Typography variant="body1" fontWeight="bold">Gross Earnings</Typography>
                 <Typography variant="body1" fontWeight="bold">
-                  ₹{parseFloat(selectedPayslip.grossEarnings).toFixed(2)}
+                  â‚¹{parseFloat(selectedPayslip.grossEarnings).toFixed(2)}
                 </Typography>
               </Box>
             </Grid>
@@ -1172,13 +1186,13 @@ const ModernPayrollManagement = () => {
               {Object.entries(selectedPayslip.deductions || {}).map(([key, value]) => (
                 <Box key={key} display="flex" justifyContent="space-between">
                   <Typography variant="body2">{formatLabel(key)}</Typography>
-                  <Typography variant="body2">₹{parseFloat(value).toFixed(2)}</Typography>
+                  <Typography variant="body2">â‚¹{parseFloat(value).toFixed(2)}</Typography>
                 </Box>
               ))}
               <Box display="flex" justifyContent="space-between" mt={1}>
                 <Typography variant="body1" fontWeight="bold">Total Deductions</Typography>
                 <Typography variant="body1" fontWeight="bold">
-                  ₹{parseFloat(selectedPayslip.totalDeductions).toFixed(2)}
+                  â‚¹{parseFloat(selectedPayslip.totalDeductions).toFixed(2)}
                 </Typography>
               </Box>
             </Grid>
@@ -1188,7 +1202,7 @@ const ModernPayrollManagement = () => {
               <Box display="flex" justifyContent="space-between">
                 <Typography variant="h6" color="primary">Net Pay</Typography>
                 <Typography variant="h6" color="primary">
-                  ₹{parseFloat(selectedPayslip.netPay).toFixed(2)}
+                  â‚¹{parseFloat(selectedPayslip.netPay).toFixed(2)}
                 </Typography>
               </Box>
               <Typography variant="caption" color="textSecondary">
@@ -1248,7 +1262,7 @@ const ModernPayrollManagement = () => {
                 <Grid item xs={12}>
                   <Paper sx={{ p: 2, bgcolor: 'success.light', color: 'success.contrastText' }}>
                     <Typography variant="h6" gutterBottom>
-                      ✅ Valid Employees ({validationResults.validEmployees.length})
+                      âœ… Valid Employees ({validationResults.validEmployees.length})
                     </Typography>
                     <Typography variant="body2" sx={{ mb: 2 }}>
                       These employees are ready for payslip generation
@@ -1288,7 +1302,7 @@ const ModernPayrollManagement = () => {
                 <Grid item xs={12}>
                   <Paper sx={{ p: 2, bgcolor: 'error.light', color: 'error.contrastText' }}>
                     <Typography variant="h6" gutterBottom>
-                      ❌ Invalid Employees ({validationResults.invalidEmployees.length})
+                      âŒ Invalid Employees ({validationResults.invalidEmployees.length})
                     </Typography>
                     <Typography variant="body2" sx={{ mb: 2 }}>
                       These employees have issues that prevent payslip generation
@@ -1449,6 +1463,7 @@ const ModernPayrollManagement = () => {
         onSave={handleSaveEdit}
         loading={loading}
       />
+      <ConfirmDialog {...dialogProps} />
     </Container>
   );
 };

@@ -1,5 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../utils/logger');
 
 class LogService {
   constructor() {
@@ -77,7 +78,7 @@ class LogService {
         hasMore: offset + lines < total
       };
     } catch (error) {
-      console.error(`Error reading ${logType} log:`, error);
+      logger.error(`Error reading ${logType} log:`, { detail: error });
       throw error;
     }
   }
@@ -123,7 +124,7 @@ class LogService {
 
       return files;
     } catch (error) {
-      console.error('Error getting log files:', error);
+      logger.error('Error getting log files:', { detail: error });
       throw error;
     }
   }
@@ -151,7 +152,7 @@ class LogService {
         message: `Log file ${fileName} cleared successfully`
       };
     } catch (error) {
-      console.error(`Error clearing ${logType} log:`, error);
+      logger.error(`Error clearing ${logType} log:`, { detail: error });
       throw error;
     }
   }
@@ -183,7 +184,7 @@ class LogService {
 
       return stats;
     } catch (error) {
-      console.error('Error getting log stats:', error);
+      logger.error('Error getting log stats:', { detail: error });
       throw error;
     }
   }
@@ -209,7 +210,7 @@ class LogService {
       const result = await this.readLog(logType, { lines, offset: 0 });
       return result;
     } catch (error) {
-      console.error(`Error tailing ${logType} log:`, error);
+      logger.error(`Error tailing ${logType} log:`, { detail: error });
       throw error;
     }
   }

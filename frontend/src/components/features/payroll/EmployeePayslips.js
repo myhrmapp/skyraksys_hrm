@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import formatCurrency from '../../../utils/formatCurrency';
 import {
   Container,
   Paper,
@@ -18,21 +20,14 @@ import {
   TablePagination,
   Chip,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
   Skeleton,
-  Avatar,
   Stack,
-  Divider,
-  useTheme,
   Fade,
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Alert
 } from '@mui/material';
 import {
   Receipt as ReceiptIcon,
@@ -40,73 +35,45 @@ import {
   ArrowBack as BackIcon,
   Visibility as ViewIcon,
   TrendingUp as TrendingUpIcon,
-  CalendarMonth as CalendarIcon,
-  FilterList as FilterIcon
+  CalendarMonth as CalendarIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
+import { payslipService } from '../../../services/payslip/payslipService';
+import PayslipViewer from '../../payslip/PayslipViewer';
 
 const EmployeePayslips = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  const [loading, setLoading] = useState(true);
-  const [payslips, setPayslips] = useState([]);
   const [selectedPayslip, setSelectedPayslip] = useState(null);
-  const [payslipDialog, setPayslipDialog] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [yearFilter, setYearFilter] = useState('all');
 
-  useEffect(() => {
-    loadEmployeePayslips();
-  }, []);
-
-  const loadEmployeePayslips = async () => {
-    try {
-      setLoading(true);
-      
-      // Load payslips from API using the payslip service
-      try {
-        const { payslipService } = await import('../../../services/payslip/payslipService');
-        
-        // Get payslips for the current employee
-        const response = await payslipService.getAllPayslips({ 
-          employeeId: user.employeeId || user.id 
-        });
-        
-        if (response?.data) {
-          const payslips = Array.isArray(response.data) ? response.data : 
-                          (response.data.data ? response.data.data : []);
-          setPayslips(payslips);
-        } else {
-          setPayslips([]);
-        }
-      } catch (serviceError) {
-        console.log('Payslip API not available yet - showing empty state');
-        setPayslips([]);
-      }
-      
-    } catch (error) {
-      console.error('Error loading payslips:', error);
-      setPayslips([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Fetch employee payslips using React Query
+  const { data: payslips = [], isLoading: loading, isError, error: queryError } = useQuery({
+    queryKey: ['employee-payslips', user?.employeeId || user?.id],
+    queryFn: async () => {
+      const history = await payslipService.getPayslipHistory(user.employeeId || user.id);
+      return Array.isArray(history) ? history : [];
+    },
+    enabled: !!user // Only run when user is available
+  });
 
   const getStatusColor = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'paid': return 'success';
-      case 'processing': return 'warning';
-      case 'pending': return 'info';
+      case 'finalized': return 'info';
+      case 'generated': return 'warning';
+      case 'draft': return 'default';
       default: return 'default';
     }
   };
 
   const filteredPayslips = payslips.filter(payslip => {
     if (yearFilter === 'all') return true;
-    return payslip.payDate.includes(yearFilter);
+    return payslip.year?.toString() === yearFilter;
   });
 
   const paginatedPayslips = filteredPayslips.slice(
@@ -114,8 +81,18 @@ const EmployeePayslips = () => {
     page * rowsPerPage + rowsPerPage
   );
 
-  const yearlyEarnings = payslips.reduce((sum, p) => sum + p.netPay, 0);
+  const yearlyEarnings = payslips.reduce((sum, p) => sum + (Number(p.netPay) || 0), 0);
   const averageMonthlyPay = payslips.length > 0 ? yearlyEarnings / payslips.length : 0;
+
+  const handleViewPayslip = (payslip) => {
+    // Create a date object from month/year for the viewer
+    const date = new Date(payslip.year, payslip.month - 1, 1);
+    setSelectedPayslip({
+       ...payslip,
+       monthDate: date
+    });
+    setViewerOpen(true);
+  };
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -123,7 +100,7 @@ const EmployeePayslips = () => {
         <Box>
           {/* Header */}
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
+            <IconButton aria-label="Back to dashboard" onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
               <BackIcon />
             </IconButton>
             <Box sx={{ flex: 1 }}>
@@ -135,6 +112,12 @@ const EmployeePayslips = () => {
               </Typography>
             </Box>
           </Box>
+
+          {isError && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              Failed to load payslips: {queryError?.message || 'Unknown error'}
+            </Alert>
+          )}
 
           {/* Summary Cards */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -156,7 +139,7 @@ const EmployeePayslips = () => {
                 <CardContent sx={{ textAlign: 'center' }}>
                   <TrendingUpIcon sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
                   <Typography variant="h4" color="success.main" fontWeight="bold">
-                    ₹{yearlyEarnings.toLocaleString('en-IN')}
+                    {formatCurrency(yearlyEarnings)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Total Earnings (YTD)
@@ -169,7 +152,7 @@ const EmployeePayslips = () => {
                 <CardContent sx={{ textAlign: 'center' }}>
                   <CalendarIcon sx={{ fontSize: 48, color: 'info.main', mb: 2 }} />
                   <Typography variant="h4" color="info.main" fontWeight="bold">
-                    ₹{averageMonthlyPay.toLocaleString('en-IN')}
+                    {formatCurrency(averageMonthlyPay)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Average Monthly Pay
@@ -192,8 +175,9 @@ const EmployeePayslips = () => {
                       label="Filter by Year"
                     >
                       <MenuItem value="all">All Years</MenuItem>
-                      <MenuItem value="2025">2025</MenuItem>
-                      <MenuItem value="2024">2024</MenuItem>
+                      {[...new Set(payslips.map(p => p.year?.toString()).filter(Boolean))].sort((a, b) => b - a).map(year => (
+                        <MenuItem key={year} value={year}>{year}</MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -201,16 +185,6 @@ const EmployeePayslips = () => {
                   <Typography variant="body2" color="text.secondary">
                     Showing {filteredPayslips.length} payslips
                   </Typography>
-                </Grid>
-                <Grid item xs={12} md={3}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<DownloadIcon />}
-                    fullWidth
-                    onClick={() => console.log('Export all payslips')}
-                  >
-                    Export All
-                  </Button>
                 </Grid>
               </Grid>
             </CardContent>
@@ -247,31 +221,31 @@ const EmployeePayslips = () => {
                         <TableCell>
                           <Box>
                             <Typography variant="body2" fontWeight="bold">
-                              {payslip.month}
+                              {new Date(payslip.year, payslip.month - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {payslip.payPeriod}
+                              {payslip.payslipNumber}
                             </Typography>
                           </Box>
                         </TableCell>
                         <TableCell align="right">
                           <Typography variant="body2" fontWeight="bold">
-                            ₹{payslip.grossPay.toLocaleString('en-IN')}
+                            {formatCurrency(payslip.grossEarnings)}
                           </Typography>
                         </TableCell>
                         <TableCell align="right">
                           <Typography variant="body2" color="error.main">
-                            ₹{(payslip.taxDeductions + payslip.socialSecurity + payslip.otherDeductions).toLocaleString('en-IN')}
+                            {formatCurrency(payslip.totalDeductions)}
                           </Typography>
                         </TableCell>
                         <TableCell align="right">
                           <Typography variant="body2" fontWeight="bold" color="success.main">
-                            ₹{payslip.netPay.toLocaleString('en-IN')}
+                            {formatCurrency(payslip.netPay)}
                           </Typography>
                         </TableCell>
                         <TableCell>
                           <Chip
-                            label={payslip.status.toUpperCase()}
+                            label={(payslip.status || 'Draft').toUpperCase()}
                             color={getStatusColor(payslip.status)}
                             size="small"
                           />
@@ -280,16 +254,15 @@ const EmployeePayslips = () => {
                           <Stack direction="row" spacing={1} justifyContent="center">
                             <IconButton
                               size="small"
-                              onClick={() => {
-                                setSelectedPayslip(payslip);
-                                setPayslipDialog(true);
-                              }}
+                              aria-label="View payslip"
+                              onClick={() => handleViewPayslip(payslip)}
                             >
                               <ViewIcon />
                             </IconButton>
                             <IconButton
                               size="small"
-                              onClick={() => console.log('Download payslip', payslip.id)}
+                              aria-label="Download payslip"
+                              onClick={() => payslipService.downloadPayslipByIdPDF(payslip.id)}
                             >
                               <DownloadIcon />
                             </IconButton>
@@ -297,6 +270,13 @@ const EmployeePayslips = () => {
                         </TableCell>
                       </TableRow>
                     ))
+                  )}
+                  {!loading && paginatedPayslips.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                        <Typography color="text.secondary">No payslips found</Typography>
+                      </TableCell>
+                    </TableRow>
                   )}
                 </TableBody>
               </Table>
@@ -311,75 +291,16 @@ const EmployeePayslips = () => {
             />
           </Card>
 
-          {/* Payslip Detail Dialog */}
-          <Dialog open={payslipDialog} onClose={() => setPayslipDialog(false)} maxWidth="md" fullWidth>
-            <DialogTitle>
-              Payslip Details - {selectedPayslip?.month}
-            </DialogTitle>
-            <DialogContent>
-              {selectedPayslip && (
-                <Grid container spacing={3}>
-                  <Grid item xs={12}>
-                    <Alert severity="info" sx={{ mb: 3 }}>
-                      <strong>Payslip Number:</strong> {selectedPayslip.payslipNumber}
-                    </Alert>
-                  </Grid>
-                  
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="h6" gutterBottom>Employee Information</Typography>
-                    <Typography><strong>Name:</strong> {user?.firstName} {user?.lastName}</Typography>
-                    <Typography><strong>Employee ID:</strong> {user?.employeeId || 'EMP001'}</Typography>
-                    <Typography><strong>Department:</strong> {user?.department || 'HR'}</Typography>
-                    <Typography><strong>Position:</strong> {user?.position || 'HR Manager'}</Typography>
-                    <Typography><strong>Pay Period:</strong> {selectedPayslip.payPeriod}</Typography>
-                    <Typography><strong>Pay Date:</strong> {selectedPayslip.payDate}</Typography>
-                  </Grid>
-                  
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="h6" gutterBottom>Earnings</Typography>
-                    <Typography><strong>Base Salary:</strong> ₹{selectedPayslip.baseSalary.toLocaleString('en-IN')}</Typography>
-                    <Typography><strong>Overtime:</strong> ₹{selectedPayslip.overtime.toLocaleString('en-IN')}</Typography>
-                    <Typography><strong>Allowances:</strong> ₹{selectedPayslip.allowances.toLocaleString('en-IN')}</Typography>
-                    <Divider sx={{ my: 1 }} />
-                    <Typography color="primary" fontWeight="bold">
-                      <strong>Gross Pay:</strong> ₹{selectedPayslip.grossPay.toLocaleString('en-IN')}
-                    </Typography>
-                  </Grid>
-                  
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="h6" gutterBottom>Deductions</Typography>
-                    <Typography><strong>Income Tax:</strong> ₹{selectedPayslip.taxDeductions.toLocaleString('en-IN')}</Typography>
-                    <Typography><strong>Social Security:</strong> ₹{selectedPayslip.socialSecurity.toLocaleString('en-IN')}</Typography>
-                    <Typography><strong>Other Deductions:</strong> ₹{selectedPayslip.otherDeductions.toLocaleString('en-IN')}</Typography>
-                    <Divider sx={{ my: 1 }} />
-                    <Typography color="error" fontWeight="bold">
-                      <strong>Total Deductions:</strong> ₹{(selectedPayslip.taxDeductions + selectedPayslip.socialSecurity + selectedPayslip.otherDeductions).toLocaleString('en-IN')}
-                    </Typography>
-                  </Grid>
-                  
-                  <Grid item xs={12} md={6}>
-                    <Typography variant="h6" gutterBottom>Net Pay</Typography>
-                    <Typography variant="h3" color="success.main" fontWeight="bold">
-                      ₹{selectedPayslip.netPay.toLocaleString('en-IN')}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Amount credited to your account
-                    </Typography>
-                  </Grid>
-                </Grid>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setPayslipDialog(false)}>Close</Button>
-              <Button
-                variant="contained"
-                startIcon={<DownloadIcon />}
-                onClick={() => console.log('Download payslip PDF')}
-              >
-                Download PDF
-              </Button>
-            </DialogActions>
-          </Dialog>
+          {/* Payslip Viewer Dialog */}
+          {selectedPayslip && (
+            <PayslipViewer
+              open={viewerOpen}
+              onClose={() => setViewerOpen(false)}
+              employee={{ ...user, id: user.employeeId || user.id }} // Ensure ID is correct
+              initialMonth={selectedPayslip.monthDate}
+              mode="view"
+            />
+          )}
         </Box>
       </Fade>
     </Container>

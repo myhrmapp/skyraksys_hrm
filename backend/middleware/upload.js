@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const logger = require('../utils/logger');
 
 // Create uploads directories if they don't exist
 const uploadDir = path.join(__dirname, '../uploads/employee-photos');
@@ -97,20 +98,18 @@ const uploadEmployeePhoto = (req, res, next) => {
     if (req.body.salary && typeof req.body.salary === 'string') {
       try {
         req.body.salary = JSON.parse(req.body.salary);
-        console.log('✅ Parsed salary object:', req.body.salary);
       } catch (e) {
-        console.error('❌ Failed to parse salary JSON:', e);
-        console.error('   Raw salary value:', req.body.salary);
+        logger.error('Failed to parse salary JSON:', { detail: e });
+        logger.error('Raw salary value:', { detail: req.body.salary });
       }
     }
     
     if (req.body.salaryStructure && typeof req.body.salaryStructure === 'string') {
       try {
         req.body.salaryStructure = JSON.parse(req.body.salaryStructure);
-        console.log('✅ Parsed salaryStructure object:', req.body.salaryStructure);
       } catch (e) {
-        console.error('❌ Failed to parse salaryStructure JSON:', e);
-        console.error('   Raw salaryStructure value:', req.body.salaryStructure);
+        logger.error('Failed to parse salaryStructure JSON:', { detail: e });
+        logger.error('Raw salaryStructure value:', { detail: req.body.salaryStructure });
       }
     }
     
@@ -122,9 +121,9 @@ const uploadEmployeePhoto = (req, res, next) => {
         const dateValue = new Date(req.body[field]);
         if (!isNaN(dateValue.getTime())) {
           req.body[field] = dateValue;
-          console.log(`✅ Converted ${field} to Date:`, dateValue);
+
         } else {
-          console.warn(`⚠️ Invalid date format for ${field}:`, req.body[field]);
+          logger.warn(`Invalid date format for ${field}:`, { detail: req.body[field] });
           // Remove invalid date to let validator handle it
           delete req.body[field];
         }
@@ -147,6 +146,59 @@ const uploadCompanyLogo = (req, res, next) => {
   
   // For multipart/form-data requests, use multer
   return logoUpload.single('companyLogo')(req, res, next);
+};
+
+// Magic-byte file signature validation
+// Validates actual file content matches expected image types (prevents MIME spoofing)
+const IMAGE_SIGNATURES = {
+  'image/jpeg': [Buffer.from([0xFF, 0xD8, 0xFF])],
+  'image/jpg': [Buffer.from([0xFF, 0xD8, 0xFF])],
+  'image/png': [Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])],
+  'image/webp': [Buffer.from('RIFF'), Buffer.from('WEBP')] // bytes 0-3 = RIFF, bytes 8-11 = WEBP
+};
+
+const validateMagicBytes = (req, res, next) => {
+  if (!req.file) return next();
+
+  const filePath = req.file.path;
+  try {
+    const fd = fs.openSync(filePath, 'r');
+    const header = Buffer.alloc(12);
+    fs.readSync(fd, header, 0, 12, 0);
+    fs.closeSync(fd);
+
+    const mimetype = req.file.mimetype;
+    let isValid = false;
+
+    if (mimetype === 'image/jpeg' || mimetype === 'image/jpg') {
+      isValid = header[0] === 0xFF && header[1] === 0xD8 && header[2] === 0xFF;
+    } else if (mimetype === 'image/png') {
+      isValid = header.slice(0, 8).equals(Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]));
+    } else if (mimetype === 'image/webp') {
+      isValid = header.slice(0, 4).toString() === 'RIFF' && header.slice(8, 12).toString() === 'WEBP';
+    }
+
+    if (!isValid) {
+      // Delete the suspicious file
+      fs.unlinkSync(filePath);
+      logger.warn('Upload rejected: magic bytes mismatch', { 
+        mimetype, 
+        filename: req.file.originalname,
+        header: header.slice(0, 8).toString('hex')
+      });
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid file: file content does not match the declared image type.'
+      });
+    }
+
+    next();
+  } catch (err) {
+    // If we can't validate, reject the file
+    try { fs.unlinkSync(filePath); } catch (_) {}
+    logger.error('Magic byte validation error', { error: err.message });
+    return res.status(500).json({ success: false, message: 'File validation failed' });
+  }
 };
 
 // Error handling middleware
@@ -189,6 +241,7 @@ module.exports = {
   uploadEmployeePhoto,
   uploadCompanyLogo,
   handleUploadError,
+  validateMagicBytes,
   uploadDir,
   logoUploadDir
 };

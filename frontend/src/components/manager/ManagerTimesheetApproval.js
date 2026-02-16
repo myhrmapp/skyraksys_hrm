@@ -41,11 +41,9 @@ import {
   PlaylistAddCheck as BulkApproveIcon,
   PlaylistRemove as BulkRejectIcon
 } from '@mui/icons-material';
-import { format, parseISO } from 'date-fns';
 import dayjs from 'dayjs';
 import { useNotification } from '../../contexts/NotificationContext';
-import timesheetService from '../../services/TimesheetService';
-import { timesheetService as newTimesheetService } from '../../services/timesheet.service';
+import { timesheetService } from '../../services/timesheet.service';
 import { useLoading } from '../../contexts/LoadingContext';
 
 const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
@@ -81,7 +79,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
       console.log('🔄 Approving timesheet:', timesheet.id);
       
       // Use the correct API format that matches the backend
-      await timesheetService.approveTimesheet(timesheet.id, {
+      await timesheetService.approve(timesheet.id, {
         action: 'approve',
         approverComments: 'Approved by manager'
       });
@@ -114,7 +112,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
       console.log('🔄 Rejecting timesheet:', timesheet.id, 'with reason:', rejectionReason);
       
       // Use the dedicated reject method from the service
-      await timesheetService.rejectTimesheet(timesheet.id, {
+      await timesheetService.approve(timesheet.id, {
         action: 'reject',
         approverComments: rejectionReason
       });
@@ -200,7 +198,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
 
     setLoading('bulk-approve', true);
     try {
-      const result = await newTimesheetService.bulkApprove(selectedIds, bulkComments);
+      const result = await timesheetService.bulkApprove(selectedIds, bulkComments);
       
       if (result.success) {
         showNotification(
@@ -239,7 +237,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
 
     setLoading('bulk-reject', true);
     try {
-      const result = await newTimesheetService.bulkReject(selectedIds, bulkComments);
+      const result = await timesheetService.bulkReject(selectedIds, bulkComments);
       
       if (result.success) {
         showNotification(
@@ -437,9 +435,9 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
                           </TableCell>
                           <TableCell>
                             {timesheet.weekStartDate 
-                              ? format(parseISO(timesheet.weekStartDate), 'MMM dd, yyyy')
+                              ? dayjs(timesheet.weekStartDate).format('MMM DD, YYYY')
                               : timesheet.workDate 
-                                ? format(parseISO(timesheet.workDate), 'MMM dd, yyyy')
+                                ? dayjs(timesheet.workDate).format('MMM DD, YYYY')
                                 : 'N/A'
                             }
                           </TableCell>
@@ -693,7 +691,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
                       <strong>Employee ID:</strong> {selectedTimesheet.employee?.employeeId}
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Week Starting:</strong> {selectedTimesheet.weekStartDate ? format(parseISO(selectedTimesheet.weekStartDate), 'MMM dd, yyyy') : 'N/A'}
+                      <strong>Week Starting:</strong> {selectedTimesheet.weekStartDate ? dayjs(selectedTimesheet.weekStartDate).format('MMM DD, YYYY') : 'N/A'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -760,7 +758,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
                       <strong>Employee ID:</strong> {selectedTimesheet.employee?.employeeId}
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Week Starting:</strong> {selectedTimesheet.weekStartDate ? format(parseISO(selectedTimesheet.weekStartDate), 'MMM dd, yyyy') : 'N/A'}
+                      <strong>Week Starting:</strong> {selectedTimesheet.weekStartDate ? dayjs(selectedTimesheet.weekStartDate).format('MMM DD, YYYY') : 'N/A'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>

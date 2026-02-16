@@ -27,6 +27,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('Low', 'Medium', 'High', 'Critical'),
       defaultValue: 'Medium'
     },
+    projectId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: { model: 'projects', key: 'id' }
+    },
+    assignedTo: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: { model: 'employees', key: 'id' }
+    },
     availableToAll: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -38,7 +48,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     tableName: 'tasks',
-    timestamps: true
+    timestamps: true,
+    paranoid: true
   });
 
   Task.associate = function(models) {

@@ -118,10 +118,10 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     // Association with Payroll for template usage tracking
-    PayslipTemplate.hasMany(models.Payroll, {
-      foreignKey: 'templateId',
-      as: 'payrolls'
-    });
+    // PayslipTemplate.hasMany(models.Payroll, {
+    //   foreignKey: 'templateId',
+    //   as: 'payrolls'
+    // });
   };
 
   // Instance methods

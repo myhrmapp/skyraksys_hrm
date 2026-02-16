@@ -4,6 +4,7 @@
  */
 
 const { PayslipTemplate } = require('../models');
+const logger = require('../utils/logger');
 
 class PayslipTemplateService {
   constructor() {
@@ -157,7 +158,7 @@ class PayslipTemplateService {
         data: template
       };
     } catch (error) {
-      console.error('Create template error:', error);
+      logger.error('Create template error:', { detail: error });
       return {
         success: false,
         message: 'Failed to create template',
@@ -191,7 +192,7 @@ class PayslipTemplateService {
         data: templates
       };
     } catch (error) {
-      console.error('Get templates error:', error);
+      logger.error('Get templates error:', { detail: error });
       return {
         success: false,
         message: 'Failed to fetch templates',
@@ -219,7 +220,7 @@ class PayslipTemplateService {
         data: template
       };
     } catch (error) {
-      console.error('Get template error:', error);
+      logger.error('Get template error:', { detail: error });
       return {
         success: false,
         message: 'Failed to fetch template',
@@ -250,7 +251,7 @@ class PayslipTemplateService {
         data: template || this.defaultTemplate
       };
     } catch (error) {
-      console.error('Get default template error:', error);
+      logger.error('Get default template error:', { detail: error });
       return {
         success: true,
         data: this.defaultTemplate // Fallback to hardcoded default
@@ -299,7 +300,7 @@ class PayslipTemplateService {
         data: template
       };
     } catch (error) {
-      console.error('Update template error:', error);
+      logger.error('Update template error:', { detail: error });
       return {
         success: false,
         message: 'Failed to update template',
@@ -338,7 +339,7 @@ class PayslipTemplateService {
         message: 'Template deleted successfully'
       };
     } catch (error) {
-      console.error('Delete template error:', error);
+      logger.error('Delete template error:', { detail: error });
       return {
         success: false,
         message: 'Failed to delete template',
@@ -375,7 +376,7 @@ class PayslipTemplateService {
         data: template
       };
     } catch (error) {
-      console.error('Set default template error:', error);
+      logger.error('Set default template error:', { detail: error });
       return {
         success: false,
         message: 'Failed to set default template',
@@ -407,7 +408,7 @@ class PayslipTemplateService {
 
       return await this.createTemplate(duplicateData, createdBy);
     } catch (error) {
-      console.error('Duplicate template error:', error);
+      logger.error('Duplicate template error:', { detail: error });
       return {
         success: false,
         message: 'Failed to duplicate template',
@@ -522,7 +523,7 @@ class PayslipTemplateService {
         }
       };
     } catch (error) {
-      console.error('Export template error:', error);
+      logger.error('Export template error:', { detail: error });
       return {
         success: false,
         message: 'Failed to export template',
@@ -554,7 +555,7 @@ class PayslipTemplateService {
 
       return await this.createTemplate(templateData, createdBy);
     } catch (error) {
-      console.error('Import template error:', error);
+      logger.error('Import template error:', { detail: error });
       return {
         success: false,
         message: 'Failed to import template',

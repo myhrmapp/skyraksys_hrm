@@ -204,6 +204,8 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 30
     },
     // Comprehensive salary structure (JSON field)
+    // DEPRECATED: Use the SalaryStructure association instead.
+    // This field is auto-synced from SalaryStructure via afterFind hook below.
     salary: {
       type: DataTypes.JSON,
       allowNull: true,
@@ -227,7 +229,39 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'employees',
     timestamps: true,
-    paranoid: true
+    paranoid: true,
+    hooks: {
+      // Auto-populate salary JSON from SalaryStructure association
+      // so the frontend always sees current data regardless of which field it reads
+      afterFind: (result) => {
+        const syncSalary = (employee) => {
+          if (employee && employee.salaryStructure) {
+            const ss = employee.salaryStructure;
+            employee.setDataValue('salary', {
+              basicSalary: parseFloat(ss.basicSalary) || 0,
+              allowances: {
+                hra: parseFloat(ss.hra) || 0,
+                other: parseFloat(ss.allowances) || 0
+              },
+              deductions: {
+                pf: parseFloat(ss.pfContribution) || 0,
+                tds: parseFloat(ss.tds) || 0,
+                professionalTax: parseFloat(ss.professionalTax) || 0,
+                other: parseFloat(ss.otherDeductions) || 0
+              },
+              currency: ss.currency || 'INR',
+              effectiveFrom: ss.effectiveFrom,
+              isActive: ss.isActive
+            });
+          }
+        };
+        if (Array.isArray(result)) {
+          result.forEach(syncSalary);
+        } else {
+          syncSalary(result);
+        }
+      }
+    }
   });
 
   Employee.associate = function(models) {
@@ -271,10 +305,10 @@ module.exports = (sequelize, DataTypes) => {
       as: 'timesheets'
     });
     
-    Employee.hasMany(models.Payroll, {
-      foreignKey: 'employeeId',
-      as: 'payrolls'
-    });
+    // Employee.hasMany(models.Payroll, {
+    //   foreignKey: 'employeeId',
+    //   as: 'payrolls'
+    // });
     
     Employee.hasOne(models.SalaryStructure, {
       foreignKey: 'employeeId',

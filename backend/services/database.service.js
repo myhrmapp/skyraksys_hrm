@@ -1,5 +1,6 @@
 const db = require('../models');
 const { QueryTypes } = require('sequelize');
+const logger = require('../utils/logger');
 
 class DatabaseService {
   constructor() {
@@ -24,7 +25,7 @@ class DatabaseService {
 
       return tables;
     } catch (error) {
-      console.error('Error getting tables:', error);
+      logger.error('Error getting tables:', { detail: error });
       throw error;
     }
   }
@@ -107,7 +108,7 @@ class DatabaseService {
         indexes
       };
     } catch (error) {
-      console.error('Error getting table schema:', error);
+      logger.error('Error getting table schema:', { detail: error });
       throw error;
     }
   }
@@ -168,7 +169,7 @@ class DatabaseService {
         hasMore: parseInt(count) > (offset + limit)
       };
     } catch (error) {
-      console.error('Error getting table data:', error);
+      logger.error('Error getting table data:', { detail: error });
       throw error;
     }
   }
@@ -187,13 +188,31 @@ class DatabaseService {
       const dangerousKeywords = [
         'DROP DATABASE',
         'DROP SCHEMA',
+        'DROP TABLE',
+        'DROP INDEX',
+        'DROP VIEW',
+        'DROP FUNCTION',
         'TRUNCATE',
         'DELETE FROM',
+        'DELETE\t',
+        'DELETE\n',
         'UPDATE ',
+        'UPDATE\t',
+        'UPDATE\n',
         'INSERT INTO',
         'ALTER TABLE',
+        'ALTER INDEX',
         'CREATE TABLE',
-        'DROP TABLE'
+        'CREATE INDEX',
+        'GRANT ',
+        'REVOKE ',
+        'COPY ',
+        'EXPLAIN ',
+        'EXEC ',
+        'EXECUTE ',
+        'RENAME ',
+        'VACUUM',
+        'REINDEX'
       ];
 
       // Check for dangerous operations
@@ -226,7 +245,7 @@ class DatabaseService {
         maxRows
       };
     } catch (error) {
-      console.error('Error executing query:', error);
+      logger.error('Error executing query:', { detail: error });
       return {
         success: false,
         error: error.message,
@@ -285,7 +304,7 @@ class DatabaseService {
         largestTables: tableSizes
       };
     } catch (error) {
-      console.error('Error getting database stats:', error);
+      logger.error('Error getting database stats:', { detail: error });
       throw error;
     }
   }
@@ -308,7 +327,7 @@ class DatabaseService {
         message: `Table backed up to ${backupTableName}`
       };
     } catch (error) {
-      console.error('Error backing up table:', error);
+      logger.error('Error backing up table:', { detail: error });
       throw error;
     }
   }
@@ -327,7 +346,7 @@ class DatabaseService {
         plan
       };
     } catch (error) {
-      console.error('Error explaining query:', error);
+      logger.error('Error explaining query:', { detail: error });
       return {
         success: false,
         error: error.message
@@ -357,7 +376,7 @@ class DatabaseService {
 
       return connections;
     } catch (error) {
-      console.error('Error getting active connections:', error);
+      logger.error('Error getting active connections:', { detail: error });
       throw error;
     }
   }

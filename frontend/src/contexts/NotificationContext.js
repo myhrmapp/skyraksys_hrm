@@ -178,6 +178,7 @@ const NotificationContainer = ({ notifications, onRemove }) => {
               <IconButton
                 size="small"
                 color="inherit"
+                aria-label="Close notification"
                 onClick={() => onRemove(notification.id)}
               >
                 <CloseIcon fontSize="small" />

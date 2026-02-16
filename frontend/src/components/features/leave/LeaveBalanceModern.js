@@ -433,6 +433,8 @@ const LeaveBalanceModern = () => {
                 placeholder="Name or ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                id="leaveSearchQuery"
+                inputProps={{ 'data-testid': 'leave-search-input' }}
                 InputProps={{
                   startAdornment: <FilterListIcon sx={{ mr: 1, color: 'action.disabled' }} />
                 }}
@@ -445,6 +447,7 @@ const LeaveBalanceModern = () => {
                   value={selectedYear}
                   label="Year"
                   onChange={(e) => setSelectedYear(e.target.value)}
+                  inputProps={{ 'data-testid': 'leave-year-select' }}
                 >
                   {getYearOptions().map(year => (
                     <MenuItem key={year} value={year}>{year}</MenuItem>
@@ -459,6 +462,7 @@ const LeaveBalanceModern = () => {
                   value={selectedEmployee}
                   label="Employee"
                   onChange={(e) => setSelectedEmployee(e.target.value)}
+                  inputProps={{ 'data-testid': 'leave-employee-select' }}
                 >
                   <MenuItem value="">All Employees</MenuItem>
                   {employees.map(emp => (
@@ -476,6 +480,7 @@ const LeaveBalanceModern = () => {
                   value={selectedLeaveType}
                   label="Leave Type"
                   onChange={(e) => setSelectedLeaveType(e.target.value)}
+                  inputProps={{ 'data-testid': 'leave-type-filter-select' }}
                 >
                   <MenuItem value="">All Leave Types</MenuItem>
                   {leaveTypes.map(type => (
@@ -787,12 +792,13 @@ const LeaveBalanceModern = () => {
                   fullWidth
                   label={`${type.name} - Days to Add`}
                   type="number"
-                  inputProps={{ step: 0.5, min: 0 }}
                   value={bulkInitData[type.id] || ''}
                   onChange={(e) => setBulkInitData({
                     ...bulkInitData,
                     [type.id]: e.target.value
                   })}
+                  id={`bulkAllocation-${type.id}`}
+                  inputProps={{ step: 0.5, min: 0, 'data-testid': `leave-bulk-allocation-${type.id}` }}
                   helperText={`Will be added to existing balances (e.g., ${type.maxDaysPerYear || 20} days)`}
                 />
               </Grid>
@@ -847,11 +853,12 @@ const LeaveBalanceModern = () => {
         <DialogContent sx={{ mt: 2 }}>
           <Stack spacing={2}>
             <FormControl fullWidth>
-              <InputLabel>Employee</InputLabel>
+              <InputLabel>Employee (Required)</InputLabel>
               <Select
                 value={createData.employeeId}
-                label="Employee"
+                label="Employee (Required)"
                 onChange={(e) => setCreateData({ ...createData, employeeId: e.target.value })}
+                inputProps={{ 'data-testid': 'create-leave-employee-select' }}
               >
                 <MenuItem value="">Select Employee</MenuItem>
                 {employees.map(emp => (
@@ -863,11 +870,12 @@ const LeaveBalanceModern = () => {
             </FormControl>
 
             <FormControl fullWidth>
-              <InputLabel>Leave Type</InputLabel>
+              <InputLabel>Leave Type (Required)</InputLabel>
               <Select
                 value={createData.leaveTypeId}
-                label="Leave Type"
+                label="Leave Type (Required)"
                 onChange={(e) => setCreateData({ ...createData, leaveTypeId: e.target.value })}
+                inputProps={{ 'data-testid': 'create-leave-type-select' }}
               >
                 <MenuItem value="">Select Leave Type</MenuItem>
                 {leaveTypes.map(type => (
@@ -887,8 +895,11 @@ const LeaveBalanceModern = () => {
                     const val = e.target.value === '' ? new Date().getFullYear() : Number.parseInt(e.target.value, 10);
                     setCreateData({ ...createData, year: val });
                   }}
-                  InputProps={{
-                    inputProps: { min: 2020, max: 2030 }
+                  id="createLeaveYear"
+                  inputProps={{ 
+                    'data-testid': 'create-leave-year-input',
+                    min: 2020, 
+                    max: 2030 
                   }}
                 />
               </Grid>
@@ -897,13 +908,14 @@ const LeaveBalanceModern = () => {
                   fullWidth
                   label="Accrued Days (Current Year)"
                   type="number"
-                  inputProps={{ step: 0.5, min: 0 }}
                   value={createData.totalAccrued}
                   onChange={(e) => {
                     const val = e.target.value === '' ? 0 : Number.parseFloat(e.target.value);
                     setCreateData({ ...createData, totalAccrued: val });
                   }}
                   helperText="Days allocated for this year"
+                  id="createLeaveAccrued"
+                  inputProps={{ step: 0.5, min: 0, 'data-testid': 'create-leave-accrued-input' }}
                 />
               </Grid>
             </Grid>
@@ -912,13 +924,14 @@ const LeaveBalanceModern = () => {
               fullWidth
               label="Carry Forward Days (From Previous Year)"
               type="number"
-              inputProps={{ step: 0.5, min: 0 }}
               value={createData.carryForward}
               onChange={(e) => {
                 const val = e.target.value === '' ? 0 : Number.parseFloat(e.target.value);
                 setCreateData({ ...createData, carryForward: val });
               }}
               helperText="Unused days from previous year"
+              id="createLeaveCarryForward"
+              inputProps={{ step: 0.5, min: 0, 'data-testid': 'create-leave-carryforward-input' }}
             />
           </Stack>
         </DialogContent>

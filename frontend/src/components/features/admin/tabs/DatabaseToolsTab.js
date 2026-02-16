@@ -47,6 +47,8 @@ import {
   Settings as SettingsIcon
 } from '@mui/icons-material';
 import http from '../../../../http-common';
+import ConfirmDialog from '../../../common/ConfirmDialog';
+import useConfirmDialog from '../../../../hooks/useConfirmDialog';
 
 function SubTabPanel({ children, value, index }) {
   return (
@@ -81,6 +83,7 @@ const DatabaseToolsTab = () => {
 
   // Dialog State
   const [schemaDialog, setSchemaDialog] = useState({ open: false, table: null });
+  const { dialogProps, confirm } = useConfirmDialog();
 
   useEffect(() => {
     loadTables();
@@ -204,24 +207,27 @@ const DatabaseToolsTab = () => {
     }
   };
 
-  const backupTable = async (tableName) => {
-    if (!window.confirm(`Create a backup of table "${tableName}"?`)) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await http.post(`/debug/database/backup/${tableName}`);
-      if (response.data.success) {
-        showNotification(response.data.message, 'success');
-        await loadTables();
+  const backupTable = (tableName) => {
+    confirm({
+      title: 'Create Backup',
+      message: `Create a backup of table "${tableName}"?`,
+      variant: 'info',
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          const response = await http.post(`/debug/database/backup/${tableName}`);
+          if (response.data.success) {
+            showNotification(response.data.message, 'success');
+            await loadTables();
+          }
+        } catch (error) {
+          console.error('Error backing up table:', error);
+          showNotification('Failed to backup table', 'error');
+        } finally {
+          setLoading(false);
+        }
       }
-    } catch (error) {
-      console.error('Error backing up table:', error);
-      showNotification('Failed to backup table', 'error');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const renderSQLConsole = () => (
@@ -774,6 +780,7 @@ const DatabaseToolsTab = () => {
           <Button onClick={() => setSchemaDialog({ open: false, table: null })}>Close</Button>
         </DialogActions>
       </Dialog>
+      <ConfirmDialog {...dialogProps} />
     </Box>
   );
 };

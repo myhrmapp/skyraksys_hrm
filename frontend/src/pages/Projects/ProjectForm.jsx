@@ -12,7 +12,7 @@ import {
   Grid
 } from '@mui/material';
 import ProjectService from '../../services/ProjectService';
-import EmployeeService from '../../services/EmployeeService';
+import { employeeService as EmployeeService } from '../../services/employee.service';
 
 const ProjectForm = ({ project, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -72,6 +72,10 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
         throw new Error('Project name is required');
       }
 
+      if (formData.endDate && formData.startDate && new Date(formData.endDate) < new Date(formData.startDate)) {
+        throw new Error('End date must be after start date');
+      }
+
       const payload = {
         ...formData,
         managerId: formData.managerId && formData.managerId.trim() ? formData.managerId : null
@@ -109,6 +113,8 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
             name="name"
             value={formData.name}
             onChange={handleChange}
+            id="projectName"
+            inputProps={{ 'data-testid': 'project-name-input' }}
           />
         </Grid>
 
@@ -121,6 +127,8 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
             onChange={handleChange}
             multiline
             rows={3}
+            id="projectDescription"
+            inputProps={{ 'data-testid': 'project-description-input' }}
           />
         </Grid>
 
@@ -133,6 +141,8 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
             value={formData.startDate}
             onChange={handleChange}
             InputLabelProps={{ shrink: true }}
+            id="projectStartDate"
+            inputProps={{ 'data-testid': 'project-start-date' }}
           />
         </Grid>
 
@@ -145,6 +155,8 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
             value={formData.endDate}
             onChange={handleChange}
             InputLabelProps={{ shrink: true }}
+            id="projectEndDate"
+            inputProps={{ 'data-testid': 'project-end-date', min: formData.startDate || undefined }}
           />
         </Grid>
 
@@ -156,6 +168,7 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
               value={formData.status}
               onChange={handleChange}
               label="Status"
+              inputProps={{ 'data-testid': 'project-status-select' }}
             >
               <MenuItem value="Planning">Planning</MenuItem>
               <MenuItem value="Active">Active</MenuItem>
@@ -173,6 +186,8 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
             name="clientName"
             value={formData.clientName}
             onChange={handleChange}
+            id="projectClientName"
+            inputProps={{ 'data-testid': 'project-client-name-input' }}
           />
         </Grid>
 
@@ -184,6 +199,7 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
               value={formData.managerId}
               onChange={handleChange}
               label="Project Manager"
+              inputProps={{ 'data-testid': 'project-manager-select' }}
             >
               <MenuItem value="">None</MenuItem>
               {employees.map(emp => (
@@ -201,6 +217,7 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
           variant="outlined"
           onClick={onCancel}
           disabled={loading}
+          data-testid="project-cancel-button"
         >
           Cancel
         </Button>
@@ -208,6 +225,7 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
           type="submit"
           variant="contained"
           disabled={loading}
+          data-testid="project-save-button"
         >
           {loading ? 'Saving...' : (project ? 'Update' : 'Create')}
         </Button>

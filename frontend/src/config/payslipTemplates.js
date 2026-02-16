@@ -6,12 +6,13 @@ export const DEFAULT_PAYSLIP_TEMPLATE = {
   isActive: true,
   
   // Company branding configuration
+  // These values should come from SystemSettings (payslip template settings)
   companyInfo: {
-    name: "SKYRAKSYS TECHNOLOGIES LLP",
-    address: "Plot-No: 27E, G.S.T. Road, Guduvanchery, Chennai, Tamil Nadu, 603202 India",
-    email: "info@skyraksys.com",
-    website: "https://www.skyraksys.com",
-    contact: "+91 89398 88577",
+    name: '',
+    address: '',
+    email: '',
+    website: '',
+    contact: '',
     logo: null, // Can be set to logo URL
     gst: null,
     cin: null,

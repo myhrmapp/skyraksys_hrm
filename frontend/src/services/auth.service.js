@@ -23,10 +23,14 @@ class AuthService {
     }
   }
 
-  // Logout user
+  // Logout user (calls backend to clear httpOnly cookies & blacklist token)
   async logout() {
-    // Simply clear local storage - no backend call needed for simple JWT
-    this.clearAuthData();
+    try {
+      await http.post('/auth/logout');
+    } catch (error) {
+      // Best-effort — cookies may already be expired
+      console.warn('Logout API call failed:', error.message);
+    }
   }
 
   // Get user profile
@@ -43,47 +47,23 @@ class AuthService {
 
   // Change password
   async changePassword(currentPassword, newPassword) {
-    const response = await http.post('/auth/change-password', {
+    const response = await http.put('/auth/change-password', {
       currentPassword,
       newPassword
     });
     return response.data;
   }
 
-  // Get current access token
-  getAccessToken() {
-    return localStorage.getItem('accessToken');
-  }
+  // Access token is stored in an httpOnly cookie — not accessible from JS.
+  // These methods exist for backward-compatible call sites but always return null/false.
+  getAccessToken() { return null; }
+  getToken() { return null; }
 
-  // Alias for getAccessToken (for backward compatibility)
-  getToken() {
-    return this.getAccessToken();
-  }
+  // User info can only be obtained via the /auth/me endpoint (see AuthContext)
+  getCurrentUser() { return null; }
 
-  // Get current user from stored token (synchronous)
-  getCurrentUser() {
-    const token = this.getAccessToken();
-    if (!token) return null;
-    
-    try {
-      // Decode JWT token to get user info
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return {
-        id: payload.id,
-        email: payload.email,
-        role: payload.role,
-        employeeId: payload.employeeId
-      };
-    } catch (error) {
-      console.error('Error parsing JWT token:', error);
-      return null;
-    }
-  }
-
-  // Check if user is authenticated
-  isAuthenticated() {
-    return !!this.getAccessToken();
-  }
+  // Auth state is managed by AuthContext; cookie presence can't be checked from JS
+  isAuthenticated() { return false; }
 
   // Reset user password (Admin/HR only)
   async resetPassword(resetData) {
@@ -170,21 +150,6 @@ class AuthService {
   async getUserByEmployeeId(employeeId) {
     try {
       const response = await http.get(`/auth/users/employee/${employeeId}`);
-      return response.data;
-    } catch (error) {
-      if (error.response?.data) {
-        return error.response.data;
-      }
-      throw error;
-    }
-  }
-
-  // Send welcome email to user
-  async sendWelcomeEmail(userId, tempPassword) {
-    try {
-      const response = await http.post(`/email/welcome/${userId}`, { 
-        tempPassword 
-      });
       return response.data;
     } catch (error) {
       if (error.response?.data) {
@@ -297,25 +262,13 @@ class AuthService {
     }
   }
 
-  // Create user account for existing employee
+  // Alias for backward compatibility
   async createEmployeeUserAccount(employeeId, userData) {
-    try {
-      console.log('Creating user account for employee:', employeeId, userData);
-      const response = await http.post(`/auth/users/employee/${employeeId}`, userData);
-      return response.data;
-    } catch (error) {
-      console.error('Error in createEmployeeUserAccount:', error);
-      if (error.response?.data) {
-        return error.response.data;
-      }
-      throw error;
-    }
+    return this.createUserAccount(employeeId, userData);
   }
 
-    // Clear all auth data
-  clearAuthData() {
-    localStorage.removeItem('accessToken');
-  }
+  // No-op: tokens are in httpOnly cookies cleared by the backend on logout
+  clearAuthData() { /* no-op */ }
 }
 
 export const authService = new AuthService();

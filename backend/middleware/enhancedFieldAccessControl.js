@@ -3,6 +3,9 @@
  * Implements granular field access control based on user roles
  */
 
+const db = require('../models');
+const logger = require('../utils/logger');
+
 const FIELD_PERMISSIONS = {
   admin: {
     view: ['*'], // Can view all fields
@@ -12,7 +15,7 @@ const FIELD_PERMISSIONS = {
   hr: {
     view: [
       // Personal Information
-      'firstName', 'lastName', 'email', 'phone', 'dateOfBirth', 'gender',
+      'id', 'firstName', 'lastName', 'email', 'phone', 'dateOfBirth', 'gender',
       'maritalStatus', 'nationality', 'address', 'city', 'state', 'pinCode',
       'photoUrl',
       
@@ -50,7 +53,7 @@ const FIELD_PERMISSIONS = {
   manager: {
     view: [
       // Basic Information
-      'firstName', 'lastName', 'email', 'phone', 'employeeId',
+      'id', 'firstName', 'lastName', 'email', 'phone', 'employeeId',
       'hireDate', 'departmentId', 'positionId', 'employmentType', 'workLocation',
       'status', 'photoUrl',
       
@@ -71,12 +74,24 @@ const FIELD_PERMISSIONS = {
   employee: {
     view: [
       // Own basic information
-      'firstName', 'lastName', 'email', 'phone', 'employeeId',
+      'id', 'firstName', 'lastName', 'email', 'phone', 'employeeId',
       'hireDate', 'departmentId', 'positionId', 'employmentType',
       'address', 'city', 'state', 'pinCode', 'photoUrl',
       'dateOfBirth', 'gender', 'maritalStatus', 'nationality',
       'emergencyContactName', 'emergencyContactPhone', 'emergencyContactRelation',
-      'bankName', 'ifscCode', 'bankBranch', // Can see bank name but not account number
+      
+      // Banking Information
+      'bankName', 'ifscCode', 'bankBranch', 'bankAccountNumber', 'accountHolderName',
+      
+      // Statutory Information
+      'aadhaarNumber', 'panNumber', 'uanNumber', 'pfNumber', 'esiNumber',
+      
+      // Salary Information
+      'salary', 'salaryStructure',
+      
+      // Work Details
+      'joiningDate', 'confirmationDate', 'probationPeriod', 'noticePeriod', 'workLocation', 'status',
+      'resignationDate', 'lastWorkingDate',
       
       // User Account Information (own only)
       'userId', 'user'
@@ -239,24 +254,33 @@ function validateEditPermissions(updateData, userRole, isOwnRecord = false) {
 }
 
 /**
- * Create audit log entry for sensitive operations
+ * Create audit log entry for sensitive operations and persist to DB
  */
-function createAuditLog(action, employeeId, fieldName, oldValue, newValue, userId, userRole) {
+async function createAuditLog(action, employeeId, fieldName, oldValue, newValue, userId, userRole) {
   // Only log changes to audit-required fields
   if (!AUDIT_REQUIRED_FIELDS.includes(fieldName)) return null;
   
-  return {
-    action,
-    employeeId,
+  const logEntry = {
+    action: `field_update:${action}`,
+    entityType: 'Employee',
+    entityId: employeeId,
     fieldName,
-    oldValue: SENSITIVE_FIELDS.includes(fieldName) ? '***MASKED***' : oldValue,
-    newValue: SENSITIVE_FIELDS.includes(fieldName) ? '***MASKED***' : newValue,
+    oldValue: SENSITIVE_FIELDS.includes(fieldName) ? '***MASKED***' : String(oldValue ?? ''),
+    newValue: SENSITIVE_FIELDS.includes(fieldName) ? '***MASKED***' : String(newValue ?? ''),
     userId,
     userRole,
-    timestamp: new Date(),
-    ipAddress: null, // To be set by middleware
-    userAgent: null  // To be set by middleware
+    timestamp: new Date()
   };
+
+  try {
+    if (db.AuditLog) {
+      await db.AuditLog.create(logEntry);
+    }
+  } catch (err) {
+    logger.error('Failed to persist field audit log:', { detail: err.message, logEntry });
+  }
+
+  return logEntry;
 }
 
 /**
@@ -288,51 +312,39 @@ function enhancedFieldAccessControl(options = {}) {
 }
 
 /**
- * File upload security validation
+ * Helper function for testing - filters data based on role and action
  */
-const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const ALLOWED_DOCUMENT_TYPES = [
-  'application/pdf', 
-  'image/jpeg', 
-  'image/png',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-];
-
-const MAX_PHOTO_SIZE = 5 * 1024 * 1024; // 5MB
-const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024; // 10MB
-
-function validateFileUpload(file, type = 'photo') {
-  const errors = [];
-  
-  if (!file) {
-    errors.push('No file provided');
-    return { isValid: false, errors };
+function filterFieldsByRole(data, role, action = 'view') {
+  if (action === 'view') {
+    const filtered = filterEmployeeData(data, role, null, false);
+    // Remove any masked/restricted fields for cleaner test results
+    const cleaned = {};
+    Object.keys(filtered).forEach(key => {
+      if (filtered[key] !== '***RESTRICTED***') {
+        cleaned[key] = filtered[key];
+      }
+    });
+    return cleaned;
+  } else if (action === 'edit') {
+    // For edit action, filter to only include editable fields
+    const filteredData = {};
+    const permissions = FIELD_PERMISSIONS[role];
+    
+    if (!permissions) return {};
+    
+    // Admin can edit everything
+    if (permissions.edit.includes('*')) return data;
+    
+    Object.keys(data).forEach(field => {
+      if (permissions.edit.includes(field)) {
+        filteredData[field] = data[field];
+      }
+    });
+    
+    return filteredData;
   }
   
-  // Check file type
-  const allowedTypes = type === 'photo' ? ALLOWED_PHOTO_TYPES : ALLOWED_DOCUMENT_TYPES;
-  if (!allowedTypes.includes(file.mimetype)) {
-    errors.push(`Invalid file type. Allowed: ${allowedTypes.join(', ')}`);
-  }
-  
-  // Check file size
-  const maxSize = type === 'photo' ? MAX_PHOTO_SIZE : MAX_DOCUMENT_SIZE;
-  if (file.size > maxSize) {
-    errors.push(`File too large. Maximum size: ${Math.round(maxSize / (1024 * 1024))}MB`);
-  }
-  
-  // Check for malicious file extensions
-  const dangerousExtensions = ['.exe', '.bat', '.cmd', '.scr', '.pif', '.com'];
-  const originalName = file.originalname?.toLowerCase() || '';
-  if (dangerousExtensions.some(ext => originalName.endsWith(ext))) {
-    errors.push('File type not allowed for security reasons');
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
+  return {};
 }
 
 module.exports = {
@@ -346,9 +358,5 @@ module.exports = {
   validateEditPermissions,
   createAuditLog,
   enhancedFieldAccessControl,
-  validateFileUpload,
-  ALLOWED_PHOTO_TYPES,
-  ALLOWED_DOCUMENT_TYPES,
-  MAX_PHOTO_SIZE,
-  MAX_DOCUMENT_SIZE
+  filterFieldsByRole // For testing
 };

@@ -2,8 +2,17 @@
 const bcrypt = require('bcryptjs');
 const { User } = require('./models');
 
+// SAFETY: Prevent accidental execution in production
+if (process.env.NODE_ENV === 'production') {
+  console.error('\n❌ FATAL: reset-passwords.js cannot be run in production!');
+  process.exit(1);
+}
+
+const RESET_PASSWORD = process.env.DEV_DEFAULT_PASSWORD || 'DevReset@2026!';
+
 async function checkAndResetPasswords() {
   console.log('\n=== Checking User Passwords ===\n');
+  console.log(`ℹ️  Will reset passwords to DEV_DEFAULT_PASSWORD env var (or default dev password)\n`);
 
   try {
     const users = await User.findAll();
@@ -14,20 +23,20 @@ async function checkAndResetPasswords() {
       console.log(`\n👤 User: ${user.email} (${user.role})`);
       
       if (!user.password) {
-        console.log(`   No password set - setting password123`);
-        const hashedPassword = await bcrypt.hash('password123', 10);
+        console.log(`   No password set - setting dev reset password`);
+        const hashedPassword = await bcrypt.hash(RESET_PASSWORD, 12);
         await user.update({ password: hashedPassword });
-        console.log(`   ✅ Password set to 'password123'`);
+        console.log(`   ✅ Password set`);
       } else {
-        // Try to check if password123 works
-        const isValidPassword = await bcrypt.compare('password123', user.password);
-        console.log(`   Current password 'password123' works: ${isValidPassword}`);
+        // Try to check if reset password already works
+        const isValidPassword = await bcrypt.compare(RESET_PASSWORD, user.password);
+        console.log(`   Current reset password works: ${isValidPassword}`);
         
         if (!isValidPassword) {
-          // Reset password to 'password123'
-          const hashedPassword = await bcrypt.hash('password123', 10);
+          // Reset password
+          const hashedPassword = await bcrypt.hash(RESET_PASSWORD, 12);
           await user.update({ password: hashedPassword });
-          console.log(`   ✅ Password reset to 'password123'`);
+          console.log(`   ✅ Password reset`);
         }
       }
     }

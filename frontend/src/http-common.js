@@ -8,44 +8,79 @@ const http = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-type": "application/json"
-  }
+  },
+  withCredentials: true // Send httpOnly cookies with every request
 });
 
-// Request interceptor to add auth token
-http.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+// --- Token refresh queue ---
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve();
     }
-    return config;
-  },
+  });
+  failedQueue = [];
+};
+
+// Request interceptor (error normalisation only — no localStorage token)
+http.interceptors.request.use(
+  (config) => config,
   (error) => {
-    // Ensure we reject with an Error instance (preserve AxiosError if already an Error)
     const err = error instanceof Error ? error : new Error(error?.message || 'Request error');
     return Promise.reject(err);
   }
 );
 
-// Response interceptor to handle authentication errors
+// Response interceptor with silent token refresh on 401
 http.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   async (error) => {
-    // If error is 401, clear auth data and redirect to login
-    if (error.response?.status === 401) {
-      // Clear auth data
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      
-      // Only redirect if not already on login page
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+    const originalRequest = error.config;
+
+    // If 401 and we haven't already retried this request
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't try to refresh if the failing request IS the refresh call
+      if (originalRequest.url?.includes('/auth/refresh-token')) {
+        // Refresh itself failed — redirect to login
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(error);
+      }
+
+      // If a refresh is already in flight, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(() => http(originalRequest));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // Attempt silent refresh (cookie sent automatically)
+        await axios.post(`${BASE_URL}/auth/refresh-token`, {}, { withCredentials: true });
+        processQueue(null);
+        // Retry the original request with the new cookie
+        return http(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError);
+        // Refresh failed — force re-login
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
-    // Ensure we reject with an Error instance (preserve AxiosError if already an Error)
     const err = error instanceof Error ? error : new Error(error?.message || 'Response error');
     return Promise.reject(err);
   }

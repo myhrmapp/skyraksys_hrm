@@ -1,42 +1,43 @@
 /**
  * Payslip Generation Service
  * Handles payslip data processing and generation
+ * Uses shared Axios instance (http-common) for consistent auth & base URL
  */
+import http from '../../http-common';
 
 class PayslipService {
-  constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  /**
+   * Generate payslip data for an employee
+   * @param {Array} employeeIds - Array of Employee IDs
+   * @param {number} month - Month (1-12)
+   * @param {number} year - Year (YYYY)
+   * @returns {Promise<Object>} Formatted payslip data
+   */
+  async generatePayslip(employeeIds, month, year) {
+    try {
+      const response = await http.post('/payslips/generate', {
+        employeeIds: Array.isArray(employeeIds) ? employeeIds : [employeeIds],
+        month,
+        year
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error generating payslip:', error);
+      throw error;
+    }
   }
 
   /**
-   * Generate payslip data for an employee
-   * @param {string} employeeId - Employee ID
-   * @param {string} month - Month in format "YYYY-MM"
-   * @param {Object} salaryData - Salary breakdown data
-   * @returns {Promise<Object>} Formatted payslip data
+   * Finalize a payslip
+   * @param {string} payslipId - Payslip ID
+   * @returns {Promise<Object>} Finalized payslip
    */
-  async generatePayslip(employeeId, month, salaryData = {}) {
+  async finalizePayslip(payslipId) {
     try {
-      const response = await fetch(`${this.baseURL}/payslips/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify({
-          employeeId,
-          month,
-          salaryData
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to generate payslip: ${response.statusText}`);
-      }
-
-      return await response.json();
+      const response = await http.put(`/payslips/${payslipId}/finalize`);
+      return response.data;
     } catch (error) {
-      console.error('Error generating payslip:', error);
+      console.error('Error finalizing payslip:', error);
       throw error;
     }
   }
@@ -48,17 +49,8 @@ class PayslipService {
    */
   async getPayslipHistory(employeeId) {
     try {
-      const response = await fetch(`${this.baseURL}/payslips/history/${employeeId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch payslip history: ${response.statusText}`);
-      }
-
-      return await response.json();
+      const response = await http.get(`/payslips/history/${employeeId}`);
+      return response.data;
     } catch (error) {
       console.error('Error fetching payslip history:', error);
       throw error;
@@ -72,17 +64,8 @@ class PayslipService {
    */
   async getPayslipById(payslipId) {
     try {
-      const response = await fetch(`${this.baseURL}/payslips/${payslipId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch payslip: ${response.statusText}`);
-      }
-
-      return await response.json();
+      const response = await http.get(`/payslips/${payslipId}`);
+      return response.data;
     } catch (error) {
       console.error('Error fetching payslip:', error);
       throw error;
@@ -96,84 +79,22 @@ class PayslipService {
    */
   async getAllPayslips(filters = {}) {
     try {
-      const queryParams = new URLSearchParams();
-      
-      if (filters.month) queryParams.append('month', filters.month);
-      if (filters.status) queryParams.append('status', filters.status);
-      if (filters.employeeId) queryParams.append('employeeId', filters.employeeId);
-      
-      const url = `${this.baseURL}/payslips${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-      
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      });
+      const params = {};
+      if (filters.month) params.month = filters.month;
+      if (filters.status) params.status = filters.status;
+      if (filters.employeeId) params.employeeId = filters.employeeId;
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch payslips: ${response.statusText}`);
-      }
-
-      return await response.json();
+      const response = await http.get('/payslips', { params });
+      return response.data;
     } catch (error) {
       console.error('Error fetching all payslips:', error);
       throw error;
     }
   }
 
-  /**
-   * Create a new payslip in the database
-   * @param {Object} payslipData - Payslip data to create
-   * @returns {Promise<Object>} Created payslip
-   */
-  async createPayslip(payslipData) {
-    try {
-      const response = await fetch(`${this.baseURL}/payslips`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify(payslipData)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to create payslip: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error creating payslip:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Generate bulk payslips for multiple employees
-   * @param {Object} bulkData - Bulk generation data
-   * @returns {Promise<Object>} Bulk generation result
-   */
-  async generateBulkPayslips(bulkData) {
-    try {
-      const response = await fetch(`${this.baseURL}/payslips/bulk-generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify(bulkData)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to generate bulk payslips: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error generating bulk payslips:', error);
-      throw error;
-    }
-  }
+  // NOTE: createPayslip and generateBulkPayslips removed — 
+  // they called non-existent backend routes (POST /payslips, POST /payslips/bulk-generate).
+  // Use generatePayslip() and the bulk endpoints in ModernPayrollManagement instead.
 
   /**
    * Calculate earnings and deductions
@@ -395,33 +316,8 @@ class PayslipService {
     }, 250);
   }
 
-  /**
-   * Download payslip as PDF (requires backend support)
-   * @param {string} employeeId - Employee ID
-   * @param {string} month - Month
-   * @returns {Promise<Blob>} PDF blob
-   */
-  async downloadPayslipPDF(employeeId, month) {
-    try {
-      const response = await fetch(`${this.baseURL}/payslips/download-pdf`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify({ employeeId, month })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to download PDF: ${response.statusText}`);
-      }
-
-      return await response.blob();
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
-      throw error;
-    }
-  }
+  // downloadPayslipPDF removed — used non-existent POST /payslips/download-pdf endpoint.
+  // Use downloadPayslipByIdPDF(payslipId) instead, which calls GET /payslips/:id/pdf.
 
   /**
    * Download payslip PDF by payslip ID
@@ -430,17 +326,11 @@ class PayslipService {
    */
   async downloadPayslipByIdPDF(payslipId) {
     try {
-      const response = await fetch(`${this.baseURL}/payslips/${payslipId}/pdf`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
+      const response = await http.get(`/payslips/${payslipId}/pdf`, {
+        responseType: 'blob'
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to download PDF: ${response.statusText}`);
-      }
-
-      const blob = await response.blob();
+      const blob = response.data;
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

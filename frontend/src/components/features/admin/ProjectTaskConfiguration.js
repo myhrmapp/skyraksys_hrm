@@ -21,7 +21,6 @@ import {
   Tabs,
   Tab,
   TextField,
-  MenuItem,
   Grid,
   Card,
   CardContent,
@@ -35,15 +34,13 @@ import {
   alpha,
   Grow,
   Fade,
-  InputAdornment // ✅ ADD
+  InputAdornment, // ✅ ADD
+  TablePagination
 } from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Visibility as ViewIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
   Info as InfoIcon,
   ViewModule as CardViewIcon, // ✅ ADD - Card view icon
   ViewList as TableViewIcon, // ✅ ADD - Table view icon
@@ -51,23 +48,27 @@ import {
   Business as BusinessIcon,
   Person as PersonIcon,
   Folder as ProjectIcon, // ✅ ADD
-  Close as CloseIcon // ✅ ADD
+  Close as CloseIcon, // ✅ ADD
+  Search as SearchIcon // ✅ ADD
 } from '@mui/icons-material';
 import ProjectService from '../../../services/ProjectService';
 import TaskService from '../../../services/TaskService';
-import EmployeeService from '../../../services/EmployeeService';
+import ConfirmDialog from '../../common/ConfirmDialog';
+import useConfirmDialog from '../../../hooks/useConfirmDialog';
+import ProjectForm from '../../../pages/Projects/ProjectForm';
+import TaskForm from '../../../pages/Tasks/TaskForm';
 
 const ProjectTaskConfiguration = () => {
   const theme = useTheme();
+  const { dialogProps, confirm } = useConfirmDialog();
   
   useEffect(() => {
-    console.log('🎯 CORRECT ProjectTaskConfiguration component loaded (TABLE VERSION - ADMIN FEATURES)');
+    // Component loaded
   }, []);
 
   const [activeTab, setActiveTab] = useState(0);
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
-  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -80,50 +81,59 @@ const ProjectTaskConfiguration = () => {
   const [statsDialogOpen, setStatsDialogOpen] = useState(false);
   const [projectStats, setProjectStats] = useState(null);
   
-  // Form state
-  const [projectForm, setProjectForm] = useState({
-    name: '',
-    description: '',
-    startDate: '',
-    endDate: '',
-    status: 'Planning',
-    clientName: '',
-    managerId: ''
-  });
-  
-  const [taskForm, setTaskForm] = useState({
-    name: '',
-    description: '',
-    projectId: '',
-    assignedTo: '',
-    availableToAll: false,
-    status: 'Not Started',
-    priority: 'Medium',
-    estimatedHours: ''
-  });
-
   // ✅ ADD VIEW STATE
   const [projectView, setProjectView] = useState('cards'); // 'cards' or 'table'
   const [taskView, setTaskView] = useState('table'); // 'cards' or 'table'
+  const [searchTerm, setSearchTerm] = useState(''); // Search state
+
+  // Pagination state
+  const [projectPage, setProjectPage] = useState(0);
+  const [projectRowsPerPage, setProjectRowsPerPage] = useState(10);
+  const [taskPage, setTaskPage] = useState(0);
+  const [taskRowsPerPage, setTaskRowsPerPage] = useState(10);
+
+  // Reset pagination when search changes
+  useEffect(() => {
+    setProjectPage(0);
+    setTaskPage(0);
+  }, [searchTerm]);
 
   useEffect(() => {
     loadProjects();
     loadTasks();
-    loadEmployees();
   }, []);
+
+  // Filter logic
+  const filteredProjects = projects.filter(p => 
+    p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.clientName?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredTasks = tasks.filter(t => 
+    t.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.project?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const loadProjects = async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await ProjectService.getAll();
-      console.log('📦 Projects loaded:', response.data);
       
-      if (response.data && response.data.success) {
+      // More robust check: accept if success is true OR if data is an array
+      if (response.data && (response.data.success || Array.isArray(response.data.data))) {
         setProjects(response.data.data || []);
       } else {
-        setProjects([]);
-        setError('Invalid response format from server');
+        console.warn('Unexpected response format:', response);
+        // Fallback: if response.data is the array itself
+        if (Array.isArray(response.data)) {
+           setProjects(response.data);
+        } else {
+           setProjects([]);
+           setError('Invalid response format from server');
+        }
       }
     } catch (error) {
       console.error('❌ Error loading projects:', error);
@@ -139,13 +149,17 @@ const ProjectTaskConfiguration = () => {
       setLoading(true);
       setError(null);
       const response = await TaskService.getAll();
-      console.log('📋 Tasks loaded:', response.data);
       
-      if (response.data && response.data.success) {
+      if (response.data && (response.data.success || Array.isArray(response.data.data))) {
         setTasks(response.data.data || []);
       } else {
-        setTasks([]);
-        setError('Invalid response format from server');
+        console.warn('Unexpected response format:', response);
+        if (Array.isArray(response.data)) {
+           setTasks(response.data);
+        } else {
+           setTasks([]);
+           setError('Invalid response format from server');
+        }
       }
     } catch (error) {
       console.error('❌ Error loading tasks:', error);
@@ -156,112 +170,47 @@ const ProjectTaskConfiguration = () => {
     }
   };
 
-  const loadEmployees = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await EmployeeService.getAll();
-      console.log('👥 Employees loaded:', response.data);
-      
-      if (response.data && response.data.success) {
-        setEmployees(response.data.data || []);
-      } else {
-        setEmployees([]);
-        setError('Invalid response format from server');
+  const handleProjectDelete = (projectId) => {
+    confirm({
+      title: 'Delete Project',
+      message: 'Are you sure you want to delete this project and all its tasks?',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          await ProjectService.delete(projectId);
+          setSuccess('Project deleted successfully');
+          loadProjects();
+          loadTasks();
+        } catch (error) {
+          console.error('Error deleting project:', error);
+          setError(error.response?.data?.message || 'Failed to delete project');
+        } finally {
+          setLoading(false);
+        }
       }
-    } catch (error) {
-      console.error('❌ Error loading employees:', error);
-      setError(error.response?.data?.message || 'Failed to load employees');
-      setEmployees([]);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
-  const handleProjectSave = async () => {
-    try {
-      setLoading(true);
-      
-      // Clean the managerId field before sending
-      const payload = {
-        ...projectForm,
-        managerId: projectForm.managerId && projectForm.managerId.trim() ? projectForm.managerId : null
-      };
-      
-      if (selectedProject) {
-        await ProjectService.update(selectedProject.id, payload);
-        setSuccess('Project updated successfully');
-      } else {
-        await ProjectService.create(payload);
-        setSuccess('Project created successfully');
+  const handleTaskDelete = (taskId) => {
+    confirm({
+      title: 'Delete Task',
+      message: 'Are you sure you want to delete this task?',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          await TaskService.delete(taskId);
+          setSuccess('Task deleted successfully');
+          loadTasks();
+        } catch (error) {
+          console.error('Error deleting task:', error);
+          setError(error.response?.data?.message || 'Failed to delete task');
+        } finally {
+          setLoading(false);
+        }
       }
-      setProjectDialogOpen(false);
-      loadProjects();
-      resetProjectForm();
-    } catch (error) {
-      console.error('Error saving project:', error);
-      setError(error.response?.data?.message || 'Failed to save project');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleTaskSave = async () => {
-    try {
-      setLoading(true);
-      if (selectedTask) {
-        await TaskService.update(selectedTask.id, taskForm);
-        setSuccess('Task updated successfully');
-      } else {
-        await TaskService.create(taskForm);
-        setSuccess('Task created successfully');
-      }
-      setTaskDialogOpen(false);
-      loadTasks();
-      resetTaskForm();
-    } catch (error) {
-      console.error('Error saving task:', error);
-      setError(error.response?.data?.message || 'Failed to save task');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleProjectDelete = async (projectId) => {
-    if (!window.confirm('Are you sure you want to delete this project and all its tasks?')) {
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      await ProjectService.delete(projectId);
-      setSuccess('Project deleted successfully');
-      loadProjects();
-      loadTasks();
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      setError(error.response?.data?.message || 'Failed to delete project');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleTaskDelete = async (taskId) => {
-    if (!window.confirm('Are you sure you want to delete this task?')) {
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      await TaskService.delete(taskId);
-      setSuccess('Task deleted successfully');
-      loadTasks();
-    } catch (error) {
-      console.error('Error deleting task:', error);
-      setError(error.response?.data?.message || 'Failed to delete task');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const handleViewStats = async (projectId) => {
@@ -279,67 +228,13 @@ const ProjectTaskConfiguration = () => {
   };
 
   const openProjectDialog = (project = null) => {
-    if (project) {
-      setSelectedProject(project);
-      setProjectForm({
-        name: project.name || '',
-        description: project.description || '',
-        startDate: project.startDate || '',
-        endDate: project.endDate || '',
-        status: project.status || 'Planning',
-        clientName: project.clientName || '',
-        managerId: project.managerId || ''
-      });
-    } else {
-      resetProjectForm();
-    }
+    setSelectedProject(project);
     setProjectDialogOpen(true);
   };
 
   const openTaskDialog = (task = null) => {
-    if (task) {
-      setSelectedTask(task);
-      setTaskForm({
-        name: task.name || '',
-        description: task.description || '',
-        projectId: task.projectId || '',
-        assignedTo: task.assignedTo || '',
-        availableToAll: task.availableToAll || false,
-        status: task.status || 'Not Started',
-        priority: task.priority || 'Medium',
-        estimatedHours: task.estimatedHours || ''
-      });
-    } else {
-      resetTaskForm();
-    }
+    setSelectedTask(task);
     setTaskDialogOpen(true);
-  };
-
-  const resetProjectForm = () => {
-    setSelectedProject(null);
-    setProjectForm({
-      name: '',
-      description: '',
-      startDate: '',
-      endDate: '',
-      status: 'Planning',
-      clientName: '',
-      managerId: ''
-    });
-  };
-
-  const resetTaskForm = () => {
-    setSelectedTask(null);
-    setTaskForm({
-      name: '',
-      description: '',
-      projectId: '',
-      assignedTo: '',
-      availableToAll: false,
-      status: 'Not Started',
-      priority: 'Medium',
-      estimatedHours: ''
-    });
   };
 
   const getStatusColor = (status) => {
@@ -383,11 +278,25 @@ const ProjectTaskConfiguration = () => {
         </Alert>
       )}
 
-      <Paper sx={{ mb: 3 }}>
+      <Paper sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 2 }}>
         <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)}>
           <Tab label="Projects" />
           <Tab label="Tasks" />
         </Tabs>
+        <TextField
+          size="small"
+          placeholder={`Search ${activeTab === 0 ? 'Projects' : 'Tasks'}...`}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            )
+          }}
+          sx={{ width: 300 }}
+        />
       </Paper>
 
       {/* ======== PROJECTS TAB ======== */}
@@ -457,7 +366,7 @@ const ProjectTaskConfiguration = () => {
               {/* ✅ CARD VIEW */}
               {projectView === 'cards' && (
                 <Grid container spacing={3}>
-                  {projects.map((project, index) => (
+                  {filteredProjects.map((project, index) => (
                     <Grow in timeout={300 + index * 100} key={project.id}>
                       <Grid item xs={12} md={6} lg={4}>
                         <Card
@@ -631,6 +540,7 @@ const ProjectTaskConfiguration = () => {
 
               {/* ✅ TABLE VIEW (Existing) */}
               {projectView === 'table' && (
+                <>
                 <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
                   <Table sx={{ minWidth: 650 }}>
                     <TableHead sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
@@ -647,7 +557,9 @@ const ProjectTaskConfiguration = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {projects.map((project) => (
+                      {filteredProjects
+                        .slice(projectPage * projectRowsPerPage, projectPage * projectRowsPerPage + projectRowsPerPage)
+                        .map((project) => (
                         <TableRow key={project.id} hover>
                           <TableCell>
                             <Typography variant="body2" fontWeight="medium">
@@ -732,6 +644,16 @@ const ProjectTaskConfiguration = () => {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                <TablePagination
+                  component="div"
+                  count={filteredProjects.length}
+                  page={projectPage}
+                  onPageChange={(e, newPage) => setProjectPage(newPage)}
+                  rowsPerPage={projectRowsPerPage}
+                  onRowsPerPageChange={(e) => { setProjectRowsPerPage(parseInt(e.target.value, 10)); setProjectPage(0); }}
+                  rowsPerPageOptions={[5, 10, 25]}
+                />
+                </>
               )}
             </>
           )}
@@ -789,7 +711,7 @@ const ProjectTaskConfiguration = () => {
               {/* ✅ CARD VIEW FOR TASKS */}
               {taskView === 'cards' && (
                 <Grid container spacing={3}>
-                  {tasks.map((task, index) => (
+                  {filteredTasks.map((task, index) => (
                     <Grow in timeout={300 + index * 50} key={task.id}>
                       <Grid item xs={12} md={6} lg={4}>
                         <Card
@@ -839,13 +761,10 @@ const ProjectTaskConfiguration = () => {
                                     {task.assignee.firstName} {task.assignee.lastName}
                                   </Typography>
                                 </Box>
-                              ) : task.availableToAll ? (
-                                <Chip label="Available to All" size="small" color="info" />
-                              ) : (
-                                <Typography variant="body2" color="text.secondary">
-                                  Unassigned
-                                </Typography>
-                              )}
+                              ) : (() => {
+                                if (task.availableToAll) return <Chip label="Available to All" size="small" color="info" />;
+                                return <Typography variant="body2" color="text.secondary">Unassigned</Typography>;
+                              })()}
 
                               {task.estimatedHours && (
                                 <Typography variant="caption" color="text.secondary">
@@ -914,6 +833,7 @@ const ProjectTaskConfiguration = () => {
 
               {/* ✅ TABLE VIEW FOR TASKS (Existing) */}
               {taskView === 'table' && (
+                <>
                 <TableContainer component={Paper}>
                   <Table>
                     <TableHead>
@@ -928,7 +848,9 @@ const ProjectTaskConfiguration = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {tasks.map((task) => (
+                      {filteredTasks
+                        .slice(taskPage * taskRowsPerPage, taskPage * taskRowsPerPage + taskRowsPerPage)
+                        .map((task) => (
                         <TableRow key={task.id} hover>
                           <TableCell>{task.name}</TableCell>
                           <TableCell>{task.project?.name || '-'}</TableCell>
@@ -949,11 +871,10 @@ const ProjectTaskConfiguration = () => {
                           <TableCell>
                             {task.availableToAll ? (
                               <Chip label="All Employees" size="small" color="info" />
-                            ) : task.assignee ? (
-                              `${task.assignee.firstName} ${task.assignee.lastName}`
-                            ) : (
-                              '-'
-                            )}
+                            ) : (() => {
+                              if (task.assignee) return `${task.assignee.firstName} ${task.assignee.lastName}`;
+                              return '-';
+                            })()}
                           </TableCell>
                           <TableCell>{task.estimatedHours || '-'}</TableCell>
                           <TableCell align="right">
@@ -994,6 +915,16 @@ const ProjectTaskConfiguration = () => {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                <TablePagination
+                  component="div"
+                  count={filteredTasks.length}
+                  page={taskPage}
+                  onPageChange={(e, newPage) => setTaskPage(newPage)}
+                  rowsPerPage={taskRowsPerPage}
+                  onRowsPerPageChange={(e) => { setTaskRowsPerPage(parseInt(e.target.value, 10)); setTaskPage(0); }}
+                  rowsPerPageOptions={[5, 10, 25]}
+                />
+                </>
               )}
             </>
           )}
@@ -1058,211 +989,20 @@ const ProjectTaskConfiguration = () => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        
-        <Divider sx={{ mx: 3 }} />
-        
-        <DialogContent sx={{ pt: 3 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                required
-                label="Project Name"
-                value={projectForm.name}
-                onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <ProjectIcon color="action" />
-                    </InputAdornment>
-                  )
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&.Mui-focused': {
-                      boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.1)}`
-                    }
-                  }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label="Description"
-                value={projectForm.description}
-                onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
-                placeholder="Describe your project..."
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2
-                  }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Client Name"
-                value={projectForm.clientName}
-                onChange={(e) => setProjectForm({ ...projectForm, clientName: e.target.value })}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <BusinessIcon color="action" />
-                    </InputAdornment>
-                  )
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': { borderRadius: 2 }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                select
-                label="Status"
-                value={projectForm.status}
-                onChange={(e) => setProjectForm({ ...projectForm, status: e.target.value })}
-                sx={{
-                  '& .MuiOutlinedInput-root': { borderRadius: 2 }
-                }}
-              >
-                <MenuItem value="Planning">
-                  <Chip label="Planning" size="small" color="default" sx={{ mr: 1 }} />
-                  Planning
-                </MenuItem>
-                <MenuItem value="Active">
-                  <Chip label="Active" size="small" color="primary" sx={{ mr: 1 }} />
-                  Active
-                </MenuItem>
-                <MenuItem value="On Hold">
-                  <Chip label="On Hold" size="small" color="warning" sx={{ mr: 1 }} />
-                  On Hold
-                </MenuItem>
-                <MenuItem value="Completed">
-                  <Chip label="Completed" size="small" color="success" sx={{ mr: 1 }} />
-                  Completed
-                </MenuItem>
-                <MenuItem value="Cancelled">
-                  <Chip label="Cancelled" size="small" color="error" sx={{ mr: 1 }} />
-                  Cancelled
-                </MenuItem>
-              </TextField>
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                type="date"
-                label="Start Date"
-                InputLabelProps={{ shrink: true }}
-                value={projectForm.startDate}
-                onChange={(e) => setProjectForm({ ...projectForm, startDate: e.target.value })}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <CalendarTodayIcon color="action" />
-                    </InputAdornment>
-                  )
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': { borderRadius: 2 }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                type="date"
-                label="End Date"
-                InputLabelProps={{ shrink: true }}
-                value={projectForm.endDate}
-                onChange={(e) => setProjectForm({ ...projectForm, endDate: e.target.value })}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <CalendarTodayIcon color="action" />
-                    </InputAdornment>
-                  )
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': { borderRadius: 2 }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                select
-                label="Project Manager (Optional)"
-                value={projectForm.managerId}
-                onChange={(e) => setProjectForm({ ...projectForm, managerId: e.target.value })}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon color="action" />
-                    </InputAdornment>
-                  )
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': { borderRadius: 2 }
-                }}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                {employees.map(emp => (
-                  <MenuItem key={emp.id} value={emp.id}>
-                    {emp.firstName} {emp.lastName} ({emp.employeeId})
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-          </Grid>
+        <DialogContent>
+          <ProjectForm
+            project={selectedProject || null}
+            onSave={() => {
+              loadProjects();
+              setProjectDialogOpen(false);
+              setSelectedProject(null);
+            }}
+            onCancel={() => {
+              setProjectDialogOpen(false);
+              setSelectedProject(null);
+            }}
+          />
         </DialogContent>
-        
-        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-          <Button
-            onClick={() => setProjectDialogOpen(false)}
-            variant="outlined"
-            sx={{
-              borderRadius: 2,
-              px: 3,
-              textTransform: 'none',
-              fontWeight: 600
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleProjectSave}
-            disabled={loading || !projectForm.name}
-            startIcon={loading ? <CircularProgress size={18} /> : <CheckCircleIcon />}
-            sx={{
-              borderRadius: 2,
-              px: 4,
-              textTransform: 'none',
-              fontWeight: 600,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-              '&:hover': {
-                background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`
-              }
-            }}
-          >
-            {loading ? 'Saving...' : selectedProject ? 'Update Project' : 'Create Project'}
-          </Button>
-        </DialogActions>
       </Dialog>
 
       {/* Task Dialog */}
@@ -1276,145 +1016,20 @@ const ProjectTaskConfiguration = () => {
           {selectedTask ? 'Edit Task' : 'Create New Task'}
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                required
-                label="Task Name"
-                value={taskForm.name}
-                onChange={(e) => setTaskForm({ ...taskForm, name: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                label="Description"
-                value={taskForm.description}
-                onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                required
-                select
-                label="Project"
-                value={taskForm.projectId}
-                onChange={(e) => setTaskForm({ ...taskForm, projectId: e.target.value })}
-              >
-                {projects.map((project) => (
-                  <MenuItem key={project.id} value={project.id}>
-                    {project.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Estimated Hours"
-                value={taskForm.estimatedHours}
-                onChange={(e) => setTaskForm({ ...taskForm, estimatedHours: e.target.value })}
-                inputProps={{ min: 0, step: 0.5 }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                select
-                label="Status"
-                value={taskForm.status}
-                onChange={(e) => setTaskForm({ ...taskForm, status: e.target.value })}
-              >
-                <MenuItem value="Not Started">Not Started</MenuItem>
-                <MenuItem value="In Progress">In Progress</MenuItem>
-                <MenuItem value="Completed">Completed</MenuItem>
-                <MenuItem value="On Hold">On Hold</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                select
-                label="Priority"
-                value={taskForm.priority}
-                onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value })}
-              >
-                <MenuItem value="Low">Low</MenuItem>
-                <MenuItem value="Medium">Medium</MenuItem>
-                <MenuItem value="High">High</MenuItem>
-                <MenuItem value="Critical">Critical</MenuItem>
-              </TextField>
-            </Grid>
-            
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Task Assignment:
-                </Typography>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={12}>
-              <Box sx={{ mb: 2 }}>
-                <Button
-                  variant={taskForm.availableToAll ? "contained" : "outlined"}
-                  onClick={() => setTaskForm({ 
-                    ...taskForm, 
-                    availableToAll: true, 
-                    assignedTo: '' 
-                  })}
-                  sx={{ mr: 2, mb: 1 }}
-                >
-                  Available to All
-                </Button>
-                <Button
-                  variant={!taskForm.availableToAll ? "contained" : "outlined"}
-                  onClick={() => setTaskForm({ 
-                    ...taskForm, 
-                    availableToAll: false 
-                  })}
-                  sx={{ mb: 1 }}
-                >
-                  Assign to Specific Employee
-                </Button>
-              </Box>
-            </Grid>
-            
-            {!taskForm.availableToAll && (
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  select
-                  label="Assign To"
-                  value={taskForm.assignedTo}
-                  onChange={(e) => setTaskForm({ ...taskForm, assignedTo: e.target.value })}
-                >
-                  <MenuItem value="">None</MenuItem>
-                  {employees.map((employee) => (
-                    <MenuItem key={employee.id} value={employee.id}>
-                      {employee.firstName} {employee.lastName} ({employee.employeeId})
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-            )}
-          </Grid>
+          <TaskForm
+            task={selectedTask || null}
+            projectId={null}
+            onSave={() => {
+              loadTasks();
+              setTaskDialogOpen(false);
+              setSelectedTask(null);
+            }}
+            onCancel={() => {
+              setTaskDialogOpen(false);
+              setSelectedTask(null);
+            }}
+          />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setTaskDialogOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleTaskSave}
-            disabled={loading || !taskForm.name || !taskForm.projectId}
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </Button>
-        </DialogActions>
       </Dialog>
 
       {/* Project Statistics Dialog */}
@@ -1457,6 +1072,7 @@ const ProjectTaskConfiguration = () => {
           <Button onClick={() => setStatsDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+      <ConfirmDialog {...dialogProps} />
     </Box>
   );
 };

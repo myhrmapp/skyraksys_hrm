@@ -1,7 +1,8 @@
 const express = require('express');
-const { authenticateToken, isAdminOrHR } = require('../middleware/auth.simple');
+const { authenticateToken, isAdminOrHR } = require('../middleware/auth');
 const db = require('../models');
-const { uploadCompanyLogo, handleUploadError } = require('../middleware/upload');
+const { uploadCompanyLogo, handleUploadError, validateMagicBytes } = require('../middleware/upload');
+const logger = require('../utils/logger');
 
 const PayslipTemplate = db.PayslipTemplate;
 const router = express.Router();
@@ -10,27 +11,34 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // GET the current payslip template settings
-router.get('/payslip-template', async (req, res) => {
+router.get('/payslip-template', async (req, res, next) => {
     try {
-        const template = await PayslipTemplate.findOne();
-        if (!template) {
-            // If no template exists, create a default one
-            const defaultTemplate = await PayslipTemplate.create({
-                companyName: 'Your Company',
-                companyAddress: '123 Main St, Anytown, USA',
-                footerText: 'This is a computer-generated payslip.'
-            });
-            return res.json({ success: true, data: defaultTemplate });
+        // Always try to load an existing template first
+        let template = await PayslipTemplate.findOne();
+
+        // If no template exists yet, create a proper default using the
+        // model helper so all required fields (like `name`) are populated.
+        if (!template && typeof PayslipTemplate.createDefaultTemplate === 'function') {
+            template = await PayslipTemplate.createDefaultTemplate();
         }
+
+        // Fallback: if helper is not available for some reason, create a
+        // minimal valid template so the endpoint still works.
+        if (!template) {
+            template = await PayslipTemplate.create({
+                name: 'Standard Payslip Template'
+            });
+        }
+
         res.json({ success: true, data: template });
     } catch (error) {
-        console.error('Get Payslip Template Error:', error);
-        res.status(500).json({ success: false, message: 'Failed to fetch payslip template settings.' });
+        logger.error('Get Payslip Template Error:', { detail: error });
+        next(error);
     }
 });
 
 // PUT to update the payslip template settings (Admin or HR only)
-router.put('/payslip-template', isAdminOrHR, uploadCompanyLogo, handleUploadError, async (req, res) => {
+router.put('/payslip-template', isAdminOrHR, uploadCompanyLogo, handleUploadError, validateMagicBytes, async (req, res, next) => {
     try {
         const [template, created] = await PayslipTemplate.findOrCreate({
             where: {}, // Finds the first one
@@ -51,8 +59,8 @@ router.put('/payslip-template', isAdminOrHR, uploadCompanyLogo, handleUploadErro
         const updatedTemplate = await PayslipTemplate.findOne();
         res.json({ success: true, message: 'Payslip template updated successfully.', data: updatedTemplate });
     } catch (error) {
-        console.error('Update Payslip Template Error:', error);
-        res.status(500).json({ success: false, message: 'Failed to update payslip template settings.' });
+        logger.error('Update Payslip Template Error:', { detail: error });
+        next(error);
     }
 });
 

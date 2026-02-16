@@ -1,10 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Box,
   Button,
   Avatar,
   IconButton,
-  Typography
+  Typography,
+  Alert
 } from '@mui/material';
 import {
   PhotoCamera as PhotoCameraIcon,
@@ -27,22 +28,24 @@ const PhotoUploadSimple = ({
   helperText = ''
 }) => {
   const fileInputRef = useRef(null);
+  const [error, setError] = useState('');
 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (!file) return;
+    setError('');
 
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      alert('Only JPEG, PNG, and WebP images are allowed.');
+      setError('Only JPEG, PNG, and WebP images are allowed.');
       return;
     }
 
     // Validate file size (5MB limit)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      alert('File size must be less than 5MB.');
+      setError('File size must be less than 5MB.');
       return;
     }
 
@@ -126,6 +129,13 @@ const PhotoUploadSimple = ({
       >
         {photo ? 'Change Photo' : label}
       </Button>
+
+      {/* Error Message */}
+      {error && (
+        <Alert severity="error" sx={{ mt: 1, py: 0 }} onClose={() => setError('')}>
+          {error}
+        </Alert>
+      )}
 
       {/* Helper Text */}
       {helperText && (

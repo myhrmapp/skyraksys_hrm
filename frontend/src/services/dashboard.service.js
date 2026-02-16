@@ -4,10 +4,8 @@ class DashboardService {
   async getStats() {
     try {
       const response = await http.get('/dashboard/stats');
-      return {
-        success: true,
-        data: response.data
-      };
+      // Backend returns { success, data } — unwrap Axios layer
+      return response.data;
     } catch (error) {
       console.error('Dashboard stats error:', error);
       return {
@@ -24,10 +22,8 @@ class DashboardService {
   async getEmployeeStats() {
     try {
       const response = await http.get('/dashboard/employee-stats');
-      return {
-        success: true,
-        data: response.data
-      };
+      // Backend returns { success, data } — unwrap Axios layer
+      return response.data;
     } catch (error) {
       console.error('Employee stats error:', error);
       return {
@@ -38,19 +34,8 @@ class DashboardService {
   }
 
   async getManagerStats() {
-    try {
-      const response = await http.get('/dashboard/manager-stats');
-      return {
-        success: true,
-        data: response.data
-      };
-    } catch (error) {
-      console.error('Manager stats error:', error);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
+    // Manager stats are served via /dashboard/stats (auto-detects role)
+    return this.getStats();
   }
 }
 

@@ -1,6 +1,22 @@
 // Service layer for business logic separation
 const ApiResponse = require('../utils/ApiResponse');
 
+/**
+ * Re-throw Sequelize errors as-is to preserve their type for the global error handler.
+ * Only wrap truly unexpected errors as generic Error.
+ */
+function rethrowError(operation, modelName, error) {
+  // Preserve Sequelize-specific errors (ValidationError, UniqueConstraintError, ForeignKeyConstraintError, etc.)
+  if (error.name && error.name.startsWith('Sequelize')) {
+    throw error;
+  }
+  // Preserve custom AppError instances
+  if (error.statusCode) {
+    throw error;
+  }
+  throw new Error(`Error ${operation} ${modelName}: ${error.message}`);
+}
+
 class BaseService {
   constructor(model) {
     this.model = model;
@@ -18,8 +34,11 @@ class BaseService {
 
       const offset = (page - 1) * limit;
 
+      // Merge any additional where conditions
+      const finalWhere = { ...where };
+
       const { count, rows } = await this.model.findAndCountAll({
-        where,
+        where: finalWhere,
         include,
         order,
         limit: parseInt(limit),
@@ -40,7 +59,7 @@ class BaseService {
         }
       };
     } catch (error) {
-      throw new Error(`Error fetching ${this.model.name} records: ${error.message}`);
+      rethrowError('fetching', `${this.model.name} records`, error);
     }
   }
 
@@ -48,40 +67,46 @@ class BaseService {
     try {
       const record = await this.model.findByPk(id, { include });
       if (!record) {
-        throw new Error(`${this.model.name} not found`);
+        return null;
       }
       return record;
     } catch (error) {
-      throw new Error(`Error fetching ${this.model.name}: ${error.message}`);
+      rethrowError('fetching', this.model.name, error);
     }
   }
 
-  async create(data) {
+  async create(data, options = {}) {
     try {
-      const record = await this.model.create(data);
+      const record = await this.model.create(data, options);
       return record;
     } catch (error) {
-      throw new Error(`Error creating ${this.model.name}: ${error.message}`);
+      rethrowError('creating', this.model.name, error);
     }
   }
 
-  async update(id, data) {
+  async update(id, data, options = {}) {
     try {
       const record = await this.findById(id);
-      const updatedRecord = await record.update(data);
+      if (!record) {
+        throw new Error(`${this.model.name} not found`);
+      }
+      const updatedRecord = await record.update(data, options);
       return updatedRecord;
     } catch (error) {
-      throw new Error(`Error updating ${this.model.name}: ${error.message}`);
+      rethrowError('updating', this.model.name, error);
     }
   }
 
   async delete(id) {
     try {
       const record = await this.findById(id);
+      if (!record) {
+        throw new Error(`${this.model.name} not found`);
+      }
       await record.destroy();
       return true;
     } catch (error) {
-      throw new Error(`Error deleting ${this.model.name}: ${error.message}`);
+      rethrowError('deleting', this.model.name, error);
     }
   }
 
@@ -90,7 +115,7 @@ class BaseService {
       const record = await this.model.findOne({ where, include });
       return record;
     } catch (error) {
-      throw new Error(`Error finding ${this.model.name}: ${error.message}`);
+      rethrowError('finding', this.model.name, error);
     }
   }
 
@@ -99,7 +124,7 @@ class BaseService {
       const count = await this.model.count({ where });
       return count;
     } catch (error) {
-      throw new Error(`Error counting ${this.model.name}: ${error.message}`);
+      rethrowError('counting', this.model.name, error);
     }
   }
 
@@ -108,7 +133,7 @@ class BaseService {
       const records = await this.model.bulkCreate(dataArray);
       return records;
     } catch (error) {
-      throw new Error(`Error bulk creating ${this.model.name}: ${error.message}`);
+      rethrowError('bulk creating', this.model.name, error);
     }
   }
 
@@ -117,7 +142,7 @@ class BaseService {
       const [affectedCount] = await this.model.update(data, { where });
       return affectedCount;
     } catch (error) {
-      throw new Error(`Error bulk updating ${this.model.name}: ${error.message}`);
+      rethrowError('bulk updating', this.model.name, error);
     }
   }
 
@@ -126,7 +151,7 @@ class BaseService {
       const affectedCount = await this.model.destroy({ where });
       return affectedCount;
     } catch (error) {
-      throw new Error(`Error bulk deleting ${this.model.name}: ${error.message}`);
+      rethrowError('bulk deleting', this.model.name, error);
     }
   }
 }

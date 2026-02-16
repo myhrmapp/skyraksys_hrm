@@ -1,6 +1,8 @@
 const BaseService = require('./BaseService');
 const db = require('../models');
 const { LeaveRequest, LeaveType, Employee, User } = db;
+const emailService = require('./email.service');
+const logger = require('../utils/logger');
 
 class LeaveService extends BaseService {
   constructor() {
@@ -33,6 +35,31 @@ class LeaveService extends BaseService {
       include: includeOptions,
       order: [['createdAt', 'DESC']]
     });
+  }
+
+  async findByIdWithDetails(id) {
+    const includeOptions = [
+      {
+        model: LeaveType,
+        as: 'leaveType',
+        attributes: ['id', 'name', 'maxDaysPerYear', 'description']
+      },
+      {
+        model: Employee,
+        as: 'employee',
+        attributes: ['id', 'employeeId', 'firstName', 'lastName', 'email'],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['id', 'email', 'role']
+          }
+        ]
+      }
+    ];
+
+    // BaseService.findById expects include array as second parameter
+    return super.findById(id, includeOptions);
   }
 
   async findByEmployee(employeeId, options = {}) {
@@ -97,35 +124,62 @@ class LeaveService extends BaseService {
 
     return super.create({
       ...data,
-      days,
+      totalDays: days,
       status: 'Pending'
     });
   }
 
   async approveLeaveRequest(id, approverId, comments = '') {
-    const leaveRequest = await this.findById(id);
-    
-    if (leaveRequest.status !== 'Pending') {
-      throw new Error('Leave request is not in pending status');
+    const transaction = await db.sequelize.transaction();
+    try {
+      const leaveRequest = await this.findById(id);
+      
+      if (leaveRequest.status !== 'Pending') {
+        throw new Error('Leave request is not in pending status');
+      }
+
+      // Check leave balance (again, inside transaction to ensure consistency)
+      const leaveBalance = await db.LeaveBalance.findOne({
+        where: { 
+          employeeId: leaveRequest.employeeId, 
+          leaveTypeId: leaveRequest.leaveTypeId 
+        },
+        transaction,
+        lock: transaction.LOCK.UPDATE
+      });
+
+      if (!leaveBalance) {
+        throw new Error('Leave balance record not found');
+      }
+
+      if (leaveBalance.balance < leaveRequest.totalDays) {
+        throw new Error(`Insufficient leave balance. Available: ${leaveBalance.balance}, Requested: ${leaveRequest.totalDays}`);
+      }
+
+      // Deduct Balance
+      leaveBalance.totalTaken = Number(leaveBalance.totalTaken) + Number(leaveRequest.totalDays);
+      leaveBalance.balance = Number(leaveBalance.balance) - Number(leaveRequest.totalDays);
+      await leaveBalance.save({ transaction });
+
+      // Update Request
+      const updatedRequest = await super.update(id, {
+        status: 'Approved',
+        approvedBy: approverId,
+        approvedAt: new Date(),
+        approverComments: comments
+      }, { transaction });
+
+      await transaction.commit();
+
+      // Send email notification (fire-and-forget)
+      this._sendLeaveNotification(leaveRequest, 'Approved', comments).catch(() => {});
+
+      return updatedRequest;
+
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
-
-    // Check leave balance
-    const balanceCheck = await this.checkLeaveBalance(
-      leaveRequest.employeeId,
-      leaveRequest.leaveTypeId,
-      leaveRequest.days
-    );
-
-    if (!balanceCheck.isValid) {
-      throw new Error(balanceCheck.message);
-    }
-
-    return super.update(id, {
-      status: 'Approved',
-      approverId,
-      approvedAt: new Date(),
-      approverComments: comments
-    });
   }
 
   async rejectLeaveRequest(id, approverId, comments) {
@@ -135,12 +189,17 @@ class LeaveService extends BaseService {
       throw new Error('Leave request is not in pending status');
     }
 
-    return super.update(id, {
+    const result = await super.update(id, {
       status: 'Rejected',
-      approverId,
-      approvedAt: new Date(),
+      approvedBy: approverId,
+      rejectedAt: new Date(),
       approverComments: comments
     });
+
+    // Send email notification (fire-and-forget)
+    this._sendLeaveNotification(leaveRequest, 'Rejected', comments).catch(() => {});
+
+    return result;
   }
 
   async validateLeaveRequest(data) {
@@ -195,10 +254,10 @@ class LeaveService extends BaseService {
       return { isValid: false, message: 'Leave balance not found' };
     }
 
-    if (leaveBalance.availableDays < requestedDays) {
+    if (leaveBalance.balance < requestedDays) {
       return { 
         isValid: false, 
-        message: `Insufficient leave balance. Available: ${leaveBalance.availableDays}, Requested: ${requestedDays}` 
+        message: `Insufficient leave balance. Available: ${leaveBalance.balance}, Requested: ${requestedDays}` 
       };
     }
 
@@ -232,16 +291,16 @@ class LeaveService extends BaseService {
     if (leaves.data) {
       leaves.data.forEach(leave => {
         stats.total++;
-        stats.days.total += leave.days || 0;
+        stats.days.total += leave.totalDays || 0;
 
         switch (leave.status) {
           case 'Approved':
             stats.approved++;
-            stats.days.approved += leave.days || 0;
+            stats.days.approved += leave.totalDays || 0;
             break;
           case 'Pending':
             stats.pending++;
-            stats.days.pending += leave.days || 0;
+            stats.days.pending += leave.totalDays || 0;
             break;
           case 'Rejected':
             stats.rejected++;
@@ -251,6 +310,40 @@ class LeaveService extends BaseService {
     }
 
     return stats;
+  }
+
+  /**
+   * Send leave status notification email to the employee (fire-and-forget)
+   * @private
+   */
+  async _sendLeaveNotification(leaveRequest, newStatus, comments = '') {
+    try {
+      // Fetch employee with user email
+      const employee = await Employee.findByPk(leaveRequest.employeeId, {
+        include: [{ model: User, as: 'user', attributes: ['email'] }]
+      });
+      if (!employee?.user?.email) return;
+
+      // Fetch leave type name
+      const leaveType = leaveRequest.leaveTypeId 
+        ? await LeaveType.findByPk(leaveRequest.leaveTypeId) 
+        : null;
+
+      await emailService.sendLeaveStatusEmail(
+        employee.user.email,
+        `${employee.firstName} ${employee.lastName}`,
+        {
+          leaveType: leaveType?.name || 'N/A',
+          startDate: leaveRequest.startDate,
+          endDate: leaveRequest.endDate,
+          totalDays: leaveRequest.totalDays,
+          comments: comments || ''
+        },
+        newStatus
+      );
+    } catch (err) {
+      logger.warn('Leave notification email failed:', { detail: err.message });
+    }
   }
 }
 

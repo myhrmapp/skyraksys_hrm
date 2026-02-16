@@ -1,14 +1,8 @@
 import http from "../http-common";
 
-class ProjectDataService {
+class ProjectService {
   getAll(params = {}) {
-    const queryParams = new URLSearchParams();
-    
-    if (params.status) queryParams.append('status', params.status);
-    if (params.managerId) queryParams.append('managerId', params.managerId);
-    
-    const queryString = queryParams.toString();
-    return http.get(`/projects${queryString ? `?${queryString}` : ''}`);
+    return http.get('/projects', { params });
   }
 
   get(id) {
@@ -54,5 +48,5 @@ class ProjectDataService {
   }
 }
 
-const projectDataService = new ProjectDataService();
-export default projectDataService;
+export const projectService = new ProjectService();
+export default projectService;

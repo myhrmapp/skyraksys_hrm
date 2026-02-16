@@ -1,6 +1,8 @@
 const express = require('express');
-const { authenticateToken, authorize } = require('../middleware/auth.simple');
+const { authenticateToken, authorize } = require('../middleware/auth');
+const { positionSchema } = require('../middleware/validators/position.validator');
 const db = require('../models');
+const logger = require('../utils/logger');
 
 const Position = db.Position;
 const Department = db.Department;
@@ -33,10 +35,11 @@ const router = express.Router();
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  */
-// Get all positions
-router.get('/', authenticateToken, async (req, res) => {
+// Get all positions (with optional pagination)
+router.get('/', authenticateToken, async (req, res, next) => {
   try {
-    const positions = await Position.findAll({
+    const { page, limit } = req.query;
+    const queryOptions = {
       include: [
         {
           model: Department,
@@ -49,18 +52,35 @@ router.get('/', authenticateToken, async (req, res) => {
           attributes: ['id', 'employeeId', 'firstName', 'lastName', 'status']
         }
       ]
-    });
+    };
+
+    // If pagination params provided, use findAndCountAll
+    if (page && limit) {
+      const pageNum = Math.max(1, parseInt(page));
+      const pageSize = Math.min(200, Math.max(1, parseInt(limit)));
+      queryOptions.limit = pageSize;
+      queryOptions.offset = (pageNum - 1) * pageSize;
+
+      const result = await Position.findAndCountAll(queryOptions);
+      return res.json({
+        success: true,
+        data: result.rows,
+        totalCount: result.count,
+        totalPages: Math.ceil(result.count / pageSize),
+        currentPage: pageNum
+      });
+    }
+
+    // No pagination — return all (backward compatible)
+    const positions = await Position.findAll(queryOptions);
 
     res.json({
       success: true,
       data: positions
     });
   } catch (error) {
-    console.error('Error fetching positions:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch positions'
-    });
+    logger.error('Error fetching positions:', { detail: error });
+    next(error);
   }
 });
 
@@ -98,7 +118,7 @@ router.get('/', authenticateToken, async (req, res) => {
  *         $ref: '#/components/responses/NotFoundError'
  */
 // Get position by ID
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', authenticateToken, async (req, res, next) => {
   try {
     const position = await Position.findByPk(req.params.id, {
       include: [
@@ -127,11 +147,8 @@ router.get('/:id', authenticateToken, async (req, res) => {
       data: position
     });
   } catch (error) {
-    console.error('Error fetching position:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch position'
-    });
+    logger.error('Error fetching position:', { detail: error });
+    next(error);
   }
 });
 
@@ -187,24 +204,19 @@ router.get('/:id', authenticateToken, async (req, res) => {
  *         $ref: '#/components/responses/ForbiddenError'
  */
 // Create new position (admin/hr only)
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, authorize('admin', 'hr'), async (req, res, next) => {
   try {
-    if (req.user.role !== 'admin' && req.user.role !== 'hr') {
-      return res.status(403).json({
-        success: false,
-        message: 'Admin or HR access required'
-      });
-    }
-
-    const { title, description, departmentId, level } = req.body;
-
-    // Validate required fields
-    if (!title || !departmentId) {
+    // Validate input
+    const { error, value } = positionSchema.create.validate(req.body, { abortEarly: false, stripUnknown: true });
+    if (error) {
       return res.status(400).json({
         success: false,
-        message: 'Title and departmentId are required'
+        message: 'Validation failed',
+        errors: error.details.map(d => d.message)
       });
     }
+
+    const { title, description, departmentId, level } = value;
 
     // Check if department exists
     const department = await Department.findByPk(departmentId);
@@ -219,7 +231,7 @@ router.post('/', authenticateToken, async (req, res) => {
       title,
       description,
       departmentId,
-      level: level || 'entry'
+      level: level || 'Entry'
     });
 
     const createdPosition = await Position.findByPk(position.id, {
@@ -238,11 +250,8 @@ router.post('/', authenticateToken, async (req, res) => {
       data: createdPosition
     });
   } catch (error) {
-    console.error('Error creating position:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create position'
-    });
+    logger.error('Error creating position:', { detail: error });
+    next(error);
   }
 });
 
@@ -330,16 +339,19 @@ router.post('/', authenticateToken, async (req, res) => {
  *         $ref: '#/components/responses/NotFoundError'
  */
 // Update position (admin/hr only)
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticateToken, authorize('admin', 'hr'), async (req, res, next) => {
   try {
-    if (req.user.role !== 'admin' && req.user.role !== 'hr') {
-      return res.status(403).json({
+    // Validate input
+    const { error, value } = positionSchema.update.validate(req.body, { abortEarly: false, stripUnknown: true });
+    if (error) {
+      return res.status(400).json({
         success: false,
-        message: 'Admin or HR access required'
+        message: 'Validation failed',
+        errors: error.details.map(d => d.message)
       });
     }
 
-    const { title, description, departmentId, level } = req.body;
+    const { title, description, departmentId, level } = value;
     
     const position = await Position.findByPk(req.params.id);
     if (!position) {
@@ -383,24 +395,14 @@ router.put('/:id', authenticateToken, async (req, res) => {
       data: updatedPosition
     });
   } catch (error) {
-    console.error('Error updating position:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update position'
-    });
+    logger.error('Error updating position:', { detail: error });
+    next(error);
   }
 });
 
 // Delete position (admin only)
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, authorize('admin'), async (req, res, next) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Admin access required'
-      });
-    }
-
     const position = await Position.findByPk(req.params.id);
     if (!position) {
       return res.status(404).json({
@@ -425,11 +427,8 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       message: 'Position deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting position:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete position'
-    });
+    logger.error('Error deleting position:', { detail: error });
+    next(error);
   }
 });
 

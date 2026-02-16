@@ -21,7 +21,9 @@ import {
   Divider,
   useTheme,
   Fade,
-  Alert
+  Alert,
+  CircularProgress,
+  LinearProgress
 } from '@mui/material';
 import {
   CalendarToday as CalendarIcon,
@@ -32,7 +34,7 @@ import {
   History as HistoryIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
-import LeaveService from '../../../services/LeaveService';
+import { leaveService } from '../../../services/leave.service';
 
 const EmployeeLeaveRequests = () => {
   const theme = useTheme();
@@ -64,7 +66,7 @@ const EmployeeLeaveRequests = () => {
       setLoading(true);
       
       // Load leave requests from API
-      const response = await LeaveService.getAll();
+      const response = await leaveService.getAll();
       if (response?.data) {
         const leaves = Array.isArray(response.data) ? response.data : 
                       (response.data.data ? response.data.data : []);
@@ -76,30 +78,34 @@ const EmployeeLeaveRequests = () => {
         setLeaveRequests([]);
       }
 
-      // Load leave balance from API (if available)
+      // Load leave balance from API
       try {
-        // For now, set empty balance - implement balance API later
-        setLeaveBalance({
-          annual: { total: 25, used: 0, remaining: 25 },
-          sick: { total: 12, used: 0, remaining: 12 },
-          personal: { total: 5, used: 0, remaining: 5 }
-        });
+        const balanceResponse = await leaveService.getBalance(user?.employeeId || null);
+        if (balanceResponse?.data) {
+          const balanceData = Array.isArray(balanceResponse.data) ? balanceResponse.data : 
+            (balanceResponse.data.data ? balanceResponse.data.data : []);
+          // Transform API balance data into component format
+          const balanceMap = {};
+          balanceData.forEach(item => {
+            const typeName = (item.leaveType?.name || item.leaveTypeName || 'other').toLowerCase().replace(/\s+leave$/, '');
+            balanceMap[typeName] = {
+              total: item.totalEntitled || item.total || 0,
+              used: item.used || 0,
+              remaining: item.remaining || item.balance || 0
+            };
+          });
+          setLeaveBalance(balanceMap);
+        } else {
+          setLeaveBalance({});
+        }
       } catch (balanceError) {
         console.error('Error loading leave balance:', balanceError);
-        setLeaveBalance({
-          annual: { total: 0, used: 0, remaining: 0 },
-          sick: { total: 0, used: 0, remaining: 0 },
-          personal: { total: 0, used: 0, remaining: 0 }
-        });
+        setLeaveBalance({});
       }
     } catch (error) {
       console.error('Error loading leave data:', error);
       setLeaveRequests([]);
-      setLeaveBalance({
-        annual: { total: 0, used: 0, remaining: 0 },
-        sick: { total: 0, used: 0, remaining: 0 },
-        personal: { total: 0, used: 0, remaining: 0 }
-      });
+      setLeaveBalance({});
     } finally {
       setLoading(false);
     }
@@ -128,8 +134,13 @@ const EmployeeLeaveRequests = () => {
     const typeString = typeof type === 'object' ? type?.name?.toLowerCase() : type?.toLowerCase();
     if (typeString?.includes('annual')) return 'primary';
     if (typeString?.includes('sick')) return 'error';
-    return 'warning';
+    if (typeString?.includes('personal')) return 'warning';
+    if (typeString?.includes('maternity') || typeString?.includes('paternity')) return 'secondary';
+    if (typeString?.includes('emergency')) return 'error';
+    return 'info';
   };
+
+  const BALANCE_COLORS = ['primary.main', 'error.main', 'warning.main', 'secondary.main', 'info.main', 'success.main'];
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -163,94 +174,59 @@ const EmployeeLeaveRequests = () => {
                 variant="outlined"
                 startIcon={<AddIcon />}
                 onClick={() => navigate('/add-leave-request')}
+                data-testid="leave-new-request-button"
               >
                 New Request
               </Button>
             </Box>
           </Paper>
 
+          {loading && <LinearProgress sx={{ mb: 2 }} />}
+
           <Grid container spacing={4}>
-            {/* Leave Balance Cards */}
+            {/* Leave Balance Cards — dynamically rendered from API data */}
             <Grid item xs={12}>
               <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
                 Leave Balance Overview
               </Typography>
               <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid item xs={12} md={4}>
-                  <Card>
-                    <CardContent sx={{ textAlign: 'center' }}>
-                      <Typography variant="h3" color="primary.main" fontWeight="bold">
-                        {leaveBalance.annual?.remaining || 0}
-                      </Typography>
-                      <Typography variant="h6" gutterBottom>
-                        Annual Leave
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {leaveBalance.annual?.used || 0} used of {leaveBalance.annual?.total || 0} days
-                      </Typography>
-                      <Box sx={{ mt: 2, bgcolor: 'grey.200', borderRadius: 1, height: 8 }}>
-                        <Box
-                          sx={{
-                            bgcolor: 'primary.main',
-                            height: '100%',
-                            borderRadius: 1,
-                            width: `${((leaveBalance.annual?.remaining || 0) / (leaveBalance.annual?.total || 1)) * 100}%`
-                          }}
-                        />
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Card>
-                    <CardContent sx={{ textAlign: 'center' }}>
-                      <Typography variant="h3" color="error.main" fontWeight="bold">
-                        {leaveBalance.sick?.remaining || 0}
-                      </Typography>
-                      <Typography variant="h6" gutterBottom>
-                        Sick Leave
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {leaveBalance.sick?.used || 0} used of {leaveBalance.sick?.total || 0} days
-                      </Typography>
-                      <Box sx={{ mt: 2, bgcolor: 'grey.200', borderRadius: 1, height: 8 }}>
-                        <Box
-                          sx={{
-                            bgcolor: 'error.main',
-                            height: '100%',
-                            borderRadius: 1,
-                            width: `${((leaveBalance.sick?.remaining || 0) / (leaveBalance.sick?.total || 1)) * 100}%`
-                          }}
-                        />
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Card>
-                    <CardContent sx={{ textAlign: 'center' }}>
-                      <Typography variant="h3" color="warning.main" fontWeight="bold">
-                        {leaveBalance.personal?.remaining || 0}
-                      </Typography>
-                      <Typography variant="h6" gutterBottom>
-                        Personal Leave
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {leaveBalance.personal?.used || 0} used of {leaveBalance.personal?.total || 0} days
-                      </Typography>
-                      <Box sx={{ mt: 2, bgcolor: 'grey.200', borderRadius: 1, height: 8 }}>
-                        <Box
-                          sx={{
-                            bgcolor: 'warning.main',
-                            height: '100%',
-                            borderRadius: 1,
-                            width: `${((leaveBalance.personal?.remaining || 0) / (leaveBalance.personal?.total || 1)) * 100}%`
-                          }}
-                        />
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
+                {Object.keys(leaveBalance).length === 0 && !loading ? (
+                  <Grid item xs={12}>
+                    <Alert severity="info">No leave balance data available. Contact HR to initialize your leave balances.</Alert>
+                  </Grid>
+                ) : (
+                  Object.entries(leaveBalance).map(([typeName, balance], index) => {
+                    const color = BALANCE_COLORS[index % BALANCE_COLORS.length];
+                    const displayName = typeName.charAt(0).toUpperCase() + typeName.slice(1) + ' Leave';
+                    return (
+                      <Grid item xs={12} sm={6} md={4} lg={3} key={typeName}>
+                        <Card>
+                          <CardContent sx={{ textAlign: 'center' }}>
+                            <Typography variant="h3" color={color} fontWeight="bold">
+                              {balance.remaining || 0}
+                            </Typography>
+                            <Typography variant="h6" gutterBottom>
+                              {displayName}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {balance.used || 0} used of {balance.total || 0} days
+                            </Typography>
+                            <Box sx={{ mt: 2, bgcolor: 'grey.200', borderRadius: 1, height: 8 }}>
+                              <Box
+                                sx={{
+                                  bgcolor: color,
+                                  height: '100%',
+                                  borderRadius: 1,
+                                  width: `${Math.min(((balance.remaining || 0) / (balance.total || 1)) * 100, 100)}%`
+                                }}
+                              />
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    );
+                  })
+                )}
               </Grid>
             </Grid>
 
@@ -269,7 +245,7 @@ const EmployeeLeaveRequests = () => {
                       You haven't submitted any leave requests yet. Click "New Request" to apply for leave.
                     </Alert>
                   ) : (
-                    <TableContainer>
+                    <TableContainer data-testid="employee-leave-requests-table">
                       <Table>
                         <TableHead>
                           <TableRow>
@@ -303,17 +279,17 @@ const EmployeeLeaveRequests = () => {
                               </TableCell>
                               <TableCell>
                                 <Typography variant="body2" fontWeight="bold">
-                                  {request.days} days
+                                  {request.totalDays || request.days} days
                                 </Typography>
                               </TableCell>
                               <TableCell>
-                                {new Date(request.appliedDate).toLocaleDateString()}
+                                {new Date(request.createdAt || request.appliedDate).toLocaleDateString()}
                               </TableCell>
                               <TableCell>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                   {statusIcons[request.status]}
                                   <Chip
-                                    label={request.status.toUpperCase()}
+                                    label={(request.status || 'Unknown').toUpperCase()}
                                     color={statusColors[request.status]}
                                     size="small"
                                     sx={{ ml: 1 }}

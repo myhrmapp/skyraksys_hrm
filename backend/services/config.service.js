@@ -1,5 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../utils/logger');
 
 class ConfigService {
   constructor() {
@@ -70,7 +71,7 @@ class ConfigService {
 
       return config;
     } catch (error) {
-      console.error('Error reading .env file:', error);
+      logger.error('Error reading .env file:', { detail: error });
       throw error;
     }
   }
@@ -109,7 +110,7 @@ class ConfigService {
         sections: envFile.sections
       };
     } catch (error) {
-      console.error('Error getting config:', error);
+      logger.error('Error getting config:', { detail: error });
       throw error;
     }
   }
@@ -152,7 +153,7 @@ class ConfigService {
         restartRequired: true
       };
     } catch (error) {
-      console.error('Error updating config:', error);
+      logger.error('Error updating config:', { detail: error });
       throw error;
     }
   }
@@ -199,7 +200,7 @@ class ConfigService {
         restartRequired: true
       };
     } catch (error) {
-      console.error('Error updating multiple configs:', error);
+      logger.error('Error updating multiple configs:', { detail: error });
       throw error;
     }
   }
@@ -224,7 +225,7 @@ class ConfigService {
         timestamp
       };
     } catch (error) {
-      console.error('Error creating backup:', error);
+      logger.error('Error creating backup:', { detail: error });
       throw error;
     }
   }
@@ -246,7 +247,7 @@ class ConfigService {
         restartRequired: true
       };
     } catch (error) {
-      console.error('Error restoring from backup:', error);
+      logger.error('Error restoring from backup:', { detail: error });
       throw error;
     }
   }
@@ -280,7 +281,7 @@ class ConfigService {
 
       return backups;
     } catch (error) {
-      console.error('Error listing backups:', error);
+      logger.error('Error listing backups:', { detail: error });
       throw error;
     }
   }

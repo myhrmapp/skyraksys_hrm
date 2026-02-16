@@ -32,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'leave_balances',
     timestamps: true,
+    paranoid: true, // Enable soft delete
     indexes: [
       {
         unique: true,

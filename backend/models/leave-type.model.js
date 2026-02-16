@@ -31,7 +31,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     tableName: 'leave_types',
-    timestamps: true
+    timestamps: true,
+    paranoid: true
   });
 
   LeaveType.associate = function(models) {

@@ -31,7 +31,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     tableName: 'projects',
-    timestamps: true
+    timestamps: true,
+    paranoid: true
   });
 
   Project.associate = function(models) {

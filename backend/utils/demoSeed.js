@@ -105,7 +105,7 @@ async function seedAllDemoData() {
     if (!existing) {
       const user = await db.User.create({
         firstName: 'Prod', lastName: 'Admin', email: 'prodadmin@company.com',
-        password: await bcrypt.hash('admin', 10), role: 'admin', isActive: true
+        password: await bcrypt.hash('admin', 12), role: 'admin', isActive: true
       });
       await db.Employee.create({
         userId: user.id, employeeId: 'EMP900', firstName: 'Prod', lastName: 'Admin',

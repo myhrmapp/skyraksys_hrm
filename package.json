@@ -1,8 +1,13 @@
 {
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@playwright/test": "^1.57.0",
+    "nodemon": "^3.1.10",
+    "playwright": "^1.57.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
   },
   "dependencies": {
+    "@mui/x-date-pickers": "^5.0.0",
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
     "concurrently": "^7.6.0",
@@ -13,7 +18,8 @@
     "puppeteer": "^24.16.0",
     "sqlite3": "^5.1.7",
     "toast": "^0.5.4",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
@@ -27,6 +33,9 @@
     "seed": "cd backend && npm run seed",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm start"
+    "dev:frontend": "cd frontend && npm start",
+    "e2e": "cd tests/e2e && npx playwright test",
+    "e2e:headed": "cd tests/e2e && npx playwright test --headed",
+    "e2e:install": "npx playwright install --with-deps"
   }
 }

@@ -24,7 +24,7 @@ import {
   Schedule as ScheduleIcon,
   CalendarToday as CalendarIcon
 } from '@mui/icons-material';
-import { format, parseISO } from 'date-fns';
+import dayjs from 'dayjs';
 
 const TeamMembersList = ({ teamMembers, onRefresh }) => {
   const [selectedMember, setSelectedMember] = useState(null);
@@ -114,7 +114,7 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <CalendarIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
                     <Typography variant="body2">
-                      Joined: {member.hireDate ? format(parseISO(member.hireDate), 'MMM yyyy') : 'Unknown'}
+                      Joined: {member.hireDate ? dayjs(member.hireDate).format('MMM YYYY') : 'Unknown'}
                     </Typography>
                   </Box>
                 </Stack>
@@ -192,7 +192,7 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
                           Date of Birth
                         </Typography>
                         <Typography variant="body1">
-                          {format(parseISO(selectedMember.dateOfBirth), 'MMM dd, yyyy')}
+                          {dayjs(selectedMember.dateOfBirth).format('MMM DD, YYYY')}
                         </Typography>
                       </Box>
                     )}
@@ -228,7 +228,7 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
                           Hire Date
                         </Typography>
                         <Typography variant="body1">
-                          {format(parseISO(selectedMember.hireDate), 'MMM dd, yyyy')}
+                          {dayjs(selectedMember.hireDate).format('MMM DD, YYYY')}
                         </Typography>
                       </Box>
                     )}
