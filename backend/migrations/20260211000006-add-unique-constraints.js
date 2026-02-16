@@ -41,10 +41,20 @@ module.exports = {
       }
 
       // Check for duplicates before adding unique constraint
+      // Check if table has deletedAt column first
+      const [hasDeletedAt] = await queryInterface.sequelize.query(
+        `SELECT column_name FROM information_schema.columns 
+         WHERE table_name = '${uq.table}' AND column_name = 'deletedAt'`
+      );
+      
+      const whereClause = hasDeletedAt.length > 0 
+        ? 'WHERE "deletedAt" IS NULL OR "deletedAt" IS NOT NULL'
+        : '';
+      
       const [duplicates] = await queryInterface.sequelize.query(
         `SELECT ${uq.fields.map(f => `"${f}"`).join(', ')}, COUNT(*) as cnt
          FROM "${uq.table}" 
-         WHERE "deletedAt" IS NULL OR "deletedAt" IS NOT NULL
+         ${whereClause}
          GROUP BY ${uq.fields.map(f => `"${f}"`).join(', ')}
          HAVING COUNT(*) > 1`
       );

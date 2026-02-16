@@ -82,7 +82,9 @@ module.exports = {
         );
 
         // 3. Change payslips.payrollDataId to UUID and add FK
-        await queryInterface.changeColumn('payslips', 'payrollDataId', {
+        // Drop the column and recreate it (PostgreSQL can't cast INTEGER to UUID)
+        await queryInterface.removeColumn('payslips', 'payrollDataId', { transaction });
+        await queryInterface.addColumn('payslips', 'payrollDataId', {
           type: Sequelize.UUID,
           allowNull: true
         }, { transaction });
