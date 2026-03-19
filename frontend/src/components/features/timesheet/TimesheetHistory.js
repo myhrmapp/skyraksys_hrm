@@ -69,7 +69,8 @@ const TimesheetHistory = ({ embedded } = {}) => {
     enabled: !!myEmployeeId,
     select: (response) => {
       const allTimesheets = Array.isArray(response.data) ? response.data : (response.data?.data || []);
-      return allTimesheets.sort((a, b) => new Date(b.weekStartDate) - new Date(a.weekStartDate));
+      const myTimesheets = allTimesheets.filter(ts => ts.employeeId === myEmployeeId || ts.employee?.id === myEmployeeId);
+      return myTimesheets.sort((a, b) => new Date(b.weekStartDate) - new Date(a.weekStartDate));
     }
   });
   
@@ -397,13 +398,13 @@ const TimesheetHistory = ({ embedded } = {}) => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 5 }}>
                   <CircularProgress />
                 </TableCell>
               </TableRow>
             ) : paginatedTimesheets.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
                   <Box sx={{ textAlign: 'center' }}>
                     <CalendarIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
                     <Typography variant="h6" color="textSecondary" gutterBottom>

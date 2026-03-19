@@ -250,6 +250,7 @@ export default function HolidayCalendarPage({ embedded } = {}) {
                 setDeletingHoliday(params.row);
                 setDeleteDialogOpen(true);
               }}
+              data-testid="holiday-delete-btn"
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -269,7 +270,7 @@ export default function HolidayCalendarPage({ embedded } = {}) {
   }
 
   return (
-    <Box sx={{ p: embedded ? 0 : 3 }}>
+    <Box sx={{ p: embedded ? 0 : 3 }} data-testid="holiday-calendar-page">
       {!embedded ? (
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
         <Stack direction="row" alignItems="center" spacing={1}>
@@ -280,13 +281,14 @@ export default function HolidayCalendarPage({ embedded } = {}) {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleOpenAdd}
+          data-testid="holiday-add-btn"
         >
           Add Holiday
         </Button>
       </Stack>
       ) : (
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenAdd}>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenAdd} data-testid="holiday-add-btn">
           Add Holiday
         </Button>
       </Box>
@@ -303,6 +305,7 @@ export default function HolidayCalendarPage({ embedded } = {}) {
               label="Year"
               value={year}
               onChange={(e) => setYear(parseInt(e.target.value))}
+              data-testid="holiday-year-select"
             >
               {yearOptions.map(y => (
                 <MenuItem key={y} value={y}>{y}</MenuItem>
@@ -406,7 +409,7 @@ export default function HolidayCalendarPage({ embedded } = {}) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleSave}>
+          <Button variant="contained" onClick={handleSave} data-testid="holiday-save-btn">
             {editMode ? 'Update' : 'Create'}
           </Button>
         </DialogActions>

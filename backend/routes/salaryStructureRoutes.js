@@ -213,6 +213,20 @@ router.post('/',
     try {
       const salaryData = req.body;
 
+      // Map frontend field names to model field names
+      if (salaryData.providentFund !== undefined && salaryData.pfContribution === undefined) {
+        salaryData.pfContribution = salaryData.providentFund;
+      }
+      if (salaryData.incomeTax !== undefined && salaryData.tds === undefined) {
+        salaryData.tds = salaryData.incomeTax;
+      }
+      // Aggregate individual allowance fields into the model's single allowances field
+      if (salaryData.allowances === undefined) {
+        salaryData.allowances = (parseFloat(salaryData.transportAllowance) || 0)
+          + (parseFloat(salaryData.medicalAllowance) || 0)
+          + (parseFloat(salaryData.specialAllowance) || 0);
+      }
+
       // Deactivate previous salary structures if making this one active
       if (salaryData.isActive) {
         await db.SalaryStructure.update(
@@ -247,6 +261,19 @@ router.put('/:id',
     try {
       const { id } = req.params;
       const updates = req.body;
+
+      // Map frontend field names to model field names
+      if (updates.providentFund !== undefined && updates.pfContribution === undefined) {
+        updates.pfContribution = updates.providentFund;
+      }
+      if (updates.incomeTax !== undefined && updates.tds === undefined) {
+        updates.tds = updates.incomeTax;
+      }
+      if (updates.allowances === undefined && (updates.transportAllowance !== undefined || updates.medicalAllowance !== undefined || updates.specialAllowance !== undefined)) {
+        updates.allowances = (parseFloat(updates.transportAllowance) || 0)
+          + (parseFloat(updates.medicalAllowance) || 0)
+          + (parseFloat(updates.specialAllowance) || 0);
+      }
 
       const salaryStructure = await db.SalaryStructure.findByPk(id);
       if (!salaryStructure) {

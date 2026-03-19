@@ -25,6 +25,7 @@ const ContactEmergencyTab = ({ formData, errors, touchedFields = {}, onChange, o
         id="emergencyContactName"
         name="emergencyContactName"
         label="Emergency Contact Name"
+        data-testid="field-emergencyContactName"
         value={formData.emergencyContactName}
         onChange={(e) => onChange('emergencyContactName', e.target.value)}
         onBlur={() => onBlur && onBlur('emergencyContactName')}
@@ -37,6 +38,7 @@ const ContactEmergencyTab = ({ formData, errors, touchedFields = {}, onChange, o
         id="emergencyContactPhone"
         name="emergencyContactPhone"
         label="Emergency Contact Phone"
+        data-testid="field-emergencyContactPhone"
         value={formData.emergencyContactPhone}
         onChange={(e) => {
           // Only allow digits and limit to 15 characters

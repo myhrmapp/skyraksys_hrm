@@ -144,8 +144,8 @@ const UserManagementEnhanced = () => {
       const response = await authService.getAllUsers(params);
       
       if (response.success) {
-        setUsers(response.data || []);
-        setTotalUsers(response.pagination?.totalRecords || 0);
+        setUsers(response.data.users || []);
+        setTotalUsers(response.data.pagination?.total || 0);
       } else {
         setError(response.message || 'Failed to load users');
       }
@@ -257,9 +257,7 @@ const UserManagementEnhanced = () => {
     setError('');
     
     try {
-      console.log('Toggling status:', { userId, currentStatus, newStatus: !currentStatus });
       const result = await authService.toggleUserStatus(userId, !currentStatus);
-      console.log('Toggle result:', result);
       
       if (result.success) {
         setSuccess(`User ${!currentStatus ? 'activated' : 'deactivated'} successfully!`);
@@ -342,6 +340,11 @@ const UserManagementEnhanced = () => {
       setError('Password must be at least 8 characters');
       return;
     }
+
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/.test(newPassword)) {
+      setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)');
+      return;
+    }
     
     setLoading(true);
     setError('');
@@ -359,7 +362,6 @@ const UserManagementEnhanced = () => {
       }
     } catch (err) {
       setError('Failed to reset password');
-      console.error('Reset password error:', err);
     } finally {
       setLoading(false);
     }
@@ -409,7 +411,6 @@ const UserManagementEnhanced = () => {
         break;
       case 'view-details':
         // Navigate to user details
-        console.log('View user details:', selectedUser);
         break;
       default:
         break;
@@ -442,7 +443,7 @@ const UserManagementEnhanced = () => {
       for (const userId of selectedUsers) {
         const user = users.find(u => u.id === userId);
         if (user && !user.isActive) {
-          await authService.toggleUserStatus(userId);
+          await authService.toggleUserStatus(userId, true);
         }
       }
       setSuccess(`${selectedUsers.length} user(s) activated successfully`);
@@ -463,7 +464,7 @@ const UserManagementEnhanced = () => {
       for (const userId of selectedUsers) {
         const user = users.find(u => u.id === userId);
         if (user && user.isActive) {
-          await authService.toggleUserStatus(userId);
+          await authService.toggleUserStatus(userId, false);
         }
       }
       setSuccess(`${selectedUsers.length} user(s) deactivated successfully`);

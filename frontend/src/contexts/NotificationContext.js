@@ -1,135 +1,67 @@
-import React, { createContext, useContext, useCallback, useState } from 'react';
-import { Snackbar, Alert, IconButton } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
-
-// Notification context
-const NotificationContext = createContext();
+import { useCallback } from 'react';
+import { useSnackbar } from 'notistack';
 
 /**
- * Notification Provider Component
- * Provides centralized notification management
+ * Notification system — now powered by notistack for consistency.
+ * All hooks preserve the same API surface so existing consumers
+ * continue to work without changes.
  */
-export const NotificationProvider = ({ children, maxNotifications = 3 }) => {
-  const [notifications, setNotifications] = useState([]);
 
-  /**
-   * Add a new notification
-   * @param {Object} notification - Notification object
-   */
+/**
+ * NotificationProvider — pass-through for backward compatibility.
+ * Actual notifications are rendered by notistack's SnackbarProvider in App.js.
+ */
+export const NotificationProvider = ({ children }) => children;
+
+/**
+ * Primary notification hook.
+ * Wraps notistack's useSnackbar with the convenience API that
+ * the rest of the app already depends on.
+ */
+export const useNotifications = () => {
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
   const addNotification = useCallback((notification) => {
-    const id = Date.now() + Math.random();
-    const newNotification = {
-      id,
-      type: 'info',
-      autoHideDuration: 6000,
-      ...notification
-    };
-
-    setNotifications(prev => {
-      const updated = [newNotification, ...prev];
-      // Limit number of notifications
-      return updated.slice(0, maxNotifications);
+    const { type = 'info', message, autoHideDuration, persist, ...rest } = notification;
+    return enqueueSnackbar(message, {
+      variant: type,
+      autoHideDuration,
+      persist,
+      ...rest,
     });
+  }, [enqueueSnackbar]);
 
-    // Auto remove notification if autoHideDuration is set
-    if (newNotification.autoHideDuration > 0) {
-      setTimeout(() => {
-        removeNotification(id);
-      }, newNotification.autoHideDuration);
-    }
-
-    return id;
-  }, [maxNotifications]);
-
-  /**
-   * Remove a notification by ID
-   * @param {number} id - Notification ID
-   */
   const removeNotification = useCallback((id) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
-  }, []);
+    closeSnackbar(id);
+  }, [closeSnackbar]);
 
-  /**
-   * Clear all notifications
-   */
   const clearAllNotifications = useCallback(() => {
-    setNotifications([]);
-  }, []);
+    closeSnackbar();
+  }, [closeSnackbar]);
 
-  /**
-   * Show success notification
-   * @param {string} message - Success message
-   * @param {Object} options - Additional options
-   */
   const showSuccess = useCallback((message, options = {}) => {
-    return addNotification({
-      type: 'success',
-      message,
-      ...options
-    });
-  }, [addNotification]);
+    return enqueueSnackbar(message, { variant: 'success', ...options });
+  }, [enqueueSnackbar]);
 
-  /**
-   * Show error notification
-   * @param {string} message - Error message
-   * @param {Object} options - Additional options
-   */
   const showError = useCallback((message, options = {}) => {
-    return addNotification({
-      type: 'error',
-      message,
-      autoHideDuration: 8000, // Longer duration for errors
-      ...options
-    });
-  }, [addNotification]);
+    const { autoHideDuration = 8000, ...rest } = options;
+    return enqueueSnackbar(message, { variant: 'error', autoHideDuration, ...rest });
+  }, [enqueueSnackbar]);
 
-  /**
-   * Show warning notification
-   * @param {string} message - Warning message
-   * @param {Object} options - Additional options
-   */
   const showWarning = useCallback((message, options = {}) => {
-    return addNotification({
-      type: 'warning',
-      message,
-      ...options
-    });
-  }, [addNotification]);
+    return enqueueSnackbar(message, { variant: 'warning', ...options });
+  }, [enqueueSnackbar]);
 
-  /**
-   * Show info notification
-   * @param {string} message - Info message
-   * @param {Object} options - Additional options
-   */
   const showInfo = useCallback((message, options = {}) => {
-    return addNotification({
-      type: 'info',
-      message,
-      ...options
-    });
-  }, [addNotification]);
+    return enqueueSnackbar(message, { variant: 'info', ...options });
+  }, [enqueueSnackbar]);
 
-  /**
-   * Generic notification function for backward compatibility
-   * @param {string} message - Notification message
-   * @param {string} type - Notification type ('success', 'error', 'warning', 'info')
-   */
   const showNotification = useCallback((message, type = 'info') => {
-    switch (type) {
-      case 'success':
-        return showSuccess(message);
-      case 'error':
-        return showError(message);
-      case 'warning':
-        return showWarning(message);
-      case 'info':
-      default:
-        return showInfo(message);
-    }
-  }, [showSuccess, showError, showWarning, showInfo]);
+    return enqueueSnackbar(message, { variant: type });
+  }, [enqueueSnackbar]);
 
-  const contextValue = {
-    notifications,
+  return {
+    notifications: [],
     addNotification,
     removeNotification,
     clearAllNotifications,
@@ -137,188 +69,57 @@ export const NotificationProvider = ({ children, maxNotifications = 3 }) => {
     showError,
     showWarning,
     showInfo,
-    showNotification // Add backward compatibility
+    showNotification,
   };
-
-  return (
-    <NotificationContext.Provider value={contextValue}>
-      {children}
-      <NotificationContainer 
-        notifications={notifications}
-        onRemove={removeNotification}
-      />
-    </NotificationContext.Provider>
-  );
-};
-
-/**
- * Notification Container Component
- * Renders the actual notification snackbars
- */
-const NotificationContainer = ({ notifications, onRemove }) => {
-  return (
-    <>
-      {notifications.map((notification, index) => (
-        <Snackbar
-          key={notification.id}
-          open={true}
-          anchorOrigin={{ 
-            vertical: 'top', 
-            horizontal: 'right' 
-          }}
-          style={{
-            top: 24 + (index * 72) // Stack notifications vertically
-          }}
-          onClose={() => onRemove(notification.id)}
-        >
-          <Alert
-            severity={notification.type}
-            onClose={() => onRemove(notification.id)}
-            action={
-              <IconButton
-                size="small"
-                color="inherit"
-                aria-label="Close notification"
-                onClick={() => onRemove(notification.id)}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            }
-            sx={{
-              minWidth: 300,
-              maxWidth: 500
-            }}
-          >
-            {notification.message}
-          </Alert>
-        </Snackbar>
-      ))}
-    </>
-  );
-};
-
-/**
- * Hook to use notifications
- * @returns {Object} Notification methods
- */
-export const useNotifications = () => {
-  const context = useContext(NotificationContext);
-  
-  if (!context) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
-  }
-  
-  return context;
 };
 
 // Alias for backward compatibility
 export const useNotification = useNotifications;
 
 /**
- * Hook for API-specific notifications
- * Provides convenient methods for common API scenarios
+ * Hook for API-specific notifications.
  */
 export const useApiNotifications = () => {
   const notifications = useNotifications();
 
-  /**
-   * Show loading notification
-   * @param {string} message - Loading message
-   * @returns {number} Notification ID
-   */
   const showLoading = useCallback((message = 'Loading...') => {
-    return notifications.showInfo(message, {
-      autoHideDuration: 0, // Don't auto-hide loading notifications
-      action: null // No close button for loading
-    });
+    return notifications.showInfo(message, { persist: true });
   }, [notifications]);
 
-  /**
-   * Update notification (useful for loading -> success/error)
-   * @param {number} id - Notification ID to update
-   * @param {Object} updates - Updates to apply
-   */
   const updateNotification = useCallback((id, updates) => {
-    // Remove old notification
     notifications.removeNotification(id);
-    // Add updated notification
     return notifications.addNotification(updates);
   }, [notifications]);
 
-  /**
-   * Handle API success with notification
-   * @param {string} message - Success message
-   * @param {number} loadingId - Loading notification ID to replace
-   */
   const handleApiSuccess = useCallback((message, loadingId = null) => {
-    if (loadingId) {
-      notifications.removeNotification(loadingId);
-    }
+    if (loadingId) notifications.removeNotification(loadingId);
     return notifications.showSuccess(message);
   }, [notifications]);
 
-  /**
-   * Handle API error with notification
-   * @param {string|Error} error - Error message or Error object
-   * @param {number} loadingId - Loading notification ID to replace
-   */
   const handleApiError = useCallback((error, loadingId = null) => {
-    if (loadingId) {
-      notifications.removeNotification(loadingId);
-    }
-    
+    if (loadingId) notifications.removeNotification(loadingId);
     const message = typeof error === 'string' ? error : error.message || 'An error occurred';
     return notifications.showError(message);
   }, [notifications]);
 
-  /**
-   * Show validation errors
-   * @param {Array} errors - Array of validation errors
-   */
   const showValidationErrors = useCallback((errors) => {
     if (Array.isArray(errors)) {
-      errors.forEach(error => {
-        const message = typeof error === 'string' ? error : error.message || 'Validation error';
-        notifications.showError(message);
+      errors.forEach(err => {
+        const msg = typeof err === 'string' ? err : err.message || 'Validation error';
+        notifications.showError(msg);
       });
     } else {
       notifications.showError('Please check your input and try again');
     }
   }, [notifications]);
 
-  /**
-   * Show operation confirmation
-   * @param {string} operation - Operation name
-   * @param {string} entity - Entity name
-   */
   const showOperationSuccess = useCallback((operation, entity) => {
-    const message = `${entity} ${operation} successfully`;
-    return notifications.showSuccess(message);
+    return notifications.showSuccess(`${entity} ${operation} successfully`);
   }, [notifications]);
 
-  /**
-   * Show save success notification
-   * @param {string} entity - Entity name
-   */
-  const showSaveSuccess = useCallback((entity = 'Record') => {
-    return showOperationSuccess('saved', entity);
-  }, [showOperationSuccess]);
-
-  /**
-   * Show delete success notification
-   * @param {string} entity - Entity name
-   */
-  const showDeleteSuccess = useCallback((entity = 'Record') => {
-    return showOperationSuccess('deleted', entity);
-  }, [showOperationSuccess]);
-
-  /**
-   * Show update success notification
-   * @param {string} entity - Entity name
-   */
-  const showUpdateSuccess = useCallback((entity = 'Record') => {
-    return showOperationSuccess('updated', entity);
-  }, [showOperationSuccess]);
+  const showSaveSuccess = useCallback((entity = 'Record') => showOperationSuccess('saved', entity), [showOperationSuccess]);
+  const showDeleteSuccess = useCallback((entity = 'Record') => showOperationSuccess('deleted', entity), [showOperationSuccess]);
+  const showUpdateSuccess = useCallback((entity = 'Record') => showOperationSuccess('updated', entity), [showOperationSuccess]);
 
   return {
     ...notifications,
@@ -330,21 +131,15 @@ export const useApiNotifications = () => {
     showOperationSuccess,
     showSaveSuccess,
     showDeleteSuccess,
-    showUpdateSuccess
+    showUpdateSuccess,
   };
 };
 
 /**
- * Higher-order component to wrap components with notification context
- * @param {React.Component} Component - Component to wrap
- * @returns {React.Component} Wrapped component
+ * HOC for backward compatibility
  */
 export const withNotifications = (Component) => {
-  return (props) => (
-    <NotificationProvider>
-      <Component {...props} />
-    </NotificationProvider>
-  );
+  return (props) => <Component {...props} />;
 };
 
 export default NotificationProvider;

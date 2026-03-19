@@ -7,7 +7,7 @@
  * - Indian compliance (EPF, ESI, TDS, PT)
  * - RBAC enforcement
  * - Business rule validation
- * - Status transitions (Draft → Processed → Approved)
+ * - Status transitions (draft → calculated → approved → paid)
  * 
  * Indian Compliance Rules:
  * - EPF: 12% employee + 12% employer (on basic + DA)
@@ -88,7 +88,7 @@ class PayrollBusinessService {
    * Business Rules:
    * - Must be calculated first
    * - Cannot create duplicate for same period
-   * - Initial status: Draft
+   * - Initial status: draft
    * 
    * @param {Object} data - Payroll data
    * @param {Object} currentUser - Current user
@@ -127,7 +127,7 @@ class PayrollBusinessService {
 
     // Set default status
     if (!data.status) {
-      data.status = 'Draft';
+      data.status = 'draft';
     }
 
     // Create record
@@ -164,9 +164,9 @@ class PayrollBusinessService {
       throw new NotFoundError('Payroll record not found');
     }
 
-    // Check status - can only update Draft or Pending
-    if (!['Draft', 'Pending'].includes(payroll.status)) {
-      throw new BadRequestError('Can only update Draft or Pending payroll records');
+    // Check status - can only update draft payroll
+    if (payroll.status !== 'draft') {
+      throw new BadRequestError('Can only update draft payroll records');
     }
 
     // If critical fields change, recalculate
@@ -212,13 +212,13 @@ class PayrollBusinessService {
       throw new NotFoundError('Payroll record not found');
     }
 
-    if (payroll.status !== 'Draft') {
-      throw new BadRequestError('Can only process Draft payroll');
+    if (payroll.status !== 'draft') {
+      throw new BadRequestError('Can only process draft payroll');
     }
 
     // Update status
     await this.payrollDataService.update(id, {
-      status: 'Processed',
+      status: 'calculated',
       processedAt: new Date(),
       processedBy: currentUser.id
     });
@@ -254,13 +254,13 @@ class PayrollBusinessService {
       throw new NotFoundError('Payroll record not found');
     }
 
-    if (payroll.status !== 'Processed') {
-      throw new BadRequestError('Can only approve Processed payroll');
+    if (payroll.status !== 'calculated') {
+      throw new BadRequestError('Can only approve calculated payroll');
     }
 
     // Update status
     await this.payrollDataService.update(id, {
-      status: 'Approved',
+      status: 'approved',
       approvedAt: new Date(),
       approvedBy: currentUser.id,
       approverComments: comments
@@ -301,13 +301,13 @@ class PayrollBusinessService {
       throw new NotFoundError('Payroll record not found');
     }
 
-    if (!['Processed', 'Pending'].includes(payroll.status)) {
+    if (!['calculated', 'approved'].includes(payroll.status)) {
       throw new BadRequestError('Can only reject Processed or Pending payroll');
     }
 
     // Return to Draft
     await this.payrollDataService.update(id, {
-      status: 'Draft',
+      status: 'draft',
       rejectedAt: new Date(),
       rejectedBy: currentUser.id,
       rejectionComments: comments

@@ -310,10 +310,10 @@ class EmployeeService extends BaseService {
       }
 
       if (salaryData.deductions && typeof salaryData.deductions === 'object') {
-        structureData.pfContribution = salaryData.deductions.pf || 0;
-        structureData.tds = salaryData.deductions.tds || 0;
+        structureData.pfContribution = salaryData.deductions.pf || salaryData.deductions.pfContribution || 0;
+        structureData.tds = salaryData.deductions.incomeTax || salaryData.deductions.tds || 0;
         structureData.professionalTax = salaryData.deductions.professionalTax || 0;
-        structureData.otherDeductions = salaryData.deductions.other || 0;
+        structureData.otherDeductions = salaryData.deductions.other || salaryData.deductions.otherDeductions || 0;
       }
 
       // Legacy format: { basicSalary, hra, allowances, pfContribution, ... }

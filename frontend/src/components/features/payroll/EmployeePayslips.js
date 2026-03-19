@@ -64,9 +64,10 @@ const EmployeePayslips = () => {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'paid': return 'success';
-      case 'finalized': return 'info';
-      case 'generated': return 'warning';
+      case 'approved': return 'info';
+      case 'calculated': return 'warning';
       case 'draft': return 'default';
+      case 'cancelled': return 'error';
       default: return 'default';
     }
   };
@@ -81,8 +82,8 @@ const EmployeePayslips = () => {
     page * rowsPerPage + rowsPerPage
   );
 
-  const yearlyEarnings = payslips.reduce((sum, p) => sum + (Number(p.netPay) || 0), 0);
-  const averageMonthlyPay = payslips.length > 0 ? yearlyEarnings / payslips.length : 0;
+  const yearlyEarnings = filteredPayslips.reduce((sum, p) => sum + (Number(p.netPay) || 0), 0);
+  const averageMonthlyPay = filteredPayslips.length > 0 ? yearlyEarnings / filteredPayslips.length : 0;
 
   const handleViewPayslip = (payslip) => {
     // Create a date object from month/year for the viewer
@@ -95,12 +96,12 @@ const EmployeePayslips = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4 }} data-testid="employee-payslips-page">
       <Fade in timeout={600}>
         <Box>
           {/* Header */}
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <IconButton aria-label="Back to dashboard" onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
+            <IconButton aria-label="Back to dashboard" data-testid="payslips-back-btn" onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
               <BackIcon />
             </IconButton>
             <Box sx={{ flex: 1 }}>
@@ -170,8 +171,9 @@ const EmployeePayslips = () => {
                   <FormControl fullWidth>
                     <InputLabel>Filter by Year</InputLabel>
                     <Select
+                      data-testid="payslips-year-filter"
                       value={yearFilter}
-                      onChange={(e) => setYearFilter(e.target.value)}
+                      onChange={(e) => { setYearFilter(e.target.value); setPage(0); }}
                       label="Filter by Year"
                     >
                       <MenuItem value="all">All Years</MenuItem>
@@ -255,6 +257,7 @@ const EmployeePayslips = () => {
                             <IconButton
                               size="small"
                               aria-label="View payslip"
+                              data-testid="payslip-view-btn"
                               onClick={() => handleViewPayslip(payslip)}
                             >
                               <ViewIcon />
@@ -262,7 +265,14 @@ const EmployeePayslips = () => {
                             <IconButton
                               size="small"
                               aria-label="Download payslip"
-                              onClick={() => payslipService.downloadPayslipByIdPDF(payslip.id)}
+                              data-testid="payslip-download-btn"
+                              onClick={async () => {
+                                try {
+                                  await payslipService.downloadPayslipByIdPDF(payslip.id);
+                                } catch (err) {
+                                  console.error('Download failed:', err);
+                                }
+                              }}
                             >
                               <DownloadIcon />
                             </IconButton>

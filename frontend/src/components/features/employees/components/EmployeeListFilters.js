@@ -49,6 +49,7 @@ const EmployeeListFilters = ({
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
+              data-testid="employee-list-search"
               placeholder="Search by name, ID, or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -75,6 +76,7 @@ const EmployeeListFilters = ({
                 sx={{ minWidth: 140, flex: 1 }}
                 size="small"
                 fullWidth
+                data-testid="employee-list-filter-status"
               >
                 <MenuItem value="">All Status</MenuItem>
                 <MenuItem value="Active">Active</MenuItem>
@@ -91,6 +93,7 @@ const EmployeeListFilters = ({
                 sx={{ minWidth: 160, flex: 1 }}
                 size="small"
                 fullWidth
+                data-testid="employee-list-filter-department"
               >
                 <MenuItem value="all">All Departments</MenuItem>
                 {(departments || []).map((dept) => (

@@ -243,7 +243,7 @@ const timesheetQuerySchema = Joi.object({
     }),
 
   sort: Joi.string()
-    .valid('weekStartDate', 'weekEndDate', 'totalHours', 'status', 'createdAt')
+    .valid('weekStartDate', 'weekEndDate', 'totalHoursWorked', 'status', 'createdAt')
     .default('weekStartDate'),
 
   order: Joi.string()

@@ -52,7 +52,7 @@ const Dashboard = () => {
       if (!response.success) {
         throw new Error(response.error || 'Failed to load dashboard data');
       }
-      return response.data?.data?.stats || {};
+      return response.data?.stats || response.data || {};
     },
     enabled: isAdmin || isHR, // Only run when user is admin/HR
     onError: (err) => {
@@ -180,6 +180,7 @@ const Dashboard = () => {
           </Box>
           <Tooltip title="Refresh">
             <IconButton
+              data-testid="admin-dashboard-refresh-btn"
               onClick={handleRefresh}
               disabled={refreshing || isLoading}
               size="small"
@@ -193,10 +194,11 @@ const Dashboard = () => {
       {/* Error Alert */}
       {error && (
         <Alert 
+          data-testid="admin-dashboard-error-alert"
           severity="error" 
           sx={{ mb: 3 }}
           action={
-            <Button color="inherit" size="small" onClick={() => refetch()}>
+            <Button data-testid="admin-dashboard-retry-btn" color="inherit" size="small" onClick={() => refetch()}>
               Retry
             </Button>
           }
@@ -211,6 +213,7 @@ const Dashboard = () => {
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid item xs={6} sm={3}>
             <Button
+              data-testid="admin-btn-add-employee"
               fullWidth
               variant="contained"
               startIcon={<AddIcon />}
@@ -222,6 +225,7 @@ const Dashboard = () => {
           </Grid>
           <Grid item xs={6} sm={3}>
             <Button
+              data-testid="admin-btn-leave-requests"
               fullWidth
               variant="outlined"
               startIcon={<LeaveIcon />}
@@ -233,6 +237,7 @@ const Dashboard = () => {
           </Grid>
           <Grid item xs={6} sm={3}>
             <Button
+              data-testid="admin-btn-timesheets"
               fullWidth
               variant="outlined"
               startIcon={<TimesheetIcon />}
@@ -244,6 +249,7 @@ const Dashboard = () => {
           </Grid>
           <Grid item xs={6} sm={3}>
             <Button
+              data-testid="admin-btn-payroll"
               fullWidth
               variant="outlined"
               startIcon={<PayrollIcon />}
@@ -281,7 +287,7 @@ const Dashboard = () => {
         Employee Overview
       </Typography>
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-total-employees">
           <StatCard
             title="Total Employees"
             value={stats.employees.total}
@@ -291,7 +297,7 @@ const Dashboard = () => {
             onClick={() => navigate('/employees')}
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-on-leave">
           <StatCard
             title="On Leave"
             value={stats.employees.onLeave}
@@ -300,7 +306,7 @@ const Dashboard = () => {
             color="warning"
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-new-hires">
           <StatCard
             title="New Hires"
             value={stats.employees.newHires}
@@ -309,7 +315,7 @@ const Dashboard = () => {
             color="success"
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-pending-leaves">
           <StatCard
             title="Pending Leaves"
             value={stats.leaves.pending}
@@ -326,7 +332,7 @@ const Dashboard = () => {
         Operations Overview
       </Typography>
       <Grid container spacing={2}>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-submitted-timesheets">
           <StatCard
             title="Submitted"
             value={stats.timesheets.submitted}
@@ -336,7 +342,7 @@ const Dashboard = () => {
             onClick={() => navigate('/timesheet-approval')}
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-draft-timesheets">
           <StatCard
             title="Draft"
             value={stats.timesheets.pending}
@@ -345,7 +351,7 @@ const Dashboard = () => {
             color="warning"
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-approved-timesheets">
           <StatCard
             title="Approved"
             value={stats.timesheets.approved}
@@ -354,7 +360,7 @@ const Dashboard = () => {
             color="success"
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-payroll">
           <StatCard
             title="Payroll"
             value={stats.payroll.processed}

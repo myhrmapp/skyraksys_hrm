@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('Low', 'Medium', 'High', 'Critical'),
       defaultValue: 'Medium'
     },
+    dueDate: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     projectId: {
       type: DataTypes.UUID,
       allowNull: false,

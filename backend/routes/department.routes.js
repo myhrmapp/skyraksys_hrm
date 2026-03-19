@@ -312,8 +312,8 @@ router.put('/:id', authenticateToken, authorize('admin', 'hr'), async (req, res,
     }
 
     await department.update({
-      name: name || department.name,
-      description: description || department.description,
+      name: name !== undefined ? name : department.name,
+      description: description !== undefined ? description : department.description,
       managerId: managerId !== undefined ? managerId : department.managerId
     });
 

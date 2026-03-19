@@ -113,7 +113,7 @@ export default function MyAttendance() {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3 }} data-testid="my-attendance-page">
       <Stack direction="row" alignItems="center" spacing={1} mb={3}>
         <ClockIcon color="primary" sx={{ fontSize: 32 }} />
         <Typography variant="h5" fontWeight={600}>My Attendance</Typography>
@@ -131,6 +131,7 @@ export default function MyAttendance() {
               <Stack spacing={1}>
                 <Typography variant="body2" color="text.secondary">Status</Typography>
                 <Chip
+                  data-testid="attendance-status-chip"
                   label={todayStatus?.status?.toUpperCase() || 'NOT CHECKED IN'}
                   color={todayStatus ? statusColors[todayStatus.status] || 'default' : 'default'}
                   variant="filled"
@@ -159,6 +160,7 @@ export default function MyAttendance() {
               <Stack direction="row" spacing={1}>
                 {!hasCheckedIn && (
                   <Button
+                    data-testid="attendance-checkin-btn"
                     variant="contained"
                     color="success"
                     startIcon={<CheckInIcon />}
@@ -170,6 +172,7 @@ export default function MyAttendance() {
                 )}
                 {hasCheckedIn && !hasCheckedOut && (
                   <Button
+                    data-testid="attendance-checkout-btn"
                     variant="contained"
                     color="warning"
                     startIcon={<CheckOutIcon />}
@@ -204,6 +207,7 @@ export default function MyAttendance() {
 
       <Stack direction="row" spacing={2} mb={2}>
         <TextField
+          data-testid="attendance-month-select"
           select
           size="small"
           label="Month"
@@ -216,6 +220,7 @@ export default function MyAttendance() {
           ))}
         </TextField>
         <TextField
+          data-testid="attendance-year-select"
           select
           size="small"
           label="Year"

@@ -161,7 +161,7 @@ const LeaveHistoryTab = ({ loading, leaveHistory, showEmployeeName, employees = 
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       {getStatusIcon(leave.status)}
                       <Chip
-                        label={leave.status.toUpperCase()}
+                        label={(leave.status || 'Unknown').toUpperCase()}
                         color={getStatusColor(leave.status)}
                         size="small"
                         sx={{ ml: 1 }}
@@ -283,7 +283,7 @@ const TimesheetHistoryTab = ({ loading, timesheetHistory, showEmployeeName, empl
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       {getStatusIcon(timesheet.status)}
                       <Chip
-                        label={timesheet.status.toUpperCase()}
+                        label={(timesheet.status || 'Unknown').toUpperCase()}
                         color={getStatusColor(timesheet.status)}
                         size="small"
                         sx={{ ml: 1 }}

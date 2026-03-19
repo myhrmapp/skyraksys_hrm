@@ -160,7 +160,9 @@ class TimesheetBusinessService extends BaseBusinessService {
     }
 
     // Validate if critical fields changed
-    if (data.hours || data.date || data.projectId || data.taskId) {
+    const dayColumns = ['mondayHours', 'tuesdayHours', 'wednesdayHours', 'thursdayHours', 'fridayHours', 'saturdayHours', 'sundayHours'];
+    const hasDayChange = dayColumns.some(col => data[col] !== undefined);
+    if (hasDayChange || data.weekStartDate || data.weekEndDate || data.projectId || data.taskId) {
       await this.validateTimeEntry({ ...timeEntry.dataValues, ...data });
     }
 

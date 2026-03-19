@@ -204,6 +204,7 @@ const LeaveTypeManagement = () => {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={handleOpenCreate}
+            data-testid="leave-type-add-btn"
           >
             Add Leave Type
           </Button>
@@ -313,12 +314,12 @@ const LeaveTypeManagement = () => {
                     </TableCell>
                     <TableCell align="center">
                       <Tooltip title="Edit">
-                        <IconButton size="small" onClick={() => handleOpenEdit(lt)} color="primary">
+                        <IconButton size="small" onClick={() => handleOpenEdit(lt)} color="primary" data-testid="leave-type-edit-btn">
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete">
-                        <IconButton size="small" onClick={() => handleOpenDelete(lt)} color="error">
+                        <IconButton size="small" onClick={() => handleOpenDelete(lt)} color="error" data-testid="leave-type-delete-btn">
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -427,7 +428,7 @@ const LeaveTypeManagement = () => {
           </Grid>
         </DialogContent>
         <DialogActions sx={{ p: 2.5 }}>
-          <Button onClick={handleCloseDialog} disabled={saving}>
+          <Button onClick={handleCloseDialog} disabled={saving} data-testid="leave-type-cancel-btn">
             Cancel
           </Button>
           <Button
@@ -435,6 +436,7 @@ const LeaveTypeManagement = () => {
             startIcon={saving ? <CircularProgress size={18} /> : <SaveIcon />}
             onClick={handleSave}
             disabled={saving}
+            data-testid="leave-type-save-btn"
           >
             {selectedType ? 'Update' : 'Create'}
           </Button>

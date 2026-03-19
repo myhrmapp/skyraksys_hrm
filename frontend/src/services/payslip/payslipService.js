@@ -50,7 +50,8 @@ class PayslipService {
   async getPayslipHistory(employeeId) {
     try {
       const response = await http.get(`/payslips/history/${employeeId}`);
-      return response.data;
+      const data = response.data?.data || response.data;
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('Error fetching payslip history:', error);
       throw error;

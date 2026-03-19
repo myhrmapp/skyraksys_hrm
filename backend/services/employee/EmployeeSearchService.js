@@ -426,6 +426,7 @@ class EmployeeSearchService {
         'title',
         'level',
         'description',
+        'departmentId',
         [this.sequelize.fn('COUNT', this.sequelize.col('employees.id')), 'employeeCount']
       ],
       include: [
@@ -446,6 +447,7 @@ class EmployeeSearchService {
       title: pos.title,
       level: pos.level,
       description: pos.description,
+      departmentId: pos.departmentId,
       employeeCount: parseInt(pos.get('employeeCount') || 0)
     }));
   }

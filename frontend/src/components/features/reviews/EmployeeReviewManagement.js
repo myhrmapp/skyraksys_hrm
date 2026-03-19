@@ -282,7 +282,7 @@ const EmployeeReviewManagement = () => {
 
   // ========== RENDER ==========
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Container maxWidth="xl" sx={{ py: 3 }} data-testid="reviews-page">
       {/* Header */}
       <Paper sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -297,6 +297,7 @@ const EmployeeReviewManagement = () => {
           </Box>
           {canCreate && (
             <Button
+              data-testid="reviews-new-btn"
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => { setFormData(initialFormState); setCreateDialogOpen(true); }}
@@ -370,6 +371,7 @@ const EmployeeReviewManagement = () => {
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={4}>
             <TextField
+              data-testid="reviews-search"
               fullWidth size="small"
               placeholder="Search by employee name, ID, or period..."
               value={searchTerm}
@@ -379,6 +381,7 @@ const EmployeeReviewManagement = () => {
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
+              data-testid="reviews-status-filter"
               fullWidth size="small" select
               label="Status" value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
@@ -391,6 +394,7 @@ const EmployeeReviewManagement = () => {
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
+              data-testid="reviews-type-filter"
               fullWidth size="small" select
               label="Type" value={typeFilter}
               onChange={(e) => { setTypeFilter(e.target.value); setPage(0); }}
@@ -714,6 +718,7 @@ const EmployeeReviewManagement = () => {
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
           <Button
+            data-testid="reviews-create-submit-btn"
             variant="contained" onClick={handleCreate}
             disabled={!formData.employeeId || !formData.reviewPeriod || createMutation.isPending}
           >
@@ -937,6 +942,7 @@ const EmployeeReviewManagement = () => {
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => { setEditDialogOpen(false); setSelectedReview(null); }}>Cancel</Button>
           <Button
+            data-testid="reviews-edit-save-btn"
             variant="contained" onClick={handleUpdate}
             disabled={updateMutation.isPending}
           >
@@ -1020,6 +1026,7 @@ const EmployeeReviewManagement = () => {
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => { setDeleteDialogOpen(false); setSelectedReview(null); }}>Cancel</Button>
           <Button
+            data-testid="reviews-delete-confirm-btn"
             variant="contained" color="error" onClick={handleDelete}
             disabled={deleteMutation.isPending}
           >

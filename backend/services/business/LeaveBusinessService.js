@@ -61,7 +61,7 @@ class LeaveBusinessService extends BaseBusinessService {
     await this.validateLeaveRequest(data);
 
     // Calculate total days
-    const totalDays = this.calculateLeaveDays(data.startDate, data.endDate);
+    const totalDays = this.calculateLeaveDays(data.startDate, data.endDate, data.isHalfDay);
 
     // Create leave request
     const leave = await this.leaveDataService.create({
@@ -272,7 +272,7 @@ class LeaveBusinessService extends BaseBusinessService {
         // Approved leave: set to 'Cancellation Requested', needs manager approval
         await this.leaveDataService.update(id, {
           status: 'Cancellation Requested',
-          comments: reason || 'Cancellation requested by user'
+          cancellationNote: reason || 'Cancellation requested by user'
         }, { transaction });
       } else {
         // Pending leave: cancel directly and restore balance
@@ -293,7 +293,7 @@ class LeaveBusinessService extends BaseBusinessService {
 
         await this.leaveDataService.update(id, {
           status: 'Cancelled',
-          comments: reason || 'Cancelled by user'
+          cancellationNote: reason || 'Cancelled by user'
         }, { transaction });
       }
 
@@ -332,10 +332,12 @@ class LeaveBusinessService extends BaseBusinessService {
     const transaction = await this.startTransaction();
     try {
       // Restore leave balance
+      const leaveYear = new Date(leaveRequest.startDate).getFullYear();
       const leaveBalance = await db.LeaveBalance.findOne({
         where: {
           employeeId: leaveRequest.employeeId,
-          leaveTypeId: leaveRequest.leaveTypeId
+          leaveTypeId: leaveRequest.leaveTypeId,
+          year: leaveYear
         },
         transaction,
         lock: transaction.LOCK.UPDATE
@@ -430,8 +432,8 @@ class LeaveBusinessService extends BaseBusinessService {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    if (start >= end) {
-      throw new ValidationError('End date must be after start date');
+    if (start > end) {
+      throw new ValidationError('End date must be after or equal to start date');
     }
 
     if (start < today) {
@@ -451,11 +453,12 @@ class LeaveBusinessService extends BaseBusinessService {
     }
 
     // Check leave balance
-    const totalDays = this.calculateLeaveDays(startDate, endDate);
+    const totalDays = this.calculateLeaveDays(startDate, endDate, data.isHalfDay);
+    const leaveYear = new Date(startDate).getFullYear();
     const leaveBalance = await this.leaveBalanceDataService.findSpecificBalance(
       employeeId,
       leaveTypeId,
-      new Date().getFullYear()
+      leaveYear
     );
 
     if (!leaveBalance) {
@@ -473,12 +476,12 @@ class LeaveBusinessService extends BaseBusinessService {
    * Calculate leave days (inclusive, excludes weekends optionally)
    * @private
    */
-  calculateLeaveDays(startDate, endDate) {
+  calculateLeaveDays(startDate, endDate, isHalfDay = false) {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const diffTime = Math.abs(end - start);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both days
-    return diffDays;
+    return isHalfDay ? 0.5 : diffDays;
   }
 }
 

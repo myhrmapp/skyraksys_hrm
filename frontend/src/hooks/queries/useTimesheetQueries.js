@@ -146,7 +146,7 @@ export const useRejectTimesheet = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   return useMutation({
-    mutationFn: ({ id, comments }) => timesheetService.reject(id, { comments }),
+    mutationFn: ({ id, comments }) => timesheetService.updateStatus(id, 'rejected', comments),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: timesheetKeys.lists() });
       queryClient.invalidateQueries({ queryKey: timesheetKeys.detail(id) });

@@ -208,6 +208,7 @@ export const useEmployeeList = () => {
     setCreatingUser(true);
     try {
       const result = await authService.createEmployeeUserAccount(selectedEmployee.id, {
+        email: userAccountData.email,
         password: userAccountData.password,
         role: userAccountData.role,
         forcePasswordChange: true

@@ -319,7 +319,7 @@ const PositionManagement = ({ embedded } = {}) => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: embedded ? 0 : 4 }}>
+    <Container maxWidth="lg" sx={{ py: embedded ? 0 : 4 }} data-testid="position-management-page">
       {/* Header */}
       {!embedded && (
       <Box sx={{ mb: 4 }}>
@@ -405,6 +405,7 @@ const PositionManagement = ({ embedded } = {}) => {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => handleOpenDialog()}
+            data-testid="position-add-btn"
           >
             Add Position
           </Button>
@@ -467,6 +468,7 @@ const PositionManagement = ({ embedded } = {}) => {
                       size="small"
                       onClick={() => handleOpenDialog(position)}
                       color="primary"
+                      data-testid="position-edit-btn"
                     >
                       <EditIcon />
                     </IconButton>
@@ -474,6 +476,7 @@ const PositionManagement = ({ embedded } = {}) => {
                       size="small"
                       onClick={() => handleDelete(position)}
                       color="error"
+                      data-testid="position-delete-btn"
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -648,7 +651,7 @@ const PositionManagement = ({ embedded } = {}) => {
           <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} variant="contained" startIcon={<SaveIcon />}>
+          <Button onClick={handleSubmit} variant="contained" startIcon={<SaveIcon />} data-testid="position-save-btn">
             {editingPosition ? 'Update' : 'Create'}
           </Button>
         </DialogActions>

@@ -27,6 +27,7 @@ const EmploymentInformationTab = ({ formData, errors, touchedFields = {}, onChan
         name="hireDate"
         label="Hire Date (Required)"
         type="date"
+        data-testid="field-hireDate"
         value={formData.hireDate}
         onChange={(e) => onChange('hireDate', e.target.value)}
         onBlur={() => onBlur && onBlur('hireDate')}
@@ -142,6 +143,7 @@ const EmploymentInformationTab = ({ formData, errors, touchedFields = {}, onChan
           onChange={(e) => onChange('employmentType', e.target.value)}
           onBlur={() => onBlur && onBlur('employmentType')}
           label="Employment Type"
+          inputProps={{ 'data-testid': 'field-employmentType' }}
         >
           <MenuItem value="Full-time">Full-time</MenuItem>
           <MenuItem value="Part-time">Part-time</MenuItem>
@@ -161,6 +163,7 @@ const EmploymentInformationTab = ({ formData, errors, touchedFields = {}, onChan
           value={formData.status || 'Active'}
           onChange={(e) => onChange('status', e.target.value)}
           label="Status"
+          inputProps={{ 'data-testid': 'field-status' }}
         >
           <MenuItem value="Active">Active</MenuItem>
           <MenuItem value="Inactive">Inactive</MenuItem>
@@ -176,6 +179,7 @@ const EmploymentInformationTab = ({ formData, errors, touchedFields = {}, onChan
         id="workLocation"
         name="workLocation"
         label="Work Location"
+        data-testid="field-workLocation"
         value={formData.workLocation}
         onChange={(e) => onChange('workLocation', e.target.value)}
         onBlur={() => onBlur && onBlur('workLocation')}
@@ -188,6 +192,7 @@ const EmploymentInformationTab = ({ formData, errors, touchedFields = {}, onChan
         name="probationPeriod"
         label="Probation Period (months)"
         type="number"
+        data-testid="field-probationPeriod"
         value={formData.probationPeriod}
         onChange={(e) => {
           const value = parseInt(e.target.value) || 0;
@@ -209,6 +214,7 @@ const EmploymentInformationTab = ({ formData, errors, touchedFields = {}, onChan
         name="noticePeriod"
         label="Notice Period (days)"
         type="number"
+        data-testid="field-noticePeriod"
         value={formData.noticePeriod}
         onChange={(e) => {
           const value = parseInt(e.target.value) || 0;

@@ -134,6 +134,7 @@ const ForgotPassword = () => {
                     ),
                   }}
                   sx={{ mb: 3 }}
+                  data-testid="forgot-password-email"
                 />
 
                 <Button
@@ -143,6 +144,7 @@ const ForgotPassword = () => {
                   size="large"
                   disabled={loading}
                   startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+                  data-testid="forgot-password-submit-btn"
                   sx={{
                     py: 1.5,
                     borderRadius: 2,
@@ -165,6 +167,7 @@ const ForgotPassword = () => {
                     to="/login"
                     variant="body2"
                     color="primary"
+                    data-testid="forgot-password-back-link"
                     sx={{
                       textDecoration: 'none',
                       fontWeight: 500,

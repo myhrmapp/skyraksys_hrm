@@ -39,6 +39,7 @@ const EmployeeListHeader = ({ canEdit, onAddEmployee, onExport }) => {
           variant="outlined"
           startIcon={<DownloadIcon />}
           onClick={onExport}
+          data-testid="employee-list-export-btn"
           sx={{
             borderRadius: 2,
             textTransform: 'none',
@@ -60,6 +61,7 @@ const EmployeeListHeader = ({ canEdit, onAddEmployee, onExport }) => {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={onAddEmployee}
+            data-testid="employee-list-add-btn"
             sx={{
               borderRadius: 2,
               px: 3,

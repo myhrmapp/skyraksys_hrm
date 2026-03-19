@@ -46,7 +46,6 @@ const STATUS_COLORS = {
   'In Progress': 'info',
   'Completed': 'success',
   'On Hold': 'warning',
-  'Cancelled': 'error',
 };
 
 const PRIORITY_COLORS = {
@@ -141,7 +140,7 @@ const MyTasks = () => {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : 'grey.50' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : 'grey.50' }} data-testid="my-tasks-page">
       {/* Header */}
       <Paper
         elevation={0}
@@ -228,6 +227,7 @@ const MyTasks = () => {
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} md={4}>
                 <TextField
+                  data-testid="tasks-search"
                   fullWidth
                   size="small"
                   label="Search tasks"
@@ -242,6 +242,7 @@ const MyTasks = () => {
                 <FormControl fullWidth size="small">
                   <InputLabel>Status</InputLabel>
                   <Select
+                    data-testid="tasks-status-filter"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                     label="Status"
@@ -258,6 +259,7 @@ const MyTasks = () => {
                 <FormControl fullWidth size="small">
                   <InputLabel>Priority</InputLabel>
                   <Select
+                    data-testid="tasks-priority-filter"
                     value={priorityFilter}
                     onChange={(e) => setPriorityFilter(e.target.value)}
                     label="Priority"

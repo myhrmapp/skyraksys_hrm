@@ -119,6 +119,7 @@ const EmployeeList = () => {
               onClick={loadEmployees} 
               sx={{ mt: 2 }}
               color="inherit"
+              data-testid="employee-list-retry-btn"
             >
               Retry
             </Button>
@@ -167,6 +168,7 @@ const EmployeeList = () => {
           onChange={(e, p) => handleChangePage(e, p - 1)} 
           color="primary"
           shape="rounded"
+          data-testid="employee-list-pagination"
         />
       </Box>
 

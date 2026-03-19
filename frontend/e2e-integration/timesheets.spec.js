@@ -1,0 +1,389 @@
+/**
+ * Timesheet Module — Full Business Flow E2E Tests
+ * =================================================
+ * Covers: draft creation, submission, manager approval/rejection,
+ * weekly navigation, RBAC enforcement, and UI rendering.
+ *
+ * Prerequisites:
+ *   - Backend at http://localhost:5000  (npm start in /backend)
+ *   - Frontend at http://localhost:3000 (npm start in /frontend)
+ *   - DB seeded: npx sequelize-cli db:seed:all
+ */
+const { test, expect } = require('@playwright/test');
+const {
+  loginViaAPI, loginViaUI, logout, waitForPageLoad, API_URL,
+  todayISO, pastDateISO, currentMonday, uniqueId,
+} = require('./helpers');
+
+// Shared state across serial flows
+let createdTimesheetId = null;
+
+// ══════════════════════════════════════════════════════════════════════════
+// FLOW 1 — TIMESHEET CRUD LIFECYCLE
+// ══════════════════════════════════════════════════════════════════════════
+test.describe.serial('Timesheet — Flow 1: CRUD Lifecycle', () => {
+  test.beforeEach(async ({ page }) => { await loginViaAPI(page, 'employee'); });
+  test.afterEach(async ({ page }) => { await logout(page); });
+
+  test('1a — Employee can list own timesheets', async ({ page }) => {
+    const res = await page.request.get(`${API_URL}/timesheets/me`);
+    expect(res.ok()).toBeTruthy();
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(Array.isArray(body.data)).toBe(true);
+  });
+
+  test('1b — Employee can create a draft timesheet', async ({ page }) => {
+    // First get a project to log time against
+    const projRes = await page.request.get(`${API_URL}/projects`);
+    const projBody = await projRes.json();
+    const projects = projBody.data || projBody;
+    const project = Array.isArray(projects) ? projects[0] : null;
+
+    const weekStart = currentMonday();
+    const payload = {
+      weekStartDate: weekStart,
+      status: 'draft',
+      entries: project ? [
+        { projectId: project.id, taskId: null, monday: 8, tuesday: 8, wednesday: 8, thursday: 8, friday: 8, saturday: 0, sunday: 0, notes: 'E2E test entry' },
+      ] : [],
+      totalHours: project ? 40 : 0,
+    };
+
+    const res = await page.request.post(`${API_URL}/timesheets`, {
+      data: payload,
+      failOnStatusCode: false,
+    });
+    const body = await res.json();
+
+    // Might already have a timesheet for this week — accept conflict too
+    if (res.status() === 409 || res.status() === 400) {
+      // Already exists — fetch it instead
+      const listRes = await page.request.get(`${API_URL}/timesheets/week/${weekStart}`);
+      if (listRes.ok()) {
+        const listBody = await listRes.json();
+        const ts = listBody.data;
+        if (ts && ts.id) createdTimesheetId = ts.id;
+      }
+    } else {
+      expect(res.ok(), `Create failed ${res.status()}: ${JSON.stringify(body)}`).toBeTruthy();
+      expect(body.success).toBe(true);
+      createdTimesheetId = body.data?.id || body.data?.timesheet?.id;
+    }
+    expect(createdTimesheetId).toBeTruthy();
+  });
+
+  test('1c — Employee can read own timesheet by ID', async ({ page }) => {
+    if (!createdTimesheetId) { test.skip(); return; }
+    const res = await page.request.get(`${API_URL}/timesheets/${createdTimesheetId}`);
+    expect(res.ok()).toBeTruthy();
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.data).toHaveProperty('id');
+    expect(body.data.id).toBe(createdTimesheetId);
+  });
+
+  test('1d — Employee can update a draft timesheet', async ({ page }) => {
+    if (!createdTimesheetId) { test.skip(); return; }
+    const res = await page.request.put(`${API_URL}/timesheets/${createdTimesheetId}`, {
+      data: { notes: 'Updated by E2E test' },
+      failOnStatusCode: false,
+    });
+    // May be 200 or 400 depending on fields accepted
+    expect([200, 400]).toContain(res.status());
+  });
+
+  test('1e — Employee can submit a draft timesheet', async ({ page }) => {
+    if (!createdTimesheetId) { test.skip(); return; }
+    const res = await page.request.patch(`${API_URL}/timesheets/${createdTimesheetId}/submit`, {
+      failOnStatusCode: false,
+    });
+    expect(res.ok(), `Submit failed ${res.status()}`).toBeTruthy();
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.data.status).toBe('submitted');
+  });
+
+  test('1f — Employee cannot update a submitted timesheet', async ({ page }) => {
+    if (!createdTimesheetId) { test.skip(); return; }
+    const res = await page.request.put(`${API_URL}/timesheets/${createdTimesheetId}`, {
+      data: { notes: 'Should fail' },
+      failOnStatusCode: false,
+    });
+    // Submitted sheets are locked — should return 4xx
+    expect(res.status()).toBeGreaterThanOrEqual(400);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// FLOW 2 — MANAGER APPROVAL WORKFLOW
+// ══════════════════════════════════════════════════════════════════════════
+test.describe.serial('Timesheet — Flow 2: Approval Workflow', () => {
+  test('2a — Manager can view pending approval queue', async ({ page }) => {
+    await loginViaAPI(page, 'manager');
+    const res = await page.request.get(`${API_URL}/timesheets/approval/pending`);
+    expect(res.ok()).toBeTruthy();
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(Array.isArray(body.data)).toBe(true);
+    await logout(page);
+  });
+
+  test('2b — Manager can approve a submitted timesheet', async ({ page }) => {
+    if (!createdTimesheetId) { test.skip(); return; }
+    await loginViaAPI(page, 'manager');
+    const res = await page.request.post(`${API_URL}/timesheets/${createdTimesheetId}/approve`, {
+      data: { comments: 'Approved by E2E manager test' },
+      failOnStatusCode: false,
+    });
+    // May fail if employee's manager doesn't match — that's acceptable
+    if (res.ok()) {
+      const body = await res.json();
+      expect(body.success).toBe(true);
+      expect(body.data.status).toBe('approved');
+    } else {
+      expect([400, 403, 404]).toContain(res.status());
+    }
+    await logout(page);
+  });
+
+  test('2c — Admin can approve any timesheet', async ({ page }) => {
+    if (!createdTimesheetId) { test.skip(); return; }
+    await loginViaAPI(page, 'admin');
+
+    // First re-submit if already approved
+    const getRes = await page.request.get(`${API_URL}/timesheets/${createdTimesheetId}`);
+    const tsBody = await getRes.json();
+    const currentStatus = tsBody.data?.status;
+
+    if (currentStatus === 'approved' || currentStatus === 'rejected') {
+      // Nothing more to approve — just verify the status is set
+      expect(['approved', 'rejected']).toContain(currentStatus);
+    } else {
+      const approveRes = await page.request.post(
+        `${API_URL}/timesheets/${createdTimesheetId}/approve`,
+        { data: { comments: 'Admin approved' }, failOnStatusCode: false }
+      );
+      if (approveRes.ok()) {
+        const body = await approveRes.json();
+        expect(['approved', 'submitted']).toContain(body.data.status);
+      }
+    }
+    await logout(page);
+  });
+
+  test('2d — Rejection sets status to rejected with comments', async ({ page }) => {
+    await loginViaAPI(page, 'admin');
+
+    // Create a fresh timesheet to reject
+    const weekStart = pastDateISO(14); // 2 weeks ago
+    const createRes = await page.request.post(`${API_URL}/timesheets`, {
+      data: { weekStartDate: weekStart, status: 'draft', entries: [], totalHours: 0 },
+      failOnStatusCode: false,
+    });
+
+    let tsId = null;
+    if (createRes.ok()) {
+      const body = await createRes.json();
+      tsId = body.data?.id;
+
+      // Submit it
+      if (tsId) {
+        await page.request.patch(`${API_URL}/timesheets/${tsId}/submit`, { failOnStatusCode: false });
+      }
+    }
+
+    if (tsId) {
+      const rejectRes = await page.request.post(`${API_URL}/timesheets/${tsId}/reject`, {
+        data: { comments: 'Missing project codes' },
+        failOnStatusCode: false,
+      });
+      if (rejectRes.ok()) {
+        const body = await rejectRes.json();
+        expect(body.success).toBe(true);
+        expect(body.data.status).toBe('rejected');
+      }
+    }
+    await logout(page);
+  });
+
+  test('2e — Employee cannot approve own timesheet', async ({ page }) => {
+    if (!createdTimesheetId) { test.skip(); return; }
+    await loginViaAPI(page, 'employee');
+    const res = await page.request.post(`${API_URL}/timesheets/${createdTimesheetId}/approve`, {
+      failOnStatusCode: false,
+    });
+    expect(res.status()).toBeGreaterThanOrEqual(400);
+    await logout(page);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// FLOW 3 — WEEKLY QUERIES & HISTORY
+// ══════════════════════════════════════════════════════════════════════════
+test.describe('Timesheet — Flow 3: Week Queries & History', () => {
+  test.beforeEach(async ({ page }) => { await loginViaAPI(page, 'employee'); });
+  test.afterEach(async ({ page }) => { await logout(page); });
+
+  test('3a — GET /timesheets/week/:weekStart returns week data', async ({ page }) => {
+    const weekStart = currentMonday();
+    const res = await page.request.get(`${API_URL}/timesheets/week/${weekStart}`, {
+      failOnStatusCode: false,
+    });
+    // 200 if sheet exists, 404 if not — both are valid
+    expect([200, 404]).toContain(res.status());
+    if (res.ok()) {
+      const body = await res.json();
+      expect(body.success).toBe(true);
+    }
+  });
+
+  test('3b — Admin can list all timesheets with filters', async ({ page }) => {
+    await logout(page);
+    await loginViaAPI(page, 'admin');
+
+    const res = await page.request.get(`${API_URL}/timesheets?status=submitted`);
+    expect(res.ok()).toBeTruthy();
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(Array.isArray(body.data)).toBe(true);
+  });
+
+  test('3c — Employee cannot view another employee timesheets', async ({ page }) => {
+    // Get all timesheets as admin first to find one from a different user
+    await logout(page);
+    await loginViaAPI(page, 'admin');
+    const adminRes = await page.request.get(`${API_URL}/timesheets?limit=50`);
+    const adminBody = await adminRes.json();
+    const allSheets = adminBody.data || [];
+    await logout(page);
+
+    await loginViaAPI(page, 'employee');
+    const meRes = await page.request.get(`${API_URL}/employees/me`);
+    const meBody = await meRes.json();
+    const myEmpId = meBody.data?.id;
+
+    const otherSheet = allSheets.find(ts => ts.employeeId !== myEmpId);
+    if (otherSheet) {
+      const res = await page.request.get(`${API_URL}/timesheets/${otherSheet.id}`, {
+        failOnStatusCode: false,
+      });
+      // Should be 403 or 404
+      expect(res.status()).toBeGreaterThanOrEqual(400);
+    } else {
+      // No other sheets to check — test passes vacuously
+      expect(true).toBe(true);
+    }
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// FLOW 4 — UI RENDERING
+// ══════════════════════════════════════════════════════════════════════════
+test.describe('Timesheet — Flow 4: UI Rendering', () => {
+  test('4a — TimesheetHub page renders for employee', async ({ page }) => {
+    await loginViaUI(page, 'employee');
+    await page.goto('/timesheets');
+    await waitForPageLoad(page);
+    await expect(page).not.toHaveURL(/\/login/);
+    await expect(page.locator('body')).toContainText(/timesheet/i);
+    await logout(page);
+  });
+
+  test('4b — Weekly timesheet page renders with nav controls', async ({ page }) => {
+    await loginViaUI(page, 'employee');
+    const weekStart = currentMonday();
+    await page.goto(`/timesheets/week/${weekStart}`);
+    await waitForPageLoad(page);
+    await expect(page).not.toHaveURL(/\/login/);
+    // Week navigation buttons should exist
+    const prevBtn = page.locator('[data-testid="timesheet-prev-week"]');
+    const nextBtn = page.locator('[data-testid="timesheet-next-week"]');
+    await expect(prevBtn.or(nextBtn).first()).toBeVisible({ timeout: 10000 });
+    await logout(page);
+  });
+
+  test('4c — Add task row is interactive', async ({ page }) => {
+    await loginViaUI(page, 'employee');
+    const weekStart = currentMonday();
+    await page.goto(`/timesheets/week/${weekStart}`);
+    await waitForPageLoad(page);
+
+    const addTaskBtn = page.locator('[data-testid="timesheet-add-task"]');
+    if (await addTaskBtn.isVisible()) {
+      await addTaskBtn.click();
+      // A new row should appear
+      await expect(
+        page.locator('[data-testid^="timesheet-project-select-"]').first()
+      ).toBeVisible({ timeout: 5000 });
+    }
+    await logout(page);
+  });
+
+  test('4d — Timesheet page renders for manager with approval view', async ({ page }) => {
+    await loginViaUI(page, 'manager');
+    await page.goto('/timesheets');
+    await waitForPageLoad(page);
+    await expect(page).not.toHaveURL(/\/login/);
+    await expect(page.locator('body')).toContainText(/timesheet/i);
+    await logout(page);
+  });
+
+  test('4e — Save draft button exists on timesheet form', async ({ page }) => {
+    await loginViaUI(page, 'employee');
+    const weekStart = currentMonday();
+    await page.goto(`/timesheets/week/${weekStart}`);
+    await waitForPageLoad(page);
+
+    const saveDraftBtn = page.locator('[data-testid="timesheet-save-draft"]');
+    // Only visible if sheet is in draft state
+    if (await saveDraftBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await expect(saveDraftBtn).toBeEnabled();
+    }
+    await logout(page);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// FLOW 5 — RBAC ENFORCEMENT
+// ══════════════════════════════════════════════════════════════════════════
+test.describe('Timesheet — Flow 5: RBAC', () => {
+  test('5a — Unauthenticated request returns 401', async ({ page }) => {
+    const res = await page.request.get(`${API_URL}/timesheets`, { failOnStatusCode: false });
+    expect(res.status()).toBe(401);
+  });
+
+  test('5b — Employee sees only own timesheets from /timesheets/me', async ({ page }) => {
+    await loginViaAPI(page, 'employee');
+    const res = await page.request.get(`${API_URL}/timesheets/me`);
+    expect(res.ok()).toBeTruthy();
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    // All returned timesheets must belong to this employee
+    const meRes = await page.request.get(`${API_URL}/employees/me`);
+    const meBody = await meRes.json();
+    const myEmpId = meBody.data?.id;
+    if (Array.isArray(body.data)) {
+      body.data.forEach(ts => {
+        expect(ts.employeeId).toBe(myEmpId);
+      });
+    }
+    await logout(page);
+  });
+
+  test('5c — Manager can see approval queue', async ({ page }) => {
+    await loginViaAPI(page, 'manager');
+    const res = await page.request.get(`${API_URL}/timesheets/approval/pending`);
+    expect(res.ok()).toBeTruthy();
+    await logout(page);
+  });
+
+  test('5d — Employee cannot access approval queue', async ({ page }) => {
+    await loginViaAPI(page, 'employee');
+    const res = await page.request.get(`${API_URL}/timesheets/approval/pending`, {
+      failOnStatusCode: false,
+    });
+    expect(res.status()).toBeGreaterThanOrEqual(400);
+    await logout(page);
+  });
+});

@@ -103,7 +103,8 @@ const Login = () => {
           height: '600px',
           background: `radial-gradient(circle, ${alpha(theme.palette.primary.light, 0.3)} 0%, transparent 70%)`,
           borderRadius: '50%',
-          animation: 'float 20s ease-in-out infinite'
+          animation: 'float 20s ease-in-out infinite',
+          '@media (prefers-reduced-motion: reduce)': { animation: 'none' }
         },
         '&::after': {
           content: '""',
@@ -114,7 +115,8 @@ const Login = () => {
           height: '500px',
           background: `radial-gradient(circle, ${alpha(theme.palette.secondary.light, 0.2)} 0%, transparent 70%)`,
           borderRadius: '50%',
-          animation: 'float 15s ease-in-out infinite reverse'
+          animation: 'float 15s ease-in-out infinite reverse',
+          '@media (prefers-reduced-motion: reduce)': { animation: 'none' }
         },
         '@keyframes float': {
           '0%, 100%': {
@@ -155,7 +157,8 @@ const Login = () => {
                   ${theme.palette.secondary.main}, 
                   ${theme.palette.primary.light})`,
                 backgroundSize: '200% 100%',
-                animation: 'shimmer 3s linear infinite'
+                animation: 'shimmer 3s linear infinite',
+                '@media (prefers-reduced-motion: reduce)': { animation: 'none' }
               },
               '@keyframes shimmer': {
                 '0%': {
@@ -182,6 +185,7 @@ const Login = () => {
                     boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`,
                     mb: 2,
                     animation: 'pulse 2s ease-in-out infinite',
+                    '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
                     '@keyframes pulse': {
                       '0%, 100%': {
                         transform: 'scale(1)',
@@ -250,6 +254,7 @@ const Login = () => {
             {error && (
               <Fade in>
                 <Alert
+                  data-testid="login-error-alert"
                   severity="error"
                   onClose={() => setError('')}
                   sx={{
@@ -266,12 +271,13 @@ const Login = () => {
             )}
 
             {/* Login Form */}
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }} data-testid="login-form">
               <TextField
                 fullWidth
                 required
                 label="Email Address"
                 name="email"
+                data-testid="login-email-input"
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
@@ -305,6 +311,7 @@ const Login = () => {
                 required
                 label="Password"
                 name="password"
+                data-testid="login-password-input"
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleChange}
@@ -323,6 +330,7 @@ const Login = () => {
                         edge="end"
                         disabled={loading}
                         aria-label="toggle password visibility"
+                        data-testid="login-toggle-password"
                         sx={{
                           color: theme.palette.primary.main,
                           '&:hover': {
@@ -356,6 +364,7 @@ const Login = () => {
                 variant="contained"
                 size="large"
                 disabled={loading}
+                data-testid="login-submit-button"
                 startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <LoginIcon />}
                 sx={{
                   py: 1.5,
@@ -389,6 +398,7 @@ const Login = () => {
                   to="/forgot-password"
                   variant="body2"
                   color="primary"
+                  data-testid="login-forgot-password-link"
                   sx={{
                     textDecoration: 'none',
                     fontWeight: 500,

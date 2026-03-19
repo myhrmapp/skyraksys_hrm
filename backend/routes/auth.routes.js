@@ -62,6 +62,7 @@ router.post('/logout',
  * @security Token rotation
  */
 router.post('/refresh-token',
+  validate(validators.refreshTokenSchema),
   authController.refreshToken
 );
 
@@ -86,6 +87,17 @@ router.get('/me',
 );
 
 /**
+ * @route PUT /api/auth/me
+ * @desc Update current user profile
+ * @access Private
+ */
+router.put('/me',
+  authenticateToken,
+  validate(validators.updateProfileSchema),
+  authController.updateProfile
+);
+
+/**
  * @route PUT /api/auth/change-password
  * @desc Change current user's password
  * @access Private
@@ -105,6 +117,7 @@ router.put('/change-password',
  */
 router.post('/forgot-password',
   passwordResetLimiter,
+  validate(validators.forgotPasswordSchema),
   authController.forgotPassword
 );
 
@@ -114,6 +127,7 @@ router.post('/forgot-password',
  * @access Public (requires valid reset token)
  */
 router.post('/reset-password',
+  validate(validators.resetPasswordSchema),
   authController.resetPassword
 );
 
@@ -162,7 +176,7 @@ router.post('/register',
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, 12);
 
       // Create user
       const user = await User.create({
@@ -252,7 +266,7 @@ router.get('/users',
 router.put('/users/:userId/reset-password',
   authenticateToken,
   authorize('admin'),
-  validateParams(validators.uuidParamSchema),
+  validateParams(validators.userIdParamSchema),
   validate(validators.adminResetPasswordSchema),
   async (req, res, next) => {
     try {
@@ -264,7 +278,7 @@ router.put('/users/:userId/reset-password',
         throw new NotFoundError('User not found');
       }
 
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
       await user.update({
         password: hashedPassword,
         failedLoginAttempts: 0,
@@ -289,7 +303,7 @@ router.put('/users/:userId/reset-password',
 router.put('/users/:userId/account',
   authenticateToken,
   authorize('admin'),
-  validateParams(validators.uuidParamSchema),
+  validateParams(validators.userIdParamSchema),
   validate(validators.adminUpdateAccountSchema),
   async (req, res, next) => {
     try {
@@ -323,6 +337,45 @@ router.put('/users/:userId/account',
 );
 
 /**
+ * @route GET /api/auth/users/employee/:employeeId
+ * @desc Get user account linked to an employee (Admin/HR)
+ * @access Admin/HR
+ */
+router.get('/users/employee/:employeeId',
+  authenticateToken,
+  authorize(['admin', 'hr']),
+  validateParams(validators.employeeIdParamSchema),
+  async (req, res, next) => {
+    try {
+      const { employeeId } = req.params;
+
+      const employee = await Employee.findByPk(employeeId, {
+        include: [{
+          model: User,
+          as: 'user',
+          attributes: { exclude: ['password'] }
+        }]
+      });
+
+      if (!employee) {
+        throw new NotFoundError('Employee not found');
+      }
+
+      if (!employee.user) {
+        throw new NotFoundError('No user account linked to this employee');
+      }
+
+      res.json({
+        success: true,
+        data: employee.user
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
  * @route POST /api/auth/users/employee/:employeeId
  * @desc Create user for existing employee (Admin)
  * @access Admin
@@ -330,11 +383,12 @@ router.put('/users/:userId/account',
 router.post('/users/employee/:employeeId',
   authenticateToken,
   authorize('admin'),
-  validateParams(validators.uuidParamSchema),
+  validateParams(validators.employeeIdParamSchema),
+  validate(validators.createEmployeeUserSchema),
   async (req, res, next) => {
     try {
       const { employeeId } = req.params;
-      const { email, password, role } = req.body;
+      const { email, password, role } = req.validatedData || req.body;
 
       // Check if employee exists
       const employee = await Employee.findByPk(employeeId);
@@ -349,7 +403,7 @@ router.post('/users/employee/:employeeId',
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, 12);
 
       // Create user
       const user = await User.create({
@@ -386,7 +440,7 @@ router.post('/users/employee/:employeeId',
 router.put('/users/:userId/role',
   authenticateToken,
   authorize('admin'),
-  validateParams(validators.uuidParamSchema),
+  validateParams(validators.userIdParamSchema),
   validate(validators.updateRoleSchema),
   async (req, res, next) => {
     try {
@@ -419,7 +473,7 @@ router.put('/users/:userId/role',
 router.put('/users/:userId/status',
   authenticateToken,
   authorize('admin'),
-  validateParams(validators.uuidParamSchema),
+  validateParams(validators.userIdParamSchema),
   validate(validators.updateUserStatusSchema),
   async (req, res, next) => {
     try {
@@ -452,7 +506,7 @@ router.put('/users/:userId/status',
 router.put('/users/:userId/lock',
   authenticateToken,
   authorize('admin'),
-  validateParams(validators.uuidParamSchema),
+  validateParams(validators.userIdParamSchema),
   validate(validators.adminLockSchema),
   async (req, res, next) => {
     try {
@@ -489,7 +543,7 @@ router.put('/users/:userId/lock',
 router.post('/users/:userId/send-welcome-email',
   authenticateToken,
   authorize('admin'),
-  validateParams(validators.uuidParamSchema),
+  validateParams(validators.userIdParamSchema),
   async (req, res, next) => {
     try {
       const { userId } = req.params;
@@ -528,7 +582,7 @@ router.post('/users/:userId/send-welcome-email',
 router.delete('/users/:userId',
   authenticateToken,
   authorize('admin'),
-  validateParams(validators.uuidParamSchema),
+  validateParams(validators.userIdParamSchema),
   async (req, res, next) => {
     try {
       const { userId } = req.params;

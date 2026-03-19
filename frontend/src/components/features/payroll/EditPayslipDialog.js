@@ -171,7 +171,7 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
               {payslip.employee?.employeeId} - {payslip.employee?.firstName} {payslip.employee?.lastName}
             </Typography>
           </Box>
-          <Chip label={payslip.status.toUpperCase()} color="warning" size="small" />
+          <Chip label={(payslip.status || 'Unknown').toUpperCase()} color="warning" size="small" />
         </Stack>
       </DialogTitle>
 
@@ -336,6 +336,7 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
           {/* Reason for Adjustment */}
           <Grid item xs={12}>
             <TextField
+              data-testid="edit-payslip-reason"
               fullWidth
               label="Reason for Manual Adjustment *"
               multiline
@@ -370,6 +371,7 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
           Cancel
         </Button>
         <Button
+          data-testid="edit-payslip-save-btn"
           variant="contained"
           onClick={handleSave}
           disabled={loading}

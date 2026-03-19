@@ -163,6 +163,7 @@ const LeaveAccrualManagement = () => {
                   })}
                   sx={{ bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }}
                   disabled={runAccrualMutation.isPending}
+                  data-testid="leave-accrual-run-btn"
                 >
                   Run Accrual
                 </Button>
@@ -175,6 +176,7 @@ const LeaveAccrualManagement = () => {
                   })}
                   sx={{ bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }}
                   disabled={carryForwardMutation.isPending}
+                  data-testid="leave-accrual-carry-forward-btn"
                 >
                   Carry Forward
                 </Button>
@@ -227,7 +229,7 @@ const LeaveAccrualManagement = () => {
       <Paper sx={{ mb: 3 }}>
         <Tabs value={activeTab} onChange={(_, v) => { setActiveTab(v); setPage(0); }}>
           <Tab label="Current Balances" />
-          <Tab label="Accrual Preview" />
+          <Tab label="Accrual Preview" data-testid="leave-accrual-preview-btn" />
         </Tabs>
       </Paper>
 

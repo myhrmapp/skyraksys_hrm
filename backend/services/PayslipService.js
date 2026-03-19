@@ -573,7 +573,7 @@ class PayslipService {
 
     await payslip.update({
       status: 'finalized',
-      finalizedDate: new Date(),
+      finalizedAt: new Date(),
       approvedBy: currentUser.id
     });
 
@@ -604,7 +604,7 @@ class PayslipService {
 
     await payslip.update({
       status: 'paid',
-      paidDate: new Date()
+      paidAt: new Date()
     });
 
     return payslip;
@@ -641,7 +641,7 @@ class PayslipService {
           }
           await payslip.update({
             status: 'finalized',
-            finalizedDate: new Date(),
+            finalizedAt: new Date(),
             approvedBy: currentUser.id
           }, { transaction });
           results.successful.push({ id, payslipNumber: payslip.payslipNumber });
@@ -685,7 +685,7 @@ class PayslipService {
           }
           await payslip.update({
             status: 'paid',
-            paidDate: new Date()
+            paidAt: new Date()
           }, { transaction });
           results.successful.push({ id, payslipNumber: payslip.payslipNumber });
         } catch (error) {
@@ -1120,10 +1120,21 @@ class PayslipService {
       });
     });
 
+    // Calculate working days (Mon-Fri) instead of calendar days
+    const totalWorkingDays = this._calculateWorkingDaysInMonth(
+      startDate.getFullYear(),
+      startDate.getMonth() + 1
+    );
+    const absentDays = Math.max(0, totalWorkingDays - presentDays);
+    const lopDays = absentDays; // LOP days = absent days (can be refined with approved leave data)
+
     return {
-      totalDays: Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1,
+      totalWorkingDays,
       presentDays,
-      absentDays: Math.max(0, ((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1 - presentDays),
+      paidDays: presentDays,
+      absentDays,
+      lopDays,
+      overtimeHours: 0,
       leaveDays: 0 // Calculate separately from leave_requests table
     };
   }

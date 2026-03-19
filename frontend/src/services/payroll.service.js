@@ -67,6 +67,35 @@ class PayrollService {
       options,
     });
   }
+
+  // Aliases used by usePayrollQueries hooks
+  async getPayslips(filters) {
+    return this.getPayrollHistory(filters);
+  }
+
+  async getPayslipById(id) {
+    return http.get(`/payslips/${id}`);
+  }
+
+  async getPayrollRuns(filters) {
+    return http.get('/payslips', { params: { ...filters, groupBy: 'run' } });
+  }
+
+  async generatePayslips(data) {
+    return this.processPayroll(data);
+  }
+
+  async updatePayslip(id, data) {
+    return http.put(`/payslips/${id}`, data);
+  }
+
+  async approvePayslip(id) {
+    return http.put(`/payslips/${id}`, { status: 'Approved' });
+  }
+
+  async downloadPayslip(id) {
+    return http.get(`/payslips/${id}/pdf`, { responseType: 'blob' });
+  }
 }
 
 export const payrollService = new PayrollService();

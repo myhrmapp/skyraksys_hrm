@@ -353,9 +353,9 @@ async function handleBulkSubmit(req, res, next) {
       });
     }
 
-    // Update status to Submitted
+    // Update status to Submitted with submittedAt timestamp
     await db.Timesheet.update(
-      { status: 'Submitted' },
+      { status: 'Submitted', submittedAt: new Date() },
       {
         where: {
           id: { [Op.in]: timesheets.map(t => t.id) }

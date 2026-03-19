@@ -1,31 +1,14 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MyTasks from '../MyTasks';
-import { AuthContext } from '../../../../contexts/AuthContext';
-import { NotificationContext } from '../../../../contexts/NotificationContext';
+import { renderWithProviders } from '../../../../test-utils/testUtils';
 import taskService from '../../../../services/TaskService';
 
 // Mock task service
 jest.mock('../../../../services/TaskService');
 
-// Create test query client
-const createTestQueryClient = () => new QueryClient({
-  defaultOptions: {
-    queries: { retry: false },
-    mutations: { retry: false },
-  },
-});
-
-// Mock notification context
-const mockNotification = {
-  showSuccess: jest.fn(),
-  showError: jest.fn(),
-  showInfo: jest.fn(),
-};
-
-// Mock auth context
+// Auth value for tests
 const mockAuth = {
   user: {
     id: 1,
@@ -36,18 +19,11 @@ const mockAuth = {
   },
 };
 
-// Wrapper component
-const renderWithProviders = (component, authContext = mockAuth) => {
-  const queryClient = createTestQueryClient();
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider value={authContext}>
-        <NotificationContext.Provider value={mockNotification}>
-          {component}
-        </NotificationContext.Provider>
-      </AuthContext.Provider>
-    </QueryClientProvider>
-  );
+// Helper to render with auth
+const renderComponent = (authOverrides = {}) => {
+  return renderWithProviders(<MyTasks />, {
+    authValue: { ...mockAuth, ...authOverrides },
+  });
 };
 
 describe('MyTasks Component', () => {
@@ -99,12 +75,11 @@ describe('MyTasks Component', () => {
 
   // Test 1: Renders component with tasks list
   test('should render My Tasks page with tasks list', async () => {
-    renderWithProviders(<MyTasks />);
-    
-    expect(screen.getByText('My Tasks')).toBeInTheDocument();
-    expect(screen.getByText(/view and update tasks assigned to you/i)).toBeInTheDocument();
+    renderComponent();
     
     await waitFor(() => {
+      expect(screen.getByText('My Tasks')).toBeInTheDocument();
+      expect(screen.getByText(/view and update tasks assigned to you/i)).toBeInTheDocument();
       expect(screen.getByText('Design Database Schema')).toBeInTheDocument();
       expect(screen.getByText('Write Unit Tests')).toBeInTheDocument();
       expect(screen.getByText('Code Review')).toBeInTheDocument();
@@ -113,13 +88,14 @@ describe('MyTasks Component', () => {
 
   // Test 2: Displays summary statistics
   test('should display task summary statistics', async () => {
-    renderWithProviders(<MyTasks />);
+    renderComponent();
     
     await waitFor(() => {
       expect(screen.getByText('Total')).toBeInTheDocument();
-      expect(screen.getByText('In Progress')).toBeInTheDocument();
-      expect(screen.getByText('Not Started')).toBeInTheDocument();
-      expect(screen.getByText('Completed')).toBeInTheDocument();
+      // Status labels appear in both summary cards and task rows
+      expect(screen.getAllByText('In Progress').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Not Started').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Completed').length).toBeGreaterThanOrEqual(1);
     });
     
     // Check counts
@@ -133,7 +109,7 @@ describe('MyTasks Component', () => {
   test('should show loading state while fetching data', () => {
     taskService.getAll.mockReturnValue(new Promise(() => {})); // Never resolves
     
-    renderWithProviders(<MyTasks />);
+    renderComponent();
     
     expect(screen.getByText(/loading your tasks/i)).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -141,14 +117,15 @@ describe('MyTasks Component', () => {
 
   // Test 4: Filters tasks by status
   test('should filter tasks by status', async () => {
-    renderWithProviders(<MyTasks />);
+    renderComponent();
     
     await waitFor(() => {
       expect(screen.getByText('Design Database Schema')).toBeInTheDocument();
     });
     
-    // Open status filter
-    const statusFilter = screen.getByLabelText(/^status$/i);
+    // Find the status filter select (shows "All Statuses" by default)
+    const allComboboxes = screen.getAllByRole('combobox');
+    const statusFilter = allComboboxes.find(el => el.textContent === 'All Statuses');
     fireEvent.mouseDown(statusFilter);
     
     await waitFor(() => {
@@ -159,20 +136,20 @@ describe('MyTasks Component', () => {
     // After filtering, only completed tasks should be visible
     await waitFor(() => {
       expect(screen.getByText('Code Review')).toBeInTheDocument();
-      // Other tasks should be filtered out (not visible in filtered view)
     });
   });
 
   // Test 5: Filters tasks by priority
   test('should filter tasks by priority', async () => {
-    renderWithProviders(<MyTasks />);
+    renderComponent();
     
     await waitFor(() => {
       expect(screen.getByText('Design Database Schema')).toBeInTheDocument();
     });
     
-    // Open priority filter
-    const priorityFilter = screen.getByLabelText(/priority/i);
+    // Find the priority filter select (shows "All Priorities" by default)
+    const allComboboxes = screen.getAllByRole('combobox');
+    const priorityFilter = allComboboxes.find(el => el.textContent === 'All Priorities');
     fireEvent.mouseDown(priorityFilter);
     
     await waitFor(() => {
@@ -188,13 +165,13 @@ describe('MyTasks Component', () => {
 
   // Test 6: Searches tasks by name
   test('should search tasks by name or description', async () => {
-    renderWithProviders(<MyTasks />);
+    renderComponent();
     
     await waitFor(() => {
       expect(screen.getByText('Design Database Schema')).toBeInTheDocument();
     });
     
-    const searchInput = screen.getByPlaceholderText(/search tasks/i);
+    const searchInput = screen.getByLabelText(/search tasks/i);
     fireEvent.change(searchInput, { target: { value: 'Database' } });
     
     await waitFor(() => {
@@ -204,16 +181,18 @@ describe('MyTasks Component', () => {
 
   // Test 7: Updates task status
   test('should update task status when changed', async () => {
-    renderWithProviders(<MyTasks />);
+    renderComponent();
     
     await waitFor(() => {
       expect(screen.getByText('Write Unit Tests')).toBeInTheDocument();
     });
     
-    // Find status dropdown for "Write Unit Tests" task (status: Not Started)
+    // The comboboxes include filter selects (Status, Priority) + per-row status selects.
+    // Filter selects come first, then task row selects in order.
     const statusSelects = screen.getAllByRole('combobox');
-    // The second task's status select
-    fireEvent.mouseDown(statusSelects[1]);
+    // Find the select that currently shows 'Not Started' (task 2)
+    const notStartedSelect = statusSelects.find(el => el.textContent === 'Not Started');
+    fireEvent.mouseDown(notStartedSelect);
     
     await waitFor(() => {
       const inProgressOption = screen.getByRole('option', { name: 'In Progress' });
@@ -226,15 +205,15 @@ describe('MyTasks Component', () => {
     });
   });
 
-  // Test 8: Displays status and priority chips with colors
+  // Test 8: Displays status and priority values with colors
   test('should display status and priority chips with appropriate colors', async () => {
-    renderWithProviders(<MyTasks />);
+    renderComponent();
     
     await waitFor(() => {
-      // Status chips
-      expect(screen.getByText('In Progress')).toBeInTheDocument();
-      expect(screen.getByText('Not Started')).toBeInTheDocument();
-      expect(screen.getByText('Completed')).toBeInTheDocument();
+      // Status values appear in summary cards and task row selects
+      expect(screen.getAllByText('In Progress').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Not Started').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Completed').length).toBeGreaterThanOrEqual(1);
       
       // Priority chips
       expect(screen.getByText('High')).toBeInTheDocument();

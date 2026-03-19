@@ -314,10 +314,11 @@ const LeaveBalanceModern = () => {
   };
 
   const filteredBalances = balances.filter(balance => {
+    if (!balance.employee) return false;
     if (!searchQuery) return true;
     const searchLower = searchQuery.toLowerCase();
-    const employeeName = `${balance.employee.firstName} ${balance.employee.lastName}`.toLowerCase();
-    const employeeId = balance.employee.employeeId.toLowerCase();
+    const employeeName = `${balance.employee.firstName || ''} ${balance.employee.lastName || ''}`.toLowerCase();
+    const employeeId = (balance.employee.employeeId || '').toLowerCase();
     return employeeName.includes(searchLower) || employeeId.includes(searchLower);
   });
 
@@ -347,6 +348,7 @@ const LeaveBalanceModern = () => {
                     startIcon={<GroupAddIcon />}
                     onClick={() => setShowBulkInit(true)}
                     disabled={loading}
+                    data-testid="leave-balance-init-btn"
                   >
                     Bulk Initialize
                   </Button>
@@ -584,10 +586,10 @@ const LeaveBalanceModern = () => {
                         <TableCell>
                           <Box>
                             <Typography variant="body2" fontWeight="bold">
-                              {balance.employee.firstName} {balance.employee.lastName}
+                              {balance.employee?.firstName} {balance.employee?.lastName}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {balance.employee.employeeId}
+                              {balance.employee?.employeeId}
                             </Typography>
                           </Box>
                         </TableCell>
@@ -717,6 +719,7 @@ const LeaveBalanceModern = () => {
                                   size="small"
                                   onClick={() => startEdit(balance)}
                                   disabled={loading}
+                                  data-testid="leave-balance-edit-btn"
                                 >
                                   <EditIcon />
                                 </IconButton>
@@ -727,6 +730,7 @@ const LeaveBalanceModern = () => {
                                   size="small"
                                   onClick={() => handleDelete(balance.id)}
                                   disabled={loading}
+                                  data-testid="leave-balance-delete-btn"
                                 >
                                   <DeleteIcon />
                                 </IconButton>
@@ -822,6 +826,7 @@ const LeaveBalanceModern = () => {
             onClick={handleBulkInit}
             disabled={loading || Object.keys(bulkInitData).length === 0}
             startIcon={loading ? <CircularProgress size={20} /> : <GroupAddIcon />}
+            data-testid="leave-balance-bulk-submit-btn"
           >
             {loading ? 'Initializing...' : 'Initialize Balances'}
           </Button>
@@ -958,6 +963,7 @@ const LeaveBalanceModern = () => {
             onClick={handleCreate}
             disabled={loading || !createData.employeeId || !createData.leaveTypeId}
             startIcon={loading ? <CircularProgress size={20} /> : <AddIcon />}
+            data-testid="leave-balance-create-submit-btn"
           >
             {loading ? 'Creating...' : 'Create Balance'}
           </Button>

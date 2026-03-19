@@ -101,6 +101,8 @@ const ConfirmDialog = ({
           variant="outlined"
           color="inherit"
           sx={{ textTransform: 'none', minWidth: 80 }}
+          autoFocus
+          data-testid="confirm-dialog-cancel-btn"
         >
           {cancelText}
         </Button>
@@ -111,7 +113,7 @@ const ConfirmDialog = ({
           color={config.color}
           startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
           sx={{ textTransform: 'none', minWidth: 80 }}
-          autoFocus
+          data-testid="confirm-dialog-confirm-btn"
         >
           {loading ? 'Processing...' : buttonText}
         </Button>

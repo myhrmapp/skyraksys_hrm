@@ -373,7 +373,7 @@ const ModernPayrollManagement = () => {
         responseType: 'blob'
       });
       
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `payslip-${payslipNumber}.pdf`);
@@ -400,7 +400,7 @@ const ModernPayrollManagement = () => {
         responseType: 'blob'
       });
       
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `payslips-${filters.month}-${filters.year}.xlsx`);
@@ -686,6 +686,7 @@ const ModernPayrollManagement = () => {
         <Typography variant="h6" gutterBottom>Quick Actions</Typography>
         <Stack direction="row" spacing={2}>
           <Button
+            data-testid="payroll-generate-btn"
             variant="contained"
             startIcon={<GenerateIcon />}
             onClick={() => setGenerateDialog(true)}
@@ -693,6 +694,7 @@ const ModernPayrollManagement = () => {
             Generate Payslips
           </Button>
           <Button
+            data-testid="payroll-export-btn"
             variant="outlined"
             startIcon={<ExportIcon />}
             onClick={handleExportExcel}
@@ -700,6 +702,7 @@ const ModernPayrollManagement = () => {
             Export Excel
           </Button>
           <Button
+            data-testid="payroll-refresh-btn"
             variant="outlined"
             startIcon={<RefreshIcon />}
             onClick={refetchPayslips}
@@ -828,6 +831,7 @@ const ModernPayrollManagement = () => {
           
           <Grid item xs={12}>
             <Button
+              data-testid="payroll-validate-generate-btn"
               variant="contained"
               size="large"
               startIcon={<GenerateIcon />}
@@ -856,6 +860,7 @@ const ModernPayrollManagement = () => {
       )}
       <Box sx={{ p: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
         <TextField
+          data-testid="payroll-search"
           placeholder="Search employee name or ID..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -941,6 +946,7 @@ const ModernPayrollManagement = () => {
               {selectedPayslipIds.length} payslip(s) selected
             </Typography>
             <Button
+              data-testid="payroll-bulk-finalize-btn"
               variant="contained"
               size="small"
               startIcon={<LockIcon />}
@@ -950,6 +956,7 @@ const ModernPayrollManagement = () => {
               Bulk Finalize
             </Button>
             <Button
+              data-testid="payroll-bulk-paid-btn"
               variant="contained"
               color="success"
               size="small"
@@ -960,6 +967,7 @@ const ModernPayrollManagement = () => {
               Bulk Mark Paid
             </Button>
             <Button
+              data-testid="payroll-bulk-delete-btn"
               variant="outlined"
               color="error"
               size="small"
@@ -1375,7 +1383,7 @@ const ModernPayrollManagement = () => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4 }} data-testid="payroll-management-page">
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" gutterBottom>
           Payroll Management System
@@ -1386,7 +1394,7 @@ const ModernPayrollManagement = () => {
       </Box>
       
       <Paper sx={{ mb: 3 }}>
-        <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+        <Tabs data-testid="payroll-tabs" value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
           <Tab label="Overview" icon={<AssessmentIcon />} iconPosition="start" />
           <Tab label="Generate" icon={<GenerateIcon />} iconPosition="start" />
           <Tab label="Process Payments" icon={<PaymentIcon />} iconPosition="start" />

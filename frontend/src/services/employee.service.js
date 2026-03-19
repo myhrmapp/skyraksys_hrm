@@ -73,7 +73,7 @@ class EmployeeService {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Upload photo for existing employee

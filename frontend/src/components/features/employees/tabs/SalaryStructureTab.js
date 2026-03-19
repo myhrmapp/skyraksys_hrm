@@ -12,6 +12,13 @@ import {
   FormHelperText
 } from '@mui/material';
 
+// Sanitize salary input: allow only digits and at most one decimal point
+const sanitizeSalaryInput = (value) => {
+  const stripped = value.replace(/[^0-9.]/g, '');
+  const parts = stripped.split('.');
+  return parts.length <= 2 ? stripped : parts[0] + '.' + parts.slice(1).join('');
+};
+
 const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, onBlur }) => (
   <Grid container spacing={3}>
     <Grid item xs={12}>
@@ -30,7 +37,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.basicSalary || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.basicSalary', value);
         }}
         onBlur={() => onBlur && onBlur('salary.basicSalary')}
@@ -118,7 +125,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.allowances?.hra || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.allowances.hra', value);
         }}
         onBlur={() => onBlur && onBlur('salary.allowances.hra')}
@@ -139,7 +146,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.allowances?.transport || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.allowances.transport', value);
         }}
         onBlur={() => onBlur && onBlur('salary.allowances.transport')}
@@ -159,7 +166,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.allowances?.medical || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.allowances.medical', value);
         }}
         error={!!errors['salary.allowances.medical']}
@@ -178,7 +185,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.allowances?.food || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.allowances.food', value);
         }}
         error={!!errors['salary.allowances.food']}
@@ -197,7 +204,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.allowances?.communication || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.allowances.communication', value);
         }}
         error={!!errors['salary.allowances.communication']}
@@ -216,7 +223,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.allowances?.special || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.allowances.special', value);
         }}
         error={!!errors['salary.allowances.special']}
@@ -235,7 +242,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.allowances?.other || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.allowances.other', value);
         }}
         error={!!errors['salary.allowances.other']}
@@ -262,7 +269,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.deductions?.pf || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.deductions.pf', value);
         }}
         error={!!errors['salary.deductions.pf']}
@@ -281,7 +288,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.deductions?.professionalTax || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.deductions.professionalTax', value);
         }}
         error={!!errors['salary.deductions.professionalTax']}
@@ -300,7 +307,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.deductions?.incomeTax || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.deductions.incomeTax', value);
         }}
         error={!!errors['salary.deductions.incomeTax']}
@@ -319,7 +326,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.deductions?.esi || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.deductions.esi', value);
         }}
         error={!!errors['salary.deductions.esi']}
@@ -338,7 +345,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.deductions?.other || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.deductions.other', value);
         }}
         error={!!errors['salary.deductions.other']}
@@ -365,7 +372,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.benefits?.bonus || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.benefits.bonus', value);
         }}
         error={!!errors['salary.benefits.bonus']}
@@ -384,7 +391,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.benefits?.incentive || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.benefits.incentive', value);
         }}
         error={!!errors['salary.benefits.incentive']}
@@ -403,7 +410,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         type="text"
         value={formData.salary?.benefits?.overtime || ''}
         onChange={(e) => {
-          const value = e.target.value.replace(/[^0-9.]/g, '');
+          const value = sanitizeSalaryInput(e.target.value);
           onChange('salary.benefits.overtime', value);
         }}
         error={!!errors['salary.benefits.overtime']}

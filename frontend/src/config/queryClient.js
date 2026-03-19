@@ -13,7 +13,7 @@ const handleQueryError = (error) => {
 
 const handleMutationError = (error) => {
   console.error('Mutation error:', error);
-  // TODO: Add error logging service
+  // TODO: Add error logging service (Sentry, LogRocket, etc.)
 };
 
 export const queryClient = new QueryClient({

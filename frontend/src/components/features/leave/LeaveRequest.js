@@ -57,7 +57,12 @@ const LeaveRequest = () => {
   const [errors, setErrors] = useState({});
 
   const halfDayDisabled = useMemo(
-    () => !form.startDate || !form.endDate || form.startDate !== form.endDate,
+    () => {
+      if (!form.startDate || !form.endDate) return true;
+      const start = form.startDate instanceof Date ? form.startDate.toDateString() : String(form.startDate);
+      const end = form.endDate instanceof Date ? form.endDate.toDateString() : String(form.endDate);
+      return start !== end;
+    },
     [form.startDate, form.endDate]
   );
 
@@ -72,7 +77,9 @@ const LeaveRequest = () => {
       const updated = { ...prev, [field]: value };
 
       // If dates are now a multi-day range, ensure half-day is cleared
-      if (updated.startDate && updated.endDate && updated.startDate !== updated.endDate) {
+      if (updated.startDate && updated.endDate &&
+          (updated.startDate instanceof Date ? updated.startDate.toDateString() : String(updated.startDate)) !==
+          (updated.endDate instanceof Date ? updated.endDate.toDateString() : String(updated.endDate))) {
         updated.isHalfDay = false;
       }
 
@@ -185,6 +192,7 @@ const LeaveRequest = () => {
                       label="Leave Type"
                       value={form.leaveTypeId}
                       onChange={handleChange('leaveTypeId')}
+                      inputProps={{ 'data-testid': 'leave-type-select' }}
                     >
                       {leaveTypes.map((type) => (
                         <MenuItem key={type.id} value={type.id}>
@@ -210,7 +218,7 @@ const LeaveRequest = () => {
                     label="Start Date"
                     value={form.startDate}
                     onChange={handleDateChange('startDate')}
-                    slotProps={{ textField: { fullWidth: true, error: !!errors.startDate, helperText: errors.startDate } }}
+                    slotProps={{ textField: { fullWidth: true, error: !!errors.startDate, helperText: errors.startDate, inputProps: { 'data-testid': 'leave-start-date' } } }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={3}>
@@ -218,7 +226,7 @@ const LeaveRequest = () => {
                     label="End Date"
                     value={form.endDate}
                     onChange={handleDateChange('endDate')}
-                    slotProps={{ textField: { fullWidth: true, error: !!errors.endDate, helperText: errors.endDate } }}
+                    slotProps={{ textField: { fullWidth: true, error: !!errors.endDate, helperText: errors.endDate, inputProps: { 'data-testid': 'leave-end-date' } } }}
                   />
                 </Grid>
 
@@ -281,15 +289,16 @@ const LeaveRequest = () => {
                     onChange={handleChange('reason')}
                     error={!!errors.reason}
                     helperText={errors.reason}
+                    inputProps={{ 'data-testid': 'leave-reason-input' }}
                   />
                 </Grid>
 
                 <Grid item xs={12}>
                   <Box display="flex" justifyContent="flex-end" gap={2}>
-                    <Button variant="outlined" onClick={() => navigate(-1)}>
+                    <Button variant="outlined" onClick={() => navigate(-1)} data-testid="leave-cancel-btn">
                       Cancel
                     </Button>
-                    <Button type="submit" variant="contained" color="primary">
+                    <Button type="submit" variant="contained" color="primary" data-testid="leave-submit-btn">
                       Submit Request
                     </Button>
                   </Box>

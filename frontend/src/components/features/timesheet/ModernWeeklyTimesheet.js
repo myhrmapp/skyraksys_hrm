@@ -969,9 +969,8 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                 disabled={saving || submitting}
                 sx={{ 
                   bgcolor: 'primary.main',
-                  '&:hover': { bgcolor: 'primary.dark' },
                   boxShadow: 'none',
-                  '&:hover': { boxShadow: 1 }
+                  '&:hover': { bgcolor: 'primary.dark', boxShadow: 1 }
                 }}
                 data-testid="timesheet-submit"
               >

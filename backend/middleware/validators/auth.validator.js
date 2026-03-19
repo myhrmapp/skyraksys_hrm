@@ -77,8 +77,8 @@ const registerSchema = Joi.object({
     }),
 
   role: Joi.string()
-    .valid('Admin', 'HR', 'Manager', 'Employee')
-    .default('Employee')
+    .valid('admin', 'hr', 'manager', 'employee')
+    .default('employee')
 });
 
 /**
@@ -344,6 +344,33 @@ const employeeIdParamSchema = Joi.object({
     })
 });
 
+/**
+ * Schema for creating user account for existing employee
+ */
+const createEmployeeUserSchema = Joi.object({
+  email: Joi.string()
+    .required()
+    .email()
+    .lowercase()
+    .messages({
+      'string.email': 'Please provide a valid email address',
+      'any.required': 'Email is required'
+    }),
+
+  password: Joi.string()
+    .required()
+    .min(8)
+    .max(128)
+    .messages({
+      'string.min': 'Password must be at least 8 characters',
+      'any.required': 'Password is required'
+    }),
+
+  role: Joi.string()
+    .valid('admin', 'hr', 'manager', 'employee')
+    .default('employee')
+});
+
 module.exports = {
   loginSchema,
   registerSchema,
@@ -358,6 +385,7 @@ module.exports = {
   adminUpdateAccountSchema,
   adminLockSchema,
   refreshTokenSchema,
+  createEmployeeUserSchema,
   userIdParamSchema,
   employeeIdParamSchema
 };

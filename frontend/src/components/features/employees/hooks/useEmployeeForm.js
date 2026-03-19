@@ -189,14 +189,14 @@ export const useEmployeeForm = () => {
         })
       ]);
       
-      setDepartments(deptResponse.data?.data || []);
-      setManagers(mgrsResponse.data?.data || []);
+      setDepartments(Array.isArray(deptResponse) ? deptResponse : deptResponse?.data?.data || deptResponse?.data || []);
+      setManagers(Array.isArray(mgrsResponse) ? mgrsResponse : mgrsResponse?.data?.data || mgrsResponse?.data || []);
       
       const positionsResponse = await employeeService.getPositions().catch(err => {
         console.error('Error loading positions:', err);
         return { data: { data: [] } };
       });
-      setPositions(positionsResponse.data?.data || []);
+      setPositions(Array.isArray(positionsResponse) ? positionsResponse : positionsResponse?.data?.data || positionsResponse?.data || []);
       
     } catch (error) {
       console.error('Error loading reference data:', error);
@@ -316,7 +316,6 @@ export const useEmployeeForm = () => {
           };
           localStorage.setItem('employeeFormDraft', JSON.stringify(draftData));
           setLastSaved(new Date());
-          console.log('💾 Auto-saved to localStorage');
         } catch (error) {
           console.error('Auto-save failed:', error);
         } finally {
@@ -339,13 +338,14 @@ export const useEmployeeForm = () => {
       
       if (fieldName.includes('.')) {
         const fieldPath = fieldName.split('.');
-        let current = newFormData;
         
+        // Deep clone each level of the nested path to avoid mutating previous state
+        let current = newFormData;
         for (let i = 0; i < fieldPath.length - 1; i++) {
           const key = fieldPath[i];
-          if (!current[key] || typeof current[key] !== 'object') {
-            current[key] = {};
-          }
+          current[key] = current[key] && typeof current[key] === 'object'
+            ? { ...current[key] }
+            : {};
           current = current[key];
         }
         

@@ -81,6 +81,7 @@ const PersonalInformationTab = ({
             id="firstName"
             name="firstName"
             label="First Name (Required)"
+            data-testid="field-firstName"
             value={formData.firstName}
             onChange={(e) => onChange('firstName', e.target.value)}
             onBlur={() => onBlur && onBlur('firstName')}
@@ -100,6 +101,7 @@ const PersonalInformationTab = ({
             id="lastName"
             name="lastName"
             label="Last Name (Required)"
+            data-testid="field-lastName"
             value={formData.lastName}
             onChange={(e) => onChange('lastName', e.target.value)}
             onBlur={() => onBlur && onBlur('lastName')}
@@ -119,6 +121,7 @@ const PersonalInformationTab = ({
             id="employeeId"
             name="employeeId"
             label="Employee ID (Required)"
+            data-testid="field-employeeId"
             value={formData.employeeId}
             onChange={(e) => onChange('employeeId', e.target.value)}
             onBlur={() => onBlur && onBlur('employeeId')}
@@ -140,6 +143,7 @@ const PersonalInformationTab = ({
             name="email"
             label="Email Address (Required)"
             type="email"
+            data-testid="field-email"
             value={formData.email}
             onChange={(e) => onChange('email', e.target.value)}
             onBlur={() => onBlur && onBlur('email')}
@@ -168,6 +172,7 @@ const PersonalInformationTab = ({
             id="phone"
             name="phone"
             label="Phone Number"
+            data-testid="field-phone"
             value={formData.phone}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, '').slice(0, 10);
@@ -190,6 +195,7 @@ const PersonalInformationTab = ({
             id="dateOfBirth"
             label="Date of Birth"
             type="date"
+            data-testid="field-dateOfBirth"
             value={formData.dateOfBirth}
             onChange={(e) => onChange('dateOfBirth', e.target.value)}
             InputLabelProps={{ shrink: true }}
@@ -208,6 +214,7 @@ const PersonalInformationTab = ({
               value={formData.gender}
               onChange={(e) => onChange('gender', e.target.value)}
               label="Gender"
+              inputProps={{ 'data-testid': 'field-gender' }}
               sx={{ borderRadius: 2 }}
             >
               <MenuItem value="Male">Male</MenuItem>
@@ -224,6 +231,7 @@ const PersonalInformationTab = ({
               value={formData.maritalStatus}
               onChange={(e) => onChange('maritalStatus', e.target.value)}
               label="Marital Status"
+              inputProps={{ 'data-testid': 'field-maritalStatus' }}
               sx={{ borderRadius: 2 }}
             >
               <MenuItem value="Single">Single</MenuItem>
@@ -238,6 +246,7 @@ const PersonalInformationTab = ({
             fullWidth
             id="nationality"
             label="Nationality"
+            data-testid="field-nationality"
             value={formData.nationality}
             onChange={(e) => onChange('nationality', e.target.value)}
             sx={{
@@ -261,6 +270,7 @@ const PersonalInformationTab = ({
             fullWidth
             id="address"
             label="Address"
+            data-testid="field-address"
             value={formData.address}
             onChange={(e) => onChange('address', e.target.value)}
             multiline
@@ -277,6 +287,7 @@ const PersonalInformationTab = ({
             fullWidth
             id="city"
             label="City"
+            data-testid="field-city"
             value={formData.city}
             onChange={(e) => onChange('city', e.target.value)}
             sx={{
@@ -291,6 +302,7 @@ const PersonalInformationTab = ({
             fullWidth
             id="state"
             label="State"
+            data-testid="field-state"
             value={formData.state}
             onChange={(e) => onChange('state', e.target.value)}
             sx={{
@@ -305,6 +317,7 @@ const PersonalInformationTab = ({
             fullWidth
             id="pinCode"
             label="PIN Code"
+            data-testid="field-pinCode"
             value={formData.pinCode}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, '').slice(0, 6);

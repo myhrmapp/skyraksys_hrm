@@ -93,6 +93,8 @@ const CreateUserAccountDialog = ({
             value={data.email}
             onChange={(e) => onChange('email', e.target.value)}
             required
+            data-testid="create-user-email"
+            InputLabelProps={{ shrink: true }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -110,6 +112,7 @@ const CreateUserAccountDialog = ({
               value={data.role}
               onChange={(e) => onChange('role', e.target.value)}
               label="User Role"
+              inputProps={{ 'data-testid': 'create-user-role' }}
               startAdornment={
                 <InputAdornment position="start">
                   <BusinessIcon color="action" />
@@ -157,6 +160,7 @@ const CreateUserAccountDialog = ({
             value={data.password}
             onChange={(e) => onChange('password', e.target.value)}
             required
+            data-testid="create-user-password"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -232,6 +236,7 @@ const CreateUserAccountDialog = ({
           onClick={onClose}
           variant="outlined"
           disabled={loading}
+          data-testid="create-user-cancel-btn"
           sx={{ textTransform: 'none', fontWeight: 500 }}
         >
           Cancel
@@ -242,6 +247,7 @@ const CreateUserAccountDialog = ({
           color="success"
           disabled={loading}
           startIcon={loading ? null : <PersonAddIcon />}
+          data-testid="create-user-submit-btn"
           sx={{ textTransform: 'none', fontWeight: 600 }}
         >
           {loading ? 'Creating Account...' : 'Create User Account'}

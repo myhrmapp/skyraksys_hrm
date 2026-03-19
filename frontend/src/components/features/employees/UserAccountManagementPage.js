@@ -62,16 +62,25 @@ const UserAccountManagementPage = () => {
     const digits = '0123456789';
     const special = '@#$!%&';
     const all = upper + lower + digits + special;
+    const randomValues = new Uint32Array(length);
+    crypto.getRandomValues(randomValues);
     let password = [
-      upper[Math.floor(Math.random() * upper.length)],
-      lower[Math.floor(Math.random() * lower.length)],
-      digits[Math.floor(Math.random() * digits.length)],
-      special[Math.floor(Math.random() * special.length)]
+      upper[randomValues[0] % upper.length],
+      lower[randomValues[1] % lower.length],
+      digits[randomValues[2] % digits.length],
+      special[randomValues[3] % special.length]
     ];
     for (let i = 4; i < length; i++) {
-      password.push(all[Math.floor(Math.random() * all.length)]);
+      password.push(all[randomValues[i] % all.length]);
     }
-    return password.sort(() => Math.random() - 0.5).join('');
+    // Shuffle using Fisher-Yates with crypto random
+    const shuffleValues = new Uint32Array(password.length);
+    crypto.getRandomValues(shuffleValues);
+    for (let i = password.length - 1; i > 0; i--) {
+      const j = shuffleValues[i] % (i + 1);
+      [password[i], password[j]] = [password[j], password[i]];
+    }
+    return password.join('');
   };
   
   const [loading, setLoading] = useState(true);
@@ -192,7 +201,7 @@ const UserAccountManagementPage = () => {
           
         case 'sendWelcome':
           // Send welcome email with credentials
-          const welcomePassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8).toUpperCase();
+          const welcomePassword = generateSecurePassword(14);
           await authService.resetUserPassword(userId, welcomePassword);
           const emailResult = await authService.sendWelcomeEmail(userId, welcomePassword);
           if (emailResult.success) {
@@ -863,7 +872,7 @@ const UserAccountManagementPage = () => {
                 
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6} md={3}>
-                    <Tooltip title="Reset password to default (password123)">
+                    <Tooltip title="Reset password and require change on next login">
                       <Button
                         fullWidth
                         variant="outlined"

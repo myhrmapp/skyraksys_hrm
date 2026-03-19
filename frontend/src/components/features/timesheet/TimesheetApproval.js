@@ -140,10 +140,10 @@ const TimesheetApproval = ({ embedded } = {}) => {
   }, [timesheets, statusFilter, searchQuery, projectFilter, dateRange,orderBy, order]);
 
   const calculateSummary = () => {
-    const submitted = timesheets.filter(ts => ts.status === 'Submitted');
-    const approved = timesheets.filter(ts => ts.status === 'Approved');
-    const rejected = timesheets.filter(ts => ts.status === 'Rejected');
-    const draft = timesheets.filter(ts => ts.status === 'Draft');
+    const submitted = timesheets.filter(ts => ts.status?.toLowerCase() === 'submitted');
+    const approved = timesheets.filter(ts => ts.status?.toLowerCase() === 'approved');
+    const rejected = timesheets.filter(ts => ts.status?.toLowerCase() === 'rejected');
+    const draft = timesheets.filter(ts => ts.status?.toLowerCase() === 'draft');
     
     setSummary({
       totalPending: submitted.length,

@@ -53,7 +53,7 @@ const ManagerDashboard = () => {
     setLoading('manager-dashboard', true);
     try {
       // Get team members (employees where managerId = current user's employeeId)
-      const teamResponse = await employeeService.getTeamMembers(user.id);
+      const teamResponse = await employeeService.getTeamMembers(user.employee?.id || user.id);
       const teamMembers = teamResponse.data || [];
 
       // Get pending leave requests for team members
@@ -136,7 +136,7 @@ const ManagerDashboard = () => {
     <Box sx={{ p: 3 }}>
       {/* Header */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" gutterBottom>
+        <Typography data-testid="manager-dashboard-heading" variant="h4" gutterBottom>
           Manager Dashboard
         </Typography>
         <Typography variant="body1" color="text.secondary">
@@ -177,6 +177,7 @@ const ManagerDashboard = () => {
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <Button
+              data-testid="manager-btn-approve-leaves"
               variant="contained"
               startIcon={<ApproveIcon />}
               onClick={() => setActiveTab(1)}
@@ -187,6 +188,7 @@ const ManagerDashboard = () => {
               </Badge>
             </Button>
             <Button
+              data-testid="manager-btn-approve-timesheets"
               variant="contained"
               startIcon={<ApproveIcon />}
               onClick={() => setActiveTab(2)}
@@ -197,6 +199,7 @@ const ManagerDashboard = () => {
               </Badge>
             </Button>
             <Button
+              data-testid="manager-btn-view-team"
               variant="outlined"
               startIcon={<PeopleIcon />}
               onClick={() => setActiveTab(0)}
@@ -211,12 +214,14 @@ const ManagerDashboard = () => {
       <Card>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs 
+            data-testid="manager-tabs"
             value={activeTab} 
             onChange={handleTabChange} 
             variant={isMobile ? "scrollable" : "standard"}
             scrollButtons={isMobile ? "auto" : false}
           >
             <Tab 
+              data-testid="manager-tab-team-members"
               label={
                 <Badge badgeContent={dashboardData.teamMembers.length} color="primary">
                   Team Members
@@ -224,6 +229,7 @@ const ManagerDashboard = () => {
               } 
             />
             <Tab 
+              data-testid="manager-tab-leave-approvals"
               label={
                 <Badge badgeContent={dashboardData.pendingLeaves.length} color="error">
                   Leave Approvals
@@ -231,6 +237,7 @@ const ManagerDashboard = () => {
               } 
             />
             <Tab 
+              data-testid="manager-tab-timesheet-approvals"
               label={
                 <Badge badgeContent={dashboardData.pendingTimesheets.length} color="error">
                   Timesheet Approvals

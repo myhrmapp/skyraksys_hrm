@@ -83,6 +83,7 @@ const DeleteEmployeeDialog = ({
         <Button
           onClick={onClose}
           variant="outlined"
+          data-testid="delete-employee-cancel-btn"
           sx={{
             textTransform: 'none',
             fontWeight: 500,
@@ -96,6 +97,7 @@ const DeleteEmployeeDialog = ({
           variant="outlined"
           color="error"
           disabled={loading}
+          data-testid="delete-employee-confirm-btn"
           sx={{
             textTransform: 'none',
             fontWeight: 600,

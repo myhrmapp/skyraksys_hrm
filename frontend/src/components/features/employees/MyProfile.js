@@ -6,7 +6,7 @@ import EmployeeProfileModern from './EmployeeProfileModern';
  * Reuses the modern profile component in "self" mode.
  */
 const MyProfile = () => {
-  return <EmployeeProfileModern mode="self" />;
+  return <div data-testid="my-profile-page"><EmployeeProfileModern mode="self" /></div>;
 };
 
 export default MyProfile;

@@ -212,24 +212,7 @@ class PayrollService extends BaseService {
     };
 
     addAllowance('House Rent Allowance', salaryStructure.hra);
-    addAllowance('Transport Allowance', salaryStructure.transportAllowance);
-    addAllowance('Medical Allowance', salaryStructure.medicalAllowance);
-    addAllowance('Food Allowance', salaryStructure.foodAllowance);
-    addAllowance('Communication Allowance', salaryStructure.communicationAllowance);
-    addAllowance('Special Allowance', salaryStructure.specialAllowance);
-    
-    // Process dynamic JSON allowances
-    if (salaryStructure.allowances && typeof salaryStructure.allowances === 'object') {
-      const standardKeys = ['hra', 'transport', 'medical', 'food', 'communication', 'special'];
-      const allowanceObj = Array.isArray(salaryStructure.allowances) ? {} : salaryStructure.allowances;
-      
-      Object.entries(allowanceObj).forEach(([key, value]) => {
-        if (!standardKeys.includes(key)) {
-           const label = key === 'other' ? 'Other Allowances' : key.split(/(?=[A-Z])|_/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-           addAllowance(label, value);
-        }
-      });
-    }
+    addAllowance('Other Allowances', salaryStructure.allowances);
 
     // Process deductions
     const deductions = [];

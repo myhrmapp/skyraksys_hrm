@@ -3,7 +3,7 @@
  */
 const Joi = require('joi');
 
-const ratingField = Joi.number().integer().min(1).max(5);
+const ratingField = Joi.number().min(1).max(5);
 
 const employeeReviewSchema = {
   create: Joi.object({
@@ -46,7 +46,7 @@ const employeeReviewSchema = {
   }).min(1),
 
   updateStatus: Joi.object({
-    status: Joi.string().valid('draft', 'submitted', 'pending_approval', 'completed', 'rejected').required(),
+    status: Joi.string().valid('draft', 'pending_employee_input', 'pending_approval', 'completed', 'archived').required(),
     hrApproved: Joi.boolean().optional(),
     reason: Joi.string().max(500).optional().allow('', null)
   })

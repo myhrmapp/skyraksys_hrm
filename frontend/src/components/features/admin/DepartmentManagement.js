@@ -236,7 +236,7 @@ const DepartmentManagement = ({ embedded } = {}) => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: embedded ? 0 : 4 }}>
+    <Container maxWidth="lg" sx={{ py: embedded ? 0 : 4 }} data-testid="department-management-page">
       {/* Header */}
       {!embedded && (
       <Box sx={{ mb: 4 }}>
@@ -305,11 +305,13 @@ const DepartmentManagement = ({ embedded } = {}) => {
               ),
             }}
             sx={{ flexGrow: 1, minWidth: 300 }}
+            data-testid="dept-search"
           />
           <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => handleOpenDialog()}
+            data-testid="dept-add-btn"
           >
             Add Department
           </Button>
@@ -380,6 +382,7 @@ const DepartmentManagement = ({ embedded } = {}) => {
                       size="small"
                       onClick={() => handleOpenDialog(department)}
                       color="primary"
+                      data-testid="dept-edit-btn"
                     >
                       <EditIcon />
                     </IconButton>
@@ -387,6 +390,7 @@ const DepartmentManagement = ({ embedded } = {}) => {
                       size="small"
                       onClick={() => handleDelete(department)}
                       color="error"
+                      data-testid="dept-delete-btn"
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -495,7 +499,7 @@ const DepartmentManagement = ({ embedded } = {}) => {
           <Button onClick={handleCloseDialog} startIcon={<CancelIcon />}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} variant="contained" startIcon={<SaveIcon />}>
+          <Button onClick={handleSubmit} variant="contained" startIcon={<SaveIcon />} data-testid="dept-save-btn">
             {editingDepartment ? 'Update' : 'Create'}
           </Button>
         </DialogActions>

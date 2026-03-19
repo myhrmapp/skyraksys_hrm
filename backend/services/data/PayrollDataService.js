@@ -72,10 +72,9 @@ class PayrollDataService {
               model: db.SalaryStructure,
               as: 'salaryStructure',
               attributes: [
-                'id', 'basicSalary',
-                'hra', 'transportAllowance', 'medicalAllowance', 
-                'foodAllowance', 'communicationAllowance', 'specialAllowance',
-                'pfContribution', 'esiContribution', 'tds', 'professionalTax'
+                'id', 'basicSalary', 'hra', 'allowances',
+                'pfContribution', 'tds', 'professionalTax', 'otherDeductions',
+                'currency', 'effectiveFrom', 'isActive'
               ]
             }
           ]

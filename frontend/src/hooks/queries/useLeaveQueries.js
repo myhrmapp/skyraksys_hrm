@@ -108,7 +108,7 @@ export const useApproveLeaveRequest = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   return useMutation({
-    mutationFn: ({ id, comments }) => leaveService.approve(id, { comments }),
+    mutationFn: ({ id, comments }) => leaveService.approve(id, comments),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
       queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });
@@ -131,7 +131,7 @@ export const useRejectLeaveRequest = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   return useMutation({
-    mutationFn: ({ id, comments }) => leaveService.reject(id, { comments }),
+    mutationFn: ({ id, comments }) => leaveService.reject(id, comments),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
       queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });
@@ -155,9 +155,15 @@ export const useCancelLeaveRequest = () => {
 
   return useMutation({
     mutationFn: (id) => leaveService.cancel(id),
-    onSuccess: (_, id) => {
+    onSuccess: (data, id) => {
       queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
       queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });
+      if (data?.employeeId) {
+        queryClient.invalidateQueries({ queryKey: leaveKeys.balances(data.employeeId) });
+      } else {
+        queryClient.invalidateQueries({ queryKey: [...leaveKeys.all, 'balances'] });
+      }
+      queryClient.invalidateQueries({ queryKey: leaveKeys.pendingApprovals() });
       enqueueSnackbar('Leave request cancelled', { variant: 'success' });
     },
     onError: (error) => {

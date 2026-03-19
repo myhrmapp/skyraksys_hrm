@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -77,8 +77,8 @@ const Layout = () => {
     logout();
   };
 
-  // Menu structure based on role
-  const getMenuStructure = () => {
+  // Menu structure based on role (memoized to avoid recreation on every render)
+  const menuStructure = useMemo(() => {
     if (isAdmin || isHR) {
       return [
         {
@@ -223,9 +223,7 @@ const Layout = () => {
         ]
       }
     ];
-  };
-
-    const menuStructure = getMenuStructure();
+  }, [isAdmin, isHR, isManager]);
 
     const modernDrawerContent = (
       <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -275,6 +273,7 @@ const Layout = () => {
                     key={item.path}
                     component={NavLink}
                     to={item.path}
+                    data-testid={`nav-${item.path.replace(/\//g, '-').replace(/^-/, '')}`}
                     sx={{
                       py: 1,
                       px: 2,
@@ -383,6 +382,7 @@ const Layout = () => {
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
+            data-testid="layout-drawer-toggle"
             sx={{ mr: 2, display: { md: 'none' } }}
           >
             <MenuIcon />
@@ -422,6 +422,7 @@ const Layout = () => {
             <Chip 
               label={user?.role?.toUpperCase() || 'USER'} 
               size="small"
+              data-testid="layout-role-chip"
               sx={{ 
                 bgcolor: 'primary.main', 
                 color: 'white',
@@ -435,15 +436,15 @@ const Layout = () => {
               edge="end"
               aria-label="notifications"
               color="inherit"
+              data-testid="layout-notifications-button"
               sx={{ mr: 1 }}
             >
-              <Badge badgeContent={4} color="error">
-                <Notifications />
-              </Badge>
+              <Notifications />
             </IconButton>
 
             <Button
               onClick={handleProfileMenuOpen}
+              data-testid="layout-profile-menu-trigger"
               sx={{ 
                 color: 'text.primary',
                 textTransform: 'none',
@@ -558,6 +559,7 @@ const Layout = () => {
             handleProfileMenuClose();
             navigate('/my-profile');
           }} 
+          data-testid="layout-menu-view-profile"
           sx={{ py: 1.5 }}
         >
           <Avatar sx={{ width: 32, height: 32, mr: 2, bgcolor: 'primary.main' }}>
@@ -575,21 +577,32 @@ const Layout = () => {
         
         <Divider />
         
-        <MenuItem onClick={handleProfileMenuClose}>
+        <MenuItem onClick={() => {
+            handleProfileMenuClose();
+            navigate('/admin/settings-hub');
+          }}
+          data-testid="layout-menu-settings"
+        >
           <ListItemIcon>
             <SettingsIcon fontSize="small" />
           </ListItemIcon>
           Account Settings
         </MenuItem>
         
-        <MenuItem onClick={handleProfileMenuClose}>
+        <MenuItem onClick={() => {
+            handleProfileMenuClose();
+            navigate('/my-profile');
+          }}>
           <ListItemIcon>
             <Notifications fontSize="small" />
           </ListItemIcon>
           Notifications
         </MenuItem>
         
-        <MenuItem onClick={handleProfileMenuClose}>
+        <MenuItem onClick={() => {
+            handleProfileMenuClose();
+            window.open('https://docs.skyraksys.com', '_blank', 'noopener,noreferrer');
+          }}>
           <ListItemIcon>
             <Help fontSize="small" />
           </ListItemIcon>
@@ -600,6 +613,7 @@ const Layout = () => {
         
         <MenuItem 
           onClick={handleLogout}
+          data-testid="layout-menu-logout"
           sx={{ 
             color: 'error.main',
             '&:hover': { bgcolor: 'error.light', color: 'error.contrastText' }

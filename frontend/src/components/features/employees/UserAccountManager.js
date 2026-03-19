@@ -102,14 +102,15 @@ const UserAccountManager = ({
     const employeeEmail = employee?.email || '';
     
     setUserData(prev => {
+      const generatedPassword = isEnabled && !employee?.user ? generateSecureDefaultPassword() : null;
       const newState = {
         ...prev,
         enableLogin: isEnabled,
         // Always ensure email is set from employee when enabling login
         email: isEnabled ? (prev.email || employeeEmail) : prev.email,
         // Generate a secure default password when enabling login for the first time
-        password: isEnabled && !employee?.user ? generateSecureDefaultPassword() : prev.password,
-        confirmPassword: isEnabled && !employee?.user ? generateSecureDefaultPassword() : prev.confirmPassword
+        password: generatedPassword || prev.password,
+        confirmPassword: generatedPassword || prev.confirmPassword
       };
       
       return newState;
@@ -190,7 +191,13 @@ const UserAccountManager = ({
       if (mode === 'create') {
         onUpdate(updateData);
       } else {
-        await authService.updateUserAccount(employee.user?.id || employee.id, updateData);
+        const userId = employee.user?.id || employee.id;
+        // Update account details (email and role)
+        await authService.updateUserAccount(userId, { email: updateData.email, role: updateData.role });
+        // If password is provided, update it via the dedicated password reset endpoint
+        if (updateData.password) {
+          await authService.resetUserPassword(userId, updateData.password);
+        }
         showNotification('User account updated successfully', 'success');
         onUpdate(updateData);
       }

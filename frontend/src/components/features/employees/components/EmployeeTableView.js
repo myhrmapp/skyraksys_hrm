@@ -36,7 +36,7 @@ const EmployeeTableView = ({
 }) => {
   return (
     <TableContainer component={Paper} sx={{ borderRadius: 3, mt: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-      <Table sx={{ minWidth: 800 }}>
+      <Table sx={{ minWidth: 800 }} data-testid="employee-table">
         <TableHead>
           <TableRow sx={{ bgcolor: 'grey.50' }}>
             <TableCell sx={{ fontWeight: 700, color: 'text.secondary', py: 2 }}>Employee</TableCell>

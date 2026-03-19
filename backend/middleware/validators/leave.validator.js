@@ -81,7 +81,7 @@ const createLeaveRequestSchema = Joi.object({
     }),
 
   status: Joi.string()
-    .valid('Pending', 'Approved', 'Rejected', 'Cancelled')
+    .valid('Pending', 'Approved', 'Rejected', 'Cancelled', 'Cancellation Requested')
     .default('Pending')
 });
 
@@ -133,7 +133,7 @@ const leaveQuerySchema = Joi.object({
     .optional(),
 
   status: Joi.string()
-    .valid('Pending', 'Approved', 'Rejected', 'Cancelled')
+    .valid('Pending', 'Approved', 'Rejected', 'Cancelled', 'Cancellation Requested')
     .optional(),
 
   startDate: Joi.date()
@@ -204,23 +204,20 @@ const updateLeaveBalanceSchema = Joi.object({
     .max(new Date().getFullYear() + 1)
     .required(),
 
-  totalDays: Joi.number()
-    .integer()
+  totalAccrued: Joi.number()
     .min(0)
     .max(365)
     .optional(),
 
-  usedDays: Joi.number()
-    .integer()
+  totalTaken: Joi.number()
     .min(0)
-    .max(Joi.ref('totalDays'))
+    .max(Joi.ref('totalAccrued'))
     .optional()
     .messages({
-      'number.max': 'Used days cannot exceed total days'
+      'number.max': 'Total taken cannot exceed total accrued'
     }),
 
-  carriedForward: Joi.number()
-    .integer()
+  carryForward: Joi.number()
     .min(0)
     .max(90)
     .optional()

@@ -242,13 +242,14 @@ export default function AttendanceManagement() {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3 }} data-testid="attendance-management-page">
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
         <Stack direction="row" alignItems="center" spacing={1}>
           <TeamIcon color="primary" sx={{ fontSize: 32 }} />
           <Typography variant="h5" fontWeight={600}>Attendance Management</Typography>
         </Stack>
         <Button
+          data-testid="attendance-mark-btn"
           variant="contained"
           startIcon={<EditIcon />}
           onClick={() => {
@@ -272,6 +273,7 @@ export default function AttendanceManagement() {
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={3}>
             <TextField
+              data-testid="attendance-date-filter"
               type="date"
               fullWidth
               size="small"
@@ -304,7 +306,7 @@ export default function AttendanceManagement() {
       </Paper>
 
       {/* Data Grid */}
-      <Paper sx={{ height: 600 }}>
+      <Paper sx={{ height: 600 }} data-testid="attendance-data-grid">
         <DataGrid
           rows={records}
           columns={columns}
@@ -398,7 +400,7 @@ export default function AttendanceManagement() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setMarkDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleMarkAttendance}>Save</Button>
+          <Button data-testid="attendance-mark-save-btn" variant="contained" onClick={handleMarkAttendance}>Save</Button>
         </DialogActions>
       </Dialog>
     </Box>

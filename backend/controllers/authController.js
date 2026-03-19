@@ -77,9 +77,7 @@ const AuthController = {
       });
 
       return res.json(ApiResponse.success({ 
-        user: result.user,
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken
+        user: result.user
       }, 'Login successful'));
     } catch (error) {
       // Handle service-level errors with proper HTTP responses
@@ -135,6 +133,14 @@ const AuthController = {
 
       // Clear the httpOnly access token cookie
       res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: secureCookie,
+        sameSite: 'Lax',
+        path: '/'
+      });
+
+      // Clear the httpOnly refresh token cookie
+      res.clearCookie('refreshToken', {
         httpOnly: true,
         secure: secureCookie,
         sameSite: 'Lax',
@@ -331,6 +337,42 @@ const AuthController = {
   },
 
   /**
+   * Update current user profile
+   * @route PUT /api/auth/me
+   * @access Private
+   */
+  async updateProfile(req, res, next) {
+    try {
+      const user = await User.findByPk(req.user.id, {
+        include: [{ model: Employee, as: 'employee' }],
+        attributes: { exclude: ['password'] }
+      });
+
+      if (!user) {
+        throw new NotFoundError('User not found');
+      }
+
+      // Only allow updating safe fields
+      const { firstName, lastName, email } = req.body;
+      const updates = {};
+      if (firstName !== undefined) updates.firstName = firstName;
+      if (lastName !== undefined) updates.lastName = lastName;
+      if (email !== undefined) updates.email = email;
+
+      await user.update(updates);
+
+      // Reload with associations
+      await user.reload({
+        include: [{ model: Employee, as: 'employee' }]
+      });
+
+      return res.json(ApiResponse.success(user, 'Profile updated successfully'));
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
    * Change password
    * @route PUT /api/auth/change-password
    * @access Private
@@ -352,12 +394,11 @@ const AuthController = {
         throw new UnauthorizedError('Current password is incorrect');
       }
 
-      // Hash and save new password
-      const oldPasswordHash = user.password;
+      // Hash and save new password + update passwordChangedAt
       const hashedPassword = await bcrypt.hash(newPassword, 12);
-      await user.update({ password: hashedPassword });
+      await user.update({ password: hashedPassword, passwordChangedAt: new Date() });
 
-      // Audit log - non-blocking
+      // Audit log - non-blocking (never log password hashes)
       try {
         if (db.AuditLog) {
           await db.AuditLog.create({
@@ -368,8 +409,6 @@ const AuthController = {
             metadata: {
               action: 'password_changed',
               passwordChanged: true,
-              oldPasswordHash,
-              newPasswordHash: hashedPassword,
               ip: req.ip || req.connection.remoteAddress,
               userAgent: req.headers['user-agent'],
               timestamp: new Date()

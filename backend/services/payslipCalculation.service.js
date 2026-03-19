@@ -4,6 +4,8 @@
  * Follows Indian statutory rules for PF, ESIC, PT, TDS
  */
 
+const logger = require('../utils/logger');
+
 class PayslipCalculationService {
   constructor() {
     // Statutory limits and rates (FY 2025-26)
@@ -125,60 +127,15 @@ class PayslipCalculationService {
     const monthlyBasic = parseFloat(salaryStructure.basicSalary) || 0;
     earnings.basicSalary = this.roundAmount((monthlyBasic / totalWorkingDays) * payableDays);
 
-    // HRA - 50% of basic or as configured
+    // HRA - 50% of basic or as configured (use ?? to allow explicit 0)
     const hraRate = salaryStructure.hraRate || 0.5;
-    const monthlyHRA = salaryStructure.hra || (monthlyBasic * hraRate);
+    const monthlyHRA = (salaryStructure.hra != null && salaryStructure.hra !== '') ? parseFloat(salaryStructure.hra) : (monthlyBasic * hraRate);
     earnings.hra = this.roundAmount((monthlyHRA / totalWorkingDays) * payableDays);
 
-    // Other Allowances (prorated)
-    const allowances = salaryStructure.allowances || {};
-    
-    if (allowances.transport || salaryStructure.transportAllowance) {
-      const monthly = parseFloat(allowances.transport || salaryStructure.transportAllowance) || 0;
-      earnings.transportAllowance = this.roundAmount((monthly / totalWorkingDays) * payableDays);
-    }
-
-    if (allowances.medical || salaryStructure.medicalAllowance) {
-      const monthly = parseFloat(allowances.medical || salaryStructure.medicalAllowance) || 0;
-      earnings.medicalAllowance = this.roundAmount((monthly / totalWorkingDays) * payableDays);
-    }
-
-    if (allowances.food || salaryStructure.foodAllowance) {
-      const monthly = parseFloat(allowances.food || salaryStructure.foodAllowance) || 0;
-      earnings.foodAllowance = this.roundAmount((monthly / totalWorkingDays) * payableDays);
-    }
-
-    if (allowances.communication || salaryStructure.communicationAllowance) {
-      const monthly = parseFloat(allowances.communication || salaryStructure.communicationAllowance) || 0;
-      earnings.communicationAllowance = this.roundAmount((monthly / totalWorkingDays) * payableDays);
-    }
-
-    if (allowances.special || salaryStructure.specialAllowance) {
-      const monthly = parseFloat(allowances.special || salaryStructure.specialAllowance) || 0;
-      earnings.specialAllowance = this.roundAmount((monthly / totalWorkingDays) * payableDays);
-    }
-
-    if (allowances.other || salaryStructure.otherAllowance) {
-      const monthly = parseFloat(allowances.other || salaryStructure.otherAllowance) || 0;
-      earnings.otherAllowance = this.roundAmount((monthly / totalWorkingDays) * payableDays);
-    }
-
-    // General allowances (if not broken down)
-    if (salaryStructure.allowances && typeof salaryStructure.allowances === 'number') {
-      const monthly = parseFloat(salaryStructure.allowances) || 0;
-      earnings.allowances = this.roundAmount((monthly / totalWorkingDays) * payableDays);
-    }
-    
-    // Process dynamic/custom allowances from JSON
-    if (salaryStructure.allowances && typeof salaryStructure.allowances === 'object' && !Array.isArray(salaryStructure.allowances)) {
-       const standardKeys = ['transport', 'medical', 'food', 'communication', 'special', 'other'];
-       Object.entries(salaryStructure.allowances).forEach(([key, value]) => {
-          if (!standardKeys.includes(key) && !earnings[key]) {
-              const monthly = parseFloat(value) || 0;
-              // Apply proration for all salary components
-              earnings[key] = this.roundAmount((monthly / totalWorkingDays) * payableDays);
-          }
-       });
+    // Other Allowances (prorated) - model has a single DECIMAL 'allowances' field
+    const monthlyAllowances = parseFloat(salaryStructure.allowances) || 0;
+    if (monthlyAllowances > 0) {
+      earnings.allowances = this.roundAmount((monthlyAllowances / totalWorkingDays) * payableDays);
     }
 
     // Overtime Pay
@@ -245,43 +202,11 @@ class PayslipCalculationService {
       });
     }
 
-    // 5. Employee Loan/Advance deductions
-    if (salaryStructure.loanDeduction || options.loanDeduction) {
-      deductions.loanDeduction = this.roundAmount(
-        parseFloat(salaryStructure.loanDeduction || options.loanDeduction) || 0
+    // 5. Other deductions from salary structure model
+    if (salaryStructure.otherDeductions) {
+      deductions.otherDeductions = this.roundAmount(
+        parseFloat(salaryStructure.otherDeductions) || 0
       );
-    }
-
-    // 6. Other deductions from salary structure
-    const structureDeductions = salaryStructure.deductions || {};
-    
-    if (structureDeductions.medicalPremium || salaryStructure.medicalPremium) {
-      deductions.medicalPremium = this.roundAmount(
-        parseFloat(structureDeductions.medicalPremium || salaryStructure.medicalPremium) || 0
-      );
-    }
-
-    if (structureDeductions.nps || salaryStructure.nps) {
-      deductions.nps = this.roundAmount(
-        parseFloat(structureDeductions.nps || salaryStructure.nps) || 0
-      );
-    }
-
-    if (structureDeductions.voluntaryPF || salaryStructure.voluntaryPF) {
-      deductions.voluntaryPF = this.roundAmount(
-        parseFloat(structureDeductions.voluntaryPF || salaryStructure.voluntaryPF) || 0
-      );
-    }
-    
-    // Dynamic Deductions from SalaryStructure (Persistent)
-    if (structureDeductions && typeof structureDeductions === 'object' && !Array.isArray(structureDeductions)) {
-         const standardDedKeys = ['pf', 'tax', 'professionalTax', 'medicalPremium', 'nps', 'voluntaryPF'];
-         Object.entries(structureDeductions).forEach(([key, value]) => {
-             if (!standardDedKeys.includes(key) && !deductions[key]) {
-                  // Fixed monthly deduction (not prorated usually)
-                  deductions[key] = this.roundAmount(parseFloat(value) || 0);
-             }
-         });
     }
 
     // 7. Other deductions (One-time overrides)

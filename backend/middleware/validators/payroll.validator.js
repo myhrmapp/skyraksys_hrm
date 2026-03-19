@@ -52,7 +52,7 @@ const payrollQuerySchema = Joi.object({
   employeeId: uuidSchema.optional(),
 
   status: Joi.string()
-    .valid('draft', 'submitted', 'approved', 'processed', 'paid', 'rejected')
+    .valid('draft', 'calculated', 'approved', 'paid', 'cancelled')
     .optional(),
 
   page: Joi.number()
@@ -157,7 +157,7 @@ const createPayrollSchema = Joi.object({
     .required(),
 
   status: Joi.string()
-    .valid('draft', 'submitted', 'approved', 'processed', 'paid')
+    .valid('draft', 'calculated', 'approved', 'paid')
     .default('draft'),
 
   variableEarnings: Joi.object().optional(),
@@ -392,16 +392,39 @@ const createSalaryStructureSchema = Joi.object({
   employeeId: uuidSchema.required(),
   basicSalary: Joi.number().min(0).required(),
   hra: Joi.number().min(0).optional(),
+  allowances: Joi.number().min(0).optional(),
   transportAllowance: Joi.number().min(0).optional(),
   medicalAllowance: Joi.number().min(0).optional(),
   specialAllowance: Joi.number().min(0).optional(),
+  pfContribution: Joi.number().min(0).optional(),
   providentFund: Joi.number().min(0).optional(),
-  professionalTax: Joi.number().min(0).optional(),
+  tds: Joi.number().min(0).optional(),
   incomeTax: Joi.number().min(0).optional(),
+  professionalTax: Joi.number().min(0).optional(),
   otherDeductions: Joi.number().min(0).optional(),
   effectiveFrom: Joi.date().optional(),
   isActive: Joi.boolean().optional()
 });
+
+/**
+ * Schema for updating salary structure
+ */
+const updateSalaryStructureSchema = Joi.object({
+  basicSalary: Joi.number().min(0).optional(),
+  hra: Joi.number().min(0).optional(),
+  allowances: Joi.number().min(0).optional(),
+  transportAllowance: Joi.number().min(0).optional(),
+  medicalAllowance: Joi.number().min(0).optional(),
+  specialAllowance: Joi.number().min(0).optional(),
+  pfContribution: Joi.number().min(0).optional(),
+  providentFund: Joi.number().min(0).optional(),
+  tds: Joi.number().min(0).optional(),
+  incomeTax: Joi.number().min(0).optional(),
+  professionalTax: Joi.number().min(0).optional(),
+  otherDeductions: Joi.number().min(0).optional(),
+  effectiveFrom: Joi.date().optional(),
+  isActive: Joi.boolean().optional()
+}).min(1);
 
 module.exports = {
   // Common
@@ -416,6 +439,7 @@ module.exports = {
   // Salary Structure
   salaryStructureQuerySchema,
   createSalaryStructureSchema,
+  updateSalaryStructureSchema,
 
   // Payslip Generation
   generatePayslipSchema,

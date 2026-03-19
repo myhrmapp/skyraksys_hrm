@@ -13,8 +13,7 @@ describe('PayslipCalculationService', () => {
   const mockSalaryStructure = {
     basicSalary: 50000,
     hra: 10000,
-    transportAllowance: 5000,
-    specialAllowance: 5000
+    allowances: 10000
   };
 
   describe('calculatePayslip', () => {
@@ -89,8 +88,7 @@ describe('PayslipCalculationService', () => {
 
       expect(result.basicSalary).toBe(50000);
       expect(result.hra).toBe(10000);
-      expect(result.transportAllowance).toBe(5000);
-      expect(result.specialAllowance).toBe(5000);
+      expect(result.allowances).toBe(10000);
     });
 
     it('should prorate earnings for partial month', () => {

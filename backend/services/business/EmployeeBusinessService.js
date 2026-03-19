@@ -135,12 +135,49 @@ class EmployeeBusinessService extends BaseBusinessService {
       throw new NotFoundError('Employee');
     }
 
-    // Update employee
-    const updated = await this.employeeDataService.update(id, data);
+    // Extract salary data before updating employee (salary lives in SalaryStructure table)
+    const salaryData = data.salary;
+    const employeeData = { ...data };
+    delete employeeData.salary;
+
+    // Update employee fields (excluding salary)
+    if (Object.keys(employeeData).length > 0) {
+      await this.employeeDataService.update(id, employeeData);
+    }
     
     // If email changed, update user account
     if (data.email && data.email !== employee.email) {
       await this.userDataService.update(employee.userId, { email: data.email });
+    }
+
+    // If salary data provided, update salary structure
+    if (salaryData && typeof salaryData === 'object') {
+      const mappedSalary = {
+        basicSalary: salaryData.basicSalary,
+        hra: salaryData.allowances?.hra || 0,
+        allowances: (
+          parseFloat(salaryData.allowances?.transport || 0) +
+          parseFloat(salaryData.allowances?.medical || 0) +
+          parseFloat(salaryData.allowances?.food || 0) +
+          parseFloat(salaryData.allowances?.communication || 0) +
+          parseFloat(salaryData.allowances?.special || 0) +
+          parseFloat(salaryData.allowances?.other || 0)
+        ),
+        pfContribution: salaryData.deductions?.pf || 0,
+        tds: salaryData.deductions?.incomeTax || 0,
+        professionalTax: salaryData.deductions?.professionalTax || 0,
+        otherDeductions: salaryData.deductions?.other || 0,
+        currency: salaryData.currency || 'INR',
+        effectiveFrom: salaryData.effectiveFrom || new Date().toISOString().split('T')[0],
+        isActive: true,
+      };
+
+      const existingSalary = await this.salaryDataService.findByEmployeeId(id);
+      if (existingSalary) {
+        await this.salaryDataService.update(existingSalary.id, mappedSalary);
+      } else {
+        await this.salaryDataService.create({ employeeId: id, ...mappedSalary });
+      }
     }
 
     this.log('updateEmployee:success', { id });
@@ -175,13 +212,26 @@ class EmployeeBusinessService extends BaseBusinessService {
       throw new NotFoundError('Employee');
     }
 
-    // Map validated API fields to model fields
-    // Joi validator uses 'salary' but SalaryStructure model expects 'basicSalary'
+    // Map validated API fields to SalaryStructure model fields
+    // Frontend sends nested { salary: { basicSalary, allowances: {...}, deductions: {...} } }
+    const salary = salaryData.salary || salaryData;
     const mappedData = {
-      basicSalary: salaryData.salary || salaryData.basicSalary,
-      effectiveFrom: salaryData.effectiveFrom || new Date().toISOString().split('T')[0],
-      payGrade: salaryData.payGrade,
-      payFrequency: salaryData.payFrequency,
+      basicSalary: salary.basicSalary,
+      hra: salary.allowances?.hra || 0,
+      allowances: (
+        parseFloat(salary.allowances?.transport || 0) +
+        parseFloat(salary.allowances?.medical || 0) +
+        parseFloat(salary.allowances?.food || 0) +
+        parseFloat(salary.allowances?.communication || 0) +
+        parseFloat(salary.allowances?.special || 0) +
+        parseFloat(salary.allowances?.other || 0)
+      ),
+      pfContribution: salary.deductions?.pf || 0,
+      tds: salary.deductions?.incomeTax || 0,
+      professionalTax: salary.deductions?.professionalTax || 0,
+      otherDeductions: salary.deductions?.other || 0,
+      currency: salary.currency || 'INR',
+      effectiveFrom: salary.effectiveFrom || new Date().toISOString().split('T')[0],
       isActive: true,
     };
 
@@ -433,11 +483,14 @@ class EmployeeBusinessService extends BaseBusinessService {
    * @private
    */
   prepareUserData(data) {
+    if (!data.password) {
+      throw new ValidationError('Password is required when creating a new employee account');
+    }
     return {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
-      password: data.password || 'Welcome@123',
+      password: data.password,
       role: data.role || 'employee',
       isActive: true
     };
@@ -482,7 +535,7 @@ class EmployeeBusinessService extends BaseBusinessService {
       noticePeriod: data.noticePeriod !== undefined ? data.noticePeriod : 30,
       status: 'Active',
       isActive: true,
-      photoUrl: photo?.filename || data.photoUrl || null,
+      photoUrl: photo?.filename ? `/uploads/employee-photos/${photo.filename}` : data.photoUrl || null,
       
       // Indian statutory fields
       panNumber: data.panNumber,
@@ -562,7 +615,15 @@ class EmployeeBusinessService extends BaseBusinessService {
       result.allowances = Number(salaryInput.allowances) || 0;
     }
 
-    // Copy top-level numeric fields if present
+    // Handle deductions — could be a nested object or flat fields
+    if (salaryInput.deductions && typeof salaryInput.deductions === 'object') {
+      result.pfContribution = Number(salaryInput.deductions.pf || salaryInput.deductions.pfContribution) || 0;
+      result.tds = Number(salaryInput.deductions.incomeTax || salaryInput.deductions.tds) || 0;
+      result.professionalTax = Number(salaryInput.deductions.professionalTax) || 0;
+      result.otherDeductions = Number(salaryInput.deductions.other || salaryInput.deductions.otherDeductions) || 0;
+    }
+
+    // Copy top-level numeric fields if present (override nested values)
     if (salaryInput.hra !== undefined) result.hra = Number(salaryInput.hra) || 0;
     if (salaryInput.pfContribution !== undefined) result.pfContribution = Number(salaryInput.pfContribution) || 0;
     if (salaryInput.tds !== undefined) result.tds = Number(salaryInput.tds) || 0;

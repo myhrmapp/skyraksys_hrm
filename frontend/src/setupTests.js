@@ -143,8 +143,11 @@ jest.mock('./contexts/AuthContext', () => {
   if (process.env.REACT_APP_TEST_MODE === 'integration') {
     return jest.requireActual('./contexts/AuthContext');
   }
+  const React = require('react');
+  const AuthContext = React.createContext({});
   return {
     __esModule: true,
+    AuthContext,
     useAuth: () => {
       return global.__TEST_AUTH_VALUE__ || {
         user: null,

@@ -31,6 +31,7 @@ const EmployeeFormActions = ({
           disabled={activeTab === 0}
           onClick={() => setActiveTab(prev => prev - 1)}
           variant="outlined"
+          data-testid="employee-form-prev-btn"
           sx={{ 
             minWidth: 100,
             borderRadius: 2,
@@ -44,6 +45,7 @@ const EmployeeFormActions = ({
           disabled={activeTab === 3}
           variant="outlined"
           onClick={() => setActiveTab(prev => prev + 1)}
+          data-testid="employee-form-next-btn"
           sx={{ 
             minWidth: 100,
             borderRadius: 2,
@@ -64,6 +66,7 @@ const EmployeeFormActions = ({
           <Button 
             variant="outlined"
             onClick={onBack}
+            data-testid="employee-form-cancel-btn"
             sx={{ 
               width: 100, 
               '&:hover': {
@@ -101,6 +104,7 @@ const EmployeeFormActions = ({
             variant="contained"
             onClick={onSubmit}
             disabled={isLoading || !isCurrentTabValid}
+            data-testid="employee-form-submit-btn"
             startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
             sx={{ 
               minWidth: 180,

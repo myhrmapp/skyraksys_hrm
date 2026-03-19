@@ -77,35 +77,40 @@ class LeaveService extends BaseService {
   }
 
   async findByDateRange(startDate, endDate, options = {}) {
+    const dateFilter = {
+      [db.Sequelize.Op.or]: [
+        {
+          startDate: {
+            [db.Sequelize.Op.between]: [startDate, endDate]
+          }
+        },
+        {
+          endDate: {
+            [db.Sequelize.Op.between]: [startDate, endDate]
+          }
+        },
+        {
+          [db.Sequelize.Op.and]: [
+            {
+              startDate: {
+                [db.Sequelize.Op.lte]: startDate
+              }
+            },
+            {
+              endDate: {
+                [db.Sequelize.Op.gte]: endDate
+              }
+            }
+          ]
+        }
+      ]
+    };
+
     return super.findAll({
       ...options,
       where: {
-        [db.Sequelize.Op.or]: [
-          {
-            startDate: {
-              [db.Sequelize.Op.between]: [startDate, endDate]
-            }
-          },
-          {
-            endDate: {
-              [db.Sequelize.Op.between]: [startDate, endDate]
-            }
-          },
-          {
-            [db.Sequelize.Op.and]: [
-              {
-                startDate: {
-                  [db.Sequelize.Op.lte]: startDate
-                }
-              },
-              {
-                endDate: {
-                  [db.Sequelize.Op.gte]: endDate
-                }
-              }
-            ]
-          }
-        ]
+        ...(options.where || {}),
+        ...dateFilter
       }
     });
   }

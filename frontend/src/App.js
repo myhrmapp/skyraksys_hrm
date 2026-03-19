@@ -9,7 +9,6 @@ import { SnackbarProvider } from 'notistack';
 // Context Providers
 import { AuthProvider } from './contexts/AuthContext';
 import { LoadingProvider } from './contexts/LoadingContext';
-import { NotificationProvider } from './contexts/NotificationContext';
 
 // Error Boundary (enhanced)
 import SmartErrorBoundary from './components/common/SmartErrorBoundary';
@@ -121,7 +120,6 @@ function App() {
       <ThemeProvider theme={modernTheme}>
         <CssBaseline />
         <LoadingProvider>
-          <NotificationProvider>
             <SnackbarProvider 
               maxSnack={3}
               anchorOrigin={{
@@ -436,11 +434,21 @@ function App() {
 
                       {/* Projects Routes removed — FE-43: ProjectTaskConfiguration at /project-task-config is the canonical admin page */}
                     </Route>
+
+                    {/* 404 catch-all */}
+                    <Route path="*" element={
+                      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="60vh" gap={2}>
+                        <Typography variant="h3" color="textSecondary">404</Typography>
+                        <Typography variant="body1" color="textSecondary">Page not found</Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          The page you're looking for doesn't exist or has been moved.
+                        </Typography>
+                      </Box>
+                    } />
                   </Routes>
                 </SmartErrorBoundary>
               </AuthProvider>
             </SnackbarProvider>
-          </NotificationProvider>
         </LoadingProvider>
       </ThemeProvider>
     </SmartErrorBoundary>

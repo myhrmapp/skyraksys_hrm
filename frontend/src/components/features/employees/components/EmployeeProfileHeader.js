@@ -23,9 +23,9 @@ const EmployeeProfileHeader = ({
   onManageUser
 }) => {
   return (
-    <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+    <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }} data-testid="employee-profile-header">
       <Tooltip title="Back to Employee List">
-        <IconButton onClick={onBack} sx={{ bgcolor: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+        <IconButton onClick={onBack} data-testid="employee-profile-back-btn" sx={{ bgcolor: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
           <ArrowBackIcon />
         </IconButton>
       </Tooltip>
@@ -78,6 +78,7 @@ const EmployeeProfileHeader = ({
                 variant="contained"
                 startIcon={<EditIcon />}
                 onClick={onEdit}
+                data-testid="employee-profile-edit-btn"
                 sx={{
                   bgcolor: '#1976d2',
                   px: 3,

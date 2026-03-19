@@ -27,6 +27,7 @@ const StatutoryBankingTab = ({ formData, errors, touchedFields = {}, onChange, o
         id="aadhaarNumber"
         name="aadhaarNumber"
         label="Aadhaar Number"
+        data-testid="field-aadharNumber"
         value={formData.aadhaarNumber}
         onChange={(e) => {
           // Only allow digits and limit to 12 characters
@@ -56,6 +57,7 @@ const StatutoryBankingTab = ({ formData, errors, touchedFields = {}, onChange, o
         id="panNumber"
         name="panNumber"
         label="PAN Number"
+        data-testid="field-panNumber"
         value={formData.panNumber}
         onChange={(e) => {
           // Format and validate PAN pattern
@@ -85,6 +87,7 @@ const StatutoryBankingTab = ({ formData, errors, touchedFields = {}, onChange, o
         id="uanNumber"
         name="uanNumber"
         label="UAN Number"
+        data-testid="field-uanNumber"
         value={formData.uanNumber}
         onChange={(e) => {
           // Allow alphanumeric only, uppercase, 12+ characters
@@ -113,6 +116,7 @@ const StatutoryBankingTab = ({ formData, errors, touchedFields = {}, onChange, o
         id="pfNumber"
         name="pfNumber"
         label="PF Number"
+        data-testid="field-pfNumber"
         value={formData.pfNumber}
         onChange={(e) => onChange('pfNumber', e.target.value)}
         onBlur={() => onBlur && onBlur('pfNumber')}
@@ -126,6 +130,7 @@ const StatutoryBankingTab = ({ formData, errors, touchedFields = {}, onChange, o
         id="esiNumber"
         name="esiNumber"
         label="ESI Number"
+        data-testid="field-esiNumber"
         value={formData.esiNumber}
         onChange={(e) => {
           // Allow alphanumeric only, uppercase, 10-17 characters
@@ -162,6 +167,7 @@ const StatutoryBankingTab = ({ formData, errors, touchedFields = {}, onChange, o
         id="bankName"
         name="bankName"
         label="Bank Name"
+        data-testid="field-bankName"
         value={formData.bankName}
         onChange={(e) => onChange('bankName', e.target.value)}
         onBlur={() => onBlur && onBlur('bankName')}
@@ -176,6 +182,7 @@ const StatutoryBankingTab = ({ formData, errors, touchedFields = {}, onChange, o
         id="bankAccountNumber"
         name="bankAccountNumber"
         label="Account Number"
+        data-testid="field-bankAccountNumber"
         value={formData.bankAccountNumber}
         onChange={(e) => onChange('bankAccountNumber', e.target.value)}
         onBlur={() => onBlur && onBlur('bankAccountNumber')}
@@ -190,6 +197,7 @@ const StatutoryBankingTab = ({ formData, errors, touchedFields = {}, onChange, o
         id="ifscCode"
         name="ifscCode"
         label="IFSC Code"
+        data-testid="field-bankIfscCode"
         value={formData.ifscCode}
         onChange={(e) => {
           // Format IFSC code: ABCD0123456 (4 letters, 1 zero, 6 alphanumeric)
@@ -230,6 +238,7 @@ const StatutoryBankingTab = ({ formData, errors, touchedFields = {}, onChange, o
         fullWidth
         id="bankBranch"
         label="Bank Branch"
+        data-testid="field-bankBranch"
         value={formData.bankBranch}
         onChange={(e) => onChange('bankBranch', e.target.value)}
         error={!!errors.bankBranch}

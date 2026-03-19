@@ -21,7 +21,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Tabs, Tab, Paper, useTheme, alpha } from '@mui/material';
 import PropTypes from 'prop-types';
 
-function TabPanel({ children, value, index }) {
+function TabPanel({ children, value, index, hasBeenActive }) {
   return (
     <Box
       role="tabpanel"
@@ -29,7 +29,7 @@ function TabPanel({ children, value, index }) {
       id={`tabpanel-${index}`}
       aria-labelledby={`tab-${index}`}
     >
-      {value === index && <Box>{children}</Box>}
+      {hasBeenActive && <Box>{children}</Box>}
     </Box>
   );
 }
@@ -42,7 +42,16 @@ TabPanel.propTypes = {
 
 const TabbedPage = ({ title, subtitle, icon, tabs = [], defaultTab = 0 }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [visitedTabs, setVisitedTabs] = useState(() => new Set([defaultTab]));
   const theme = useTheme();
+
+  const handleTabChange = (_, newValue) => {
+    setActiveTab(newValue);
+    setVisitedTabs(prev => {
+      if (prev.has(newValue)) return prev;
+      return new Set([...prev, newValue]);
+    });
+  };
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : 'grey.50' }}>
@@ -90,7 +99,7 @@ const TabbedPage = ({ title, subtitle, icon, tabs = [], defaultTab = 0 }) => {
         {/* Tabs Row */}
         <Tabs
           value={activeTab}
-          onChange={(_, v) => setActiveTab(v)}
+          onChange={handleTabChange}
           sx={{
             '& .MuiTab-root': {
               textTransform: 'none',
@@ -117,9 +126,9 @@ const TabbedPage = ({ title, subtitle, icon, tabs = [], defaultTab = 0 }) => {
         </Tabs>
       </Paper>
 
-      {/* Tab Content — lazy: only the active tab's component is mounted */}
+      {/* Tab Content — lazy: mount on first visit, keep mounted */}
       {tabs.map((tab, i) => (
-        <TabPanel key={tab.label} value={activeTab} index={i}>
+        <TabPanel key={tab.label} value={activeTab} index={i} hasBeenActive={visitedTabs.has(i)}>
           {tab.render ? tab.render() : tab.component}
         </TabPanel>
       ))}

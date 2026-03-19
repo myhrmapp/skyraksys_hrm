@@ -355,6 +355,7 @@ const TabBasedEmployeeForm = () => {
           <Button 
             onClick={handleCancelNavigation}
             variant="outlined"
+            data-testid="unsaved-dialog-stay-btn"
             sx={{ 
               textTransform: 'none',
               fontWeight: 600,
@@ -367,6 +368,7 @@ const TabBasedEmployeeForm = () => {
             onClick={handleConfirmNavigation}
             variant="contained"
             color="warning"
+            data-testid="unsaved-dialog-leave-btn"
             sx={{ 
               textTransform: 'none',
               fontWeight: 600,

@@ -49,7 +49,8 @@ class AuthService {
   async changePassword(currentPassword, newPassword) {
     const response = await http.put('/auth/change-password', {
       currentPassword,
-      newPassword
+      newPassword,
+      confirmPassword: newPassword
     });
     return response.data;
   }

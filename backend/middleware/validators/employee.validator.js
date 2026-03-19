@@ -719,21 +719,28 @@ const uuidParamSchema = Joi.object({
  * Schema for updating employee compensation
  */
 const updateCompensationSchema = Joi.object({
-  salary: Joi.number()
-    .positive()
-    .required()
-    .messages({
-      'number.base': 'Salary must be a number',
-      'number.positive': 'Salary must be a positive value',
-      'any.required': 'Salary is a required field'
-    }),
-  payGrade: Joi.string()
-    .max(50)
-    .allow('', null)
-    .optional(),
-  payFrequency: Joi.string()
-    .valid('Monthly', 'Bi-Weekly', 'Weekly')
-    .optional()
+  salary: Joi.object({
+    basicSalary: Joi.number().min(0).max(10000000).precision(2).required(),
+    currency: Joi.string().valid('INR', 'USD', 'EUR', 'GBP').default('INR').optional(),
+    payFrequency: Joi.string().valid('weekly', 'biweekly', 'monthly', 'annually').insensitive().default('monthly').optional(),
+    effectiveFrom: Joi.date().optional().allow(null),
+    allowances: Joi.object({
+      hra: Joi.number().min(0).default(0).optional(),
+      transport: Joi.number().min(0).default(0).optional(),
+      medical: Joi.number().min(0).default(0).optional(),
+      food: Joi.number().min(0).default(0).optional(),
+      communication: Joi.number().min(0).default(0).optional(),
+      special: Joi.number().min(0).default(0).optional(),
+      other: Joi.number().min(0).default(0).optional()
+    }).optional().default({}),
+    deductions: Joi.object({
+      pf: Joi.number().min(0).default(0).optional(),
+      professionalTax: Joi.number().min(0).default(0).optional(),
+      incomeTax: Joi.number().min(0).default(0).optional(),
+      other: Joi.number().min(0).default(0).optional()
+    }).optional().default({}),
+    salaryNotes: Joi.string().max(500).allow('', null).optional()
+  }).required()
 });
 
 /**

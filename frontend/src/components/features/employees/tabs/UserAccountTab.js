@@ -119,7 +119,7 @@ const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur
               onChange={(e) => onChange('userAccount.password', e.target.value)}
               onBlur={() => onBlur && onBlur('userAccount.password')}
               error={!!errors['userAccount.password']}
-              helperText={errors['userAccount.password'] || 'Minimum 6 characters'}
+              helperText={errors['userAccount.password'] || 'Minimum 8 characters (uppercase, lowercase, number, special character)'}
               required={!formData.id} // Required for new users if login enabled
             />
           </Grid>

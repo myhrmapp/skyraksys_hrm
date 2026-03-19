@@ -23,7 +23,8 @@ import {
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon
+  ExpandLess as ExpandLessIcon,
+  Inbox as InboxIcon
 } from '@mui/icons-material';
 
 /**
@@ -47,6 +48,19 @@ const ResponsiveTable = ({
       <Card>
         <CardContent>
           <Typography>Loading...</Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <Card>
+        <CardContent sx={{ py: 6, textAlign: 'center' }}>
+          <InboxIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+          <Typography variant="body1" color="text.secondary">
+            No records found
+          </Typography>
         </CardContent>
       </Card>
     );
@@ -400,22 +414,26 @@ export const PayrollMobileCard = ({ payslip, onAction, onDownload }) => {
   const [expanded, setExpanded] = useState(false);
   
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'processed': return 'success';
-      case 'pending': return 'warning';
-      case 'draft': return 'info';
-      case 'error': return 'error';
+    switch (status?.toLowerCase()) {
+      case 'approved': return 'success';
+      case 'calculated': return 'info';
+      case 'paid': return 'success';
+      case 'draft': return 'default';
+      case 'cancelled': return 'error';
+      case 'finalized': return 'success';
       default: return 'default';
     }
   };
 
   const getStatusIcon = (status) => {
-    switch (status) {
-      case 'processed': return '✓';
-      case 'pending': return '⏱';
-      case 'draft': return '📝';
-      case 'error': return '⚠';
-      default: return '•';
+    switch (status?.toLowerCase()) {
+      case 'approved': return '\u2713';
+      case 'calculated': return '\u23F1';
+      case 'paid': return '$';
+      case 'draft': return '\u270E';
+      case 'cancelled': return '\u2715';
+      case 'finalized': return '\u2713';
+      default: return '\u2022';
     }
   };
 
@@ -602,9 +620,9 @@ export const TimesheetMobileCard = ({ timesheet, onApprove, onReject, onView }) 
         <Chip
           label={timesheet.status.toUpperCase()}
           color={
-            timesheet.status === 'approved' ? 'success' :
-            timesheet.status === 'rejected' ? 'error' :
-            timesheet.status === 'pending' ? 'warning' : 'default'
+            timesheet.status?.toLowerCase() === 'approved' ? 'success' :
+            timesheet.status?.toLowerCase() === 'rejected' ? 'error' :
+            timesheet.status?.toLowerCase() === 'submitted' ? 'warning' : 'default'
           }
           size="small"
         />
@@ -664,7 +682,7 @@ export const TimesheetMobileCard = ({ timesheet, onApprove, onReject, onView }) 
         >
           View
         </Button>
-        {timesheet.status === 'pending' && (
+        {timesheet.status?.toLowerCase() === 'submitted' && (
           <>
             <Button 
               size="small" 

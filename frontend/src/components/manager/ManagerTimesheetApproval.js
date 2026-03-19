@@ -55,6 +55,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
   const [approvalDialog, setApprovalDialog] = useState(false);
   const [rejectionDialog, setRejectionDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [approvalComment, setApprovalComment] = useState('');
   
   // Bulk operations state
   const [selectedTimesheets, setSelectedTimesheets] = useState(new Set());
@@ -76,12 +77,11 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
   const handleApprove = useCallback(async (timesheet) => {
     setLoading('approve-timesheet', true);
     try {
-      console.log('🔄 Approving timesheet:', timesheet.id);
       
       // Use the correct API format that matches the backend
       await timesheetService.approve(timesheet.id, {
         action: 'approve',
-        approverComments: 'Approved by manager'
+        approverComments: approvalComment.trim() || 'Approved'
       });
       
       showNotification(
@@ -90,10 +90,10 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
       );
       
       setApprovalDialog(false);
+      setApprovalComment('');
       onApprovalUpdate?.();
       
     } catch (error) {
-      console.error('❌ Failed to approve timesheet:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to approve timesheet';
       showNotification(errorMessage, 'error');
     } finally {
@@ -109,13 +109,9 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
 
     setLoading('reject-timesheet', true);
     try {
-      console.log('🔄 Rejecting timesheet:', timesheet.id, 'with reason:', rejectionReason);
       
-      // Use the dedicated reject method from the service
-      await timesheetService.approve(timesheet.id, {
-        action: 'reject',
-        approverComments: rejectionReason
-      });
+      // Use the dedicated reject endpoint from the service
+      await timesheetService.updateStatus(timesheet.id, 'rejected', rejectionReason);
       
       showNotification(
         `Timesheet for ${timesheet.employee?.firstName} ${timesheet.employee?.lastName} rejected`,
@@ -127,7 +123,6 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
       onApprovalUpdate?.();
       
     } catch (error) {
-      console.error('❌ Failed to reject timesheet:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to reject timesheet';
       showNotification(errorMessage, 'error');
     } finally {
@@ -153,6 +148,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
   const getStatusColor = (status) => {
     const colors = {
       'Pending': 'warning',
+      'Submitted': 'warning',
       'Approved': 'success',
       'Rejected': 'error',
       'Draft': 'default'
@@ -219,7 +215,6 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
         onApprovalUpdate?.();
       }
     } catch (error) {
-      console.error('Failed to bulk approve timesheets:', error);
       showNotification('Failed to approve timesheets', 'error');
     } finally {
       setLoading('bulk-approve', false);
@@ -258,7 +253,6 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
         onApprovalUpdate?.();
       }
     } catch (error) {
-      console.error('Failed to bulk reject timesheets:', error);
       showNotification('Failed to reject timesheets', 'error');
     } finally {
       setLoading('bulk-reject', false);
@@ -725,9 +719,19 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
               </Box>
             </Box>
           )}
+          <TextField
+            fullWidth
+            label="Approval Comment (optional)"
+            multiline
+            rows={2}
+            value={approvalComment}
+            onChange={(e) => setApprovalComment(e.target.value)}
+            placeholder="Add a comment..."
+            sx={{ mt: 2 }}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setApprovalDialog(false)}>Cancel</Button>
+          <Button onClick={() => { setApprovalDialog(false); setApprovalComment(''); }}>Cancel</Button>
           <Button
             onClick={() => handleApprove(selectedTimesheet)}
             variant="contained"

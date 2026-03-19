@@ -14,6 +14,11 @@ class TimesheetService {
     return response.data.data;
   }
 
+  // Alias used by useTimesheetQueries hook
+  async getById(id) {
+    return this.get(id);
+  }
+
   // Create timesheet entry (save as draft)
   async create(data) {
     const response = await http.post('/timesheets', data);
@@ -74,14 +79,14 @@ class TimesheetService {
       ? `/timesheets?employeeId=${employeeId}`
       : '/timesheets';
     
-    const response = await http.get(url, { params: { ...params, limit: 50, sortBy: 'workDate', sortOrder: 'DESC' } });
+    const response = await http.get(url, { params: { ...params, limit: 50, sortBy: 'weekStartDate', sortOrder: 'DESC' } });
     return response.data;
   }
 
   // Get pending timesheets for approval
   async getPending() {
     const response = await http.get('/timesheets', { params: { status: 'submitted' } });
-    return response;
+    return response.data;
   }
 
   // Create batch of timesheets
@@ -92,7 +97,7 @@ class TimesheetService {
 
   // Get timesheets by week
   async getByWeek(weekStartDate, employeeId = null) {
-    const params = { startDate: weekStartDate };
+    const params = { weekStartDate: weekStartDate };
     
     // Include employeeId if provided (for admin users to filter specific employee)
     if (employeeId) {

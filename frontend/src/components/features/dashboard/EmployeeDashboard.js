@@ -19,7 +19,8 @@ import {
   ListItemText,
   ListItemIcon,
   CircularProgress,
-  Divider
+  Divider,
+  Alert
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -41,7 +42,7 @@ const EmployeeDashboard = () => {
   const { user } = useAuth();
 
   // Fetch employee dashboard stats using React Query
-  const { data: employeeStatsData, isLoading } = useQuery({
+  const { data: employeeStatsData, isLoading, isError } = useQuery({
     queryKey: ['dashboard-stats', 'employee', user?.employeeId || user?.id],
     queryFn: async () => {
       const response = await dashboardService.getEmployeeStats();
@@ -138,11 +139,19 @@ const EmployeeDashboard = () => {
     );
   }
 
+  if (isError) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert data-testid="employee-dashboard-error-alert" severity="error">Failed to load dashboard data. Please try refreshing the page.</Alert>
+      </Container>
+    );
+  }
+
   return (
     <Container maxWidth="md" sx={{ py: 2 }}>
       {/* Minimalistic Header */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" fontWeight="600" gutterBottom>
+        <Typography data-testid="employee-dashboard-heading" variant="h5" fontWeight="600" gutterBottom>
           Welcome, {user?.firstName}
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -152,7 +161,7 @@ const EmployeeDashboard = () => {
 
       {/* Essential Stats Only */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-pending">
           <StatCard
             title="Pending"
             value={(employeeStats.pendingRequests?.leaves || 0) + (employeeStats.pendingRequests?.timesheets || 0)}
@@ -161,7 +170,7 @@ const EmployeeDashboard = () => {
             color="warning"
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-this-month">
           <StatCard
             title="This Month"
             value={`${employeeStats.currentMonth?.hoursWorked || 0}h`}
@@ -170,7 +179,7 @@ const EmployeeDashboard = () => {
             color="primary"
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-leave-balance">
           <StatCard
             title="Leave Balance"
             value={employeeStats.leaveBalance?.annual?.remaining || 0}
@@ -179,7 +188,7 @@ const EmployeeDashboard = () => {
             color="success"
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="stat-card-upcoming-leaves">
           <StatCard
             title="Upcoming"
             value={employeeStats.upcomingLeaves?.length || 0}
@@ -192,7 +201,7 @@ const EmployeeDashboard = () => {
 
       {/* Essential Quick Actions Only */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="quick-action-timesheet">
           <QuickActionCard
             icon={<TimesheetIcon sx={{ fontSize: 28, color: 'primary.main' }} />}
             title="Timesheet"
@@ -201,7 +210,7 @@ const EmployeeDashboard = () => {
             color="primary"
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="quick-action-leave-request">
           <QuickActionCard
             icon={<LeaveIcon sx={{ fontSize: 28, color: 'warning.main' }} />}
             title="Leave Request"
@@ -210,7 +219,7 @@ const EmployeeDashboard = () => {
             color="warning"
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="quick-action-payslips">
           <QuickActionCard
             icon={<StatsIcon sx={{ fontSize: 28, color: 'secondary.main' }} />}
             title="Payslips"
@@ -219,7 +228,7 @@ const EmployeeDashboard = () => {
             color="secondary"
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={6} sm={3} data-testid="quick-action-profile">
           <QuickActionCard
             icon={<PersonIcon sx={{ fontSize: 28, color: 'info.main' }} />}
             title="Profile"

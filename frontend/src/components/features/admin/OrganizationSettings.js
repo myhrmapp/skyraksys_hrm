@@ -14,6 +14,7 @@ import {
 } from '@mui/icons-material';
 
 const OrganizationSettings = () => (
+  <div data-testid="organization-settings-page">
   <TabbedPage
     title="Organization"
     subtitle="Manage departments, positions, and holidays"
@@ -24,6 +25,7 @@ const OrganizationSettings = () => (
       { label: 'Holidays',    icon: <CalendarIcon fontSize="small" />, render: () => <HolidayCalendarPage embedded /> },
     ]}
   />
+  </div>
 );
 
 export default OrganizationSettings;

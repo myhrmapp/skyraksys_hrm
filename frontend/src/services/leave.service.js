@@ -85,19 +85,19 @@ class LeaveService {
   // Create a new leave balance
   async createBalance(data) {
     const response = await http.post("/admin/leave-balances", data);
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Update an existing leave balance
   async updateBalance(id, data) {
     const response = await http.put(`/admin/leave-balances/${id}`, data);
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Initialize balances for all employees
   async initializeBalances(data) {
     const response = await http.post("/admin/leave-balances/bulk/initialize", data);
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Get leave balances by employee and type (Admin)
@@ -106,7 +106,7 @@ class LeaveService {
     if (employeeId) url += `&employeeId=${employeeId}`;
     if (leaveTypeId) url += `&leaveTypeId=${leaveTypeId}`;
     const response = await http.get(url);
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // --- Manager Methods ---
@@ -114,25 +114,25 @@ class LeaveService {
   // Get pending leave requests for manager approval
   async getPendingForManager() {
     const response = await http.get("/leaves/pending-for-manager");
-    return response.data.data;
+    return normalizeResponse(response);
   }
 
   // Approve leave request (used by ManagerLeaveApproval)
   async approveLeave(leaveId, comments = '') {
     const response = await http.put(`/leaves/${leaveId}/approve`, { comments });
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Reject leave request (used by ManagerLeaveApproval)
   async rejectLeave(leaveId, comments) {
     const response = await http.put(`/leaves/${leaveId}/reject`, { comments });
-    return response.data;
+    return normalizeResponse(response);
   }
 
   // Get recent approvals
   async getRecentApprovals() {
     const response = await http.get("/leaves/recent-approvals");
-    return response.data.data;
+    return normalizeResponse(response);
   }
 
   // Get current user's own leave balance (any role)

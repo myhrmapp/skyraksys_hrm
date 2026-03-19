@@ -138,9 +138,9 @@ const ModernLeaveManagement = () => {
       escCsv(b.employee?.employeeId || ''),
       escCsv(b.employee?.department || ''),
       escCsv(b.leaveType?.name || ''),
-      escCsv(b.allocated ?? ''),
-      escCsv(b.used ?? ''),
-      escCsv(b.remaining ?? '')
+      escCsv(b.totalAccrued ?? b.allocated ?? ''),
+      escCsv(b.totalTaken ?? b.used ?? ''),
+      escCsv(b.balance ?? b.remaining ?? '')
     ].join(','));
     const csv = [header, ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -233,7 +233,7 @@ const ModernLeaveManagement = () => {
       (request.employeeId?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || request.status?.toLowerCase() === statusFilter?.toLowerCase();
-    const matchesType = typeFilter === 'all' || request.leaveType === typeFilter;
+    const matchesType = typeFilter === 'all' || request.leaveType?.name?.toLowerCase() === typeFilter || request.leaveType?.id?.toString() === typeFilter;
     
     return matchesSearch && matchesStatus && matchesType;
   });
@@ -324,6 +324,8 @@ const ModernLeaveManagement = () => {
                   <MenuItem value="pending">Pending</MenuItem>
                   <MenuItem value="approved">Approved</MenuItem>
                   <MenuItem value="rejected">Rejected</MenuItem>
+                  <MenuItem value="cancelled">Cancelled</MenuItem>
+                  <MenuItem value="cancellation requested">Cancellation Requested</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -542,6 +544,7 @@ const ModernLeaveManagement = () => {
                                 <IconButton
                                   size="small"
                                   aria-label="Approve leave request"
+                                  data-testid="leave-approve-btn"
                                   onClick={() => setConfirmAction({ id: leave.id, action: 'Approved' })}
                                   sx={{
                                     bgcolor: alpha(theme.palette.success.main, 0.1),
@@ -556,6 +559,7 @@ const ModernLeaveManagement = () => {
                                 <IconButton
                                   size="small"
                                   aria-label="Reject leave request"
+                                  data-testid="leave-reject-btn"
                                   onClick={() => setConfirmAction({ id: leave.id, action: 'Rejected' })}
                                   sx={{
                                     bgcolor: alpha(theme.palette.error.main, 0.1),

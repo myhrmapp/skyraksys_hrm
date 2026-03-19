@@ -143,7 +143,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
           address: employee.address,
           city: employee.city,
           state: employee.state,
-          zipCode: employee.zipCode,
+          pinCode: employee.pinCode,
           emergencyContactName: employee.emergencyContactName,
           emergencyContactPhone: employee.emergencyContactPhone,
           emergencyContactRelation: employee.emergencyContactRelation,
@@ -158,7 +158,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
           // 2. Upload photo if selected
           if (selectedPhoto) {
             try {
-              const photoResponse = await employeeService.uploadPhoto(id, selectedPhoto);
+              const photoResponse = await employeeService.uploadPhoto(employeeId, selectedPhoto);
               if (photoResponse.success && photoResponse.data?.photoUrl) {
                 updated.photoUrl = photoResponse.data.photoUrl;
                 setPhotoPreview(`${process.env.REACT_APP_BACKEND_URL || ''}${updated.photoUrl}`);

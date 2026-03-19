@@ -351,7 +351,7 @@ router.put('/:id', authenticateToken, authorize('admin', 'hr'), async (req, res,
       });
     }
 
-    const { title, description, departmentId, level } = value;
+    const { title, description, departmentId, level, code, minSalary, maxSalary, requirements, responsibilities, isActive } = value;
     
     const position = await Position.findByPk(req.params.id);
     if (!position) {
@@ -373,10 +373,16 @@ router.put('/:id', authenticateToken, authorize('admin', 'hr'), async (req, res,
     }
 
     await position.update({
-      title: title || position.title,
-      description: description || position.description,
-      departmentId: departmentId || position.departmentId,
-      level: level || position.level
+      title: title !== undefined ? title : position.title,
+      description: description !== undefined ? description : position.description,
+      departmentId: departmentId !== undefined ? departmentId : position.departmentId,
+      level: level !== undefined ? level : position.level,
+      ...(code !== undefined && { code }),
+      ...(minSalary !== undefined && { minSalary }),
+      ...(maxSalary !== undefined && { maxSalary }),
+      ...(requirements !== undefined && { requirements }),
+      ...(responsibilities !== undefined && { responsibilities }),
+      ...(isActive !== undefined && { isActive })
     });
 
     const updatedPosition = await Position.findByPk(position.id, {
