@@ -51,6 +51,7 @@ const ForgotPassword = () => {
 
   return (
     <Box
+      data-testid="forgot-password-page"
       sx={{
         minHeight: '100vh',
         display: 'flex',

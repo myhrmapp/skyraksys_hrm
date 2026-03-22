@@ -126,6 +126,7 @@ const PhotoUploadSimple = ({
         startIcon={<PhotoCameraIcon />}
         onClick={triggerFileInput}
         size="small"
+        data-testid="photo-upload-btn"
       >
         {photo ? 'Change Photo' : label}
       </Button>

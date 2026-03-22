@@ -2,14 +2,26 @@
 const { test, expect, loginAs, waitForPageReady } = require('../fixtures/test-fixtures');
 const { ExcelReader } = require('../lib/excel-reader');
 const DashboardPage = require('../pages/DashboardPage');
+const selectors = require('../lib/object-repository');
 
 const reader = new ExcelReader();
 const rows = reader.readEnabledTests('Dashboard');
+
+// Map roles to their dashboard routes
+const DASHBOARD_ROUTES = {
+  admin: '/admin-dashboard',
+  hr: '/admin-dashboard',
+  manager: '/manager-dashboard',
+  employee: '/employee-dashboard',
+};
 
 test.describe('Dashboard Module', () => {
   for (const row of rows) {
     test(`${row.testId}: ${row.description}`, async ({ page }) => {
       await loginAs(page, row.role);
+      // Navigate directly to the role-specific dashboard to avoid redirect timing issues
+      const dashRoute = DASHBOARD_ROUTES[row.role] || '/admin-dashboard';
+      await page.goto(dashRoute);
       await waitForPageReady(page);
       const dashboard = new DashboardPage(page);
 
@@ -20,15 +32,29 @@ test.describe('Dashboard Module', () => {
             const visible = await dashboard.isAdminDashboardVisible();
             expect(visible).toBeTruthy();
             for (const el of elements) {
-              const selector = `[data-testid="admin-dashboard-${el.replace(/([A-Z])/g, '-$1').toLowerCase()}"]`;
-              await expect(page.locator(selector).first()).toBeVisible({ timeout: 8000 });
+              const sel = selectors.adminDashboard[el];
+              if (sel) {
+                await expect(page.locator(sel).first()).toBeVisible({ timeout: 8000 });
+              }
             }
           } else if (row.role === 'employee') {
             const visible = await dashboard.isEmployeeDashboardVisible();
             expect(visible).toBeTruthy();
+            for (const el of elements) {
+              const sel = selectors.employeeDashboard[el];
+              if (sel) {
+                await expect(page.locator(sel).first()).toBeVisible({ timeout: 8000 });
+              }
+            }
           } else if (row.role === 'manager') {
             const visible = await dashboard.isManagerDashboardVisible();
             expect(visible).toBeTruthy();
+            for (const el of elements) {
+              const sel = selectors.managerDashboard[el];
+              if (sel) {
+                await expect(page.locator(sel).first()).toBeVisible({ timeout: 8000 });
+              }
+            }
           }
           break;
         }

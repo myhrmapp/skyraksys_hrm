@@ -259,7 +259,7 @@ test.describe('Org — Flow 4: UI Rendering', () => {
     const url = page.url();
     const unauthorizedOnPage = await page.locator('body').textContent();
     const isRedirected = url.includes('/login') || url.includes('/employee-dashboard');
-    const isUnauthorized = /unauthorized|forbidden|403|not allowed/i.test(unauthorizedOnPage || '');
+    const isUnauthorized = /unauthorized|forbidden|403|not allowed|access.denied/i.test(unauthorizedOnPage || '');
     expect(isRedirected || isUnauthorized).toBe(true);
     await logout(page);
   });

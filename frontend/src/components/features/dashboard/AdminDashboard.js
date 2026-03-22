@@ -241,7 +241,7 @@ const Dashboard = () => {
               fullWidth
               variant="outlined"
               startIcon={<TimesheetIcon />}
-              onClick={() => navigate('/timesheet-approval')}
+              onClick={() => navigate('/timesheets')}
               size="small"
             >
               Timesheets
@@ -253,7 +253,7 @@ const Dashboard = () => {
               fullWidth
               variant="outlined"
               startIcon={<PayrollIcon />}
-              onClick={() => navigate('/payroll')}
+              onClick={() => navigate('/payroll-management')}
               size="small"
             >
               Payroll
@@ -339,7 +339,7 @@ const Dashboard = () => {
             subtitle="timesheets"
             icon={<TimesheetIcon />}
             color="info"
-            onClick={() => navigate('/timesheet-approval')}
+            onClick={() => navigate('/timesheets')}
           />
         </Grid>
         <Grid item xs={6} sm={3} data-testid="stat-card-draft-timesheets">
@@ -367,7 +367,7 @@ const Dashboard = () => {
             subtitle={`of ${stats.payroll.total}`}
             icon={<PayrollIcon />}
             color="primary"
-            onClick={() => navigate('/payroll')}
+            onClick={() => navigate('/payroll-management')}
           />
         </Grid>
       </Grid>

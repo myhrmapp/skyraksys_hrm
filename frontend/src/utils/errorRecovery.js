@@ -378,7 +378,9 @@ export const recoveryStrategies = {
         const { accessToken } = await response.json();
         localStorage.setItem('accessToken', accessToken);
         
-        console.log(`Token refreshed successfully for operation ${operationId}`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Token refreshed successfully for operation ${operationId}`);
+        }
       } catch (refreshError) {
         // Clear tokens on refresh failure
         localStorage.removeItem('accessToken');
@@ -412,7 +414,9 @@ export const recoveryStrategies = {
           timeout: 5000,
           cache: 'no-cache'
         });
-        console.log(`Network connectivity restored for operation ${operationId}`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Network connectivity restored for operation ${operationId}`);
+        }
       } catch (connectivityError) {
         throw new Error('Network connectivity check failed');
       }
@@ -432,7 +436,9 @@ export const recoveryStrategies = {
       if ('caches' in window) {
         try {
           await caches.delete('api-cache');
-          console.log(`Cache cleared for operation ${operationId}`);
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`Cache cleared for operation ${operationId}`);
+          }
         } catch (cacheError) {
           console.warn('Failed to clear cache:', cacheError);
         }
@@ -457,7 +463,9 @@ export const recoveryStrategies = {
       const retryAfter = error.response?.headers?.['retry-after'];
       const backoffTime = retryAfter ? parseInt(retryAfter) * 1000 : 5000;
       
-      console.log(`Server overload detected for operation ${operationId}, backing off for ${backoffTime}ms`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Server overload detected for operation ${operationId}, backing off for ${backoffTime}ms`);
+      }
       await new Promise(resolve => setTimeout(resolve, backoffTime));
     }
   }

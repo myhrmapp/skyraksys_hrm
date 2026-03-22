@@ -157,16 +157,16 @@ export default function AttendanceManagement() {
       headerName: 'Employee',
       flex: 1,
       minWidth: 200,
-      valueGetter: (value, row) => {
-        const emp = row.employee;
-        return emp ? `${emp.firstName} ${emp.lastName} (${emp.employeeId})` : row.employeeId;
+      valueGetter: (params) => {
+        const emp = params.row.employee;
+        return emp ? `${emp.firstName} ${emp.lastName} (${emp.employeeId})` : params.row.employeeId;
       }
     },
     {
       field: 'department',
       headerName: 'Department',
       width: 150,
-      valueGetter: (value, row) => row.employee?.department?.name || '—'
+      valueGetter: (params) => params.row.employee?.department?.name || '—'
     },
     {
       field: 'checkIn',

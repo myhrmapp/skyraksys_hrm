@@ -260,7 +260,8 @@ test.describe('Admin Settings — Flow 5: Employee Reviews', () => {
   test('5b — Performance dashboard page renders for admin', async ({ page }) => {
     await loginViaUI(page, 'admin');
     await page.goto('/performance-dashboard');
-    await waitForPageLoad(page);
+    // Skip waitForPageLoad — this page has permanent MuiLinearProgress bars
+    await page.waitForLoadState('networkidle');
     const url = page.url();
     // Page may render or redirect — either is acceptable
     const rendered = !url.includes('/login');

@@ -1,0 +1,4967 @@
+{
+  "generatedAt": "2026-03-21T19:10:22.321Z",
+  "appName": "SkyrakSys HRM",
+  "version": "1.0.0",
+  "totalGuides": 99,
+  "totalWithVideo": 99,
+  "modules": [
+    {
+      "module": "Employee Management",
+      "icon": "PersonAdd",
+      "color": "#1976d2",
+      "order": 1,
+      "guides": [
+        {
+          "testId": "BW-010",
+          "title": "Full employee onboarding: add employee with all 4 tabs filled",
+          "module": "Employee Management",
+          "icon": "PersonAdd",
+          "color": "#1976d2",
+          "order": 1,
+          "action": "onboardingFull",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "smoke",
+            "onboarding"
+          ],
+          "videoUrl": "guides/videos/BW-010.webm",
+          "screenshotUrl": "guides/screenshots/BW-010.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Employees** → Click **Add Employee**",
+            "Fill in personal details (name, email, phone)",
+            "Click **Next** → Fill employment info (department, position)",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:54:17.762Z"
+        },
+        {
+          "testId": "BW-011",
+          "title": "Create user login for newly onboarded employee",
+          "module": "Employee Management",
+          "icon": "PersonAdd",
+          "color": "#1976d2",
+          "order": 1,
+          "action": "onboardingCreateLogin",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "onboarding"
+          ],
+          "videoUrl": "guides/videos/BW-011.webm",
+          "screenshotUrl": "guides/screenshots/BW-011.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Employees** → Click **Add Employee**",
+            "Fill in personal details (name, email, phone)",
+            "Search employee → Click **Create Login**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:54:23.224Z"
+        },
+        {
+          "testId": "BW-012",
+          "title": "New employee logs in and sees employee dashboard",
+          "module": "Employee Management",
+          "icon": "PersonAdd",
+          "color": "#1976d2",
+          "order": 1,
+          "action": "onboardingVerifyDashboard",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "onboarding"
+          ],
+          "videoUrl": "guides/videos/BW-012.webm",
+          "screenshotUrl": "guides/screenshots/BW-012.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **Employees** → Click **Add Employee**",
+            "Fill in personal details (name, email, phone)",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:54:25.889Z"
+        },
+        {
+          "testId": "BW-013",
+          "title": "HR assigns department and position to new employee",
+          "module": "Employee Management",
+          "icon": "PersonAdd",
+          "color": "#1976d2",
+          "order": 1,
+          "action": "onboardingAssignDepartment",
+          "role": "hr",
+          "roleDisplay": "HR Manager",
+          "tags": [
+            "onboarding"
+          ],
+          "videoUrl": "guides/videos/BW-013.webm",
+          "screenshotUrl": "guides/screenshots/BW-013.png",
+          "steps": [
+            "Log in as **HR Manager**",
+            "Navigate to **Employees** → Click **Add Employee**",
+            "Fill in personal details (name, email, phone)",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:54:29.656Z"
+        },
+        {
+          "testId": "BW-190",
+          "title": "Full employee CRUD: create with all fields → verify profile → edit name → delete",
+          "module": "Employee Management",
+          "icon": "People",
+          "color": "#1976d2",
+          "order": 1,
+          "action": "employeeCreateEditDelete",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "smoke",
+            "employee"
+          ],
+          "videoUrl": "guides/videos/BW-190.webm",
+          "screenshotUrl": "guides/screenshots/BW-190.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Add → Edit → Delete an employee end-to-end",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:40.725Z"
+        },
+        {
+          "testId": "BW-191",
+          "title": "Search for employee, filter by Active status, filter by department",
+          "module": "Employee Management",
+          "icon": "People",
+          "color": "#1976d2",
+          "order": 1,
+          "action": "employeeSearchFilter",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "employee"
+          ],
+          "videoUrl": "guides/videos/BW-191.webm",
+          "screenshotUrl": "guides/screenshots/BW-191.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Use search bar and status/department filters",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:51.504Z"
+        },
+        {
+          "testId": "BW-192",
+          "title": "Admin exports employee list and verifies download",
+          "module": "Employee Management",
+          "icon": "People",
+          "color": "#1976d2",
+          "order": 1,
+          "action": "employeeExport",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "employee"
+          ],
+          "videoUrl": "guides/videos/BW-192.webm",
+          "screenshotUrl": "guides/screenshots/BW-192.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Click **Export** button → Verify download",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:55.273Z"
+        },
+        {
+          "testId": "BW-193",
+          "title": "Submit employee form with invalid email, phone, PAN — all validation errors shown",
+          "module": "Employee Management",
+          "icon": "People",
+          "color": "#1976d2",
+          "order": 1,
+          "action": "employeeFormValidation",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "employee",
+            "validation"
+          ],
+          "videoUrl": "guides/videos/BW-193.webm",
+          "screenshotUrl": "guides/screenshots/BW-193.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:59.852Z"
+        },
+        {
+          "testId": "BW-194",
+          "title": "View employee profile and navigate all 4 tabs: personal, employment, emergency, statutory",
+          "module": "Employee Management",
+          "icon": "People",
+          "color": "#1976d2",
+          "order": 1,
+          "action": "employeeViewAllTabs",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "employee"
+          ],
+          "videoUrl": "guides/videos/BW-194.webm",
+          "screenshotUrl": "guides/screenshots/BW-194.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Click through Personal, Employment, Emergency, Statutory tabs",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:04:03.474Z"
+        },
+        {
+          "testId": "BW-195",
+          "title": "Manager sees only their team members (fewer than admin)",
+          "module": "Employee Management",
+          "icon": "People",
+          "color": "#1976d2",
+          "order": 1,
+          "action": "employeeManagerTeamView",
+          "role": "manager",
+          "roleDisplay": "Team Lead / Manager",
+          "tags": [
+            "employee",
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-195.webm",
+          "screenshotUrl": "guides/screenshots/BW-195.png",
+          "steps": [
+            "Log in as **Team Lead / Manager**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:04:06.976Z"
+        },
+        {
+          "testId": "BW-196",
+          "title": "Admin fills full salary structure (basic + all allowances + deductions) and verifies save",
+          "module": "Employee Management",
+          "icon": "People",
+          "color": "#1976d2",
+          "order": 1,
+          "action": "employeeSalaryStructure",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "employee",
+            "payroll"
+          ],
+          "videoUrl": "guides/videos/BW-196.webm",
+          "screenshotUrl": "guides/screenshots/BW-196.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:04:11.166Z"
+        }
+      ]
+    },
+    {
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "guides": [
+        {
+          "testId": "BW-020",
+          "title": "Employee submits casual leave request with dates and reason",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveRequestSubmit",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "smoke",
+            "leave"
+          ],
+          "videoUrl": "guides/videos/BW-020.webm",
+          "screenshotUrl": "guides/screenshots/BW-020.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **Leave Request** → Select leave type",
+            "Fill start/end dates and reason → Click **Submit**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:54:38.545Z"
+        },
+        {
+          "testId": "BW-021",
+          "title": "Manager approves the pending leave request",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveManagerApprove",
+          "role": "manager",
+          "roleDisplay": "Team Lead / Manager",
+          "tags": [
+            "leave"
+          ],
+          "videoUrl": "guides/videos/BW-021.webm",
+          "screenshotUrl": "guides/screenshots/BW-021.png",
+          "steps": [
+            "Log in as **Team Lead / Manager**",
+            "Navigate to **Leave Management** → Click **Approve**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:54:42.113Z"
+        },
+        {
+          "testId": "BW-022",
+          "title": "Employee verifies leave request shows Approved status",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveVerifyApproved",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "leave"
+          ],
+          "videoUrl": "guides/videos/BW-022.webm",
+          "screenshotUrl": "guides/screenshots/BW-022.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **Leave Management** → Click **Approve**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:54:44.460Z"
+        },
+        {
+          "testId": "BW-023",
+          "title": "Employee submits sick leave, manager rejects with reason",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveRequestReject",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "leave"
+          ],
+          "videoUrl": "guides/videos/BW-023.webm",
+          "screenshotUrl": "guides/screenshots/BW-023.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **Leave Request** → Select leave type",
+            "Navigate to **Leave Management** → Click **Reject**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:54:53.572Z"
+        },
+        {
+          "testId": "BW-024",
+          "title": "Employee views leave balance cards after approved leave",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveBalanceCheck",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "leave"
+          ],
+          "videoUrl": "guides/videos/BW-024.webm",
+          "screenshotUrl": "guides/screenshots/BW-024.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **Leave Requests** → View balance cards",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:54:55.961Z"
+        },
+        {
+          "testId": "BW-025",
+          "title": "Employee submits leave then cancels it before approval",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveCancelPending",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "leave"
+          ],
+          "videoUrl": "guides/videos/BW-025.webm",
+          "screenshotUrl": "guides/screenshots/BW-025.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **My Leaves** → Click **Cancel** on pending request",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:55:04.123Z"
+        },
+        {
+          "testId": "BW-026",
+          "title": "Employee submits leave overlapping with already-approved leave — should warn/reject",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveOverlapCheck",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "leave",
+            "validation"
+          ],
+          "videoUrl": "guides/videos/BW-026.webm",
+          "screenshotUrl": "guides/screenshots/BW-026.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:55:11.057Z"
+        },
+        {
+          "testId": "BW-027",
+          "title": "Employee tries to submit leave when balance is zero — should reject",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveBalanceExhausted",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "leave",
+            "validation"
+          ],
+          "videoUrl": "guides/videos/BW-027.webm",
+          "screenshotUrl": "guides/screenshots/BW-027.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **Leave Requests** → View balance cards",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:55:17.940Z"
+        },
+        {
+          "testId": "BW-028",
+          "title": "Admin views leave management, filters by status, searches by employee name",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveAdminManagement",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "leave"
+          ],
+          "videoUrl": "guides/videos/BW-028.webm",
+          "screenshotUrl": "guides/screenshots/BW-028.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Open **Leave Management** → Search and filter requests",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:55:24.608Z"
+        },
+        {
+          "testId": "BW-029",
+          "title": "Admin adds new leave type, verifies it appears, then deletes it",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveTypesCRUD",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "leave",
+            "admin"
+          ],
+          "videoUrl": "guides/videos/BW-029.webm",
+          "screenshotUrl": "guides/screenshots/BW-029.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Open **Leave Types** → Add / Edit / Delete leave types",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:55:48.147Z"
+        },
+        {
+          "testId": "BW-030",
+          "title": "Admin opens leave accrual, previews, and runs accrual process",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveAccrualRun",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "leave",
+            "admin"
+          ],
+          "videoUrl": "guides/videos/BW-030.webm",
+          "screenshotUrl": "guides/screenshots/BW-030.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:55:55.487Z"
+        },
+        {
+          "testId": "BW-031",
+          "title": "Employee submits 3-day leave, manager approves, balance deducted by 3",
+          "module": "Leave Management",
+          "icon": "EventBusy",
+          "color": "#ed6c02",
+          "order": 2,
+          "action": "leaveMultiDay",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "leave"
+          ],
+          "videoUrl": "guides/videos/BW-031.webm",
+          "screenshotUrl": "guides/screenshots/BW-031.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:56:04.465Z"
+        }
+      ]
+    },
+    {
+      "module": "Attendance",
+      "icon": "AccessTime",
+      "color": "#2e7d32",
+      "order": 3,
+      "guides": [
+        {
+          "testId": "BW-040",
+          "title": "Employee checks in, verifies status, checks out, verifies status",
+          "module": "Attendance",
+          "icon": "AccessTime",
+          "color": "#2e7d32",
+          "order": 3,
+          "action": "attendanceCheckInOut",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "smoke",
+            "attendance"
+          ],
+          "videoUrl": "guides/videos/BW-040.webm",
+          "screenshotUrl": "guides/screenshots/BW-040.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **My Attendance** → Click **Check In** then **Check Out**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:56:10.564Z"
+        },
+        {
+          "testId": "BW-041",
+          "title": "Admin marks attendance for an employee via management UI",
+          "module": "Attendance",
+          "icon": "AccessTime",
+          "color": "#2e7d32",
+          "order": 3,
+          "action": "attendanceAdminMark",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "attendance"
+          ],
+          "videoUrl": "guides/videos/BW-041.webm",
+          "screenshotUrl": "guides/screenshots/BW-041.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Attendance Management** → Use filters/mark attendance",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:56:14.782Z"
+        },
+        {
+          "testId": "BW-042",
+          "title": "Employee navigates to previous month and verifies attendance data grid",
+          "module": "Attendance",
+          "icon": "AccessTime",
+          "color": "#2e7d32",
+          "order": 3,
+          "action": "attendanceMonthNav",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "attendance"
+          ],
+          "videoUrl": "guides/videos/BW-042.webm",
+          "screenshotUrl": "guides/screenshots/BW-042.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **My Attendance** → Change month/year dropdowns",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:56:18.922Z"
+        },
+        {
+          "testId": "BW-043",
+          "title": "Admin filters attendance by date and verifies results",
+          "module": "Attendance",
+          "icon": "AccessTime",
+          "color": "#2e7d32",
+          "order": 3,
+          "action": "attendanceAdminFilter",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "attendance"
+          ],
+          "videoUrl": "guides/videos/BW-043.webm",
+          "screenshotUrl": "guides/screenshots/BW-043.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Attendance Management** → Use filters/mark attendance",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:56:23.225Z"
+        },
+        {
+          "testId": "BW-044",
+          "title": "Employee checks in but forgets check-out — verify status shows CHECKED IN",
+          "module": "Attendance",
+          "icon": "AccessTime",
+          "color": "#2e7d32",
+          "order": 3,
+          "action": "attendanceMissedCheckout",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "attendance",
+            "edge"
+          ],
+          "videoUrl": "guides/videos/BW-044.webm",
+          "screenshotUrl": "guides/screenshots/BW-044.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:56:26.713Z"
+        }
+      ]
+    },
+    {
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "guides": [
+        {
+          "testId": "BW-050",
+          "title": "Employee fills full week hours (Mon-Fri 8h each), saves draft",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetWeeklyEntry",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "smoke",
+            "timesheet"
+          ],
+          "videoUrl": "guides/videos/BW-050.webm",
+          "screenshotUrl": "guides/screenshots/BW-050.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **Timesheets** → Add task → Fill weekly hours",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:56:35.302Z"
+        },
+        {
+          "testId": "BW-051",
+          "title": "Employee submits saved timesheet for approval",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetSubmit",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "timesheet"
+          ],
+          "videoUrl": "guides/videos/BW-051.webm",
+          "screenshotUrl": "guides/screenshots/BW-051.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Click **Submit** to send timesheet for approval",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:56:42.669Z"
+        },
+        {
+          "testId": "BW-052",
+          "title": "Submitted timesheet is read-only for employee",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetReadOnlyAfterSubmit",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "timesheet"
+          ],
+          "videoUrl": "guides/videos/BW-052.webm",
+          "screenshotUrl": "guides/screenshots/BW-052.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Click **Submit** to send timesheet for approval",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:56:45.224Z"
+        },
+        {
+          "testId": "BW-053",
+          "title": "Manager approves submitted timesheet with comments",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetManagerApprove",
+          "role": "manager",
+          "roleDisplay": "Team Lead / Manager",
+          "tags": [
+            "timesheet"
+          ],
+          "videoUrl": "guides/videos/BW-053.webm",
+          "screenshotUrl": "guides/screenshots/BW-053.png",
+          "steps": [
+            "Log in as **Team Lead / Manager**",
+            "Navigate to **Timesheet Approvals** → Click **Approve**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:56:50.341Z"
+        },
+        {
+          "testId": "BW-054",
+          "title": "Manager rejects submitted timesheet with mandatory comments",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetManagerReject",
+          "role": "manager",
+          "roleDisplay": "Team Lead / Manager",
+          "tags": [
+            "timesheet"
+          ],
+          "videoUrl": "guides/videos/BW-054.webm",
+          "screenshotUrl": "guides/screenshots/BW-054.png",
+          "steps": [
+            "Log in as **Team Lead / Manager**",
+            "Navigate to **Timesheet Approvals** → Click **Reject** with comments",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:56:55.485Z"
+        },
+        {
+          "testId": "BW-055",
+          "title": "Employee edits rejected timesheet and resubmits",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetResubmitAfterReject",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "timesheet"
+          ],
+          "videoUrl": "guides/videos/BW-055.webm",
+          "screenshotUrl": "guides/screenshots/BW-055.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **Timesheet Approvals** → Click **Reject** with comments",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:01.166Z"
+        },
+        {
+          "testId": "BW-056",
+          "title": "Manager selects multiple timesheets and bulk-approves",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetBulkApprove",
+          "role": "manager",
+          "roleDisplay": "Team Lead / Manager",
+          "tags": [
+            "timesheet"
+          ],
+          "videoUrl": "guides/videos/BW-056.webm",
+          "screenshotUrl": "guides/screenshots/BW-056.png",
+          "steps": [
+            "Log in as **Team Lead / Manager**",
+            "Navigate to **Timesheet Approvals** → Click **Approve**",
+            "Select multiple timesheets → Use **Bulk Approve**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:06.331Z"
+        },
+        {
+          "testId": "BW-057",
+          "title": "Employee exports timesheet history to file",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetHistoryExport",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "timesheet"
+          ],
+          "videoUrl": "guides/videos/BW-057.webm",
+          "screenshotUrl": "guides/screenshots/BW-057.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **Timesheet History** → View/export past timesheets",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:10.278Z"
+        },
+        {
+          "testId": "BW-058",
+          "title": "Employee adds 2 task rows with different projects, fills hours for both",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetMultiProject",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "timesheet"
+          ],
+          "videoUrl": "guides/videos/BW-058.webm",
+          "screenshotUrl": "guides/screenshots/BW-058.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:15.067Z"
+        },
+        {
+          "testId": "BW-059",
+          "title": "Employee enters >24 hours in a day — validation rejects",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetValidation",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "timesheet",
+            "validation"
+          ],
+          "videoUrl": "guides/videos/BW-059.webm",
+          "screenshotUrl": "guides/screenshots/BW-059.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:19.317Z"
+        },
+        {
+          "testId": "BW-060",
+          "title": "Empty timesheet submit is blocked",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetEmptySubmitBlocked",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "timesheet",
+            "validation"
+          ],
+          "videoUrl": "guides/videos/BW-060.webm",
+          "screenshotUrl": "guides/screenshots/BW-060.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Click **Submit** to send timesheet for approval",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:21.958Z"
+        },
+        {
+          "testId": "BW-061",
+          "title": "Employee enters >40 weekly hours — overtime indicator appears",
+          "module": "Timesheets",
+          "icon": "Schedule",
+          "color": "#9c27b0",
+          "order": 4,
+          "action": "timesheetOvertimeAlert",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "timesheet",
+            "validation"
+          ],
+          "videoUrl": "guides/videos/BW-061.webm",
+          "screenshotUrl": "guides/screenshots/BW-061.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:25.956Z"
+        }
+      ]
+    },
+    {
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "guides": [
+        {
+          "testId": "BW-070",
+          "title": "Admin navigates payroll management page and verifies all 4 tabs exist",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollPageAndTabs",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "smoke",
+            "payroll"
+          ],
+          "videoUrl": "guides/videos/BW-070.webm",
+          "screenshotUrl": "guides/screenshots/BW-070.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Payroll Management** → Review tabs",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:29.159Z"
+        },
+        {
+          "testId": "BW-071",
+          "title": "Admin navigates to generate tab, selects employees, clicks validate & generate",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollGenerate",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "payroll"
+          ],
+          "videoUrl": "guides/videos/BW-071.webm",
+          "screenshotUrl": "guides/screenshots/BW-071.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Go to **Generate** tab → Click **Validate & Generate**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:33.430Z"
+        },
+        {
+          "testId": "BW-072",
+          "title": "Admin bulk-finalizes generated payslips",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollFinalize",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "payroll"
+          ],
+          "videoUrl": "guides/videos/BW-072.webm",
+          "screenshotUrl": "guides/screenshots/BW-072.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Select payroll records → Click **Finalize**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:39.307Z"
+        },
+        {
+          "testId": "BW-073",
+          "title": "Admin marks finalized payslips as paid",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollMarkPaid",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "payroll"
+          ],
+          "videoUrl": "guides/videos/BW-073.webm",
+          "screenshotUrl": "guides/screenshots/BW-073.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Select finalized records → Click **Mark as Paid**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:45.298Z"
+        },
+        {
+          "testId": "BW-074",
+          "title": "Employee views own payslips page, checks summary cards and table",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollEmployeeView",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "payroll"
+          ],
+          "videoUrl": "guides/videos/BW-074.webm",
+          "screenshotUrl": "guides/screenshots/BW-074.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **My Payslips** → View summary and history",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:48.108Z"
+        },
+        {
+          "testId": "BW-075",
+          "title": "Employee downloads a payslip PDF",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollEmployeeDownload",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "payroll"
+          ],
+          "videoUrl": "guides/videos/BW-075.webm",
+          "screenshotUrl": "guides/screenshots/BW-075.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **My Payslips** → View summary and history",
+            "Click **Download** on a payslip row",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:50.601Z"
+        },
+        {
+          "testId": "BW-076",
+          "title": "Admin searches payslips and exports to file",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollSearchAndExport",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "payroll"
+          ],
+          "videoUrl": "guides/videos/BW-076.webm",
+          "screenshotUrl": "guides/screenshots/BW-076.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Use search bar → Click **Export**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:55.324Z"
+        },
+        {
+          "testId": "BW-077",
+          "title": "Admin views payroll template configuration page",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollTemplateConfig",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "payroll"
+          ],
+          "videoUrl": "guides/videos/BW-077.webm",
+          "screenshotUrl": "guides/screenshots/BW-077.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Payroll Template Config**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:57:58.318Z"
+        },
+        {
+          "testId": "BW-078",
+          "title": "HR accesses payroll management with full read/export permissions",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollHRAccess",
+          "role": "hr",
+          "roleDisplay": "HR Manager",
+          "tags": [
+            "payroll",
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-078.webm",
+          "screenshotUrl": "guides/screenshots/BW-078.png",
+          "steps": [
+            "Log in as **HR Manager**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:58:02.152Z"
+        },
+        {
+          "testId": "BW-079",
+          "title": "Employee cannot access payroll management page",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollEmployeeRBAC",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "payroll",
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-079.webm",
+          "screenshotUrl": "guides/screenshots/BW-079.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **My Payslips** → View summary and history",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:58:06.643Z"
+        },
+        {
+          "testId": "BW-080",
+          "title": "Verify generated payslip amounts match employee salary components (basic + allowances - deductions)",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollSalaryBreakdown",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "payroll",
+            "accuracy"
+          ],
+          "videoUrl": "guides/videos/BW-080.webm",
+          "screenshotUrl": "guides/screenshots/BW-080.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:58:10.119Z"
+        },
+        {
+          "testId": "BW-081",
+          "title": "Admin re-generates payroll for a month that already has payslips",
+          "module": "Payroll",
+          "icon": "Payment",
+          "color": "#d32f2f",
+          "order": 5,
+          "action": "payrollReprocess",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "payroll",
+            "edge"
+          ],
+          "videoUrl": "guides/videos/BW-081.webm",
+          "screenshotUrl": "guides/screenshots/BW-081.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:58:14.449Z"
+        }
+      ]
+    },
+    {
+      "module": "Tasks & Projects",
+      "icon": "Assignment",
+      "color": "#0288d1",
+      "order": 6,
+      "guides": [
+        {
+          "testId": "BW-090",
+          "title": "Employee views my tasks, filters by priority High",
+          "module": "Tasks & Projects",
+          "icon": "Assignment",
+          "color": "#0288d1",
+          "order": 6,
+          "action": "taskViewAndFilter",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "smoke",
+            "tasks"
+          ],
+          "videoUrl": "guides/videos/BW-090.webm",
+          "screenshotUrl": "guides/screenshots/BW-090.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **My Tasks** → Use priority filter",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:58:18.064Z"
+        },
+        {
+          "testId": "BW-091",
+          "title": "Employee changes task status from Not Started to In Progress",
+          "module": "Tasks & Projects",
+          "icon": "Assignment",
+          "color": "#0288d1",
+          "order": 6,
+          "action": "taskStatusChange",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "tasks"
+          ],
+          "videoUrl": "guides/videos/BW-091.webm",
+          "screenshotUrl": "guides/screenshots/BW-091.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Click status dropdown on a task → Select new status",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:58:22.440Z"
+        },
+        {
+          "testId": "BW-092",
+          "title": "Admin creates project, verifies it appears in project list",
+          "module": "Tasks & Projects",
+          "icon": "Assignment",
+          "color": "#0288d1",
+          "order": 6,
+          "action": "projectCreateAndVerify",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "tasks"
+          ],
+          "videoUrl": "guides/videos/BW-092.webm",
+          "screenshotUrl": "guides/screenshots/BW-092.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Project Config** → Click **Add Project** → Fill form",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:58:32.713Z"
+        },
+        {
+          "testId": "BW-093",
+          "title": "Admin creates a task under the project, verifies task tab shows it",
+          "module": "Tasks & Projects",
+          "icon": "Assignment",
+          "color": "#0288d1",
+          "order": 6,
+          "action": "taskCreateUnderProject",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "tasks"
+          ],
+          "videoUrl": "guides/videos/BW-093.webm",
+          "screenshotUrl": "guides/screenshots/BW-093.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Task Config** → Click **Add Task** → Fill form",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:58:40.230Z"
+        },
+        {
+          "testId": "BW-094",
+          "title": "Admin edits project name, then deletes it",
+          "module": "Tasks & Projects",
+          "icon": "Assignment",
+          "color": "#0288d1",
+          "order": 6,
+          "action": "projectEditAndDelete",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "tasks"
+          ],
+          "videoUrl": "guides/videos/BW-094.webm",
+          "screenshotUrl": "guides/screenshots/BW-094.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:58:49.679Z"
+        },
+        {
+          "testId": "BW-095",
+          "title": "Admin assigns task to employee and employee sees it in My Tasks",
+          "module": "Tasks & Projects",
+          "icon": "Assignment",
+          "color": "#0288d1",
+          "order": 6,
+          "action": "taskAssignToEmployee",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "tasks"
+          ],
+          "videoUrl": "guides/videos/BW-095.webm",
+          "screenshotUrl": "guides/screenshots/BW-095.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:58:58.507Z"
+        },
+        {
+          "testId": "BW-096",
+          "title": "Employee cannot access project config page",
+          "module": "Tasks & Projects",
+          "icon": "Assignment",
+          "color": "#0288d1",
+          "order": 6,
+          "action": "taskProjectRBAC",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "tasks",
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-096.webm",
+          "screenshotUrl": "guides/screenshots/BW-096.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:59:03.115Z"
+        }
+      ]
+    },
+    {
+      "module": "Reviews",
+      "icon": "RateReview",
+      "color": "#f57c00",
+      "order": 7,
+      "guides": [
+        {
+          "testId": "BW-100",
+          "title": "Admin creates a new performance review",
+          "module": "Reviews",
+          "icon": "RateReview",
+          "color": "#f57c00",
+          "order": 7,
+          "action": "reviewCreate",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "smoke",
+            "reviews"
+          ],
+          "videoUrl": "guides/videos/BW-100.webm",
+          "screenshotUrl": "guides/screenshots/BW-100.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Reviews** → Click **New Review** → Fill form",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:59:11.472Z"
+        },
+        {
+          "testId": "BW-101",
+          "title": "Employee submits self-assessment on their review",
+          "module": "Reviews",
+          "icon": "RateReview",
+          "color": "#f57c00",
+          "order": 7,
+          "action": "reviewSelfAssessment",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "reviews"
+          ],
+          "videoUrl": "guides/videos/BW-101.webm",
+          "screenshotUrl": "guides/screenshots/BW-101.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Reviews** → Click **Self-Assess** on your review",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:59:14.467Z"
+        },
+        {
+          "testId": "BW-102",
+          "title": "Admin approves the reviewed performance review",
+          "module": "Reviews",
+          "icon": "RateReview",
+          "color": "#f57c00",
+          "order": 7,
+          "action": "reviewApprove",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "reviews"
+          ],
+          "videoUrl": "guides/videos/BW-102.webm",
+          "screenshotUrl": "guides/screenshots/BW-102.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Reviews** → Click **Approve** → Confirm",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:59:17.396Z"
+        },
+        {
+          "testId": "BW-103",
+          "title": "Search reviews by employee name and filter by status",
+          "module": "Reviews",
+          "icon": "RateReview",
+          "color": "#f57c00",
+          "order": 7,
+          "action": "reviewSearchFilter",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "reviews"
+          ],
+          "videoUrl": "guides/videos/BW-103.webm",
+          "screenshotUrl": "guides/screenshots/BW-103.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Use search bar and status filter on **Reviews** page",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:59:23.283Z"
+        },
+        {
+          "testId": "BW-104",
+          "title": "Admin edits a review, then deletes another",
+          "module": "Reviews",
+          "icon": "RateReview",
+          "color": "#f57c00",
+          "order": 7,
+          "action": "reviewEditDelete",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "reviews"
+          ],
+          "videoUrl": "guides/videos/BW-104.webm",
+          "screenshotUrl": "guides/screenshots/BW-104.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Click **Edit** on a review → Make changes or **Cancel**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:59:26.323Z"
+        },
+        {
+          "testId": "BW-105",
+          "title": "Full cycle: create → self-assess → manager-rate → HR-approve → finalize",
+          "module": "Reviews",
+          "icon": "RateReview",
+          "color": "#f57c00",
+          "order": 7,
+          "action": "reviewFullCycle",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "reviews",
+            "critical"
+          ],
+          "videoUrl": "guides/videos/BW-105.webm",
+          "screenshotUrl": "guides/screenshots/BW-105.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T18:59:35.365Z"
+        }
+      ]
+    },
+    {
+      "module": "Organization",
+      "icon": "Business",
+      "color": "#00838f",
+      "order": 8,
+      "guides": [
+        {
+          "testId": "BW-110",
+          "title": "Admin creates department, edits it, then deletes it",
+          "module": "Organization",
+          "icon": "Business",
+          "color": "#00838f",
+          "order": 8,
+          "action": "orgDeptCRUD",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "smoke",
+            "organization"
+          ],
+          "videoUrl": "guides/videos/BW-110.webm",
+          "screenshotUrl": "guides/screenshots/BW-110.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Organization** → **Departments** tab",
+            "Use **Add**, **Edit**, or **Delete** buttons",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:00:03.500Z"
+        },
+        {
+          "testId": "BW-111",
+          "title": "Admin creates position, edits it, then deletes it",
+          "module": "Organization",
+          "icon": "Business",
+          "color": "#00838f",
+          "order": 8,
+          "action": "orgPositionCRUD",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "organization"
+          ],
+          "videoUrl": "guides/videos/BW-111.webm",
+          "screenshotUrl": "guides/screenshots/BW-111.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Organization** → **Positions** tab",
+            "Use **Add**, **Edit**, or **Delete** buttons",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:00:27.530Z"
+        },
+        {
+          "testId": "BW-112",
+          "title": "Admin creates holiday, verifies it appears, then deletes",
+          "module": "Organization",
+          "icon": "Business",
+          "color": "#00838f",
+          "order": 8,
+          "action": "orgHolidayCRUD",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "organization"
+          ],
+          "videoUrl": "guides/videos/BW-112.webm",
+          "screenshotUrl": "guides/screenshots/BW-112.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Organization** → **Holidays** tab",
+            "Use **Add**, **Edit**, or **Delete** buttons",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:00:51.534Z"
+        },
+        {
+          "testId": "BW-113",
+          "title": "Admin searches departments by name",
+          "module": "Organization",
+          "icon": "Business",
+          "color": "#00838f",
+          "order": 8,
+          "action": "orgDeptSearch",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "organization"
+          ],
+          "videoUrl": "guides/videos/BW-113.webm",
+          "screenshotUrl": "guides/screenshots/BW-113.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Organization** → **Departments** tab",
+            "Use **Add**, **Edit**, or **Delete** buttons",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:00:56.324Z"
+        },
+        {
+          "testId": "BW-114",
+          "title": "Admin tries to add department with empty name — validation blocks",
+          "module": "Organization",
+          "icon": "Business",
+          "color": "#00838f",
+          "order": 8,
+          "action": "orgDeptEmptyValidation",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "organization",
+            "validation"
+          ],
+          "videoUrl": "guides/videos/BW-114.webm",
+          "screenshotUrl": "guides/screenshots/BW-114.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Organization** → **Departments** tab",
+            "Use **Add**, **Edit**, or **Delete** buttons",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:01:17.655Z"
+        },
+        {
+          "testId": "BW-115",
+          "title": "Employee cannot access organization management",
+          "module": "Organization",
+          "icon": "Business",
+          "color": "#00838f",
+          "order": 8,
+          "action": "orgRBAC",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "organization",
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-115.webm",
+          "screenshotUrl": "guides/screenshots/BW-115.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Use **Add**, **Edit**, or **Delete** buttons",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:01:21.848Z"
+        },
+        {
+          "testId": "BW-116",
+          "title": "Admin tries to delete department with assigned employees — blocked or warned",
+          "module": "Organization",
+          "icon": "Business",
+          "color": "#00838f",
+          "order": 8,
+          "action": "orgDeptDeleteWithEmployees",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "organization",
+            "edge"
+          ],
+          "videoUrl": "guides/videos/BW-116.webm",
+          "screenshotUrl": "guides/screenshots/BW-116.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **Organization** → **Departments** tab",
+            "Use **Add**, **Edit**, or **Delete** buttons",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:01:29.462Z"
+        }
+      ]
+    },
+    {
+      "module": "User Management",
+      "icon": "ManageAccounts",
+      "color": "#5e35b1",
+      "order": 9,
+      "guides": [
+        {
+          "testId": "BW-120",
+          "title": "Admin creates a new user with all fields (email, name, role, password)",
+          "module": "User Management",
+          "icon": "ManageAccounts",
+          "color": "#5e35b1",
+          "order": 9,
+          "action": "userCreateFull",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "smoke",
+            "usermgmt"
+          ],
+          "videoUrl": "guides/videos/BW-120.webm",
+          "screenshotUrl": "guides/screenshots/BW-120.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **User Management**",
+            "Go to **Create** tab → Fill email, name, password, role",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:01:35.122Z"
+        },
+        {
+          "testId": "BW-121",
+          "title": "Admin searches user by name and filters by role",
+          "module": "User Management",
+          "icon": "ManageAccounts",
+          "color": "#5e35b1",
+          "order": 9,
+          "action": "userSearchAndFilter",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "usermgmt"
+          ],
+          "videoUrl": "guides/videos/BW-121.webm",
+          "screenshotUrl": "guides/screenshots/BW-121.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **User Management**",
+            "Go to **Manage** tab → Search and filter users",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:01:41.091Z"
+        },
+        {
+          "testId": "BW-122",
+          "title": "Submit empty form shows validation; password mismatch caught",
+          "module": "User Management",
+          "icon": "ManageAccounts",
+          "color": "#5e35b1",
+          "order": 9,
+          "action": "userValidation",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "usermgmt",
+            "validation"
+          ],
+          "videoUrl": "guides/videos/BW-122.webm",
+          "screenshotUrl": "guides/screenshots/BW-122.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **User Management**",
+            "Test form validation by submitting empty/mismatched data",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:01:46.366Z"
+        },
+        {
+          "testId": "BW-123",
+          "title": "Non-admin users cannot access user management",
+          "module": "User Management",
+          "icon": "ManageAccounts",
+          "color": "#5e35b1",
+          "order": 9,
+          "action": "userRBAC",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "usermgmt",
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-123.webm",
+          "screenshotUrl": "guides/screenshots/BW-123.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Navigate to **User Management**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:01:50.822Z"
+        },
+        {
+          "testId": "BW-124",
+          "title": "Admin changes user role from employee to manager and verifies access changes",
+          "module": "User Management",
+          "icon": "ManageAccounts",
+          "color": "#5e35b1",
+          "order": 9,
+          "action": "userRoleChange",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "usermgmt",
+            "critical"
+          ],
+          "videoUrl": "guides/videos/BW-124.webm",
+          "screenshotUrl": "guides/screenshots/BW-124.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **User Management**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:01:57.363Z"
+        },
+        {
+          "testId": "BW-125",
+          "title": "Admin deactivates user account, verifies login is blocked",
+          "module": "User Management",
+          "icon": "ManageAccounts",
+          "color": "#5e35b1",
+          "order": 9,
+          "action": "userAccountDeactivate",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "usermgmt",
+            "critical"
+          ],
+          "videoUrl": "guides/videos/BW-125.webm",
+          "screenshotUrl": "guides/screenshots/BW-125.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Navigate to **User Management**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:03.679Z"
+        }
+      ]
+    },
+    {
+      "module": "Access Control",
+      "icon": "Security",
+      "color": "#455a64",
+      "order": 10,
+      "guides": [
+        {
+          "testId": "BW-150",
+          "title": "Employee denied access to employee management",
+          "module": "Access Control",
+          "icon": "Security",
+          "color": "#455a64",
+          "order": 10,
+          "action": "rbacEmployeeDenied",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-150.webm",
+          "screenshotUrl": "guides/screenshots/BW-150.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Attempt to access a restricted page as **Employee**",
+            "Verify access is granted or denied based on role",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:33.262Z"
+        },
+        {
+          "testId": "BW-151",
+          "title": "Employee denied access to payroll management",
+          "module": "Access Control",
+          "icon": "Security",
+          "color": "#455a64",
+          "order": 10,
+          "action": "rbacEmployeeDenied",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-151.webm",
+          "screenshotUrl": "guides/screenshots/BW-151.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Attempt to access a restricted page as **Employee**",
+            "Verify access is granted or denied based on role",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:37.569Z"
+        },
+        {
+          "testId": "BW-152",
+          "title": "Employee denied access to leave management (admin)",
+          "module": "Access Control",
+          "icon": "Security",
+          "color": "#455a64",
+          "order": 10,
+          "action": "rbacEmployeeDenied",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-152.webm",
+          "screenshotUrl": "guides/screenshots/BW-152.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Attempt to access a restricted page as **Employee**",
+            "Verify access is granted or denied based on role",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:41.841Z"
+        },
+        {
+          "testId": "BW-153",
+          "title": "Employee denied access to attendance management",
+          "module": "Access Control",
+          "icon": "Security",
+          "color": "#455a64",
+          "order": 10,
+          "action": "rbacEmployeeDenied",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-153.webm",
+          "screenshotUrl": "guides/screenshots/BW-153.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Attempt to access a restricted page as **Employee**",
+            "Verify access is granted or denied based on role",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:46.096Z"
+        },
+        {
+          "testId": "BW-154",
+          "title": "Manager denied access to payroll management",
+          "module": "Access Control",
+          "icon": "Security",
+          "color": "#455a64",
+          "order": 10,
+          "action": "rbacManagerDenied",
+          "role": "manager",
+          "roleDisplay": "Team Lead / Manager",
+          "tags": [
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-154.webm",
+          "screenshotUrl": "guides/screenshots/BW-154.png",
+          "steps": [
+            "Log in as **Team Lead / Manager**",
+            "Attempt to access a restricted page as **Team Lead / Manager**",
+            "Verify access is granted or denied based on role",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:50.341Z"
+        },
+        {
+          "testId": "BW-155",
+          "title": "Manager can access timesheets and approve them",
+          "module": "Access Control",
+          "icon": "Security",
+          "color": "#455a64",
+          "order": 10,
+          "action": "rbacManagerAllowed",
+          "role": "manager",
+          "roleDisplay": "Team Lead / Manager",
+          "tags": [
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-155.webm",
+          "screenshotUrl": "guides/screenshots/BW-155.png",
+          "steps": [
+            "Log in as **Team Lead / Manager**",
+            "Attempt to access a restricted page as **Team Lead / Manager**",
+            "Verify access is granted or denied based on role",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:52.692Z"
+        },
+        {
+          "testId": "BW-156",
+          "title": "HR can access employee management and leave management",
+          "module": "Access Control",
+          "icon": "Security",
+          "color": "#455a64",
+          "order": 10,
+          "action": "rbacHRAllowed",
+          "role": "hr",
+          "roleDisplay": "HR Manager",
+          "tags": [
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-156.webm",
+          "screenshotUrl": "guides/screenshots/BW-156.png",
+          "steps": [
+            "Log in as **HR Manager**",
+            "Attempt to access a restricted page as **HR Manager**",
+            "Verify access is granted or denied based on role",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:56.518Z"
+        },
+        {
+          "testId": "BW-157",
+          "title": "Admin can access all modules without restriction",
+          "module": "Access Control",
+          "icon": "Security",
+          "color": "#455a64",
+          "order": 10,
+          "action": "rbacAdminFull",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "rbac"
+          ],
+          "videoUrl": "guides/videos/BW-157.webm",
+          "screenshotUrl": "guides/screenshots/BW-157.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Attempt to access a restricted page as **Administrator**",
+            "Verify access is granted or denied based on role",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:01.343Z"
+        },
+        {
+          "testId": "BW-158",
+          "title": "Session expiry redirects to login page",
+          "module": "Access Control",
+          "icon": "Security",
+          "color": "#455a64",
+          "order": 10,
+          "action": "rbacSessionExpiry",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "rbac",
+            "security"
+          ],
+          "videoUrl": "guides/videos/BW-158.webm",
+          "screenshotUrl": "guides/screenshots/BW-158.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Attempt to access a restricted page as **Employee**",
+            "Verify access is granted or denied based on role",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:06.004Z"
+        }
+      ]
+    },
+    {
+      "module": "Navigation & UI",
+      "icon": "Explore",
+      "color": "#795548",
+      "order": 11,
+      "guides": [
+        {
+          "testId": "BW-170",
+          "title": "Admin sidebar shows all navigation items and each navigates correctly",
+          "module": "Navigation & UI",
+          "icon": "Explore",
+          "color": "#795548",
+          "order": 11,
+          "action": "navAdminSidebar",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "smoke",
+            "navigation"
+          ],
+          "videoUrl": "guides/videos/BW-170.webm",
+          "screenshotUrl": "guides/screenshots/BW-170.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Verify sidebar navigation items are visible",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:08.780Z"
+        },
+        {
+          "testId": "BW-171",
+          "title": "Employee sidebar shows limited nav items matching role permissions",
+          "module": "Navigation & UI",
+          "icon": "Explore",
+          "color": "#795548",
+          "order": 11,
+          "action": "navEmployeeSidebar",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "navigation"
+          ],
+          "videoUrl": "guides/videos/BW-171.webm",
+          "screenshotUrl": "guides/screenshots/BW-171.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Verify sidebar navigation items are visible",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:11.223Z"
+        },
+        {
+          "testId": "BW-172",
+          "title": "Profile menu opens with My Profile and Logout options",
+          "module": "Navigation & UI",
+          "icon": "Explore",
+          "color": "#795548",
+          "order": 11,
+          "action": "navProfileMenu",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "navigation"
+          ],
+          "videoUrl": "guides/videos/BW-172.webm",
+          "screenshotUrl": "guides/screenshots/BW-172.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Verify sidebar navigation items are visible",
+            "Click profile avatar → Verify dropdown menu",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:13.594Z"
+        },
+        {
+          "testId": "BW-173",
+          "title": "Navigating to invalid URL shows 404 or redirect",
+          "module": "Navigation & UI",
+          "icon": "Explore",
+          "color": "#795548",
+          "order": 11,
+          "action": "nav404Page",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "navigation"
+          ],
+          "videoUrl": "guides/videos/BW-173.webm",
+          "screenshotUrl": "guides/screenshots/BW-173.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Verify sidebar navigation items are visible",
+            "Navigate to a non-existent URL → Verify 404 page",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:18.167Z"
+        }
+      ]
+    },
+    {
+      "module": "Reports & Settings",
+      "icon": "Assessment",
+      "color": "#607d8b",
+      "order": 12,
+      "guides": [
+        {
+          "testId": "BW-180",
+          "title": "Admin opens reports page and verifies date filter and export button",
+          "module": "Reports & Settings",
+          "icon": "Assessment",
+          "color": "#607d8b",
+          "order": 12,
+          "action": "reportsPageLoad",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "smoke",
+            "reports"
+          ],
+          "videoUrl": "guides/videos/BW-180.webm",
+          "screenshotUrl": "guides/screenshots/BW-180.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Execute the **Admin opens reports page and verifies date filter and export button** workflow",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:20.959Z"
+        },
+        {
+          "testId": "BW-181",
+          "title": "Admin opens settings hub and navigates through email/preferences/advanced tabs",
+          "module": "Reports & Settings",
+          "icon": "Assessment",
+          "color": "#607d8b",
+          "order": 12,
+          "action": "settingsTabNavigation",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "settings"
+          ],
+          "videoUrl": "guides/videos/BW-181.webm",
+          "screenshotUrl": "guides/screenshots/BW-181.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Execute the **Admin opens settings hub and navigates through email/preferences/advanced tabs** workflow",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:23.383Z"
+        },
+        {
+          "testId": "BW-182",
+          "title": "Admin opens restore management page and verifies reviews/balances/users tabs",
+          "module": "Reports & Settings",
+          "icon": "Assessment",
+          "color": "#607d8b",
+          "order": 12,
+          "action": "restoreManagementTabs",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "admin"
+          ],
+          "videoUrl": "guides/videos/BW-182.webm",
+          "screenshotUrl": "guides/screenshots/BW-182.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Execute the **Admin opens restore management page and verifies reviews/balances/users tabs** workflow",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:26.283Z"
+        },
+        {
+          "testId": "BW-183",
+          "title": "Admin exports report data and verifies download triggers",
+          "module": "Reports & Settings",
+          "icon": "Assessment",
+          "color": "#607d8b",
+          "order": 12,
+          "action": "reportsExport",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "reports"
+          ],
+          "videoUrl": "guides/videos/BW-183.webm",
+          "screenshotUrl": "guides/screenshots/BW-183.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Execute the **Admin exports report data and verifies download triggers** workflow",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:03:29.036Z"
+        }
+      ]
+    },
+    {
+      "module": "Cross-Module Workflows",
+      "icon": "Hub",
+      "color": "#e91e63",
+      "order": 13,
+      "guides": [
+        {
+          "testId": "BW-130",
+          "title": "Full hire-to-paycheck: create employee → assign dept → create login → generate payslip",
+          "module": "Cross-Module Workflows",
+          "icon": "Hub",
+          "color": "#e91e63",
+          "order": 13,
+          "action": "hireToPaycheck",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "critical",
+            "integration"
+          ],
+          "videoUrl": "guides/videos/BW-130.webm",
+          "screenshotUrl": "guides/screenshots/BW-130.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Execute the **Full hire-to-paycheck: create employee → assign dept → create login → generate payslip** workflow",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:11.058Z"
+        },
+        {
+          "testId": "BW-131",
+          "title": "Approved leave day shows as leave in attendance view (not absent)",
+          "module": "Cross-Module Workflows",
+          "icon": "Hub",
+          "color": "#e91e63",
+          "order": 13,
+          "action": "leaveAffectsAttendance",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "integration"
+          ],
+          "videoUrl": "guides/videos/BW-131.webm",
+          "screenshotUrl": "guides/screenshots/BW-131.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:21.493Z"
+        },
+        {
+          "testId": "BW-132",
+          "title": "Approved timesheet hours reflect in payroll calculation",
+          "module": "Cross-Module Workflows",
+          "icon": "Hub",
+          "color": "#e91e63",
+          "order": 13,
+          "action": "timesheetToPayroll",
+          "role": "employee",
+          "roleDisplay": "Employee",
+          "tags": [
+            "integration"
+          ],
+          "videoUrl": "guides/videos/BW-132.webm",
+          "screenshotUrl": "guides/screenshots/BW-132.png",
+          "steps": [
+            "Log in as **Employee**",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:26.257Z"
+        },
+        {
+          "testId": "BW-133",
+          "title": "Dashboard stat cards reflect actual employee/leave/attendance counts",
+          "module": "Cross-Module Workflows",
+          "icon": "Hub",
+          "color": "#e91e63",
+          "order": 13,
+          "action": "dashboardDataAccuracy",
+          "role": "admin",
+          "roleDisplay": "Administrator",
+          "tags": [
+            "integration",
+            "data-accuracy"
+          ],
+          "videoUrl": "guides/videos/BW-133.webm",
+          "screenshotUrl": "guides/screenshots/BW-133.png",
+          "steps": [
+            "Log in as **Administrator**",
+            "Execute the **Dashboard stat cards reflect actual employee/leave/attendance counts** workflow",
+            "Verify the expected outcome"
+          ],
+          "duration": null,
+          "status": "recorded",
+          "recordedAt": "2026-03-21T19:02:28.889Z"
+        }
+      ]
+    }
+  ],
+  "guides": [
+    {
+      "testId": "BW-010",
+      "title": "Full employee onboarding: add employee with all 4 tabs filled",
+      "module": "Employee Management",
+      "icon": "PersonAdd",
+      "color": "#1976d2",
+      "order": 1,
+      "action": "onboardingFull",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "smoke",
+        "onboarding"
+      ],
+      "videoUrl": "guides/videos/BW-010.webm",
+      "screenshotUrl": "guides/screenshots/BW-010.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Employees** → Click **Add Employee**",
+        "Fill in personal details (name, email, phone)",
+        "Click **Next** → Fill employment info (department, position)",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:54:17.762Z"
+    },
+    {
+      "testId": "BW-011",
+      "title": "Create user login for newly onboarded employee",
+      "module": "Employee Management",
+      "icon": "PersonAdd",
+      "color": "#1976d2",
+      "order": 1,
+      "action": "onboardingCreateLogin",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "onboarding"
+      ],
+      "videoUrl": "guides/videos/BW-011.webm",
+      "screenshotUrl": "guides/screenshots/BW-011.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Employees** → Click **Add Employee**",
+        "Fill in personal details (name, email, phone)",
+        "Search employee → Click **Create Login**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:54:23.224Z"
+    },
+    {
+      "testId": "BW-012",
+      "title": "New employee logs in and sees employee dashboard",
+      "module": "Employee Management",
+      "icon": "PersonAdd",
+      "color": "#1976d2",
+      "order": 1,
+      "action": "onboardingVerifyDashboard",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "onboarding"
+      ],
+      "videoUrl": "guides/videos/BW-012.webm",
+      "screenshotUrl": "guides/screenshots/BW-012.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **Employees** → Click **Add Employee**",
+        "Fill in personal details (name, email, phone)",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:54:25.889Z"
+    },
+    {
+      "testId": "BW-013",
+      "title": "HR assigns department and position to new employee",
+      "module": "Employee Management",
+      "icon": "PersonAdd",
+      "color": "#1976d2",
+      "order": 1,
+      "action": "onboardingAssignDepartment",
+      "role": "hr",
+      "roleDisplay": "HR Manager",
+      "tags": [
+        "onboarding"
+      ],
+      "videoUrl": "guides/videos/BW-013.webm",
+      "screenshotUrl": "guides/screenshots/BW-013.png",
+      "steps": [
+        "Log in as **HR Manager**",
+        "Navigate to **Employees** → Click **Add Employee**",
+        "Fill in personal details (name, email, phone)",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:54:29.656Z"
+    },
+    {
+      "testId": "BW-020",
+      "title": "Employee submits casual leave request with dates and reason",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveRequestSubmit",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "smoke",
+        "leave"
+      ],
+      "videoUrl": "guides/videos/BW-020.webm",
+      "screenshotUrl": "guides/screenshots/BW-020.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **Leave Request** → Select leave type",
+        "Fill start/end dates and reason → Click **Submit**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:54:38.545Z"
+    },
+    {
+      "testId": "BW-021",
+      "title": "Manager approves the pending leave request",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveManagerApprove",
+      "role": "manager",
+      "roleDisplay": "Team Lead / Manager",
+      "tags": [
+        "leave"
+      ],
+      "videoUrl": "guides/videos/BW-021.webm",
+      "screenshotUrl": "guides/screenshots/BW-021.png",
+      "steps": [
+        "Log in as **Team Lead / Manager**",
+        "Navigate to **Leave Management** → Click **Approve**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:54:42.113Z"
+    },
+    {
+      "testId": "BW-022",
+      "title": "Employee verifies leave request shows Approved status",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveVerifyApproved",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "leave"
+      ],
+      "videoUrl": "guides/videos/BW-022.webm",
+      "screenshotUrl": "guides/screenshots/BW-022.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **Leave Management** → Click **Approve**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:54:44.460Z"
+    },
+    {
+      "testId": "BW-023",
+      "title": "Employee submits sick leave, manager rejects with reason",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveRequestReject",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "leave"
+      ],
+      "videoUrl": "guides/videos/BW-023.webm",
+      "screenshotUrl": "guides/screenshots/BW-023.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **Leave Request** → Select leave type",
+        "Navigate to **Leave Management** → Click **Reject**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:54:53.572Z"
+    },
+    {
+      "testId": "BW-024",
+      "title": "Employee views leave balance cards after approved leave",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveBalanceCheck",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "leave"
+      ],
+      "videoUrl": "guides/videos/BW-024.webm",
+      "screenshotUrl": "guides/screenshots/BW-024.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **Leave Requests** → View balance cards",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:54:55.961Z"
+    },
+    {
+      "testId": "BW-025",
+      "title": "Employee submits leave then cancels it before approval",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveCancelPending",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "leave"
+      ],
+      "videoUrl": "guides/videos/BW-025.webm",
+      "screenshotUrl": "guides/screenshots/BW-025.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **My Leaves** → Click **Cancel** on pending request",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:55:04.123Z"
+    },
+    {
+      "testId": "BW-026",
+      "title": "Employee submits leave overlapping with already-approved leave — should warn/reject",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveOverlapCheck",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "leave",
+        "validation"
+      ],
+      "videoUrl": "guides/videos/BW-026.webm",
+      "screenshotUrl": "guides/screenshots/BW-026.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:55:11.057Z"
+    },
+    {
+      "testId": "BW-027",
+      "title": "Employee tries to submit leave when balance is zero — should reject",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveBalanceExhausted",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "leave",
+        "validation"
+      ],
+      "videoUrl": "guides/videos/BW-027.webm",
+      "screenshotUrl": "guides/screenshots/BW-027.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **Leave Requests** → View balance cards",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:55:17.940Z"
+    },
+    {
+      "testId": "BW-028",
+      "title": "Admin views leave management, filters by status, searches by employee name",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveAdminManagement",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "leave"
+      ],
+      "videoUrl": "guides/videos/BW-028.webm",
+      "screenshotUrl": "guides/screenshots/BW-028.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Open **Leave Management** → Search and filter requests",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:55:24.608Z"
+    },
+    {
+      "testId": "BW-029",
+      "title": "Admin adds new leave type, verifies it appears, then deletes it",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveTypesCRUD",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "leave",
+        "admin"
+      ],
+      "videoUrl": "guides/videos/BW-029.webm",
+      "screenshotUrl": "guides/screenshots/BW-029.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Open **Leave Types** → Add / Edit / Delete leave types",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:55:48.147Z"
+    },
+    {
+      "testId": "BW-030",
+      "title": "Admin opens leave accrual, previews, and runs accrual process",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveAccrualRun",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "leave",
+        "admin"
+      ],
+      "videoUrl": "guides/videos/BW-030.webm",
+      "screenshotUrl": "guides/screenshots/BW-030.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:55:55.487Z"
+    },
+    {
+      "testId": "BW-031",
+      "title": "Employee submits 3-day leave, manager approves, balance deducted by 3",
+      "module": "Leave Management",
+      "icon": "EventBusy",
+      "color": "#ed6c02",
+      "order": 2,
+      "action": "leaveMultiDay",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "leave"
+      ],
+      "videoUrl": "guides/videos/BW-031.webm",
+      "screenshotUrl": "guides/screenshots/BW-031.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:56:04.465Z"
+    },
+    {
+      "testId": "BW-040",
+      "title": "Employee checks in, verifies status, checks out, verifies status",
+      "module": "Attendance",
+      "icon": "AccessTime",
+      "color": "#2e7d32",
+      "order": 3,
+      "action": "attendanceCheckInOut",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "smoke",
+        "attendance"
+      ],
+      "videoUrl": "guides/videos/BW-040.webm",
+      "screenshotUrl": "guides/screenshots/BW-040.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **My Attendance** → Click **Check In** then **Check Out**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:56:10.564Z"
+    },
+    {
+      "testId": "BW-041",
+      "title": "Admin marks attendance for an employee via management UI",
+      "module": "Attendance",
+      "icon": "AccessTime",
+      "color": "#2e7d32",
+      "order": 3,
+      "action": "attendanceAdminMark",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "attendance"
+      ],
+      "videoUrl": "guides/videos/BW-041.webm",
+      "screenshotUrl": "guides/screenshots/BW-041.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Attendance Management** → Use filters/mark attendance",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:56:14.782Z"
+    },
+    {
+      "testId": "BW-042",
+      "title": "Employee navigates to previous month and verifies attendance data grid",
+      "module": "Attendance",
+      "icon": "AccessTime",
+      "color": "#2e7d32",
+      "order": 3,
+      "action": "attendanceMonthNav",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "attendance"
+      ],
+      "videoUrl": "guides/videos/BW-042.webm",
+      "screenshotUrl": "guides/screenshots/BW-042.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **My Attendance** → Change month/year dropdowns",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:56:18.922Z"
+    },
+    {
+      "testId": "BW-043",
+      "title": "Admin filters attendance by date and verifies results",
+      "module": "Attendance",
+      "icon": "AccessTime",
+      "color": "#2e7d32",
+      "order": 3,
+      "action": "attendanceAdminFilter",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "attendance"
+      ],
+      "videoUrl": "guides/videos/BW-043.webm",
+      "screenshotUrl": "guides/screenshots/BW-043.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Attendance Management** → Use filters/mark attendance",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:56:23.225Z"
+    },
+    {
+      "testId": "BW-044",
+      "title": "Employee checks in but forgets check-out — verify status shows CHECKED IN",
+      "module": "Attendance",
+      "icon": "AccessTime",
+      "color": "#2e7d32",
+      "order": 3,
+      "action": "attendanceMissedCheckout",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "attendance",
+        "edge"
+      ],
+      "videoUrl": "guides/videos/BW-044.webm",
+      "screenshotUrl": "guides/screenshots/BW-044.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:56:26.713Z"
+    },
+    {
+      "testId": "BW-050",
+      "title": "Employee fills full week hours (Mon-Fri 8h each), saves draft",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetWeeklyEntry",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "smoke",
+        "timesheet"
+      ],
+      "videoUrl": "guides/videos/BW-050.webm",
+      "screenshotUrl": "guides/screenshots/BW-050.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **Timesheets** → Add task → Fill weekly hours",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:56:35.302Z"
+    },
+    {
+      "testId": "BW-051",
+      "title": "Employee submits saved timesheet for approval",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetSubmit",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "timesheet"
+      ],
+      "videoUrl": "guides/videos/BW-051.webm",
+      "screenshotUrl": "guides/screenshots/BW-051.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Click **Submit** to send timesheet for approval",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:56:42.669Z"
+    },
+    {
+      "testId": "BW-052",
+      "title": "Submitted timesheet is read-only for employee",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetReadOnlyAfterSubmit",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "timesheet"
+      ],
+      "videoUrl": "guides/videos/BW-052.webm",
+      "screenshotUrl": "guides/screenshots/BW-052.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Click **Submit** to send timesheet for approval",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:56:45.224Z"
+    },
+    {
+      "testId": "BW-053",
+      "title": "Manager approves submitted timesheet with comments",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetManagerApprove",
+      "role": "manager",
+      "roleDisplay": "Team Lead / Manager",
+      "tags": [
+        "timesheet"
+      ],
+      "videoUrl": "guides/videos/BW-053.webm",
+      "screenshotUrl": "guides/screenshots/BW-053.png",
+      "steps": [
+        "Log in as **Team Lead / Manager**",
+        "Navigate to **Timesheet Approvals** → Click **Approve**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:56:50.341Z"
+    },
+    {
+      "testId": "BW-054",
+      "title": "Manager rejects submitted timesheet with mandatory comments",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetManagerReject",
+      "role": "manager",
+      "roleDisplay": "Team Lead / Manager",
+      "tags": [
+        "timesheet"
+      ],
+      "videoUrl": "guides/videos/BW-054.webm",
+      "screenshotUrl": "guides/screenshots/BW-054.png",
+      "steps": [
+        "Log in as **Team Lead / Manager**",
+        "Navigate to **Timesheet Approvals** → Click **Reject** with comments",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:56:55.485Z"
+    },
+    {
+      "testId": "BW-055",
+      "title": "Employee edits rejected timesheet and resubmits",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetResubmitAfterReject",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "timesheet"
+      ],
+      "videoUrl": "guides/videos/BW-055.webm",
+      "screenshotUrl": "guides/screenshots/BW-055.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **Timesheet Approvals** → Click **Reject** with comments",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:01.166Z"
+    },
+    {
+      "testId": "BW-056",
+      "title": "Manager selects multiple timesheets and bulk-approves",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetBulkApprove",
+      "role": "manager",
+      "roleDisplay": "Team Lead / Manager",
+      "tags": [
+        "timesheet"
+      ],
+      "videoUrl": "guides/videos/BW-056.webm",
+      "screenshotUrl": "guides/screenshots/BW-056.png",
+      "steps": [
+        "Log in as **Team Lead / Manager**",
+        "Navigate to **Timesheet Approvals** → Click **Approve**",
+        "Select multiple timesheets → Use **Bulk Approve**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:06.331Z"
+    },
+    {
+      "testId": "BW-057",
+      "title": "Employee exports timesheet history to file",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetHistoryExport",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "timesheet"
+      ],
+      "videoUrl": "guides/videos/BW-057.webm",
+      "screenshotUrl": "guides/screenshots/BW-057.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **Timesheet History** → View/export past timesheets",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:10.278Z"
+    },
+    {
+      "testId": "BW-058",
+      "title": "Employee adds 2 task rows with different projects, fills hours for both",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetMultiProject",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "timesheet"
+      ],
+      "videoUrl": "guides/videos/BW-058.webm",
+      "screenshotUrl": "guides/screenshots/BW-058.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:15.067Z"
+    },
+    {
+      "testId": "BW-059",
+      "title": "Employee enters >24 hours in a day — validation rejects",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetValidation",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "timesheet",
+        "validation"
+      ],
+      "videoUrl": "guides/videos/BW-059.webm",
+      "screenshotUrl": "guides/screenshots/BW-059.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:19.317Z"
+    },
+    {
+      "testId": "BW-060",
+      "title": "Empty timesheet submit is blocked",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetEmptySubmitBlocked",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "timesheet",
+        "validation"
+      ],
+      "videoUrl": "guides/videos/BW-060.webm",
+      "screenshotUrl": "guides/screenshots/BW-060.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Click **Submit** to send timesheet for approval",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:21.958Z"
+    },
+    {
+      "testId": "BW-061",
+      "title": "Employee enters >40 weekly hours — overtime indicator appears",
+      "module": "Timesheets",
+      "icon": "Schedule",
+      "color": "#9c27b0",
+      "order": 4,
+      "action": "timesheetOvertimeAlert",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "timesheet",
+        "validation"
+      ],
+      "videoUrl": "guides/videos/BW-061.webm",
+      "screenshotUrl": "guides/screenshots/BW-061.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:25.956Z"
+    },
+    {
+      "testId": "BW-070",
+      "title": "Admin navigates payroll management page and verifies all 4 tabs exist",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollPageAndTabs",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "smoke",
+        "payroll"
+      ],
+      "videoUrl": "guides/videos/BW-070.webm",
+      "screenshotUrl": "guides/screenshots/BW-070.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Payroll Management** → Review tabs",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:29.159Z"
+    },
+    {
+      "testId": "BW-071",
+      "title": "Admin navigates to generate tab, selects employees, clicks validate & generate",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollGenerate",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "payroll"
+      ],
+      "videoUrl": "guides/videos/BW-071.webm",
+      "screenshotUrl": "guides/screenshots/BW-071.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Go to **Generate** tab → Click **Validate & Generate**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:33.430Z"
+    },
+    {
+      "testId": "BW-072",
+      "title": "Admin bulk-finalizes generated payslips",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollFinalize",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "payroll"
+      ],
+      "videoUrl": "guides/videos/BW-072.webm",
+      "screenshotUrl": "guides/screenshots/BW-072.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Select payroll records → Click **Finalize**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:39.307Z"
+    },
+    {
+      "testId": "BW-073",
+      "title": "Admin marks finalized payslips as paid",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollMarkPaid",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "payroll"
+      ],
+      "videoUrl": "guides/videos/BW-073.webm",
+      "screenshotUrl": "guides/screenshots/BW-073.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Select finalized records → Click **Mark as Paid**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:45.298Z"
+    },
+    {
+      "testId": "BW-074",
+      "title": "Employee views own payslips page, checks summary cards and table",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollEmployeeView",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "payroll"
+      ],
+      "videoUrl": "guides/videos/BW-074.webm",
+      "screenshotUrl": "guides/screenshots/BW-074.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **My Payslips** → View summary and history",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:48.108Z"
+    },
+    {
+      "testId": "BW-075",
+      "title": "Employee downloads a payslip PDF",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollEmployeeDownload",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "payroll"
+      ],
+      "videoUrl": "guides/videos/BW-075.webm",
+      "screenshotUrl": "guides/screenshots/BW-075.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **My Payslips** → View summary and history",
+        "Click **Download** on a payslip row",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:50.601Z"
+    },
+    {
+      "testId": "BW-076",
+      "title": "Admin searches payslips and exports to file",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollSearchAndExport",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "payroll"
+      ],
+      "videoUrl": "guides/videos/BW-076.webm",
+      "screenshotUrl": "guides/screenshots/BW-076.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Use search bar → Click **Export**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:55.324Z"
+    },
+    {
+      "testId": "BW-077",
+      "title": "Admin views payroll template configuration page",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollTemplateConfig",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "payroll"
+      ],
+      "videoUrl": "guides/videos/BW-077.webm",
+      "screenshotUrl": "guides/screenshots/BW-077.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Payroll Template Config**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:57:58.318Z"
+    },
+    {
+      "testId": "BW-078",
+      "title": "HR accesses payroll management with full read/export permissions",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollHRAccess",
+      "role": "hr",
+      "roleDisplay": "HR Manager",
+      "tags": [
+        "payroll",
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-078.webm",
+      "screenshotUrl": "guides/screenshots/BW-078.png",
+      "steps": [
+        "Log in as **HR Manager**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:58:02.152Z"
+    },
+    {
+      "testId": "BW-079",
+      "title": "Employee cannot access payroll management page",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollEmployeeRBAC",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "payroll",
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-079.webm",
+      "screenshotUrl": "guides/screenshots/BW-079.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **My Payslips** → View summary and history",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:58:06.643Z"
+    },
+    {
+      "testId": "BW-080",
+      "title": "Verify generated payslip amounts match employee salary components (basic + allowances - deductions)",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollSalaryBreakdown",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "payroll",
+        "accuracy"
+      ],
+      "videoUrl": "guides/videos/BW-080.webm",
+      "screenshotUrl": "guides/screenshots/BW-080.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:58:10.119Z"
+    },
+    {
+      "testId": "BW-081",
+      "title": "Admin re-generates payroll for a month that already has payslips",
+      "module": "Payroll",
+      "icon": "Payment",
+      "color": "#d32f2f",
+      "order": 5,
+      "action": "payrollReprocess",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "payroll",
+        "edge"
+      ],
+      "videoUrl": "guides/videos/BW-081.webm",
+      "screenshotUrl": "guides/screenshots/BW-081.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:58:14.449Z"
+    },
+    {
+      "testId": "BW-090",
+      "title": "Employee views my tasks, filters by priority High",
+      "module": "Tasks & Projects",
+      "icon": "Assignment",
+      "color": "#0288d1",
+      "order": 6,
+      "action": "taskViewAndFilter",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "smoke",
+        "tasks"
+      ],
+      "videoUrl": "guides/videos/BW-090.webm",
+      "screenshotUrl": "guides/screenshots/BW-090.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **My Tasks** → Use priority filter",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:58:18.064Z"
+    },
+    {
+      "testId": "BW-091",
+      "title": "Employee changes task status from Not Started to In Progress",
+      "module": "Tasks & Projects",
+      "icon": "Assignment",
+      "color": "#0288d1",
+      "order": 6,
+      "action": "taskStatusChange",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "tasks"
+      ],
+      "videoUrl": "guides/videos/BW-091.webm",
+      "screenshotUrl": "guides/screenshots/BW-091.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Click status dropdown on a task → Select new status",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:58:22.440Z"
+    },
+    {
+      "testId": "BW-092",
+      "title": "Admin creates project, verifies it appears in project list",
+      "module": "Tasks & Projects",
+      "icon": "Assignment",
+      "color": "#0288d1",
+      "order": 6,
+      "action": "projectCreateAndVerify",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "tasks"
+      ],
+      "videoUrl": "guides/videos/BW-092.webm",
+      "screenshotUrl": "guides/screenshots/BW-092.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Project Config** → Click **Add Project** → Fill form",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:58:32.713Z"
+    },
+    {
+      "testId": "BW-093",
+      "title": "Admin creates a task under the project, verifies task tab shows it",
+      "module": "Tasks & Projects",
+      "icon": "Assignment",
+      "color": "#0288d1",
+      "order": 6,
+      "action": "taskCreateUnderProject",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "tasks"
+      ],
+      "videoUrl": "guides/videos/BW-093.webm",
+      "screenshotUrl": "guides/screenshots/BW-093.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Task Config** → Click **Add Task** → Fill form",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:58:40.230Z"
+    },
+    {
+      "testId": "BW-094",
+      "title": "Admin edits project name, then deletes it",
+      "module": "Tasks & Projects",
+      "icon": "Assignment",
+      "color": "#0288d1",
+      "order": 6,
+      "action": "projectEditAndDelete",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "tasks"
+      ],
+      "videoUrl": "guides/videos/BW-094.webm",
+      "screenshotUrl": "guides/screenshots/BW-094.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:58:49.679Z"
+    },
+    {
+      "testId": "BW-095",
+      "title": "Admin assigns task to employee and employee sees it in My Tasks",
+      "module": "Tasks & Projects",
+      "icon": "Assignment",
+      "color": "#0288d1",
+      "order": 6,
+      "action": "taskAssignToEmployee",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "tasks"
+      ],
+      "videoUrl": "guides/videos/BW-095.webm",
+      "screenshotUrl": "guides/screenshots/BW-095.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:58:58.507Z"
+    },
+    {
+      "testId": "BW-096",
+      "title": "Employee cannot access project config page",
+      "module": "Tasks & Projects",
+      "icon": "Assignment",
+      "color": "#0288d1",
+      "order": 6,
+      "action": "taskProjectRBAC",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "tasks",
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-096.webm",
+      "screenshotUrl": "guides/screenshots/BW-096.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:59:03.115Z"
+    },
+    {
+      "testId": "BW-100",
+      "title": "Admin creates a new performance review",
+      "module": "Reviews",
+      "icon": "RateReview",
+      "color": "#f57c00",
+      "order": 7,
+      "action": "reviewCreate",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "smoke",
+        "reviews"
+      ],
+      "videoUrl": "guides/videos/BW-100.webm",
+      "screenshotUrl": "guides/screenshots/BW-100.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Reviews** → Click **New Review** → Fill form",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:59:11.472Z"
+    },
+    {
+      "testId": "BW-101",
+      "title": "Employee submits self-assessment on their review",
+      "module": "Reviews",
+      "icon": "RateReview",
+      "color": "#f57c00",
+      "order": 7,
+      "action": "reviewSelfAssessment",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "reviews"
+      ],
+      "videoUrl": "guides/videos/BW-101.webm",
+      "screenshotUrl": "guides/screenshots/BW-101.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Reviews** → Click **Self-Assess** on your review",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:59:14.467Z"
+    },
+    {
+      "testId": "BW-102",
+      "title": "Admin approves the reviewed performance review",
+      "module": "Reviews",
+      "icon": "RateReview",
+      "color": "#f57c00",
+      "order": 7,
+      "action": "reviewApprove",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "reviews"
+      ],
+      "videoUrl": "guides/videos/BW-102.webm",
+      "screenshotUrl": "guides/screenshots/BW-102.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Reviews** → Click **Approve** → Confirm",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:59:17.396Z"
+    },
+    {
+      "testId": "BW-103",
+      "title": "Search reviews by employee name and filter by status",
+      "module": "Reviews",
+      "icon": "RateReview",
+      "color": "#f57c00",
+      "order": 7,
+      "action": "reviewSearchFilter",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "reviews"
+      ],
+      "videoUrl": "guides/videos/BW-103.webm",
+      "screenshotUrl": "guides/screenshots/BW-103.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Use search bar and status filter on **Reviews** page",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:59:23.283Z"
+    },
+    {
+      "testId": "BW-104",
+      "title": "Admin edits a review, then deletes another",
+      "module": "Reviews",
+      "icon": "RateReview",
+      "color": "#f57c00",
+      "order": 7,
+      "action": "reviewEditDelete",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "reviews"
+      ],
+      "videoUrl": "guides/videos/BW-104.webm",
+      "screenshotUrl": "guides/screenshots/BW-104.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Click **Edit** on a review → Make changes or **Cancel**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:59:26.323Z"
+    },
+    {
+      "testId": "BW-105",
+      "title": "Full cycle: create → self-assess → manager-rate → HR-approve → finalize",
+      "module": "Reviews",
+      "icon": "RateReview",
+      "color": "#f57c00",
+      "order": 7,
+      "action": "reviewFullCycle",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "reviews",
+        "critical"
+      ],
+      "videoUrl": "guides/videos/BW-105.webm",
+      "screenshotUrl": "guides/screenshots/BW-105.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T18:59:35.365Z"
+    },
+    {
+      "testId": "BW-110",
+      "title": "Admin creates department, edits it, then deletes it",
+      "module": "Organization",
+      "icon": "Business",
+      "color": "#00838f",
+      "order": 8,
+      "action": "orgDeptCRUD",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "smoke",
+        "organization"
+      ],
+      "videoUrl": "guides/videos/BW-110.webm",
+      "screenshotUrl": "guides/screenshots/BW-110.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Organization** → **Departments** tab",
+        "Use **Add**, **Edit**, or **Delete** buttons",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:00:03.500Z"
+    },
+    {
+      "testId": "BW-111",
+      "title": "Admin creates position, edits it, then deletes it",
+      "module": "Organization",
+      "icon": "Business",
+      "color": "#00838f",
+      "order": 8,
+      "action": "orgPositionCRUD",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "organization"
+      ],
+      "videoUrl": "guides/videos/BW-111.webm",
+      "screenshotUrl": "guides/screenshots/BW-111.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Organization** → **Positions** tab",
+        "Use **Add**, **Edit**, or **Delete** buttons",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:00:27.530Z"
+    },
+    {
+      "testId": "BW-112",
+      "title": "Admin creates holiday, verifies it appears, then deletes",
+      "module": "Organization",
+      "icon": "Business",
+      "color": "#00838f",
+      "order": 8,
+      "action": "orgHolidayCRUD",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "organization"
+      ],
+      "videoUrl": "guides/videos/BW-112.webm",
+      "screenshotUrl": "guides/screenshots/BW-112.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Organization** → **Holidays** tab",
+        "Use **Add**, **Edit**, or **Delete** buttons",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:00:51.534Z"
+    },
+    {
+      "testId": "BW-113",
+      "title": "Admin searches departments by name",
+      "module": "Organization",
+      "icon": "Business",
+      "color": "#00838f",
+      "order": 8,
+      "action": "orgDeptSearch",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "organization"
+      ],
+      "videoUrl": "guides/videos/BW-113.webm",
+      "screenshotUrl": "guides/screenshots/BW-113.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Organization** → **Departments** tab",
+        "Use **Add**, **Edit**, or **Delete** buttons",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:00:56.324Z"
+    },
+    {
+      "testId": "BW-114",
+      "title": "Admin tries to add department with empty name — validation blocks",
+      "module": "Organization",
+      "icon": "Business",
+      "color": "#00838f",
+      "order": 8,
+      "action": "orgDeptEmptyValidation",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "organization",
+        "validation"
+      ],
+      "videoUrl": "guides/videos/BW-114.webm",
+      "screenshotUrl": "guides/screenshots/BW-114.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Organization** → **Departments** tab",
+        "Use **Add**, **Edit**, or **Delete** buttons",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:01:17.655Z"
+    },
+    {
+      "testId": "BW-115",
+      "title": "Employee cannot access organization management",
+      "module": "Organization",
+      "icon": "Business",
+      "color": "#00838f",
+      "order": 8,
+      "action": "orgRBAC",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "organization",
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-115.webm",
+      "screenshotUrl": "guides/screenshots/BW-115.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Use **Add**, **Edit**, or **Delete** buttons",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:01:21.848Z"
+    },
+    {
+      "testId": "BW-116",
+      "title": "Admin tries to delete department with assigned employees — blocked or warned",
+      "module": "Organization",
+      "icon": "Business",
+      "color": "#00838f",
+      "order": 8,
+      "action": "orgDeptDeleteWithEmployees",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "organization",
+        "edge"
+      ],
+      "videoUrl": "guides/videos/BW-116.webm",
+      "screenshotUrl": "guides/screenshots/BW-116.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **Organization** → **Departments** tab",
+        "Use **Add**, **Edit**, or **Delete** buttons",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:01:29.462Z"
+    },
+    {
+      "testId": "BW-120",
+      "title": "Admin creates a new user with all fields (email, name, role, password)",
+      "module": "User Management",
+      "icon": "ManageAccounts",
+      "color": "#5e35b1",
+      "order": 9,
+      "action": "userCreateFull",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "smoke",
+        "usermgmt"
+      ],
+      "videoUrl": "guides/videos/BW-120.webm",
+      "screenshotUrl": "guides/screenshots/BW-120.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **User Management**",
+        "Go to **Create** tab → Fill email, name, password, role",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:01:35.122Z"
+    },
+    {
+      "testId": "BW-121",
+      "title": "Admin searches user by name and filters by role",
+      "module": "User Management",
+      "icon": "ManageAccounts",
+      "color": "#5e35b1",
+      "order": 9,
+      "action": "userSearchAndFilter",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "usermgmt"
+      ],
+      "videoUrl": "guides/videos/BW-121.webm",
+      "screenshotUrl": "guides/screenshots/BW-121.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **User Management**",
+        "Go to **Manage** tab → Search and filter users",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:01:41.091Z"
+    },
+    {
+      "testId": "BW-122",
+      "title": "Submit empty form shows validation; password mismatch caught",
+      "module": "User Management",
+      "icon": "ManageAccounts",
+      "color": "#5e35b1",
+      "order": 9,
+      "action": "userValidation",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "usermgmt",
+        "validation"
+      ],
+      "videoUrl": "guides/videos/BW-122.webm",
+      "screenshotUrl": "guides/screenshots/BW-122.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **User Management**",
+        "Test form validation by submitting empty/mismatched data",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:01:46.366Z"
+    },
+    {
+      "testId": "BW-123",
+      "title": "Non-admin users cannot access user management",
+      "module": "User Management",
+      "icon": "ManageAccounts",
+      "color": "#5e35b1",
+      "order": 9,
+      "action": "userRBAC",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "usermgmt",
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-123.webm",
+      "screenshotUrl": "guides/screenshots/BW-123.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Navigate to **User Management**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:01:50.822Z"
+    },
+    {
+      "testId": "BW-124",
+      "title": "Admin changes user role from employee to manager and verifies access changes",
+      "module": "User Management",
+      "icon": "ManageAccounts",
+      "color": "#5e35b1",
+      "order": 9,
+      "action": "userRoleChange",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "usermgmt",
+        "critical"
+      ],
+      "videoUrl": "guides/videos/BW-124.webm",
+      "screenshotUrl": "guides/screenshots/BW-124.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **User Management**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:01:57.363Z"
+    },
+    {
+      "testId": "BW-125",
+      "title": "Admin deactivates user account, verifies login is blocked",
+      "module": "User Management",
+      "icon": "ManageAccounts",
+      "color": "#5e35b1",
+      "order": 9,
+      "action": "userAccountDeactivate",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "usermgmt",
+        "critical"
+      ],
+      "videoUrl": "guides/videos/BW-125.webm",
+      "screenshotUrl": "guides/screenshots/BW-125.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Navigate to **User Management**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:03.679Z"
+    },
+    {
+      "testId": "BW-130",
+      "title": "Full hire-to-paycheck: create employee → assign dept → create login → generate payslip",
+      "module": "Cross-Module Workflows",
+      "icon": "Hub",
+      "color": "#e91e63",
+      "order": 13,
+      "action": "hireToPaycheck",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "critical",
+        "integration"
+      ],
+      "videoUrl": "guides/videos/BW-130.webm",
+      "screenshotUrl": "guides/screenshots/BW-130.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Execute the **Full hire-to-paycheck: create employee → assign dept → create login → generate payslip** workflow",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:11.058Z"
+    },
+    {
+      "testId": "BW-131",
+      "title": "Approved leave day shows as leave in attendance view (not absent)",
+      "module": "Cross-Module Workflows",
+      "icon": "Hub",
+      "color": "#e91e63",
+      "order": 13,
+      "action": "leaveAffectsAttendance",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "integration"
+      ],
+      "videoUrl": "guides/videos/BW-131.webm",
+      "screenshotUrl": "guides/screenshots/BW-131.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:21.493Z"
+    },
+    {
+      "testId": "BW-132",
+      "title": "Approved timesheet hours reflect in payroll calculation",
+      "module": "Cross-Module Workflows",
+      "icon": "Hub",
+      "color": "#e91e63",
+      "order": 13,
+      "action": "timesheetToPayroll",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "integration"
+      ],
+      "videoUrl": "guides/videos/BW-132.webm",
+      "screenshotUrl": "guides/screenshots/BW-132.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:26.257Z"
+    },
+    {
+      "testId": "BW-133",
+      "title": "Dashboard stat cards reflect actual employee/leave/attendance counts",
+      "module": "Cross-Module Workflows",
+      "icon": "Hub",
+      "color": "#e91e63",
+      "order": 13,
+      "action": "dashboardDataAccuracy",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "integration",
+        "data-accuracy"
+      ],
+      "videoUrl": "guides/videos/BW-133.webm",
+      "screenshotUrl": "guides/screenshots/BW-133.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Execute the **Dashboard stat cards reflect actual employee/leave/attendance counts** workflow",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:28.889Z"
+    },
+    {
+      "testId": "BW-150",
+      "title": "Employee denied access to employee management",
+      "module": "Access Control",
+      "icon": "Security",
+      "color": "#455a64",
+      "order": 10,
+      "action": "rbacEmployeeDenied",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-150.webm",
+      "screenshotUrl": "guides/screenshots/BW-150.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Attempt to access a restricted page as **Employee**",
+        "Verify access is granted or denied based on role",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:33.262Z"
+    },
+    {
+      "testId": "BW-151",
+      "title": "Employee denied access to payroll management",
+      "module": "Access Control",
+      "icon": "Security",
+      "color": "#455a64",
+      "order": 10,
+      "action": "rbacEmployeeDenied",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-151.webm",
+      "screenshotUrl": "guides/screenshots/BW-151.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Attempt to access a restricted page as **Employee**",
+        "Verify access is granted or denied based on role",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:37.569Z"
+    },
+    {
+      "testId": "BW-152",
+      "title": "Employee denied access to leave management (admin)",
+      "module": "Access Control",
+      "icon": "Security",
+      "color": "#455a64",
+      "order": 10,
+      "action": "rbacEmployeeDenied",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-152.webm",
+      "screenshotUrl": "guides/screenshots/BW-152.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Attempt to access a restricted page as **Employee**",
+        "Verify access is granted or denied based on role",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:41.841Z"
+    },
+    {
+      "testId": "BW-153",
+      "title": "Employee denied access to attendance management",
+      "module": "Access Control",
+      "icon": "Security",
+      "color": "#455a64",
+      "order": 10,
+      "action": "rbacEmployeeDenied",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-153.webm",
+      "screenshotUrl": "guides/screenshots/BW-153.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Attempt to access a restricted page as **Employee**",
+        "Verify access is granted or denied based on role",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:46.096Z"
+    },
+    {
+      "testId": "BW-154",
+      "title": "Manager denied access to payroll management",
+      "module": "Access Control",
+      "icon": "Security",
+      "color": "#455a64",
+      "order": 10,
+      "action": "rbacManagerDenied",
+      "role": "manager",
+      "roleDisplay": "Team Lead / Manager",
+      "tags": [
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-154.webm",
+      "screenshotUrl": "guides/screenshots/BW-154.png",
+      "steps": [
+        "Log in as **Team Lead / Manager**",
+        "Attempt to access a restricted page as **Team Lead / Manager**",
+        "Verify access is granted or denied based on role",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:50.341Z"
+    },
+    {
+      "testId": "BW-155",
+      "title": "Manager can access timesheets and approve them",
+      "module": "Access Control",
+      "icon": "Security",
+      "color": "#455a64",
+      "order": 10,
+      "action": "rbacManagerAllowed",
+      "role": "manager",
+      "roleDisplay": "Team Lead / Manager",
+      "tags": [
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-155.webm",
+      "screenshotUrl": "guides/screenshots/BW-155.png",
+      "steps": [
+        "Log in as **Team Lead / Manager**",
+        "Attempt to access a restricted page as **Team Lead / Manager**",
+        "Verify access is granted or denied based on role",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:52.692Z"
+    },
+    {
+      "testId": "BW-156",
+      "title": "HR can access employee management and leave management",
+      "module": "Access Control",
+      "icon": "Security",
+      "color": "#455a64",
+      "order": 10,
+      "action": "rbacHRAllowed",
+      "role": "hr",
+      "roleDisplay": "HR Manager",
+      "tags": [
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-156.webm",
+      "screenshotUrl": "guides/screenshots/BW-156.png",
+      "steps": [
+        "Log in as **HR Manager**",
+        "Attempt to access a restricted page as **HR Manager**",
+        "Verify access is granted or denied based on role",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:02:56.518Z"
+    },
+    {
+      "testId": "BW-157",
+      "title": "Admin can access all modules without restriction",
+      "module": "Access Control",
+      "icon": "Security",
+      "color": "#455a64",
+      "order": 10,
+      "action": "rbacAdminFull",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-157.webm",
+      "screenshotUrl": "guides/screenshots/BW-157.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Attempt to access a restricted page as **Administrator**",
+        "Verify access is granted or denied based on role",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:01.343Z"
+    },
+    {
+      "testId": "BW-158",
+      "title": "Session expiry redirects to login page",
+      "module": "Access Control",
+      "icon": "Security",
+      "color": "#455a64",
+      "order": 10,
+      "action": "rbacSessionExpiry",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "rbac",
+        "security"
+      ],
+      "videoUrl": "guides/videos/BW-158.webm",
+      "screenshotUrl": "guides/screenshots/BW-158.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Attempt to access a restricted page as **Employee**",
+        "Verify access is granted or denied based on role",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:06.004Z"
+    },
+    {
+      "testId": "BW-170",
+      "title": "Admin sidebar shows all navigation items and each navigates correctly",
+      "module": "Navigation & UI",
+      "icon": "Explore",
+      "color": "#795548",
+      "order": 11,
+      "action": "navAdminSidebar",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "smoke",
+        "navigation"
+      ],
+      "videoUrl": "guides/videos/BW-170.webm",
+      "screenshotUrl": "guides/screenshots/BW-170.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Verify sidebar navigation items are visible",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:08.780Z"
+    },
+    {
+      "testId": "BW-171",
+      "title": "Employee sidebar shows limited nav items matching role permissions",
+      "module": "Navigation & UI",
+      "icon": "Explore",
+      "color": "#795548",
+      "order": 11,
+      "action": "navEmployeeSidebar",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "navigation"
+      ],
+      "videoUrl": "guides/videos/BW-171.webm",
+      "screenshotUrl": "guides/screenshots/BW-171.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Verify sidebar navigation items are visible",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:11.223Z"
+    },
+    {
+      "testId": "BW-172",
+      "title": "Profile menu opens with My Profile and Logout options",
+      "module": "Navigation & UI",
+      "icon": "Explore",
+      "color": "#795548",
+      "order": 11,
+      "action": "navProfileMenu",
+      "role": "employee",
+      "roleDisplay": "Employee",
+      "tags": [
+        "navigation"
+      ],
+      "videoUrl": "guides/videos/BW-172.webm",
+      "screenshotUrl": "guides/screenshots/BW-172.png",
+      "steps": [
+        "Log in as **Employee**",
+        "Verify sidebar navigation items are visible",
+        "Click profile avatar → Verify dropdown menu",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:13.594Z"
+    },
+    {
+      "testId": "BW-173",
+      "title": "Navigating to invalid URL shows 404 or redirect",
+      "module": "Navigation & UI",
+      "icon": "Explore",
+      "color": "#795548",
+      "order": 11,
+      "action": "nav404Page",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "navigation"
+      ],
+      "videoUrl": "guides/videos/BW-173.webm",
+      "screenshotUrl": "guides/screenshots/BW-173.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Verify sidebar navigation items are visible",
+        "Navigate to a non-existent URL → Verify 404 page",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:18.167Z"
+    },
+    {
+      "testId": "BW-180",
+      "title": "Admin opens reports page and verifies date filter and export button",
+      "module": "Reports & Settings",
+      "icon": "Assessment",
+      "color": "#607d8b",
+      "order": 12,
+      "action": "reportsPageLoad",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "smoke",
+        "reports"
+      ],
+      "videoUrl": "guides/videos/BW-180.webm",
+      "screenshotUrl": "guides/screenshots/BW-180.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Execute the **Admin opens reports page and verifies date filter and export button** workflow",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:20.959Z"
+    },
+    {
+      "testId": "BW-181",
+      "title": "Admin opens settings hub and navigates through email/preferences/advanced tabs",
+      "module": "Reports & Settings",
+      "icon": "Assessment",
+      "color": "#607d8b",
+      "order": 12,
+      "action": "settingsTabNavigation",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "settings"
+      ],
+      "videoUrl": "guides/videos/BW-181.webm",
+      "screenshotUrl": "guides/screenshots/BW-181.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Execute the **Admin opens settings hub and navigates through email/preferences/advanced tabs** workflow",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:23.383Z"
+    },
+    {
+      "testId": "BW-182",
+      "title": "Admin opens restore management page and verifies reviews/balances/users tabs",
+      "module": "Reports & Settings",
+      "icon": "Assessment",
+      "color": "#607d8b",
+      "order": 12,
+      "action": "restoreManagementTabs",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "admin"
+      ],
+      "videoUrl": "guides/videos/BW-182.webm",
+      "screenshotUrl": "guides/screenshots/BW-182.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Execute the **Admin opens restore management page and verifies reviews/balances/users tabs** workflow",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:26.283Z"
+    },
+    {
+      "testId": "BW-183",
+      "title": "Admin exports report data and verifies download triggers",
+      "module": "Reports & Settings",
+      "icon": "Assessment",
+      "color": "#607d8b",
+      "order": 12,
+      "action": "reportsExport",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "reports"
+      ],
+      "videoUrl": "guides/videos/BW-183.webm",
+      "screenshotUrl": "guides/screenshots/BW-183.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Execute the **Admin exports report data and verifies download triggers** workflow",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:29.036Z"
+    },
+    {
+      "testId": "BW-190",
+      "title": "Full employee CRUD: create with all fields → verify profile → edit name → delete",
+      "module": "Employee Management",
+      "icon": "People",
+      "color": "#1976d2",
+      "order": 1,
+      "action": "employeeCreateEditDelete",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "smoke",
+        "employee"
+      ],
+      "videoUrl": "guides/videos/BW-190.webm",
+      "screenshotUrl": "guides/screenshots/BW-190.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Add → Edit → Delete an employee end-to-end",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:40.725Z"
+    },
+    {
+      "testId": "BW-191",
+      "title": "Search for employee, filter by Active status, filter by department",
+      "module": "Employee Management",
+      "icon": "People",
+      "color": "#1976d2",
+      "order": 1,
+      "action": "employeeSearchFilter",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "employee"
+      ],
+      "videoUrl": "guides/videos/BW-191.webm",
+      "screenshotUrl": "guides/screenshots/BW-191.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Use search bar and status/department filters",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:51.504Z"
+    },
+    {
+      "testId": "BW-192",
+      "title": "Admin exports employee list and verifies download",
+      "module": "Employee Management",
+      "icon": "People",
+      "color": "#1976d2",
+      "order": 1,
+      "action": "employeeExport",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "employee"
+      ],
+      "videoUrl": "guides/videos/BW-192.webm",
+      "screenshotUrl": "guides/screenshots/BW-192.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Click **Export** button → Verify download",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:55.273Z"
+    },
+    {
+      "testId": "BW-193",
+      "title": "Submit employee form with invalid email, phone, PAN — all validation errors shown",
+      "module": "Employee Management",
+      "icon": "People",
+      "color": "#1976d2",
+      "order": 1,
+      "action": "employeeFormValidation",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "employee",
+        "validation"
+      ],
+      "videoUrl": "guides/videos/BW-193.webm",
+      "screenshotUrl": "guides/screenshots/BW-193.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:03:59.852Z"
+    },
+    {
+      "testId": "BW-194",
+      "title": "View employee profile and navigate all 4 tabs: personal, employment, emergency, statutory",
+      "module": "Employee Management",
+      "icon": "People",
+      "color": "#1976d2",
+      "order": 1,
+      "action": "employeeViewAllTabs",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "employee"
+      ],
+      "videoUrl": "guides/videos/BW-194.webm",
+      "screenshotUrl": "guides/screenshots/BW-194.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Click through Personal, Employment, Emergency, Statutory tabs",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:04:03.474Z"
+    },
+    {
+      "testId": "BW-195",
+      "title": "Manager sees only their team members (fewer than admin)",
+      "module": "Employee Management",
+      "icon": "People",
+      "color": "#1976d2",
+      "order": 1,
+      "action": "employeeManagerTeamView",
+      "role": "manager",
+      "roleDisplay": "Team Lead / Manager",
+      "tags": [
+        "employee",
+        "rbac"
+      ],
+      "videoUrl": "guides/videos/BW-195.webm",
+      "screenshotUrl": "guides/screenshots/BW-195.png",
+      "steps": [
+        "Log in as **Team Lead / Manager**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:04:06.976Z"
+    },
+    {
+      "testId": "BW-196",
+      "title": "Admin fills full salary structure (basic + all allowances + deductions) and verifies save",
+      "module": "Employee Management",
+      "icon": "People",
+      "color": "#1976d2",
+      "order": 1,
+      "action": "employeeSalaryStructure",
+      "role": "admin",
+      "roleDisplay": "Administrator",
+      "tags": [
+        "employee",
+        "payroll"
+      ],
+      "videoUrl": "guides/videos/BW-196.webm",
+      "screenshotUrl": "guides/screenshots/BW-196.png",
+      "steps": [
+        "Log in as **Administrator**",
+        "Verify the expected outcome"
+      ],
+      "duration": null,
+      "status": "recorded",
+      "recordedAt": "2026-03-21T19:04:11.166Z"
+    }
+  ]
+}

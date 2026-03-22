@@ -141,10 +141,19 @@ const LeaveRequest = () => {
     event.preventDefault();
     if (!validateForm()) return;
 
+    // Format dates as local YYYY-MM-DD (avoids UTC shift from toISOString)
+    const formatLocalDate = (d) => {
+      if (!d) return null;
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
     const payload = {
       leaveTypeId: form.leaveTypeId,
-      startDate: form.startDate ? form.startDate.toISOString().slice(0, 10) : null,
-      endDate: form.endDate ? form.endDate.toISOString().slice(0, 10) : null,
+      startDate: formatLocalDate(form.startDate),
+      endDate: formatLocalDate(form.endDate),
       isHalfDay: form.isHalfDay,
       ...(form.isHalfDay && form.halfDayType ? { halfDayType: form.halfDayType } : {}),
       reason: form.reason.trim(),
@@ -218,7 +227,15 @@ const LeaveRequest = () => {
                     label="Start Date"
                     value={form.startDate}
                     onChange={handleDateChange('startDate')}
-                    slotProps={{ textField: { fullWidth: true, error: !!errors.startDate, helperText: errors.startDate, inputProps: { 'data-testid': 'leave-start-date' } } }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        error={!!errors.startDate}
+                        helperText={errors.startDate}
+                        inputProps={{ ...params.inputProps, 'data-testid': 'leave-start-date' }}
+                      />
+                    )}
                   />
                 </Grid>
                 <Grid item xs={12} sm={3}>
@@ -226,7 +243,15 @@ const LeaveRequest = () => {
                     label="End Date"
                     value={form.endDate}
                     onChange={handleDateChange('endDate')}
-                    slotProps={{ textField: { fullWidth: true, error: !!errors.endDate, helperText: errors.endDate, inputProps: { 'data-testid': 'leave-end-date' } } }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        error={!!errors.endDate}
+                        helperText={errors.endDate}
+                        inputProps={{ ...params.inputProps, 'data-testid': 'leave-end-date' }}
+                      />
+                    )}
                   />
                 </Grid>
 

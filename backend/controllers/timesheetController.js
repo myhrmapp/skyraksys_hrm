@@ -53,7 +53,10 @@ const getAll = async (req, res, next) => {
     const filters = {};
     
     if (status) {
-      filters.status = status;
+      // Normalize case to match DB enum ('Draft', 'Submitted', 'Approved', 'Rejected')
+      const validStatuses = ['Draft', 'Submitted', 'Approved', 'Rejected'];
+      const normalized = validStatuses.find(s => s.toLowerCase() === status.toLowerCase());
+      filters.status = normalized || status;
     }
     
     if (projectId) {
@@ -85,8 +88,13 @@ const getAll = async (req, res, next) => {
         }
         filters.employeeId = employeeId;
       } else {
-        // Return manager's team timesheets
-        filters.managerId = req.employeeId;
+        // Return manager's own + team timesheets
+        const subordinates = await db.Employee.findAll({
+          where: { managerId: req.employeeId },
+          attributes: ['id']
+        });
+        const teamIds = [req.employeeId, ...subordinates.map(e => e.id)];
+        filters.employeeId = { [db.Sequelize.Op.in]: teamIds };
       }
     }
     // RBAC: Admin/HR see all

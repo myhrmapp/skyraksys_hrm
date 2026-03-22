@@ -49,6 +49,7 @@ const EmployeeProfileHeader = ({
                   variant="text"
                   startIcon={<ReceiptIcon />}
                   onClick={onViewPayslip}
+                  data-testid="employee-profile-payslip-btn"
                   sx={{ 
                     color: 'text.secondary',
                     textTransform: 'none',
@@ -103,6 +104,7 @@ const EmployeeProfileHeader = ({
               startIcon={<CancelIcon />}
               onClick={onCancel}
               disabled={saving}
+              data-testid="employee-profile-cancel-btn"
               sx={{ 
                 textTransform: 'none', 
                 borderRadius: 2,
@@ -121,6 +123,7 @@ const EmployeeProfileHeader = ({
               startIcon={saving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
               onClick={onSave}
               disabled={saving}
+              data-testid="employee-profile-save-btn"
               sx={{
                 bgcolor: '#10b981',
                 '&:hover': { bgcolor: '#059669' },

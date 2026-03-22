@@ -150,10 +150,13 @@ class DashboardService extends BaseService {
                 const [recentLeaves, recentTimesheets, upcomingLeaves] = activities;
 
                 // Format leave balance
+                // Key by first word of leave type name (e.g. "Annual Leave" -> "annual")
+                // so EmployeeDashboard can read leaveBalance.annual, leaveBalance.sick, etc.
                 const formattedLeaveBalance = {};
                 leaveBalances.forEach(balance => {
                     const leaveTypeName = balance.leaveType?.name || 'Unknown';
-                    formattedLeaveBalance[leaveTypeName.toLowerCase()] = {
+                    const leaveKey = leaveTypeName.toLowerCase().split(' ')[0];
+                    formattedLeaveBalance[leaveKey] = {
                         remaining: balance.balance || 0,
                         total: balance.totalAccrued || 0,
                         used: (balance.totalAccrued || 0) - (balance.balance || 0)

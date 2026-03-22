@@ -6,85 +6,91 @@ const AttendancePage = require('../pages/AttendancePage');
 const reader = new ExcelReader();
 const rows = reader.readEnabledTests('Attendance');
 
+// Route depends on role: employee → /my-attendance, admin/hr → /attendance-management
+const ADMIN_ACTIONS = ['managementLoad', 'filterDate', 'markAttendance'];
+
 test.describe('Attendance Module', () => {
   for (const row of rows) {
     test(`${row.testId}: ${row.description}`, async ({ page }) => {
       await loginAs(page, row.role);
       const attendance = new AttendancePage(page);
+      const route = ADMIN_ACTIONS.includes(row.action) ? 'attendance-management' : 'my-attendance';
 
       switch (row.action) {
         case 'pageLoad': {
-          await navigateTo(page, 'attendance');
+          await navigateTo(page, route);
           await waitForPageReady(page);
           await expect(page.locator('[data-testid="my-attendance-page"]')).toBeVisible({ timeout: 8000 });
           break;
         }
 
         case 'checkIn': {
-          await navigateTo(page, 'attendance');
+          await navigateTo(page, route);
           await waitForPageReady(page);
-          const result = await attendance.checkIn();
-          // Check-in button may be disabled if already checked in
-          await expect(page.locator('[data-testid="my-attendance-page"]')).toBeVisible();
+          await expect(page.locator('[data-testid="my-attendance-page"]')).toBeVisible({ timeout: 8000 });
+          // Check-in button may be absent if already checked in today
+          await attendance.checkIn();
           break;
         }
 
         case 'checkOut': {
-          await navigateTo(page, 'attendance');
+          await navigateTo(page, route);
           await waitForPageReady(page);
-          const result = await attendance.checkOut();
-          await expect(page.locator('[data-testid="my-attendance-page"]')).toBeVisible();
+          await expect(page.locator('[data-testid="my-attendance-page"]')).toBeVisible({ timeout: 8000 });
+          // Check-out button may be absent if not checked in or already checked out
+          await attendance.checkOut();
           break;
         }
 
         case 'changeMonth': {
-          await navigateTo(page, 'attendance');
+          await navigateTo(page, route);
           await waitForPageReady(page);
+          await expect(page.locator('[data-testid="my-attendance-page"]')).toBeVisible({ timeout: 8000 });
           await attendance.selectMonth(row.month);
           await attendance.selectYear(row.year);
           await page.waitForTimeout(500);
-          await expect(page.locator('[data-testid="my-attendance-page"]')).toBeVisible();
           break;
         }
 
         case 'managementLoad': {
-          await navigateTo(page, 'attendance');
+          await navigateTo(page, route);
           await waitForPageReady(page);
-          // Admin should see management view or a tab for it
-          const mgmtPage = page.locator('[data-testid="attendance-management-page"]');
-          const mgmtTab = page.locator('text=Management, text=Manage').first();
-          if (await mgmtTab.isVisible()) await mgmtTab.click();
-          await expect(mgmtPage.or(page.locator('[data-testid="my-attendance-page"]'))).toBeVisible({ timeout: 8000 });
+          await expect(page.locator('[data-testid="attendance-management-page"]')).toBeVisible({ timeout: 8000 });
           break;
         }
 
         case 'filterDate': {
-          await navigateTo(page, 'attendance');
+          await navigateTo(page, route);
           await waitForPageReady(page);
-          const mgmtTab2 = page.locator('text=Management, text=Manage').first();
-          if (await mgmtTab2.isVisible()) await mgmtTab2.click();
-          await waitForPageReady(page);
+          await expect(page.locator('[data-testid="attendance-management-page"]')).toBeVisible({ timeout: 8000 });
           await attendance.filterByDate(row.date);
           await page.waitForTimeout(500);
           break;
         }
 
         case 'markAttendance': {
-          await navigateTo(page, 'attendance');
+          await navigateTo(page, route);
           await waitForPageReady(page);
-          const mgmtTab3 = page.locator('text=Management, text=Manage').first();
-          if (await mgmtTab3.isVisible()) await mgmtTab3.click();
-          await waitForPageReady(page);
+          await expect(page.locator('[data-testid="attendance-management-page"]')).toBeVisible({ timeout: 8000 });
           await attendance.clickMarkAttendance();
           await page.waitForTimeout(1000);
+          // Close dialog if it opened
+          const dialog = page.locator('[role="dialog"]');
+          if (await dialog.isVisible({ timeout: 1000 }).catch(() => false)) {
+            const cancelBtn = dialog.locator('button:has-text("Cancel")');
+            if (await cancelBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+              await cancelBtn.click();
+            }
+          }
           break;
         }
 
         case 'verifyStatus': {
-          await navigateTo(page, 'attendance');
+          await navigateTo(page, route);
           await waitForPageReady(page);
+          await expect(page.locator('[data-testid="my-attendance-page"]')).toBeVisible({ timeout: 8000 });
           const status = await attendance.getStatus();
-          // Status should be some non-empty string (Checked In / Checked Out / Not Checked In)
+          // Status chip should show: CHECKED IN, CHECKED OUT, or NOT CHECKED IN
           expect(status || '').toBeTruthy();
           break;
         }

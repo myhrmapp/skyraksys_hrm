@@ -137,27 +137,27 @@ const EmployeeTableView = ({
               <TableCell align="right">
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
                   <Tooltip title="View Profile">
-                    <IconButton size="small" onClick={() => onView(emp.id)} sx={{ color: 'primary.main', bgcolor: 'primary.50' }}>
+                    <IconButton size="small" onClick={() => onView(emp.id)} data-testid="employee-table-view-btn" sx={{ color: 'primary.main', bgcolor: 'primary.50' }}>
                       <VisibilityIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                   
                   {!emp.userId ? (
                     <Tooltip title="Create Login">
-                      <IconButton size="small" onClick={() => onCreateUserAccount(emp)} sx={{ color: 'success.main', bgcolor: 'success.50' }}>
+                      <IconButton size="small" onClick={() => onCreateUserAccount(emp)} data-testid="employee-table-create-login-btn" sx={{ color: 'success.main', bgcolor: 'success.50' }}>
                         <VpnKeyIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   ) : (
                     <Tooltip title="Manage Login">
-                      <IconButton size="small" onClick={() => onManageUserAccount(emp)} sx={{ color: 'info.main', bgcolor: 'info.50' }}>
+                      <IconButton size="small" onClick={() => onManageUserAccount(emp)} data-testid="employee-table-manage-login-btn" sx={{ color: 'info.main', bgcolor: 'info.50' }}>
                         <VpnKeyIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   )}
 
                   <Tooltip title="Edit">
-                    <IconButton size="small" onClick={() => onEdit(emp.id)} sx={{ color: 'warning.main', bgcolor: 'warning.50' }}>
+                    <IconButton size="small" onClick={() => onEdit(emp.id)} data-testid="employee-table-edit-btn" sx={{ color: 'warning.main', bgcolor: 'warning.50' }}>
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>

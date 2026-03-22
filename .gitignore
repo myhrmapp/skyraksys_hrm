@@ -91,6 +91,7 @@ backend/test-screenshots/
 test-results/
 playwright-report/
 test-screenshots/
+.progress/
 
 # Temporary markdown files
 contexttmp.md

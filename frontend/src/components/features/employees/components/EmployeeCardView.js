@@ -146,6 +146,7 @@ const EmployeeCardView = ({
                       <Tooltip title="Create User Account">
                         <IconButton
                           size="small"
+                          data-testid="employee-card-create-login-btn"
                           onClick={(e) => {
                             e.stopPropagation();
                             onCreateUserAccount(employee);
@@ -162,6 +163,7 @@ const EmployeeCardView = ({
                       <Tooltip title="Manage User Account">
                         <IconButton
                           size="small"
+                          data-testid="employee-card-manage-login-btn"
                           onClick={(e) => {
                             e.stopPropagation();
                             onManageUserAccount(employee);
@@ -198,6 +200,7 @@ const EmployeeCardView = ({
                     <Tooltip title="View Profile">
                       <IconButton
                         size="small"
+                        data-testid="employee-card-view-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           onView(employee.id);
@@ -214,6 +217,7 @@ const EmployeeCardView = ({
                     <Tooltip title="Edit Employee">
                       <IconButton
                         size="small"
+                        data-testid="employee-card-edit-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           onEdit(employee);
@@ -230,6 +234,7 @@ const EmployeeCardView = ({
                     <Tooltip title="Terminate Employee">
                       <IconButton
                         size="small"
+                        data-testid="employee-card-delete-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           onDelete(employee);

@@ -274,7 +274,7 @@ router.get('/recent-approvals',
         },
         include: [
           { model: db.Employee, as: 'employee', attributes: ['id', 'firstName', 'lastName'] },
-          { model: db.User, as: 'approver', attributes: ['id', 'firstName', 'lastName'] },
+          { model: db.Employee, as: 'approver', attributes: ['id', 'firstName', 'lastName'] },
           { model: db.LeaveType, as: 'leaveType' }
         ],
         order: [['approvedAt', 'DESC']],

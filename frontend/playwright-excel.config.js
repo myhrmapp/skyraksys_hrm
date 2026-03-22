@@ -1,5 +1,8 @@
 // @ts-check
 const { defineConfig, devices } = require('@playwright/test');
+const dns = require('dns');
+// Force IPv4 resolution (Windows may resolve localhost to ::1 IPv6 first)
+dns.setDefaultResultOrder('ipv4first');
 
 /**
  * Playwright Excel-Driven E2E Test Configuration
@@ -27,6 +30,9 @@ module.exports = defineConfig({
   workers: 1,                    // single worker to avoid conflicts
   reporter: [
     ['html', { open: 'never', outputFolder: 'playwright-report-excel' }],
+    ['json', { outputFile: 'test-results/employee-test-results.json' }],
+    ['junit', { outputFile: 'test-results/employee-test-results.xml' }],
+    ['./e2e-excel/lib/progress-reporter.js'],
     ['list'],
   ],
   timeout: 45000,                // 45s per test (some workflows need more time)

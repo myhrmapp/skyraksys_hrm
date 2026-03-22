@@ -53,7 +53,10 @@ const getAll = async (req, res, next) => {
     const filters = {};
     
     if (status) {
-      filters.status = status;
+      // Normalize case to match DB enum ('Pending', 'Approved', 'Rejected', 'Cancelled', 'Cancellation Requested')
+      const validStatuses = ['Pending', 'Approved', 'Rejected', 'Cancelled', 'Cancellation Requested'];
+      const normalized = validStatuses.find(s => s.toLowerCase() === status.toLowerCase());
+      filters.status = normalized || status;
     }
     
     // RBAC: Employee sees only own leaves
@@ -76,8 +79,13 @@ const getAll = async (req, res, next) => {
         }
         filters.employeeId = employeeId;
       } else {
-        // Return manager's team leaves
-        filters.managerId = req.employeeId;
+        // Return manager's own + team leaves
+        const subordinates = await db.Employee.findAll({
+          where: { managerId: req.employeeId },
+          attributes: ['id']
+        });
+        const teamIds = [req.employeeId, ...subordinates.map(e => e.id)];
+        filters.employeeId = { [db.Sequelize.Op.in]: teamIds };
       }
     }
     // RBAC: Admin/HR see all (or filter by employeeId if provided)

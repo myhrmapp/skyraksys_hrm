@@ -34,8 +34,10 @@ const EmployeeRecords = lazy(() => import('./components/features/employees/Emplo
 const MyProfile = lazy(() => import('./components/features/employees/MyProfile'));
 const UserAccountManagementPage = lazy(() => import('./components/features/employees/UserAccountManagementPage'));
 
-// Debug Components
-const SimpleValidationDiagnostic = React.lazy(() => import('./components/debug/SimpleValidationDiagnostic'));
+// Debug Components — only loaded in development
+const SimpleValidationDiagnostic = process.env.NODE_ENV !== 'production'
+  ? React.lazy(() => import('./components/debug/SimpleValidationDiagnostic'))
+  : () => null;
 
 // Leave Management Components
 const LeaveManagement = lazy(() => import('./components/features/leave/LeaveManagement'));
@@ -67,14 +69,19 @@ const HolidayCalendarPage = lazy(() => import('./components/admin/HolidayCalenda
 const MyAttendance = lazy(() => import('./components/features/attendance/MyAttendance'));
 const AttendanceManagement = lazy(() => import('./components/features/attendance/AttendanceManagement'));
 const MyTasks = lazy(() => import('./components/features/tasks/MyTasks'));
-// Enhanced Admin Debug Panel with Environment Selector, Database Tools, and Log Viewer
-const AdminDebugPanel = lazy(() => import('./components/features/admin/AdminDebugPanel'));
+// Enhanced Admin Debug Panel — only loaded in development
+const AdminDebugPanel = process.env.NODE_ENV !== 'production'
+  ? lazy(() => import('./components/features/admin/AdminDebugPanel'))
+  : () => null;
 // System Configuration Page (Admin Only - Password Re-auth Required)
 const SystemConfigPage = lazy(() => import('./components/admin/SystemConfigPage'));
 
 // Hub Pages (Tabbed page merges)
 const OrganizationSettings = lazy(() => import('./components/features/admin/OrganizationSettings'));
 const SystemSettingsHub = lazy(() => import('./components/features/admin/SystemSettingsHub'));
+
+// User Guide (auto-generated from E2E tests)
+const UserGuide = lazy(() => import('./components/features/help/UserGuide'));
 
 // Projects Pages
 // ProjectList and ProjectDetails removed — ProjectTaskConfiguration is the canonical admin page
@@ -433,6 +440,15 @@ function App() {
                       )}
 
                       {/* Projects Routes removed — FE-43: ProjectTaskConfiguration at /project-task-config is the canonical admin page */}
+
+                      {/* User Guide — accessible to all roles */}
+                      <Route path="user-guide" element={
+                        <SmartErrorBoundary level="page">
+                          <Suspense fallback={<EnhancedLoadingFallback text="Loading User Guide..." />}>
+                            <UserGuide />
+                          </Suspense>
+                        </SmartErrorBoundary>
+                      } />
                     </Route>
 
                     {/* 404 catch-all */}

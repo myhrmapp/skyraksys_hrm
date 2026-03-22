@@ -47,14 +47,20 @@ class LeaveBusinessService extends BaseBusinessService {
   async createLeaveRequest(data, currentUser) {
     this.log('createLeaveRequest', { employeeId: data.employeeId, leaveTypeId: data.leaveTypeId });
 
-    // RBAC: Employee can only create for self
+    // RBAC: Employee can only create for self; admin/HR can create for others
     if (currentUser.role === 'employee') {
       if (!currentUser.employee?.id) {
         throw new ForbiddenError('Employee record not found');
       }
       data.employeeId = currentUser.employee.id;
     } else if (!data.employeeId) {
-      throw new BadRequestError('employeeId is required');
+      // Admin/HR using the leave form without specifying an employee —
+      // auto-assign their own employeeId if they have an employee record
+      if (currentUser.employee?.id) {
+        data.employeeId = currentUser.employee.id;
+      } else {
+        throw new BadRequestError('employeeId is required when creating leave for another employee');
+      }
     }
 
     // Validate business rules
@@ -426,17 +432,20 @@ class LeaveBusinessService extends BaseBusinessService {
       throw new NotFoundError('Leave type not found');
     }
 
-    // Validate dates
+    // Validate dates — compare date portions only (timezone-safe)
     const start = new Date(startDate);
     const end = new Date(endDate);
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Normalize all to UTC midnight for consistent date-only comparison
+    const startDateOnly = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
+    const endDateOnly = Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate());
+    const todayDateOnly = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
     
-    if (start > end) {
+    if (startDateOnly > endDateOnly) {
       throw new ValidationError('End date must be after or equal to start date');
     }
 
-    if (start < today) {
+    if (startDateOnly < todayDateOnly) {
       throw new ValidationError('Start date cannot be in the past');
     }
 

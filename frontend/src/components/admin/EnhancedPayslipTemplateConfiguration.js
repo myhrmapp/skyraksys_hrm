@@ -61,6 +61,7 @@ import { payrollService } from '../../services/payroll.service';
 import ConfirmDialog from '../common/ConfirmDialog';
 import useConfirmDialog from '../../hooks/useConfirmDialog';
 import PayslipPreview from './PayslipPreview';
+import { TabPanel } from '../common/TabbedPage';
 
 const EnhancedPayslipTemplateConfiguration = () => {
   const { user } = useAuth();
@@ -564,16 +565,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
     </Accordion>
   );
 
-  const TabPanel = ({ children, value, index }) => (
-    <div 
-      hidden={value !== index}
-      id={`tabpanel-${index}`}
-      role="tabpanel"
-      aria-labelledby={`tab-${index}`}
-    >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-    </div>
-  );
+  // TabPanel imported from ../common/TabbedPage
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -611,7 +603,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
   }, [templateDialog, activeTab]);
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3 }} data-testid="payslip-template-config-page">
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
@@ -627,6 +619,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
           size="large"
           startIcon={<AddIcon />}
           onClick={handleCreateTemplate}
+          data-testid="payslip-template-create-btn"
         >
           Create Template
         </Button>
@@ -850,7 +843,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
           </Tabs>
 
           {/* Tab 1: Basic Info */}
-          <TabPanel value={activeTab} index={0}>
+          <TabPanel value={activeTab} index={0} contentSx={{ py: 3 }}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <Alert severity="info" icon={<Typography>ℹ️</Typography>}>
@@ -918,7 +911,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
           </TabPanel>
 
           {/* Tab 2: Company & Logo */}
-          <TabPanel value={activeTab} index={1}>
+          <TabPanel value={activeTab} index={1} contentSx={{ py: 3 }}>
             <Grid container spacing={3}>
               {/* Logo Upload Section */}
               <Grid item xs={12}>
@@ -1122,7 +1115,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
           </TabPanel>
 
           {/* Tab 3: Fields */}
-          <TabPanel value={activeTab} index={2}>
+          <TabPanel value={activeTab} index={2} contentSx={{ py: 3 }}>
             <Alert severity="info" icon={<Typography>📋</Typography>} sx={{ mb: 3 }}>
               <strong>Configure Payslip Fields:</strong> Select which fields to include in your payslip template. 
               You can add, remove, and reorder fields in each section. Fields marked as "Auto-calculated" will be computed automatically.
@@ -1161,7 +1154,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
           </TabPanel>
 
           {/* Tab 4: Styling & Colors */}
-          <TabPanel value={activeTab} index={3}>
+          <TabPanel value={activeTab} index={3} contentSx={{ py: 3 }}>
             <Grid container spacing={3}>
               {/* Color Themes */}
               <Grid item xs={12}>
@@ -1429,7 +1422,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
           </TabPanel>
 
           {/* Tab 5: Advanced */}
-          <TabPanel value={activeTab} index={4}>
+          <TabPanel value={activeTab} index={4} contentSx={{ py: 3 }}>
             <Grid container spacing={3}>
               {/* Watermark */}
               <Grid item xs={12}>

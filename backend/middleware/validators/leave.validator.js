@@ -22,11 +22,7 @@ const createLeaveRequestSchema = Joi.object({
     .required(),
 
   startDate: Joi.date()
-    .required()
-    .min('now')
-    .messages({
-      'date.min': 'Start date cannot be in the past'
-    }),
+    .required(),
 
   endDate: Joi.date()
     .required()

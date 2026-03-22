@@ -261,7 +261,7 @@ const ProjectTaskConfiguration = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3 }} data-testid="project-task-config-page">
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>
         Project & Task Configuration
       </Typography>
@@ -280,14 +280,15 @@ const ProjectTaskConfiguration = () => {
 
       <Paper sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 2 }}>
         <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)}>
-          <Tab label="Projects" />
-          <Tab label="Tasks" />
+          <Tab label="Projects" data-testid="ptc-tab-projects" />
+          <Tab label="Tasks" data-testid="ptc-tab-tasks" />
         </Tabs>
         <TextField
           size="small"
           placeholder={`Search ${activeTab === 0 ? 'Projects' : 'Tasks'}...`}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          data-testid="ptc-search-input"
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -339,6 +340,7 @@ const ProjectTaskConfiguration = () => {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => openProjectDialog()}
+              data-testid="ptc-add-project-btn"
               sx={{
                 borderRadius: 2,
                 px: 3,
@@ -692,6 +694,7 @@ const ProjectTaskConfiguration = () => {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => openTaskDialog()}
+              data-testid="ptc-add-task-btn"
               sx={{
                 borderRadius: 2,
                 px: 3,

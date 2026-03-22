@@ -83,7 +83,7 @@ const selectors = {
     btnApproveLeaves:  tid('manager-btn-approve-leaves'),
     btnApproveTS:      tid('manager-btn-approve-timesheets'),
     btnViewTeam:       tid('manager-btn-view-team'),
-    tabsContainer:     tid('manager-dashboard-tabs'),
+    tabsContainer:     tid('manager-tabs'),
     tabTeamMembers:    tid('manager-tab-team-members'),
     tabLeaveApprovals: tid('manager-tab-leave-approvals'),
     tabTSApprovals:    tid('manager-tab-timesheet-approvals'),
@@ -105,6 +105,10 @@ const selectors = {
     profileHeader:   tid('employee-profile-header'),
     profileBackBtn:  tid('employee-profile-back-btn'),
     profileEditBtn:  tid('employee-profile-edit-btn'),
+    profileSaveBtn:  tid('employee-profile-save-btn'),
+    profileCancelBtn:tid('employee-profile-cancel-btn'),
+    profileFooterSaveBtn:   tid('employee-profile-footer-save-btn'),
+    profileFooterCancelBtn: tid('employee-profile-footer-cancel-btn'),
     myProfilePage:   tid('my-profile-page'),
 
     // Form tabs
@@ -124,6 +128,23 @@ const selectors = {
     // Delete dialog
     deleteCancelBtn:  tid('delete-employee-cancel-btn'),
     deleteConfirmBtn: tid('delete-employee-confirm-btn'),
+
+    // View toggle
+    viewToggleList:   tid('employee-list-view-toggle-list'),
+    viewToggleCards:  tid('employee-list-view-toggle-cards'),
+
+    // Table row action buttons
+    tableViewBtn:     tid('employee-table-view-btn'),
+    tableEditBtn:     tid('employee-table-edit-btn'),
+    tableCreateLoginBtn: tid('employee-table-create-login-btn'),
+    tableManageLoginBtn: tid('employee-table-manage-login-btn'),
+
+    // Card action buttons
+    cardViewBtn:      tid('employee-card-view-btn'),
+    cardEditBtn:      tid('employee-card-edit-btn'),
+    cardDeleteBtn:    tid('employee-card-delete-btn'),
+    cardCreateLoginBtn:  tid('employee-card-create-login-btn'),
+    cardManageLoginBtn:  tid('employee-card-manage-login-btn'),
 
     // Create user account dialog
     createUserEmail:     tid('create-user-email'),
@@ -148,6 +169,9 @@ const selectors = {
 
     // Employment Info fields
     fieldHireDate:        tid('field-hireDate'),
+    fieldDepartment:      tid('department-select'),
+    fieldPosition:        tid('position-select'),
+    fieldManager:         tid('manager-select'),
     fieldEmploymentType:  tid('field-employmentType'),
     fieldStatus:          tid('field-status'),
     fieldWorkLocation:    tid('field-workLocation'),
@@ -168,6 +192,29 @@ const selectors = {
     fieldBankAccount:    tid('field-bankAccountNumber'),
     fieldBankIfsc:       tid('field-bankIfscCode'),
     fieldBankBranch:     tid('field-bankBranch'),
+
+    // List filters (additional)
+    listFilterEmploymentType: tid('employee-list-filter-employment-type'),
+    listFilterWorkLocation:   tid('employee-list-filter-work-location'),
+
+    // Salary fields
+    salaryCurrency:      tid('salary-currency-select'),
+    salaryPayFrequency:  tid('salary-payfrequency-select'),
+
+    // Photo upload
+    photoUploadBtn:      tid('photo-upload-btn'),
+
+    // Profile payslip button
+    profilePayslipBtn:   tid('employee-profile-payslip-btn'),
+
+    // User Account Management page buttons
+    userAcctResetPasswordBtn: tid('user-acct-reset-password-btn'),
+    userAcctLockBtn:          tid('user-acct-lock-btn'),
+    userAcctWelcomeEmailBtn:  tid('user-acct-welcome-email-btn'),
+    userAcctForceLogoutBtn:   tid('user-acct-force-logout-btn'),
+
+    // Create user account dialog role dropdown
+    createUserRole:      tid('create-user-role'),
   },
 
   // ─── LEAVE MODULE ───────────────────────────────────
@@ -206,11 +253,33 @@ const selectors = {
 
   // ─── TIMESHEET MODULE ──────────────────────────────
   timesheet: {
-    // TimesheetHistory already had data-testid attrs from prior code
-    weekSelect:     tid('timesheet-week-select'),
-    statusFilter:   tid('timesheet-status-filter'),
-    submitBtn:      tid('timesheet-submit-btn'),
-    table:          tid('timesheet-table'),
+    // Hub
+    hub:                tid('timesheet-hub-page'),
+
+    // Week Navigation
+    prevWeek:           tid('timesheet-prev-week'),
+    nextWeek:           tid('timesheet-next-week'),
+    todayBtn:           tid('timesheet-today-button'),
+
+    // Weekly Entry Grid
+    entryTable:         tid('timesheet-entry-table'),
+    addTask:            tid('timesheet-add-task'),
+    saveDraft:          tid('timesheet-save-draft'),
+    submitBtn:          tid('timesheet-submit'),
+
+    // Approval Tab
+    approvalSearch:     tid('ts-approval-search-input'),
+    approvalStatusSelect: tid('ts-approval-status-select'),
+    approvalProjectSelect: tid('ts-approval-project-select'),
+    approvalStartDate:  tid('ts-approval-start-date'),
+    approvalEndDate:    tid('ts-approval-end-date'),
+
+    // History Tab
+    historyFilterToggle: tid('ts-history-filter-toggle'),
+    historyExport:      tid('ts-history-export'),
+    historyStatusSelect: tid('ts-history-status-select'),
+    historyStartDate:   tid('ts-history-start-date'),
+    historyEndDate:     tid('ts-history-end-date'),
   },
 
   // ─── ATTENDANCE MODULE ──────────────────────────────
@@ -255,6 +324,10 @@ const selectors = {
     // Edit Payslip Dialog
     editSaveBtn:       tid('edit-payslip-save-btn'),
     editReason:        tid('edit-payslip-reason'),
+
+    // Payslip Template Configuration
+    templatePage:      tid('payslip-template-config-page'),
+    templateCreateBtn: tid('payslip-template-create-btn'),
   },
 
   // ─── TASKS MODULE ───────────────────────────────────
@@ -263,6 +336,52 @@ const selectors = {
     search:          tid('tasks-search'),
     statusFilter:    tid('tasks-status-filter'),
     priorityFilter:  tid('tasks-priority-filter'),
+  },
+
+  // ─── PROJECTS & TASKS ADMIN ─────────────────────────
+  projectTaskConfig: {
+    page:            tid('project-task-config-page'),
+    tabProjects:     tid('ptc-tab-projects'),
+    tabTasks:        tid('ptc-tab-tasks'),
+    search:          tid('ptc-search-input'),
+    addProjectBtn:   tid('ptc-add-project-btn'),
+    addTaskBtn:      tid('ptc-add-task-btn'),
+    // Project form
+    projectName:     tid('project-name-input'),
+    projectDesc:     tid('project-description-input'),
+    projectStartDate:tid('project-start-date'),
+    projectEndDate:  tid('project-end-date'),
+    projectStatus:   tid('project-status-select'),
+    projectClient:   tid('project-client-name-input'),
+    projectManager:  tid('project-manager-select'),
+    projectCancel:   tid('project-cancel-button'),
+    projectSave:     tid('project-save-button'),
+  },
+
+  // ─── LEAVE MANAGEMENT (Admin/HR/Manager) ────────────
+  leaveManagement: {
+    search:          tid('leave-mgmt-search-input'),
+    statusSelect:    tid('leave-mgmt-status-select'),
+    typeSelect:      tid('leave-mgmt-type-select'),
+    filtersButton:   tid('leave-mgmt-filters-button'),
+    requestsTable:   tid('leave-mgmt-requests-table'),
+    newRequestBtn:   tid('leave-new-request-button'),
+    requestsTableEmp:tid('employee-leave-requests-table'),
+  },
+
+  // ─── LEAVE BALANCE ──────────────────────────────────
+  leaveBalance: {
+    searchInput:     tid('leave-search-input'),
+    yearSelect:      tid('leave-year-select'),
+    employeeSelect:  tid('leave-employee-select'),
+    typeFilterSelect:tid('leave-type-filter-select'),
+    bulkSubmitBtn:   tid('leave-balance-bulk-submit-btn'),
+    createEmployeeSelect: tid('create-leave-employee-select'),
+    createTypeSelect:tid('create-leave-type-select'),
+    createYearInput: tid('create-leave-year-input'),
+    createAccruedInput: tid('create-leave-accrued-input'),
+    createCarryForward: tid('create-leave-carryforward-input'),
+    createSubmitBtn: tid('leave-balance-create-submit-btn'),
   },
 
   // ─── REVIEWS MODULE ─────────────────────────────────
@@ -305,6 +424,22 @@ const selectors = {
 
   orgSettings: {
     page: tid('organization-settings-page'),
+  },
+
+  userManagement: {
+    page:             tid('user-management-page'),
+    tabCreate:        tid('usermgmt-tab-create'),
+    tabManage:        tid('usermgmt-tab-manage'),
+    emailInput:       tid('usermgmt-email-input'),
+    firstNameInput:   tid('usermgmt-firstname-input'),
+    lastNameInput:    tid('usermgmt-lastname-input'),
+    roleSelect:       tid('usermgmt-role-select'),
+    passwordInput:    tid('usermgmt-password-input'),
+    confirmPassInput: tid('usermgmt-confirm-password-input'),
+    submitBtn:        tid('usermgmt-submit-btn'),
+    searchInput:      tid('usermgmt-search-input'),
+    roleFilter:       tid('usermgmt-role-filter'),
+    statusFilter:     tid('usermgmt-status-filter'),
   },
 };
 

@@ -21,15 +21,17 @@ import React, { useState } from 'react';
 import { Box, Typography, Tabs, Tab, Paper, useTheme, alpha } from '@mui/material';
 import PropTypes from 'prop-types';
 
-function TabPanel({ children, value, index, hasBeenActive }) {
+function TabPanel({ children, value, index, hasBeenActive, contentSx }) {
+  const isActive = value === index;
+  const shouldRender = hasBeenActive != null ? hasBeenActive : isActive;
   return (
     <Box
       role="tabpanel"
-      hidden={value !== index}
+      hidden={!isActive}
       id={`tabpanel-${index}`}
       aria-labelledby={`tab-${index}`}
     >
-      {hasBeenActive && <Box>{children}</Box>}
+      {shouldRender && <Box sx={contentSx}>{children}</Box>}
     </Box>
   );
 }
@@ -40,7 +42,7 @@ TabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
-const TabbedPage = ({ title, subtitle, icon, tabs = [], defaultTab = 0 }) => {
+const TabbedPage = ({ title, subtitle, icon, tabs = [], defaultTab = 0, testId }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [visitedTabs, setVisitedTabs] = useState(() => new Set([defaultTab]));
   const theme = useTheme();
@@ -54,7 +56,7 @@ const TabbedPage = ({ title, subtitle, icon, tabs = [], defaultTab = 0 }) => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : 'grey.50' }}>
+    <Box data-testid={testId ? `${testId}-page` : undefined} sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* Page Header */}
       <Paper
         elevation={0}
@@ -121,6 +123,7 @@ const TabbedPage = ({ title, subtitle, icon, tabs = [], defaultTab = 0 }) => {
               aria-controls={`tabpanel-${i}`}
               icon={tab.icon || undefined}
               iconPosition="start"
+              data-testid={testId ? `${testId}-tab-${tab.label.toLowerCase().replace(/\s+/g, '-')}` : undefined}
             />
           ))}
         </Tabs>
@@ -149,6 +152,7 @@ TabbedPage.propTypes = {
     })
   ).isRequired,
   defaultTab: PropTypes.number,
+  testId: PropTypes.string,
 };
 
 export { TabPanel };

@@ -203,7 +203,7 @@ const UserAccountManagementPage = () => {
           // Send welcome email with credentials
           const welcomePassword = generateSecurePassword(14);
           await authService.resetUserPassword(userId, welcomePassword);
-          const emailResult = await authService.sendWelcomeEmail(userId, welcomePassword);
+          const emailResult = await authService.sendWelcomeEmail(userId, true, welcomePassword);
           if (emailResult.success) {
             showNotification('Welcome email sent successfully', 'success');
           } else {
@@ -879,6 +879,7 @@ const UserAccountManagementPage = () => {
                         startIcon={<RefreshIcon />}
                         onClick={handleQuickPasswordReset}
                         disabled={actionLoading}
+                        data-testid="user-acct-reset-password-btn"
                       >
                         Reset Password
                       </Button>
@@ -893,6 +894,7 @@ const UserAccountManagementPage = () => {
                         startIcon={employee.user?.isLocked ? <LockOpenIcon /> : <LockIcon />}
                         onClick={handleLockAccount}
                         disabled={actionLoading}
+                        data-testid="user-acct-lock-btn"
                       >
                         {employee.user?.isLocked ? 'Unlock' : 'Lock'} Account
                       </Button>
@@ -906,6 +908,7 @@ const UserAccountManagementPage = () => {
                         startIcon={<SendIcon />}
                         onClick={handleSendWelcomeEmail}
                         disabled={actionLoading}
+                        data-testid="user-acct-welcome-email-btn"
                       >
                         Send Welcome Email
                       </Button>
@@ -920,6 +923,7 @@ const UserAccountManagementPage = () => {
                         startIcon={<LogoutIcon />}
                         onClick={handleForceLogout}
                         disabled={actionLoading}
+                        data-testid="user-acct-force-logout-btn"
                       >
                         Force Logout
                       </Button>

@@ -138,7 +138,7 @@ const LeaveAccrualManagement = () => {
     return <Navigate to="/dashboard" replace />;
   }
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Container maxWidth="xl" sx={{ py: 3 }} data-testid="leave-accrual-page">
       {/* Header */}
       <Paper sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #43a047 0%, #1b5e20 100%)', color: 'white' }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>

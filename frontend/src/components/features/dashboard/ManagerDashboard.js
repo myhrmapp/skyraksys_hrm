@@ -70,7 +70,7 @@ const ManagerDashboard = () => {
   const { data: pendingLeavesData, isLoading: isLoadingLeaves } = useQuery({
     queryKey: ['pending-leaves', 'manager', user?.id],
     queryFn: async () => {
-      const response = await leaveService.getPendingForManager(user.id);
+      const response = await leaveService.getPendingForManager();
       return response || [];
     },
     enabled: !!user?.id

@@ -38,6 +38,7 @@ const TimesheetHub = () => {
       icon={<TimesheetIcon />}
       tabs={tabs}
       defaultTab={defaultTab}
+      testId="timesheet-hub"
     />
   );
 };

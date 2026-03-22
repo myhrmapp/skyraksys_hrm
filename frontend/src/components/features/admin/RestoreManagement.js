@@ -110,7 +110,7 @@ const RestoreManagement = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Container maxWidth="xl" sx={{ py: 3 }} data-testid="restore-management-page">
       {/* Header */}
       <Paper sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #ef5350 0%, #b71c1c 100%)', color: 'white' }}>
         <Box display="flex" alignItems="center" gap={2}>
@@ -127,17 +127,17 @@ const RestoreManagement = () => {
       {/* Tabs */}
       <Paper sx={{ mb: 3 }}>
         <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)}>
-          <Tab label={
+          <Tab data-testid="restore-tab-reviews" label={
             <Badge badgeContent={deletedReviews.length} color="error" max={99}>
               <Box display="flex" alignItems="center" gap={0.5}><ReviewIcon fontSize="small" /> Reviews</Box>
             </Badge>
           } />
-          <Tab label={
+          <Tab data-testid="restore-tab-balances" label={
             <Badge badgeContent={deletedBalances.length} color="error" max={99}>
               <Box display="flex" alignItems="center" gap={0.5}><BalanceIcon fontSize="small" /> Balances</Box>
             </Badge>
           } />
-          <Tab label={
+          <Tab data-testid="restore-tab-users" label={
             <Badge badgeContent={deletedUsers.length} color="error" max={99}>
               <Box display="flex" alignItems="center" gap={0.5}><UserIcon fontSize="small" /> Users</Box>
             </Badge>
@@ -355,13 +355,14 @@ const RestoreManagement = () => {
           </Alert>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setConfirmDialog({ open: false, type: '', id: null, label: '' })}>
+          <Button onClick={() => setConfirmDialog({ open: false, type: '', id: null, label: '' })} data-testid="restore-cancel-btn">
             Cancel
           </Button>
           <Button
             variant="contained" color="success" onClick={handleRestore}
             disabled={isMutating}
             startIcon={isMutating ? <CircularProgress size={16} /> : <RestoreIcon />}
+            data-testid="restore-confirm-btn"
           >
             Restore
           </Button>

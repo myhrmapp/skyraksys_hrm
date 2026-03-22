@@ -187,7 +187,7 @@ export default function HolidayCalendarPage({ embedded } = {}) {
       field: 'dayOfWeek',
       headerName: 'Day',
       width: 100,
-      valueGetter: (value, row) => dayjs(row.date).format('dddd')
+      valueGetter: (params) => dayjs(params.row.date).format('dddd')
     },
     { field: 'name', headerName: 'Holiday Name', flex: 1, minWidth: 200 },
     {

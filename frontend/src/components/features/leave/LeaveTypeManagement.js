@@ -179,7 +179,7 @@ const LeaveTypeManagement = () => {
   const inactiveCount = leaveTypes.length - activeCount;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <Box data-testid="leave-type-page" sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>

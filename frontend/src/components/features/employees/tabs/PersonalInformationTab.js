@@ -175,7 +175,7 @@ const PersonalInformationTab = ({
             data-testid="field-phone"
             value={formData.phone}
             onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+              const value = e.target.value.replace(/\D/g, '').slice(0, 15);
               onChange('phone', value);
             }}
             onBlur={() => onBlur && onBlur('phone')}

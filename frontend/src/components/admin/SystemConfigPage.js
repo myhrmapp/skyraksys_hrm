@@ -99,8 +99,6 @@ const SystemConfigPage = ({ embedded } = {}) => {
 
   const handleCopyToClipboard = (text, label) => {
     navigator.clipboard.writeText(text);
-    // You can add a toast notification here
-    console.log(`${label} copied to clipboard`);
   };
 
   const renderConfigSection = (title, icon, data, color = 'primary') => {

@@ -217,11 +217,22 @@ router.get('/users',
   authorize(['admin', 'hr']),
   async (req, res, next) => {
     try {
-      const { page = 1, limit = 20, role, isActive } = req.query;
+      const { page = 1, limit = 20, role, isActive, status, search } = req.query;
 
       const where = {};
       if (role) where.role = role;
-      if (isActive !== undefined) where.isActive = isActive === 'true';
+      if (status === 'active') where.isActive = true;
+      else if (status === 'inactive') where.isActive = false;
+      else if (isActive !== undefined) where.isActive = isActive === 'true';
+
+      if (search) {
+        const { Op } = require('sequelize');
+        where[Op.or] = [
+          { email: { [Op.iLike]: `%${search}%` } },
+          { firstName: { [Op.iLike]: `%${search}%` } },
+          { lastName: { [Op.iLike]: `%${search}%` } }
+        ];
+      }
 
       const offset = (page - 1) * limit;
 

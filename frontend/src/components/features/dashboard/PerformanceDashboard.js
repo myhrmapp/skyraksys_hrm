@@ -233,7 +233,7 @@ const PerformanceDashboard = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 3 }}>
+    <Container maxWidth="lg" sx={{ py: 3 }} data-testid="performance-dashboard-page">
       {/* Header */}
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
         <Typography variant="h4" fontWeight="600">
@@ -246,6 +246,7 @@ const PerformanceDashboard = () => {
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
                 size="small"
+                data-testid="perf-auto-refresh-toggle"
               />
             }
             label="Auto Refresh"
@@ -253,6 +254,7 @@ const PerformanceDashboard = () => {
           <IconButton 
             onClick={activeTab === 0 ? fetchClientMetrics : fetchServerMetrics}
             disabled={loading}
+            data-testid="perf-refresh-btn"
           >
             <RefreshIcon />
           </IconButton>
@@ -270,12 +272,14 @@ const PerformanceDashboard = () => {
             icon={<ClientIcon />} 
             label="Client Performance" 
             iconPosition="start"
+            data-testid="perf-tab-client"
           />
           {isAdmin && (
             <Tab 
               icon={<ServerIcon />} 
               label="Server Performance" 
               iconPosition="start"
+              data-testid="perf-tab-server"
             />
           )}
         </Tabs>

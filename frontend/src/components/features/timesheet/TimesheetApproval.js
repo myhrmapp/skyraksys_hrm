@@ -74,10 +74,10 @@ const TimesheetApproval = ({ embedded } = {}) => {
   const queryClient = useQueryClient();
   const { dialogProps, confirm } = useConfirmDialog();
   
-  // 🚀 React Query for pending timesheets
+  // 🚀 React Query for pending timesheets (team-scoped via /approval/pending)
   const { data: timesheetsData, isLoading: loading, refetch } = useQuery({
     queryKey: ['timesheets', 'pending'],
-    queryFn: () => timesheetService.getAll({ status: 'submitted' }),
+    queryFn: () => timesheetService.getPendingApprovals(),
     select: (response) => {
       const allTimesheets = Array.isArray(response.data) ? response.data : (response.data?.data || []);
       return allTimesheets.sort((a, b) => new Date(b.weekStartDate) - new Date(a.weekStartDate));
@@ -147,7 +147,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
     
     setSummary({
       totalPending: submitted.length,
-      totalHours: submitted.reduce((sum, ts) => sum + parseFloat(ts.totalHoursWorked || 0), 0),
+      totalHours: submitted.reduce((sum, ts) => sum + parseFloat(ts.totalHours || ts.totalHoursWorked || 0), 0),
       employees: [...new Set(submitted.map(ts => ts.employeeId))].length,
       approved: approved.length,
       rejected: rejected.length,
@@ -887,6 +887,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
                         <IconButton 
                           size="small" 
                           aria-label="View details"
+                          data-testid="ts-approval-view-btn"
                           onClick={() => handleViewDetails(timesheet)}
                           sx={{ 
                             color: 'primary.main',
@@ -907,6 +908,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
                             <IconButton 
                               size="small" 
                               aria-label="Approve timesheet"
+                              data-testid="ts-approval-approve-btn"
                               onClick={() => handleApprovalClick(timesheet, 'approve')}
                               sx={{ 
                                 color: 'success.main',
@@ -925,6 +927,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
                             <IconButton 
                               size="small" 
                               aria-label="Reject timesheet"
+                              data-testid="ts-approval-reject-btn"
                               onClick={() => handleApprovalClick(timesheet, 'reject')}
                               sx={{ 
                                 color: 'error.main',

@@ -120,17 +120,21 @@ class DatabaseService {
     try {
       let { limit = 50, offset = 0, orderBy, orderDir = 'ASC' } = options;
 
-      // Validate table name to prevent SQL injection
+      // Validate table name against actual database tables
       const validTables = await this.getTables();
       if (!validTables.find(t => t.table_name === tableName)) {
         throw new Error('Invalid table name');
       }
 
-      // Get table schema to find a valid column for ordering
+      // Validate orderDir — must be strictly ASC or DESC
+      const safeOrderDir = orderDir.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+      // Get table schema to find valid columns and a default ordering column
+      const schema = await this.getTableSchema(tableName);
+      const validColumns = schema.columns ? schema.columns.map(c => c.column_name) : [];
+
       if (!orderBy) {
-        const schema = await this.getTableSchema(tableName);
         if (schema.columns && schema.columns.length > 0) {
-          // Try to use primary key first, otherwise use first column
           const primaryKey = schema.primaryKeys && schema.primaryKeys.length > 0 
             ? schema.primaryKeys[0] 
             : schema.columns[0].column_name;
@@ -138,6 +142,9 @@ class DatabaseService {
         } else {
           orderBy = '1'; // Fallback to first column by position
         }
+      } else if (orderBy !== '1' && !validColumns.includes(orderBy)) {
+        // Validate orderBy against actual column names to prevent injection
+        throw new Error(`Invalid order column: ${orderBy}`);
       }
 
       // Get total count
@@ -149,11 +156,9 @@ class DatabaseService {
       // Get data with safe ordering
       let query;
       if (orderBy === '1') {
-        // Order by column position
         query = `SELECT * FROM "${tableName}" LIMIT :limit OFFSET :offset`;
       } else {
-        // Order by specific column
-        query = `SELECT * FROM "${tableName}" ORDER BY "${orderBy}" ${orderDir} LIMIT :limit OFFSET :offset`;
+        query = `SELECT * FROM "${tableName}" ORDER BY "${orderBy}" ${safeOrderDir} LIMIT :limit OFFSET :offset`;
       }
 
       const data = await this.sequelize.query(query, {
@@ -314,6 +319,12 @@ class DatabaseService {
    */
   async backupTable(tableName) {
     try {
+      // Validate table name against actual database tables
+      const validTables = await this.getTables();
+      if (!validTables.find(t => t.table_name === tableName)) {
+        throw new Error('Invalid table name');
+      }
+
       const backupTableName = `${tableName}_backup_${Date.now()}`;
       
       await this.sequelize.query(`
@@ -337,6 +348,12 @@ class DatabaseService {
    */
   async explainQuery(query) {
     try {
+      // Only allow SELECT statements in EXPLAIN ANALYZE
+      const trimmed = query.trim().toUpperCase();
+      if (!trimmed.startsWith('SELECT')) {
+        throw new Error('EXPLAIN only supports SELECT queries');
+      }
+
       const plan = await this.sequelize.query(`EXPLAIN ANALYZE ${query}`, {
         type: QueryTypes.SELECT
       });

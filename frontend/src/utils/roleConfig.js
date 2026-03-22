@@ -1,6 +1,7 @@
 /**
  * Role-Based Access Control Configuration
  * Centralized configuration for route access and feature permissions
+ * Updated for full route coverage
  */
 
 // Define user roles
@@ -34,6 +35,10 @@ export const ROUTE_PERMISSIONS = {
   '/add-leave-request': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/admin/leave-balances': [ROLES.ADMIN, ROLES.HR],
   
+  // Attendance Routes
+  '/my-attendance': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
+  '/attendance-management': [ROLES.ADMIN, ROLES.HR],
+
   // Timesheet Routes
   '/timesheets': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/timesheets/week/:weekStart': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
@@ -45,15 +50,28 @@ export const ROUTE_PERMISSIONS = {
   '/employee-payslips': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/admin/payslip-templates': [ROLES.ADMIN, ROLES.HR],
   
-  // Project Routes
+  // Project & Task Routes
   '/project-task-config': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
+  '/my-tasks': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   
+  // Employee Reviews
+  '/employee-reviews': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
+
+  // Organization
+  '/organization': [ROLES.ADMIN, ROLES.HR],
+
+  // Leave Admin Routes
+  '/admin/leave-accrual': [ROLES.ADMIN, ROLES.HR],
+  '/admin/leave-types': [ROLES.ADMIN, ROLES.HR],
+
   // Admin Routes
   '/user-management': [ROLES.ADMIN, ROLES.HR],
   '/position-management': [ROLES.ADMIN, ROLES.HR],
   '/settings': [ROLES.ADMIN],
   '/admin/config': [ROLES.ADMIN],
   '/admin/debug': [ROLES.ADMIN],
+  '/admin/settings-hub': [ROLES.ADMIN],
+  '/admin/restore': [ROLES.ADMIN, ROLES.HR],
   '/reports': [ROLES.ADMIN, ROLES.HR],
   '/admin/consolidated-reports': [ROLES.ADMIN, ROLES.HR],
   '/admin/payslip-templates-old': [ROLES.ADMIN, ROLES.HR],

@@ -102,17 +102,17 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
         
         {/* Header with Actions */}
         <EmployeeProfileHeader 
-          navigate={navigate}
+          onBack={() => mode === 'self' ? navigate('/') : navigate('/employees')}
           editing={editing}
-          setEditing={setEditing}
+          onEdit={() => setEditing(true)}
           saving={saving}
-          handleSave={handleSave}
-          handleCancel={handleCancel}
-          canEdit={mode === 'self' ? canSelfEdit : canEdit} // Self-service: edit phone, address, emergency contact
-          canEditSensitive={mode === 'self' ? false : canEditSensitive} // Employees can't edit their own sensitive info
+          onSave={handleSave}
+          onCancel={handleCancel}
+          canEdit={mode === 'self' ? canSelfEdit : canEdit}
+          canEditSensitive={mode === 'self' ? false : canEditSensitive}
           id={id || employee.id}
           onViewPayslip={() => setShowPayslipViewer(true)}
-          onBack={() => mode === 'self' ? navigate('/') : navigate('/employees')}
+          onManageUser={() => navigate(`/employees/${id || employee.id}/user-account`)}
           mode={mode}
         />
 
@@ -218,6 +218,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
                 startIcon={<CancelIcon />}
                 onClick={handleCancel}
                 disabled={saving}
+                data-testid="employee-profile-footer-cancel-btn"
                 sx={{
                   borderColor: '#cbd5e1',
                   color: '#64748b',
@@ -235,6 +236,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
                 startIcon={saving ? <CircularProgress size={20} /> : <SaveIcon />}
                 onClick={handleSave}
                 disabled={saving}
+                data-testid="employee-profile-footer-save-btn"
                 sx={{
                   bgcolor: '#10b981',
                   color: 'white',

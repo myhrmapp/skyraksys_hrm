@@ -43,9 +43,9 @@ const SystemSettings = ({ embedded } = {}) => {
       try {
         setLoading(true);
         const response = await settingsService.getPayslipTemplate();
-        if (response.data) {
-          setSettings(response.data);
-          setLogoPreview(response.data.companyLogo);
+        if (response.data?.data) {
+          setSettings(response.data.data);
+          setLogoPreview(response.data.data.companyLogo);
         }
       } catch (err) {
         setError('Failed to load settings.');
@@ -103,9 +103,9 @@ const SystemSettings = ({ embedded } = {}) => {
       
       const response = await settingsService.updatePayslipTemplate(settings, selectedLogo);
       
-      setSettings(response.data);
-      if (response.data.companyLogo) {
-        setLogoPreview(response.data.companyLogo);
+      setSettings(response.data.data);
+      if (response.data.data?.companyLogo) {
+        setLogoPreview(response.data.data.companyLogo);
       }
       setSelectedLogo(null);
       setSuccess('Settings saved successfully!');

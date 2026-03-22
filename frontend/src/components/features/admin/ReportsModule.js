@@ -166,7 +166,7 @@ const ReportsModule = () => {
         filteredEmployees = filteredEmployees.filter(e => (e.department?.name || 'Unassigned') === filters.department);
       }
       if (filters.status !== 'all') {
-        filteredEmployees = filteredEmployees.filter(e => (filters.status === 'active' ? e.status === 'active' : e.status !== 'active'));
+        filteredEmployees = filteredEmployees.filter(e => (filters.status === 'active' ? e.status === 'Active' : e.status !== 'Active'));
       }
 
       // Filter leaves by date range
@@ -412,7 +412,7 @@ const ReportsModule = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }} data-testid="reports-page">
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
@@ -436,6 +436,7 @@ const ReportsModule = () => {
                 value={filters.dateRange}
                 label="Date Range"
                 onChange={(e) => handleFilterChange('dateRange', e.target.value)}
+                data-testid="reports-date-range-select"
               >
                 <MenuItem value="week">This Week</MenuItem>
                 <MenuItem value="month">This Month</MenuItem>
@@ -451,6 +452,7 @@ const ReportsModule = () => {
                 value={filters.department}
                 label="Department"
                 onChange={(e) => handleFilterChange('department', e.target.value)}
+                data-testid="reports-department-select"
               >
                 <MenuItem value="all">All Departments</MenuItem>
                 {Object.keys(reportData.employee.byDepartment || {}).map(dept => (
@@ -466,6 +468,7 @@ const ReportsModule = () => {
                 value={filters.status}
                 label="Status"
                 onChange={(e) => handleFilterChange('status', e.target.value)}
+                data-testid="reports-status-select"
               >
                 <MenuItem value="all">All Status</MenuItem>
                 <MenuItem value="active">Active</MenuItem>
@@ -481,6 +484,7 @@ const ReportsModule = () => {
               onClick={() => generateReport('Consolidated')}
               disabled={generatingReport}
               sx={{ height: '56px' }}
+              data-testid="reports-export-btn"
             >
               {generatingReport ? 'Generating...' : 'Export Report'}
             </Button>

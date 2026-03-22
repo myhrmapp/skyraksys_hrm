@@ -184,7 +184,11 @@ async function logout(page) {
   } catch {
     // ignore errors
   }
-  await page.goto('/login');
+  try {
+    await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 10000 });
+  } catch {
+    // Navigation may be interrupted by redirect — that's OK
+  }
 }
 
 /**

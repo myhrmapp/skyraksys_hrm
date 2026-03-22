@@ -517,9 +517,11 @@ test.describe.serial('Flow 5 — Compensation Management', () => {
       `${API_URL}/employees/${createdEmployeeId}/compensation`,
       {
         data: {
-          salary: 50000,
-          payGrade: 'L4',
-          payFrequency: 'Monthly',
+          salary: {
+            basicSalary: 50000,
+            currency: 'INR',
+            payFrequency: 'monthly',
+          },
         },
         failOnStatusCode: false,
       }

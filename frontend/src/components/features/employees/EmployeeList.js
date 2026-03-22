@@ -154,10 +154,10 @@ const EmployeeList = () => {
           size="small"
           sx={{ bgcolor: 'white', boxShadow: 1 }}
         >
-          <ToggleButton value="list" aria-label="list view">
+          <ToggleButton value="list" aria-label="list view" data-testid="employee-list-view-toggle-list">
             <TableViewIcon />
           </ToggleButton>
-          <ToggleButton value="cards" aria-label="card view">
+          <ToggleButton value="cards" aria-label="card view" data-testid="employee-list-view-toggle-cards">
             <CardViewIcon />
           </ToggleButton>
         </ToggleButtonGroup>
@@ -208,7 +208,7 @@ const EmployeeList = () => {
         data={userAccountData}
         onChange={handleUserAccountDataChange}
         loading={creatingUser}
-        employeeName={selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : ''}
+        employee={selectedEmployee}
       />
     </Box>
   );

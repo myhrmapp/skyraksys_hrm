@@ -120,7 +120,7 @@ module.exports = (sequelize, DataTypes) => {
     approvedBy: {
       type: DataTypes.UUID,
       allowNull: true,
-      references: { model: 'employees', key: 'id' }
+      references: { model: 'users', key: 'id' }
     }
   }, {
     tableName: 'timesheets',

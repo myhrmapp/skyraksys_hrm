@@ -147,6 +147,14 @@ const Layout = () => {
             { label: 'My Attendance', path: '/my-attendance', icon: <CalendarToday /> },
             { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> }
           ]
+        },
+        {
+          id: 'help',
+          label: 'Help',
+          icon: <Help />,
+          items: [
+            { label: 'User Guide', path: '/user-guide', icon: <Help /> }
+          ]
         }
       ];
     }
@@ -194,6 +202,14 @@ const Layout = () => {
             { label: 'My Tasks', path: '/my-tasks', icon: <ProjectIcon /> },
             { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> }
           ]
+        },
+        {
+          id: 'help',
+          label: 'Help',
+          icon: <Help />,
+          items: [
+            { label: 'User Guide', path: '/user-guide', icon: <Help /> }
+          ]
         }
       ];
     }
@@ -220,6 +236,14 @@ const Layout = () => {
           { label: 'My Reviews', path: '/employee-reviews', icon: <Assessment /> },
           { label: 'My Tasks', path: '/my-tasks', icon: <ProjectIcon /> },
           { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> }
+        ]
+      },
+      {
+        id: 'help',
+        label: 'Help',
+        icon: <Help />,
+        items: [
+          { label: 'User Guide', path: '/user-guide', icon: <Help /> }
         ]
       }
     ];
@@ -601,12 +625,12 @@ const Layout = () => {
         
         <MenuItem onClick={() => {
             handleProfileMenuClose();
-            window.open('https://docs.skyraksys.com', '_blank', 'noopener,noreferrer');
+            navigate('/user-guide');
           }}>
           <ListItemIcon>
             <Help fontSize="small" />
           </ListItemIcon>
-          Help & Support
+          Help & User Guide
         </MenuItem>
         
         <Divider />

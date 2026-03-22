@@ -111,6 +111,7 @@ const EmployeeListFilters = ({
                 sx={{ minWidth: 140, flex: 1 }}
                 size="small"
                 fullWidth
+                data-testid="employee-list-filter-employment-type"
               >
                 <MenuItem value="">All Types</MenuItem>
                 <MenuItem value="Full-time">Full-time</MenuItem>
@@ -127,6 +128,7 @@ const EmployeeListFilters = ({
                 sx={{ minWidth: 140, flex: 1 }}
                 size="small"
                 fullWidth
+                data-testid="employee-list-filter-work-location"
               >
                 <MenuItem value="">All Locations</MenuItem>
                 <MenuItem value="Chennai">Chennai</MenuItem>

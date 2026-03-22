@@ -449,7 +449,7 @@ const EmployeeRecords = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4 }} data-testid="employee-records-page">
       <Fade in timeout={600}>
         <Box>
           {/* Header */}
@@ -475,6 +475,7 @@ const EmployeeRecords = () => {
                   getOptionLabel={(option) => `${option.firstName} ${option.lastName} (${option.employeeId})`}
                   value={selectedEmployee}
                   onChange={(event, newValue) => setSelectedEmployee(newValue)}
+                  data-testid="employee-records-search"
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -561,18 +562,21 @@ const EmployeeRecords = () => {
                   label="Leave History" 
                   iconPosition="start"
                   sx={{ minHeight: 64 }}
+                  data-testid="records-tab-leave"
                 />
                 <Tab 
                   icon={<TimesheetIcon />} 
                   label="Timesheet History" 
                   iconPosition="start"
                   sx={{ minHeight: 64 }}
+                  data-testid="records-tab-timesheet"
                 />
                 <Tab 
                   icon={<CalendarIcon />} 
                   label="Attendance Summary" 
                   iconPosition="start"
                   sx={{ minHeight: 64 }}
+                  data-testid="records-tab-attendance"
                 />
               </Tabs>
             </Box>

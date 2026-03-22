@@ -91,35 +91,6 @@ router.get('/', async (req, res, next) => {
 });
 
 /**
- * GET /:id — Get specific attendance record
- */
-router.get('/:id', async (req, res, next) => {
-  try {
-    const db = require('../models');
-    
-    const record = await db.Attendance.findByPk(req.params.id, {
-      include: [{
-        model: db.Employee,
-        as: 'employee',
-        attributes: ['id', 'employeeId', 'firstName', 'lastName']
-      }]
-    });
-    
-    if (!record) {
-      return res.status(404).json({
-        success: false,
-        message: 'Attendance record not found'
-      });
-    }
-    
-    res.json({ success: true, data: record });
-  } catch (error) {
-    logger.error('Error fetching attendance record:', { detail: error });
-    next(error);
-  }
-});
-
-/**
  * POST / — Create attendance record (admin/hr only)
  */
 router.post('/', authorize('admin', 'hr'), async (req, res, next) => {
@@ -439,6 +410,38 @@ router.get('/summary', authorize('admin', 'hr', 'manager'), async (req, res, nex
     res.json({ success: true, data: summary });
   } catch (error) {
     logger.error('Error fetching attendance summary', { error: error.message });
+    next(error);
+  }
+});
+
+// ─── Parameterized Routes (MUST come AFTER all named routes) ────
+
+/**
+ * GET /:id — Get specific attendance record
+ * NOTE: Must be last GET route to avoid shadowing /today, /daily, /my, etc.
+ */
+router.get('/:id', async (req, res, next) => {
+  try {
+    const db = require('../models');
+    
+    const record = await db.Attendance.findByPk(req.params.id, {
+      include: [{
+        model: db.Employee,
+        as: 'employee',
+        attributes: ['id', 'employeeId', 'firstName', 'lastName']
+      }]
+    });
+    
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: 'Attendance record not found'
+      });
+    }
+    
+    res.json({ success: true, data: record });
+  } catch (error) {
+    logger.error('Error fetching attendance record:', { detail: error });
     next(error);
   }
 });

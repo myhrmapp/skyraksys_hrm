@@ -23,6 +23,7 @@ const SystemSettingsHub = () => (
       { label: 'Preferences',    icon: <SettingsIcon fontSize="small" />, render: () => <SystemSettings embedded /> },
       { label: 'Advanced',       icon: <AdminIcon fontSize="small" />,    render: () => <SystemConfigPage embedded /> },
     ]}
+    testId="settings-hub"
   />
 );
 

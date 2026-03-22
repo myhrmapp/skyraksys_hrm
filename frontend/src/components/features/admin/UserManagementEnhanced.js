@@ -560,7 +560,7 @@ const UserManagementEnhanced = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4 }} data-testid="user-management-page">
       <Fade in timeout={600}>
         <Box>
           {/* Header */}
@@ -626,12 +626,14 @@ const UserManagementEnhanced = () => {
                   label="Create User" 
                   iconPosition="start"
                   sx={{ textTransform: 'none', fontWeight: 'medium', fontSize: '1rem' }}
+                  data-testid="usermgmt-tab-create"
                 />
                 <Tab 
                   icon={<PeopleIcon />} 
                   label={`Manage Users (${totalUsers})`}
                   iconPosition="start"
                   sx={{ textTransform: 'none', fontWeight: 'medium', fontSize: '1rem' }}
+                  data-testid="usermgmt-tab-manage"
                 />
               </Tabs>
             </Box>
@@ -652,6 +654,7 @@ const UserManagementEnhanced = () => {
                         value={formData.email}
                         onChange={handleChange}
                         required
+                        data-testid="usermgmt-email-input"
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -670,6 +673,7 @@ const UserManagementEnhanced = () => {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
+                        data-testid="usermgmt-firstname-input"
                       />
                     </Grid>
 
@@ -681,6 +685,7 @@ const UserManagementEnhanced = () => {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
+                        data-testid="usermgmt-lastname-input"
                       />
                     </Grid>
 
@@ -693,6 +698,7 @@ const UserManagementEnhanced = () => {
                           value={formData.role}
                           onChange={handleChange}
                           label="User Role"
+                          data-testid="usermgmt-role-select"
                           startAdornment={
                             <InputAdornment position="start">
                               <BusinessIcon color="action" />
@@ -733,6 +739,7 @@ const UserManagementEnhanced = () => {
                         value={formData.password}
                         onChange={handleChange}
                         required
+                        data-testid="usermgmt-password-input"
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -764,6 +771,7 @@ const UserManagementEnhanced = () => {
                         value={formData.confirmPassword}
                         onChange={handleChange}
                         required
+                        data-testid="usermgmt-confirm-password-input"
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -811,6 +819,7 @@ const UserManagementEnhanced = () => {
                       variant="contained"
                       disabled={loading}
                       startIcon={loading ? null : <SaveIcon />}
+                      data-testid="usermgmt-submit-btn"
                       sx={{
                         px: 4,
                         py: 1.5,
@@ -868,6 +877,7 @@ const UserManagementEnhanced = () => {
                         placeholder="Search by name or email..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        data-testid="usermgmt-search-input"
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -884,6 +894,7 @@ const UserManagementEnhanced = () => {
                           value={filterRole}
                           label="Role Filter"
                           onChange={(e) => setFilterRole(e.target.value)}
+                          data-testid="usermgmt-role-filter"
                         >
                           <MenuItem value="">All Roles</MenuItem>
                           {roles.map(role => (
@@ -899,6 +910,7 @@ const UserManagementEnhanced = () => {
                           value={filterStatus}
                           label="Status Filter"
                           onChange={(e) => setFilterStatus(e.target.value)}
+                          data-testid="usermgmt-status-filter"
                         >
                           <MenuItem value="">All Status</MenuItem>
                           <MenuItem value="active">Active</MenuItem>
@@ -1019,7 +1031,7 @@ const UserManagementEnhanced = () => {
                               </TableCell>
                               <TableCell align="center">
                                 <Chip 
-                                  label={user.role.toUpperCase()} 
+                                  label={user.role?.toUpperCase() || 'UNKNOWN'} 
                                   color={getRoleColor(user.role)}
                                   size="small"
                                   sx={{ fontWeight: 'bold' }}

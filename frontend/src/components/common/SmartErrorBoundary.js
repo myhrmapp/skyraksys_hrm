@@ -247,7 +247,7 @@ class SmartErrorBoundary extends Component {
       }
       
       // Show feedback (could use notification service)
-      console.log('Error details copied to clipboard');
+      // Clipboard copy succeeded silently
     } catch (error) {
       console.error('Failed to copy error details:', error);
     }

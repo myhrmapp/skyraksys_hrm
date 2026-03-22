@@ -51,7 +51,14 @@ const PayslipController = {
       const result = await payslipService.getAllPayslips(filters, currentUser);
 
       return res.json(ApiResponse.success(
-        result.payslips || result,
+        {
+          payslips: result.payslips || [],
+          pagination: {
+            totalRecords: result.totalCount || 0,
+            currentPage: result.currentPage || 1,
+            totalPages: result.totalPages || 1
+          }
+        },
         'Payslips retrieved successfully'
       ));
     } catch (error) {

@@ -151,8 +151,8 @@ const ModernPayrollManagement = () => {
   });
   
   // Derive data from queries
-  const payslips = payslipsData?.success ? payslipsData.data : [];
-  const totalRecords = payslipsData?.pagination?.totalRecords || 0;
+  const payslips = payslipsData?.success ? (payslipsData.data?.payslips || []) : [];
+  const totalRecords = payslipsData?.data?.pagination?.totalRecords || 0;
   const employees = employeesData?.success ? employeesData.data : [];
   const departments = departmentsData?.success ? departmentsData.data : [];
   const templates = templatesData?.success ? templatesData.data || [] : [];
@@ -199,7 +199,8 @@ const ModernPayrollManagement = () => {
     };
     
     payslipList.forEach(p => {
-      newStats[p.status]++;
+      const s = p.status?.toLowerCase();
+      if (s && s in newStats) newStats[s]++;
       newStats.totalAmount += parseFloat(p.netPay) || 0;
     });
     
@@ -225,7 +226,7 @@ const ModernPayrollManagement = () => {
       });
 
       if (response.data.success) {
-        setValidationResults(response.data.validation);
+        setValidationResults(response.data.data);
         setValidationDialog(true);
       }
     } catch (error) {
@@ -469,13 +470,15 @@ const ModernPayrollManagement = () => {
             payslipIds: selectedPayslipIds
           });
           if (response.data.success) {
+            const successCount = response.data.data?.successful?.length || 0;
+            const failedCount = response.data.data?.failed?.length || 0;
             enqueueSnackbar(
-              `${response.data.successCount} payslip(s) finalized successfully`,
+              `${successCount} payslip(s) finalized successfully`,
               { variant: 'success' }
             );
-            if (response.data.failedCount > 0) {
+            if (failedCount > 0) {
               enqueueSnackbar(
-                `${response.data.failedCount} payslip(s) failed (only drafts can be finalized)`,
+                `${failedCount} payslip(s) failed (only drafts can be finalized)`,
                 { variant: 'warning' }
               );
             }
@@ -515,13 +518,15 @@ const ModernPayrollManagement = () => {
             paymentMethod
           });
           if (response.data.success) {
+            const successCount = response.data.data?.successful?.length || 0;
+            const failedCount = response.data.data?.failed?.length || 0;
             enqueueSnackbar(
-              `${response.data.successCount} payslip(s) marked as paid`,
+              `${successCount} payslip(s) marked as paid`,
               { variant: 'success' }
             );
-            if (response.data.failedCount > 0) {
+            if (failedCount > 0) {
               enqueueSnackbar(
-                `${response.data.failedCount} payslip(s) failed (only finalized can be marked paid)`,
+                `${failedCount} payslip(s) failed (only finalized can be marked paid)`,
                 { variant: 'warning' }
               );
             }
@@ -558,13 +563,15 @@ const ModernPayrollManagement = () => {
             data: { payslipIds: selectedPayslipIds }
           });
           if (response.data.success) {
+            const successCount = response.data.data?.successful?.length || 0;
+            const failedCount = response.data.data?.failed?.length || 0;
             enqueueSnackbar(
-              `${response.data.successCount} payslip(s) deleted`,
+              `${successCount} payslip(s) deleted`,
               { variant: 'success' }
             );
-            if (response.data.failedCount > 0) {
+            if (failedCount > 0) {
               enqueueSnackbar(
-                `${response.data.failedCount} payslip(s) could not be deleted (only drafts can be deleted)`,
+                `${failedCount} payslip(s) could not be deleted (only drafts can be deleted)`,
                 { variant: 'warning' }
               );
             }

@@ -413,7 +413,9 @@ export const useErrorRecovery = (options = {}) => {
     };
 
     // Send to error reporting service
-    console.log('Error report generated:', errorReport);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Error report generated:', errorReport);
+    }
     
     // Could integrate with external error reporting service here
     // e.g., Sentry, LogRocket, etc.

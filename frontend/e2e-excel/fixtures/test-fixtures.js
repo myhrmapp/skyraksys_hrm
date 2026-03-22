@@ -4,6 +4,8 @@
  */
 
 const { test: base, expect } = require('@playwright/test');
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
 
 const TEST_USERS = {
   admin:    { email: 'admin@skyraksys.com',     password: 'admin123', role: 'admin' },
@@ -15,28 +17,31 @@ const TEST_USERS = {
 const API_URL = process.env.API_URL || 'http://localhost:5000/api';
 
 /**
- * Login via API, set auth cookie, then navigate.
+ * Login via UI form — reliable cross-origin auth.
  */
 async function loginAs(page, role) {
   const user = TEST_USERS[role];
   if (!user) throw new Error(`Unknown role: ${role}`);
 
+  await page.goto('/login');
+  await page.getByLabel(/email/i).fill(user.email);
+  await page.locator('input[type="password"]').fill(user.password);
+  await page.getByRole('button', { name: /sign in|log in|login/i }).click();
+  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
+  await waitForPageReady(page);
+}
+
+/**
+ * Login via API — for API-level data setup/cleanup only (not browser navigation).
+ */
+async function loginViaAPI(page, role) {
+  const user = TEST_USERS[role];
+  if (!user) throw new Error(`Unknown role: ${role}`);
   const res = await page.request.post(`${API_URL}/auth/login`, {
     data: { email: user.email, password: user.password },
   });
-
-  if (!res.ok()) {
-    // Fallback to UI login
-    await page.goto('/login');
-    await page.locator('[data-testid="login-email-input"] input').fill(user.email);
-    await page.locator('[data-testid="login-password-input"] input').fill(user.password);
-    await page.locator('[data-testid="login-submit-button"]').click();
-    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
-  } else {
-    await page.goto('/dashboard');
-  }
-
-  await waitForPageReady(page);
+  if (!res.ok()) throw new Error(`API login failed for ${role}: ${res.status()}`);
+  return res;
 }
 
 /**
@@ -61,11 +66,12 @@ async function waitForPageReady(page, timeout = 10000) {
  * Navigate to a route via sidebar link. Falls back to direct navigation.
  */
 async function navigateTo(page, routePath) {
-  const navItem = page.locator(`[data-testid="nav-${routePath}"]`);
+  const cleanPath = routePath.replace(/^\/+/, ''); // strip leading slashes to prevent //path protocol-relative URLs
+  const navItem = page.locator(`[data-testid="nav-${cleanPath}"]`);
   if (await navItem.isVisible({ timeout: 2000 }).catch(() => false)) {
     await navItem.click();
   } else {
-    await page.goto(`/${routePath}`);
+    await page.goto(`/${cleanPath}`);
   }
   await waitForPageReady(page);
 }
@@ -94,4 +100,4 @@ const test = base.extend({
   },
 });
 
-module.exports = { test, expect, TEST_USERS, API_URL, loginAs, waitForPageReady, navigateTo };
+module.exports = { test, expect, TEST_USERS, API_URL, loginAs, loginViaAPI, waitForPageReady, navigateTo };

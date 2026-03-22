@@ -14,7 +14,10 @@ class DashboardPage {
 
   // ─── Admin Dashboard ────────────────────
   async isAdminDashboardVisible() {
-    return this.page.locator(selectors.adminDashboard.refreshButton).isVisible({ timeout: 5000 }).catch(() => false);
+    try {
+      await this.page.locator(selectors.adminDashboard.refreshButton).waitFor({ state: 'visible', timeout: 15000 });
+      return true;
+    } catch { return false; }
   }
 
   async clickRefresh() {
@@ -39,7 +42,10 @@ class DashboardPage {
 
   // ─── Employee Dashboard ─────────────────
   async isEmployeeDashboardVisible() {
-    return this.page.locator(selectors.employeeDashboard.heading).isVisible({ timeout: 5000 }).catch(() => false);
+    try {
+      await this.page.locator(selectors.employeeDashboard.heading).waitFor({ state: 'visible', timeout: 15000 });
+      return true;
+    } catch { return false; }
   }
 
   async clickQuickAction(action) {
@@ -54,7 +60,10 @@ class DashboardPage {
 
   // ─── Manager Dashboard ──────────────────
   async isManagerDashboardVisible() {
-    return this.page.locator(selectors.managerDashboard.heading).isVisible({ timeout: 5000 }).catch(() => false);
+    try {
+      await this.page.locator(selectors.managerDashboard.heading).waitFor({ state: 'visible', timeout: 15000 });
+      return true;
+    } catch { return false; }
   }
 
   async clickManagerAction(action) {

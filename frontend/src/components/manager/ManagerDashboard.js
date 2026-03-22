@@ -54,7 +54,8 @@ const ManagerDashboard = () => {
     try {
       // Get team members (employees where managerId = current user's employeeId)
       const teamResponse = await employeeService.getTeamMembers(user.employee?.id || user.id);
-      const teamMembers = teamResponse.data || [];
+      const rawTeam = teamResponse.data || [];
+      const teamMembers = Array.isArray(rawTeam) ? rawTeam : (rawTeam.data || []);
 
       // Get pending leave requests for team members
       const pendingLeavesResponse = await leaveService.getPendingForManager();
