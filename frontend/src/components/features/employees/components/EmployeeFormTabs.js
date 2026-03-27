@@ -1,13 +1,16 @@
 import React from 'react';
-import { Tabs, Tab, Box, Chip, useTheme } from '@mui/material';
+import { Tabs, Tab, Box, useTheme } from '@mui/material';
 import {
   Person as PersonIcon,
   Work as WorkIcon,
   ContactMail as ContactIcon,
   AccountBalance as BankIcon,
+  CheckCircle as OkIcon,
+  Error as ErrorIcon,
+  Warning as WarnIcon,
 } from '@mui/icons-material';
 
-const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus }) => {
+const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus, hideSensitiveTabs = false }) => {
   const theme = useTheme();
 
   return (
@@ -29,22 +32,26 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus }
           fontSize: '0.95rem',
           color: theme.palette.text.secondary,
           transition: 'all 0.2s ease',
-          borderBottom: '3px solid transparent',
           '&:hover': {
             bgcolor: 'rgba(99, 102, 241, 0.04)',
             color: theme.palette.primary.main,
-            borderBottomColor: 'rgba(99, 102, 241, 0.2)'
           },
           '&.Mui-selected': {
             color: theme.palette.primary.main,
-            borderBottomColor: theme.palette.primary.main,
             '& .MuiSvgIcon-root': {
               color: theme.palette.primary.main
             }
+          },
+          '&.Mui-focusVisible': {
+            outline: `3px solid ${theme.palette.primary.main}`,
+            outlineOffset: '-3px',
+            borderRadius: 1
           }
         },
         '& .MuiTabs-indicator': {
-          display: 'none'
+          height: 3,
+          borderRadius: '3px 3px 0 0',
+          backgroundColor: theme.palette.primary.main
         },
         '& .MuiTabs-scrollButtons': {
           color: theme.palette.primary.main,
@@ -60,44 +67,13 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus }
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <span>Personal Info</span>
             {getTabValidationStatus[0].hasErrors && (
-              <Chip 
-                label="✗" 
-                size="small" 
-                sx={{ 
-                  height: 20, 
-                  minWidth: 20,
-                  fontSize: '0.7rem',
-                  bgcolor: '#fee2e2',
-                  color: '#dc2626',
-                  '& .MuiChip-label': { px: 0.5 }
-                }} 
-              />
+              <ErrorIcon sx={{ fontSize: 16, color: '#dc2626' }} />
             )}
             {!getTabValidationStatus[0].hasErrors && getTabValidationStatus[0].isComplete && (
-              <Chip 
-                label="✓" 
-                size="small" 
-                sx={{ 
-                  height: 20, 
-                  minWidth: 20,
-                  fontSize: '0.7rem',
-                  bgcolor: '#d1fae5',
-                  color: '#059669',
-                  '& .MuiChip-label': { px: 0.5 }
-                }} 
-              />
+              <OkIcon sx={{ fontSize: 16, color: '#059669' }} />
             )}
             {!getTabValidationStatus[0].hasErrors && !getTabValidationStatus[0].isComplete && (
-              <Chip 
-                label="⚠" 
-                size="small" 
-                sx={{ 
-                  height: 20, 
-                  minWidth: 20,
-                  fontSize: '0.7rem',
-                  bgcolor: '#fef3c7',
-                  color: '#d97706',
-                  '& .MuiChip-label': { px: 0.5 }
+              <WarnIcon sx={{ fontSize: 16, color: '#d97706'
                 }} 
               />
             )}
@@ -113,46 +89,13 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus }
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <span>Employment & Compensation</span>
             {getTabValidationStatus[1].hasErrors && (
-              <Chip 
-                label="✗" 
-                size="small" 
-                sx={{ 
-                  height: 20, 
-                  minWidth: 20,
-                  fontSize: '0.7rem',
-                  bgcolor: '#fee2e2',
-                  color: '#dc2626',
-                  '& .MuiChip-label': { px: 0.5 }
-                }} 
-              />
+              <ErrorIcon sx={{ fontSize: 16, color: '#dc2626' }} />
             )}
             {!getTabValidationStatus[1].hasErrors && getTabValidationStatus[1].isComplete && (
-              <Chip 
-                label="✓" 
-                size="small" 
-                sx={{ 
-                  height: 20, 
-                  minWidth: 20,
-                  fontSize: '0.7rem',
-                  bgcolor: '#d1fae5',
-                  color: '#059669',
-                  '& .MuiChip-label': { px: 0.5 }
-                }} 
-              />
+              <OkIcon sx={{ fontSize: 16, color: '#059669' }} />
             )}
             {!getTabValidationStatus[1].hasErrors && !getTabValidationStatus[1].isComplete && (
-              <Chip 
-                label="⚠" 
-                size="small" 
-                sx={{ 
-                  height: 20, 
-                  minWidth: 20,
-                  fontSize: '0.7rem',
-                  bgcolor: '#fef3c7',
-                  color: '#d97706',
-                  '& .MuiChip-label': { px: 0.5 }
-                }} 
-              />
+              <WarnIcon sx={{ fontSize: 16, color: '#d97706' }} />
             )}
           </Box>
         }
@@ -166,32 +109,10 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus }
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <span>Contact & Emergency</span>
             {getTabValidationStatus[2].hasErrors && (
-              <Chip 
-                label="✗" 
-                size="small" 
-                sx={{ 
-                  height: 20, 
-                  minWidth: 20,
-                  fontSize: '0.7rem',
-                  bgcolor: '#fee2e2',
-                  color: '#dc2626',
-                  '& .MuiChip-label': { px: 0.5 }
-                }} 
-              />
+              <ErrorIcon sx={{ fontSize: 16, color: '#dc2626' }} />
             )}
             {!getTabValidationStatus[2].hasErrors && (
-              <Chip 
-                label="✓" 
-                size="small" 
-                sx={{ 
-                  height: 20, 
-                  minWidth: 20,
-                  fontSize: '0.7rem',
-                  bgcolor: '#d1fae5',
-                  color: '#059669',
-                  '& .MuiChip-label': { px: 0.5 }
-                }} 
-              />
+              <OkIcon sx={{ fontSize: 16, color: '#059669' }} />
             )}
           </Box>
         }
@@ -199,38 +120,17 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus }
         data-testid="tab-emergency"
         aria-controls="employee-tabpanel-2"
       />
+      {!hideSensitiveTabs && (
       <Tab 
         icon={<BankIcon />} 
         label={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <span>Statutory, Banking & Access</span>
             {getTabValidationStatus[3].hasErrors && (
-              <Chip 
-                label="✗" 
-                size="small" 
-                sx={{ 
-                  height: 20, 
-                  minWidth: 20,
-                  fontSize: '0.7rem',
-                  bgcolor: '#fee2e2',
-                  color: '#dc2626',
-                  '& .MuiChip-label': { px: 0.5 }
-                }} 
-              />
+              <ErrorIcon sx={{ fontSize: 16, color: '#dc2626' }} />
             )}
             {!getTabValidationStatus[3].hasErrors && (
-              <Chip 
-                label="✓" 
-                size="small" 
-                sx={{ 
-                  height: 20, 
-                  minWidth: 20,
-                  fontSize: '0.7rem',
-                  bgcolor: '#d1fae5',
-                  color: '#059669',
-                  '& .MuiChip-label': { px: 0.5 }
-                }} 
-              />
+              <OkIcon sx={{ fontSize: 16, color: '#059669' }} />
             )}
           </Box>
         }
@@ -238,6 +138,7 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus }
         data-testid="tab-statutory"
         aria-controls="employee-tabpanel-3"
       />
+      )}
     </Tabs>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   Container,
   Paper,
@@ -34,6 +35,7 @@ import {
   Avatar,
   Stack,
   Divider,
+  InputAdornment,
   useTheme,
   alpha,
   Fade,
@@ -49,11 +51,14 @@ import {
   Add as AddIcon,
   FilterList as FilterIcon,
   Download as DownloadIcon,
-  Search as SearchIcon
+  Search as SearchIcon,
+  EventBusy as EventBusyIcon
 } from '@mui/icons-material';
+import EmptyState from '../../shared/EmptyState';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNotification } from '../../../contexts/NotificationContext';
-import { useLeaveRequests, useLeaveBalances, useLeaveTypes, useApproveLeaveRequest, useRejectLeaveRequest } from '../../../hooks/queries';
+import { leaveService } from '../../../services';
+import { useLeaveRequests, useLeaveTypes, useApproveLeaveRequest, useRejectLeaveRequest } from '../../../hooks/queries';
 
 const ModernLeaveManagement = () => {
   const { showSuccess, showError } = useNotification(); // ✅ Already destructured
@@ -63,20 +68,32 @@ const ModernLeaveManagement = () => {
   
   // Hooks must be called first, before any conditional logic
   const [activeTab, setActiveTab] = useState(0);
+  const [innerTab, setInnerTab] = useState(0);
   const tabs = ['All', 'Pending', 'Approved', 'Rejected'];
   
   // 🚀 React Query hooks for data fetching
-  const { data: leaveRequestsData, isLoading: isLoadingRequests } = useLeaveRequests();
-  const { data: leaveBalancesData, isLoading: isLoadingBalances } = useLeaveBalances(user?.employeeId);
+  const { data: leaveRequestsData, isLoading: isLoadingRequests } = useLeaveRequests({ limit: 500 });
+  const { data: leaveBalancesData, isLoading: isLoadingBalances } = useQuery({
+    queryKey: ['leave-balances-all'],
+    queryFn: () => leaveService.getAllBalances(),
+    staleTime: 2 * 60 * 1000,
+  });
   const { data: leaveTypesData } = useLeaveTypes();
   
   // 🚀 Mutations for approve/reject
   const approveMutation = useApproveLeaveRequest();
   const rejectMutation = useRejectLeaveRequest();
   
-  // Derive data from queries
-  const leaveRequests = leaveRequestsData?.data || [];
-  const leaveBalances = leaveBalancesData || [];
+  // Derive data from queries — normaliseResponse can return an array directly,
+  // { data: [] }, or { data: { data: [], pagination: {} } } depending on endpoint.
+  const toArray = (v) =>
+    Array.isArray(v) ? v
+    : Array.isArray(v?.data) ? v.data
+    : Array.isArray(v?.data?.data) ? v.data.data
+    : [];
+
+  const leaveRequests = toArray(leaveRequestsData);
+  const leaveBalances = toArray(leaveBalancesData);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [approvalDialog, setApprovalDialog] = useState(false);
   const [approvalAction, setApprovalAction] = useState('');
@@ -89,6 +106,13 @@ const ModernLeaveManagement = () => {
   const [typeFilter, setTypeFilter] = useState('all');
   const [filterOpen, setFilterOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null); // { id, action: 'Approved'|'Rejected' }
+  const [quickRejectComments, setQuickRejectComments] = useState('');
+
+  // Balance tab filters
+  const [balSearch, setBalSearch] = useState('');
+  const [balTypeFilter, setBalTypeFilter] = useState('all');
+  const [balPage, setBalPage] = useState(0);
+  const [balRowsPerPage, setBalRowsPerPage] = useState(10);
   
   // -- Helpers --
 
@@ -228,14 +252,21 @@ const ModernLeaveManagement = () => {
   };
 
   const filteredRequests = leaveRequests.filter(request => {
-    const matchesSearch = 
-      (request.employeeName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (request.employeeId?.toLowerCase() || '').includes(searchTerm.toLowerCase());
-    
+    const matchesTab = innerTab === 0 || request.status === tabs[innerTab];
+
+    const nestedName = `${request.employee?.firstName || ''} ${request.employee?.lastName || ''}`.trim().toLowerCase();
+    const nestedEmpId = (request.employee?.employeeId || '').toLowerCase();
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = !searchTerm ||
+      (request.employeeName?.toLowerCase() || '').includes(term) ||
+      (request.employeeId?.toLowerCase() || '').includes(term) ||
+      nestedName.includes(term) ||
+      nestedEmpId.includes(term);
+
     const matchesStatus = statusFilter === 'all' || request.status?.toLowerCase() === statusFilter?.toLowerCase();
     const matchesType = typeFilter === 'all' || request.leaveType?.name?.toLowerCase() === typeFilter || request.leaveType?.id?.toString() === typeFilter;
-    
-    return matchesSearch && matchesStatus && matchesType;
+
+    return matchesTab && matchesSearch && matchesStatus && matchesType;
   });
 
 
@@ -248,13 +279,13 @@ const ModernLeaveManagement = () => {
   };
 
   // 🚀 Handle status update using mutations
-  const handleStatusUpdate = async (leaveId, newStatus) => {
+  const handleStatusUpdate = async (leaveId, newStatus, comments = '') => {
     setActionLoading(true);
     
     const mutation = newStatus === 'Approved' ? approveMutation : rejectMutation;
     
     mutation.mutate(
-      { id: leaveId, comments: '' },
+      { id: leaveId, comments },
       {
         onSuccess: () => {
           showSuccess(`Leave request ${newStatus.toLowerCase()} successfully`);
@@ -303,7 +334,7 @@ const ModernLeaveManagement = () => {
                 fullWidth
                 label="Search employee"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
                 id="leaveMgmtSearch"
                 inputProps={{ 'data-testid': 'leave-mgmt-search-input' }}
                 InputProps={{
@@ -316,7 +347,7 @@ const ModernLeaveManagement = () => {
                 <InputLabel>Status</InputLabel>
                 <Select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}
                   label="Status"
                   inputProps={{ 'data-testid': 'leave-mgmt-status-select' }}
                 >
@@ -334,7 +365,7 @@ const ModernLeaveManagement = () => {
                 <InputLabel>Leave Type</InputLabel>
                 <Select
                   value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
+                  onChange={(e) => { setTypeFilter(e.target.value); setPage(0); }}
                   label="Leave Type"
                   inputProps={{ 'data-testid': 'leave-mgmt-type-select' }}
                 >
@@ -364,8 +395,8 @@ const ModernLeaveManagement = () => {
       {/* Tabs and Quick Actions */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Tabs
-          value={activeTab}
-          onChange={(e, newValue) => setActiveTab(newValue)}
+          value={innerTab}
+          onChange={(e, newValue) => { setInnerTab(newValue); setPage(0); }}
           sx={{
             '& .MuiTab-root': {
               textTransform: 'none',
@@ -385,7 +416,7 @@ const ModernLeaveManagement = () => {
                     size="small"
                     variant="outlined"
                     color={tab === 'Pending' ? 'warning' : 'default'}
-                    sx={{ height: 20, fontSize: '0.7rem' }}
+                    sx={{ height: 28, fontSize: '0.75rem' }}
                   />
                 </Box>
               }
@@ -420,8 +451,18 @@ const ModernLeaveManagement = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {leaveRequests
-                .filter(leave => activeTab === 0 || leave.status === tabs[activeTab])
+              {filteredRequests.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} sx={{ py: 0, border: 0 }}>
+                    <EmptyState
+                      icon={<EventBusyIcon sx={{ fontSize: 48 }} />}
+                      title="No leave requests found"
+                      description="Try adjusting your filters or search terms."
+                    />
+                  </TableCell>
+                </TableRow>
+              ) : filteredRequests
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((leave, index) => {
                   const leaveTypeInfo = getLeaveTypeInfo(leave.leaveType);
                   const employeeName = leave.employeeName || 
@@ -474,7 +515,7 @@ const ModernLeaveManagement = () => {
                                 color="warning"
                                 size="small"
                                 variant="filled"
-                                sx={{ fontWeight: 'bold', height: 20, fontSize: '0.7rem' }}
+                                sx={{ fontWeight: 'bold', height: 28, fontSize: '0.75rem' }}
                               />
                             )}
                             {leave.isHalfDay && (
@@ -483,7 +524,7 @@ const ModernLeaveManagement = () => {
                                 color="info"
                                 size="small"
                                 variant="outlined"
-                                sx={{ height: 20, fontSize: '0.7rem' }}
+                                sx={{ height: 28, fontSize: '0.75rem' }}
                               />
                             )}
                           </Stack>
@@ -597,131 +638,168 @@ const ModernLeaveManagement = () => {
     </Box>
   );
 
-  const LeaveBalancesTab = () => (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" fontWeight="bold">
-          Leave Balances Overview
-        </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<DownloadIcon />}
-          onClick={handleExportBalances}
-        >
-          Export Report
-        </Button>
-      </Box>
+  const LeaveBalancesTab = () => {
+    const filteredBalances = leaveBalances.filter(b => {
+      const name = `${b.employee?.firstName || ''} ${b.employee?.lastName || ''}`.toLowerCase();
+      const empId = (b.employee?.employeeId || '').toLowerCase();
+      const matchesSearch = !balSearch ||
+        name.includes(balSearch.toLowerCase()) ||
+        empId.includes(balSearch.toLowerCase());
+      const matchesType = balTypeFilter === 'all' ||
+        b.leaveType?.name?.toLowerCase() === balTypeFilter ||
+        b.leaveType?.id?.toString() === balTypeFilter;
+      return matchesSearch && matchesType;
+    });
 
-      {!leaveBalances || leaveBalances.length === 0 ? (
-        <Alert severity="info">
-          No leave balance data available. Navigate to Admin → Leave Balances to manage employee leave allocations.
-        </Alert>
-      ) : (
-        <Grid container spacing={3}>
-          {leaveBalances.map((balance, index) => {
-            // API returns individual balance records, not grouped by employee
-            const employeeName = balance.employee 
-              ? `${balance.employee.firstName} ${balance.employee.lastName}` 
-              : 'Unknown Employee';
-            const employeeId = balance.employee?.employeeId || 'N/A';
-            const department = balance.employee?.department || 'N/A';
-            const leaveTypeName = balance.leaveType?.name || 'Unknown Type';
-            
-            return (
-              <Grid item xs={12} md={6} lg={4} key={balance.id || index}>
-                <Card sx={{ height: '100%', border: '1px solid', borderColor: 'divider' }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <Avatar sx={{ mr: 2, bgcolor: 'secondary.main' }}>
-                        {employeeName.split(' ').map(n => n[0]).join('')}
-                      </Avatar>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="h6">{employeeName}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {employeeId} • {department}
-                        </Typography>
-                      </Box>
-                    </Box>
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h5" fontWeight="bold">
+            Leave Balances Overview
+          </Typography>
+          <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleExportBalances}>
+            Export Report
+          </Button>
+        </Box>
 
-                    <Divider sx={{ my: 2 }} />
-
-                    <Stack spacing={2}>
-                      <Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="body2" color="primary" fontWeight="bold">
-                            {leaveTypeName}
-                          </Typography>
-                          <Chip 
-                            label={`${balance.balance || 0} days left`}
-                            color={
-                              (balance.balance || 0) >= 10 ? 'success' :
-                              (balance.balance || 0) >= 5 ? 'warning' : 'error'
-                            }
-                            size="small"
-                            variant="outlined"
-                          />
-                        </Box>
-                        
-                        {/* Progress bar */}
-                        <Box sx={{ bgcolor: 'grey.200', borderRadius: 1, height: 8, mb: 2 }}>
-                          <Box
-                            sx={{
-                              bgcolor: (balance.balance || 0) >= 10 ? 'success.main' :
-                                      (balance.balance || 0) >= 5 ? 'warning.main' : 'error.main',
-                              height: '100%',
-                              borderRadius: 1,
-                              width: `${Math.min(((balance.balance || 0) / (Number(balance.totalAccrued || 0) + Number(balance.carryForward || 0))) * 100, 100)}%`,
-                              transition: 'width 0.3s ease'
-                            }}
-                          />
-                        </Box>
-
-                        {/* Detailed breakdown */}
-                        <Grid container spacing={1}>
-                          <Grid item xs={6}>
-                            <Typography variant="caption" color="text.secondary">
-                              Total Allocated
-                            </Typography>
-                            <Typography variant="body2" fontWeight="bold">
-                              {(Number(balance.totalAccrued || 0) + Number(balance.carryForward || 0)).toFixed(1)} days
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Typography variant="caption" color="text.secondary">
-                              Taken
-                            </Typography>
-                            <Typography variant="body2" fontWeight="bold">
-                              {balance.totalTaken || 0} days
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Typography variant="caption" color="text.secondary">
-                              Pending
-                            </Typography>
-                            <Typography variant="body2" fontWeight="bold">
-                              {balance.totalPending || 0} days
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Typography variant="caption" color="text.secondary">
-                              Available
-                            </Typography>
-                            <Typography variant="body2" fontWeight="bold" color="primary">
-                              {balance.balance || 0} days
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
+        {/* Filters */}
+        <Card sx={{ mb: 3, border: '1px solid', borderColor: 'divider' }}>
+          <CardContent>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={5}>
+                <TextField
+                  fullWidth
+                  label="Search employee"
+                  value={balSearch}
+                  onChange={(e) => { setBalSearch(e.target.value); setBalPage(0); }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon color="action" />
+                      </InputAdornment>
+                    )
+                  }}
+                />
               </Grid>
-            );
-          })}
-        </Grid>
-      )}
-    </Box>
-  );
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Leave Type</InputLabel>
+                  <Select
+                    value={balTypeFilter}
+                    label="Leave Type"
+                    onChange={(e) => { setBalTypeFilter(e.target.value); setBalPage(0); }}
+                  >
+                    <MenuItem value="all">All Types</MenuItem>
+                    {leaveTypes.map(t => (
+                      <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <Typography variant="body2" color="text.secondary">
+                  {filteredBalances.length} of {leaveBalances.length} records
+                </Typography>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+
+        {!leaveBalances || leaveBalances.length === 0 ? (
+          <Alert severity="info">
+            No leave balance data available. Navigate to Admin → Leave Balances to manage employee leave allocations.
+          </Alert>
+        ) : (
+          <Card sx={{ border: '1px solid', borderColor: 'divider' }}>
+            <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+              <Table>
+                <TableHead sx={{ bgcolor: 'grey.50' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Employee</TableCell>
+                    <TableCell sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Leave Type</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Allocated</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Taken</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Pending</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Available</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredBalances.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                        <Typography color="text.secondary">No matching records</Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredBalances
+                      .slice(balPage * balRowsPerPage, balPage * balRowsPerPage + balRowsPerPage)
+                      .map((balance, index) => {
+                        const employeeName = balance.employee
+                          ? `${balance.employee.firstName} ${balance.employee.lastName}`
+                          : 'Unknown Employee';
+                        const allocated = Number(balance.totalAccrued || 0) + Number(balance.carryForward || 0);
+                        const available = Number(balance.balance || 0);
+                        return (
+                          <TableRow key={balance.id || index} hover>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                <Avatar sx={{ width: 36, height: 36, bgcolor: 'secondary.main' }}>
+                                  {employeeName.split(' ').map(n => n[0]).join('')}
+                                </Avatar>
+                                <Box>
+                                  <Typography variant="body2" fontWeight="600">{employeeName}</Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {balance.employee?.employeeId || 'N/A'} • {balance.employee?.department?.name || balance.employee?.department || ''}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={balance.leaveType?.name || 'Unknown'}
+                                size="small"
+                                variant="outlined"
+                                color="primary"
+                              />
+                            </TableCell>
+                            <TableCell align="right">
+                              <Typography variant="body2" fontWeight="bold">{allocated.toFixed(1)}</Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Typography variant="body2">{balance.totalTaken || 0}</Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Typography variant="body2">{balance.totalPending || 0}</Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Chip
+                                label={`${available} days`}
+                                size="small"
+                                color={available >= 10 ? 'success' : available >= 5 ? 'warning' : 'error'}
+                                variant="outlined"
+                              />
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              component="div"
+              count={filteredBalances.length}
+              page={balPage}
+              onPageChange={(e, newPage) => setBalPage(newPage)}
+              rowsPerPage={balRowsPerPage}
+              onRowsPerPageChange={(e) => { setBalRowsPerPage(parseInt(e.target.value, 10)); setBalPage(0); }}
+              rowsPerPageOptions={[10, 25, 50]}
+            />
+          </Card>
+        )}
+      </Box>
+    );
+  };
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -836,15 +914,31 @@ const ModernLeaveManagement = () => {
               <Typography>
                 Are you sure you want to {confirmAction?.action === 'Approved' ? 'approve' : 'reject'} this leave request?
               </Typography>
+              {confirmAction?.action === 'Rejected' && (
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={2}
+                  label="Rejection Reason"
+                  data-testid="quick-reject-comments"
+                  value={quickRejectComments}
+                  onChange={(e) => setQuickRejectComments(e.target.value)}
+                  placeholder="Enter reason for rejection..."
+                  sx={{ mt: 2 }}
+                  required
+                />
+              )}
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setConfirmAction(null)} variant="outlined">Cancel</Button>
+              <Button onClick={() => { setConfirmAction(null); setQuickRejectComments(''); }} variant="outlined">Cancel</Button>
               <Button
                 variant="contained"
                 color={confirmAction?.action === 'Approved' ? 'success' : 'error'}
+                disabled={confirmAction?.action === 'Rejected' && !quickRejectComments.trim()}
                 onClick={() => {
-                  handleStatusUpdate(confirmAction.id, confirmAction.action);
+                  handleStatusUpdate(confirmAction.id, confirmAction.action, quickRejectComments);
                   setConfirmAction(null);
+                  setQuickRejectComments('');
                 }}
               >
                 {confirmAction?.action === 'Approved' ? 'Approve' : 'Reject'}

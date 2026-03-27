@@ -9,7 +9,7 @@ import { DEFAULT_CURRENCY_CODE } from '../../../../utils/formatCurrency';
 // 🚀 React Query hooks for server state management
 import { useEmployee, useCreateEmployee, useUpdateEmployee } from '../../../../hooks/queries';
 
-export const useEmployeeForm = () => {
+export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
@@ -250,9 +250,13 @@ export const useEmployeeForm = () => {
   useEffect(() => {
     if (isEditMode && employee && !formData.id) {
       // Transform employee data to match formData structure
+      // Coalesce null/undefined API values to '' so MUI TextFields stay controlled
+      const safeEmployee = Object.fromEntries(
+        Object.entries(employee).map(([k, v]) => [k, v == null ? '' : v])
+      );
       const transformedData = {
         ...formData,
-        ...employee,
+        ...safeEmployee,
         // Ensure nested salary object is properly merged
         salary: {
           ...formData.salary,
@@ -442,28 +446,36 @@ export const useEmployeeForm = () => {
   // Get validation status for all tabs
   const getTabValidationStatus = useMemo(() => {
     const validation = validateEmployeeForm(formData);
-    
+    const tab0Fields = ['firstName', 'lastName', 'email'];
+    const tab1Fields = ['hireDate', 'departmentId', 'positionId'];
+    const tab2Fields = ['phone', 'emergencyContactPhone'];
+    const tab3Fields = ['aadhaarNumber', 'panNumber', 'ifscCode'];
+
     return {
       0: {
-        requiredFields: ['firstName', 'lastName', 'email'],
-        hasErrors: ['firstName', 'lastName', 'email'].some(field => validation.errors[field]),
+        requiredFields: tab0Fields,
+        hasErrors: tab0Fields.some(f => validation.errors[f]),
+        errorFields: tab0Fields.filter(f => validation.errors[f]),
         isComplete: formData.firstName && formData.lastName && formData.email &&
                     !validation.errors.firstName && !validation.errors.lastName && !validation.errors.email
       },
       1: {
-        requiredFields: ['hireDate', 'departmentId', 'positionId'],
-        hasErrors: ['hireDate', 'departmentId', 'positionId'].some(field => validation.errors[field]),
+        requiredFields: tab1Fields,
+        hasErrors: tab1Fields.some(f => validation.errors[f]),
+        errorFields: tab1Fields.filter(f => validation.errors[f]),
         isComplete: formData.hireDate && formData.departmentId && formData.positionId &&
                     !validation.errors.hireDate && !validation.errors.departmentId && !validation.errors.positionId
       },
       2: {
         requiredFields: [],
-        hasErrors: ['phone', 'emergencyContactPhone'].some(field => validation.errors[field]),
+        hasErrors: tab2Fields.some(f => validation.errors[f]),
+        errorFields: tab2Fields.filter(f => validation.errors[f]),
         isComplete: true
       },
       3: {
         requiredFields: [],
-        hasErrors: ['aadhaarNumber', 'panNumber', 'ifscCode'].some(field => validation.errors[field]),
+        hasErrors: tab3Fields.some(f => validation.errors[f]),
+        errorFields: tab3Fields.filter(f => validation.errors[f]),
         isComplete: true
       }
     };
@@ -575,6 +587,7 @@ export const useEmployeeForm = () => {
             if (formData.userAccount.enableLogin && employeeData?.id) {
               try {
                 const userAccountData = {
+                  email: employeeData.email || formData.email,
                   role: formData.userAccount.role,
                   password: formData.userAccount.password,
                   forcePasswordChange: formData.userAccount.forcePasswordChange
@@ -590,9 +603,10 @@ export const useEmployeeForm = () => {
             localStorage.removeItem('employeeFormDraft');
             setHasUnsavedChanges(false);
             
-            // Navigate after brief delay
+            // Navigate back to profile after brief delay
             setTimeout(() => {
-              navigate('/employees');
+              const dest = mode === 'self' ? '/my-profile' : `/employees/${id}`;
+              navigate(dest, { state: { snackbar: 'Employee updated successfully.' } });
             }, 1200);
           },
           onError: (error) => {
@@ -644,21 +658,8 @@ export const useEmployeeForm = () => {
           const created = employeeData;
           setSubmitSuccess(`Employee created successfully! Employee ID: ${created?.employeeId || 'Generated'}`);
           
-          // Handle user account creation if needed
-          if (formData.userAccount.enableLogin && created?.id) {
-            try {
-              const userAccountData = {
-                role: formData.userAccount.role,
-                password: formData.userAccount.password,
-                forcePasswordChange: formData.userAccount.forcePasswordChange
-              };
-              await authService.createUserAccount(created.id, userAccountData);
-              setSubmitSuccess(prev => prev + ' User account created successfully.');
-            } catch (userError) {
-              console.warn('User account operation failed:', userError);
-              setSubmitSuccess(prev => prev + ' User account creation failed - you can set this up later.');
-            }
-          }
+          // Note: User account is created atomically by the backend's createEmployee service.
+          // No separate authService.createUserAccount() call needed here.
           
           localStorage.removeItem('employeeFormDraft');
           setHasUnsavedChanges(false);
@@ -711,13 +712,14 @@ export const useEmployeeForm = () => {
   };
 
   const handleBackToEmployees = useCallback(() => {
+    const destination = mode === 'self' ? '/my-profile' : (isEditMode ? `/employees/${id}` : '/employees');
     if (hasUnsavedChanges) {
-      setPendingNavigation('/employees');
+      setPendingNavigation(destination);
       setShowUnsavedDialog(true);
     } else {
-      navigate('/employees');
+      navigate(destination);
     }
-  }, [navigate, hasUnsavedChanges]);
+  }, [navigate, hasUnsavedChanges, isEditMode, id]);
 
   const handleCancelNavigation = () => {
     setShowUnsavedDialog(false);
@@ -747,30 +749,7 @@ export const useEmployeeForm = () => {
     setPhotoPreview(null);
   };
   
-  const handleSaveAsDraft = async () => {
-    try {
-      setSubmitError('');
-      
-      const draftData = {
-        ...formData,
-        savedAt: new Date().toISOString(),
-        isDraft: true
-      };
-      
-      localStorage.setItem('employeeFormDraft', JSON.stringify(draftData));
-      setLastSaved(new Date());
-      
-      setSubmitSuccess('Draft saved successfully! You can continue later.');
-      setHasUnsavedChanges(false);
-      
-      setTimeout(() => {
-        navigate('/employees');
-      }, 1500);
-    } catch (error) {
-      console.error('Error saving draft:', error);
-      setSubmitError('Failed to save draft. Please try again.');
-    }
-  };
+
 
   return {
     // State
@@ -807,7 +786,6 @@ export const useEmployeeForm = () => {
     handleBackToEmployees,
     handlePhotoSelect,
     handlePhotoRemove,
-    handleSaveAsDraft,
     handleCancelNavigation,
     handleConfirmNavigation,
     

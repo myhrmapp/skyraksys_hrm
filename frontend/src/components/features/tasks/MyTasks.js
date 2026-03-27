@@ -341,7 +341,7 @@ const MyTasks = () => {
                               value={task.status || 'Not Started'}
                               onChange={(e) => handleStatusChange(task.id, e.target.value)}
                               variant="outlined"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: '0.875rem' }}
                             >
                               <MenuItem value="Not Started">Not Started</MenuItem>
                               <MenuItem value="In Progress">In Progress</MenuItem>

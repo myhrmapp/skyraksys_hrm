@@ -30,6 +30,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0
     },
+    esi: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0
+    },
     otherDeductions: {
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0

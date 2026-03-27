@@ -29,6 +29,12 @@ class EmployeeService extends BaseService {
         as: 'manager',
         attributes: ['id', 'employeeId', 'firstName', 'lastName'],
         required: false
+      },
+      {
+        model: db.SalaryStructure,
+        as: 'salaryStructure',
+        where: { isActive: true },
+        required: false
       }
     ];
 
@@ -57,6 +63,12 @@ class EmployeeService extends BaseService {
         model: Employee,
         as: 'manager',
         attributes: ['id', 'employeeId', 'firstName', 'lastName']
+      },
+      {
+        model: db.SalaryStructure,
+        as: 'salaryStructure',
+        where: { isActive: true },
+        required: false
       }
     ];
 
@@ -195,8 +207,9 @@ class EmployeeService extends BaseService {
 
   async generateEmployeeId(transaction = null) {
     // Find last SKYT employee ID with lock to prevent race condition
+    // Use CAST to numeric ordering so SKYT10000 sorts after SKYT9999
     const queryOptions = {
-      order: [['employeeId', 'DESC']],
+      order: [[db.Sequelize.literal("CAST(SUBSTRING(\"employeeId\" FROM 5) AS INTEGER)"), 'DESC']],
       where: {
         employeeId: {
           [db.Sequelize.Op.like]: 'SKYT%'
@@ -313,6 +326,7 @@ class EmployeeService extends BaseService {
         structureData.pfContribution = salaryData.deductions.pf || salaryData.deductions.pfContribution || 0;
         structureData.tds = salaryData.deductions.incomeTax || salaryData.deductions.tds || 0;
         structureData.professionalTax = salaryData.deductions.professionalTax || 0;
+        structureData.esi = salaryData.deductions.esi || 0;
         structureData.otherDeductions = salaryData.deductions.other || salaryData.deductions.otherDeductions || 0;
       }
 
@@ -594,10 +608,11 @@ class EmployeeService extends BaseService {
             updateFields.allowances = totalAllowances;
           }
           if (salaryData.deductions && typeof salaryData.deductions === 'object') {
-            updateFields.pfContribution = salaryData.deductions.pf || 0;
-            updateFields.tds = salaryData.deductions.tds || 0;
+            updateFields.pfContribution = salaryData.deductions.pf || salaryData.deductions.pfContribution || 0;
+            updateFields.tds = salaryData.deductions.incomeTax || salaryData.deductions.tds || 0;
             updateFields.professionalTax = salaryData.deductions.professionalTax || 0;
-            updateFields.otherDeductions = salaryData.deductions.other || 0;
+            updateFields.esi = salaryData.deductions.esi || 0;
+            updateFields.otherDeductions = salaryData.deductions.other || salaryData.deductions.otherDeductions || 0;
           }
 
           updateFields.isActive = true;

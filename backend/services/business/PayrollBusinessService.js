@@ -243,9 +243,9 @@ class PayrollBusinessService {
   async approvePayroll(id, currentUser, comments = '') {
     this.log('approvePayroll', { id });
 
-    // RBAC: Only admin or payroll managers
-    if (!['admin', 'payroll_manager'].includes(currentUser.role)) {
-      throw new ForbiddenError('Only admin or payroll managers can approve payroll');
+    // RBAC: Only admin or HR can approve
+    if (!['admin', 'hr'].includes(currentUser.role)) {
+      throw new ForbiddenError('Only admin or HR can approve payroll');
     }
 
     const payroll = await this.payrollDataService.findById(id);
@@ -286,9 +286,9 @@ class PayrollBusinessService {
   async rejectPayroll(id, currentUser, comments) {
     this.log('rejectPayroll', { id });
 
-    // RBAC: Only admin or payroll managers
-    if (!['admin', 'payroll_manager'].includes(currentUser.role)) {
-      throw new ForbiddenError('Only admin or payroll managers can reject payroll');
+    // RBAC: Only admin or HR can reject
+    if (!['admin', 'hr'].includes(currentUser.role)) {
+      throw new ForbiddenError('Only admin or HR can reject payroll');
     }
 
     if (!comments || comments.trim() === '') {
@@ -432,6 +432,9 @@ class PayrollBusinessService {
     if (Array.isArray(allowances)) {
       return allowances.reduce((sum, a) => sum + Number(a.amount || 0), 0);
     }
+    if (typeof allowances === 'object') {
+      return Object.values(allowances).reduce((sum, val) => sum + Number(val || 0), 0);
+    }
     return 0;
   }
 
@@ -444,6 +447,9 @@ class PayrollBusinessService {
     if (!deductions) return 0;
     if (Array.isArray(deductions)) {
       return deductions.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+    }
+    if (typeof deductions === 'object') {
+      return Object.values(deductions).reduce((sum, val) => sum + Number(val || 0), 0);
     }
     return 0;
   }

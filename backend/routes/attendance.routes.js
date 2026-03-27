@@ -63,9 +63,9 @@ router.get('/', async (req, res, next) => {
       }
     } else if (req.user.role === 'manager') {
       const manager = await db.Employee.findOne({ where: { userId: req.user.id } });
-      if (manager && manager.departmentId) {
+      if (manager) {
         const teamMembers = await db.Employee.findAll({ 
-          where: { departmentId: manager.departmentId },
+          where: { managerId: manager.id },
           attributes: ['id']
         });
         where.employeeId = { [Op.in]: teamMembers.map(e => e.id) };
@@ -109,6 +109,11 @@ router.post('/', authorize('admin', 'hr'), async (req, res, next) => {
  */
 router.put('/:id', authenticateToken, async (req, res, next) => {
   try {
+    const { error, value } = attendanceSchema.update.validate(req.body, { abortEarly: false, stripUnknown: true });
+    if (error) {
+      return res.status(400).json({ success: false, message: 'Validation failed', errors: error.details.map(d => d.message) });
+    }
+
     const db = require('../models');
     
     const record = await db.Attendance.findByPk(req.params.id, {
@@ -137,7 +142,7 @@ router.put('/:id', authenticateToken, async (req, res, next) => {
       });
     }
     
-    await record.update(req.body);
+    await record.update(value);
     res.json({ success: true, data: record });
   } catch (error) {
     logger.error('Error updating attendance record:', { detail: error });

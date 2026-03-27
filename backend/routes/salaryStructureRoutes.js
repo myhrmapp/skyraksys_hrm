@@ -86,7 +86,7 @@ router.get('/',
  */
 router.get('/employee/:employeeId',
   authorize(['admin', 'hr', 'employee']),
-  validateParams(validators.uuidParamSchema),
+  validateParams(validators.employeeIdParamSchema),
   async (req, res, next) => {
     try {
       const { employeeId } = req.params;

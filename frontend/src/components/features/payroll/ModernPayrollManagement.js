@@ -1,9 +1,9 @@
 ﻿/**
  * Modern Payroll Management System - Admin/HR Interface
- * Comprehensive payslip generation, approval, payment processing, and reporting
+ * Workflow-driven payslip generation, approval, and payment processing
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Container,
@@ -40,53 +40,77 @@ import {
   Stack,
   Tooltip,
   CircularProgress,
-  LinearProgress
+  LinearProgress,
+  InputAdornment,
+  Avatar,
 } from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
 import {
-  Receipt as ReceiptIcon,
-  Add as AddIcon,
-  Check as ApproveIcon,
-  Clear as RejectIcon,
   Download as DownloadIcon,
   Visibility as ViewIcon,
-  Assessment as ReportIcon,
   Assessment as AssessmentIcon,
   Payment as PaymentIcon,
   PlayArrow as GenerateIcon,
   Lock as LockIcon,
-  LockOpen as UnlockIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
   Refresh as RefreshIcon,
-  FileDownload as ExportIcon
+  FileDownload as ExportIcon,
+  Search as SearchIcon,
+  Clear as ClearIcon,
+  ArrowForward as ArrowIcon,
+  CheckCircle as CheckCircleIcon,
+  RadioButtonUnchecked as UncheckedIcon,
+  People as PeopleIcon,
+  MonetizationOn as PaidIcon,
+  HourglassEmpty as DraftIcon,
 } from '@mui/icons-material';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+
+// ── Shared constants ───────────────────────────────
+const MONTHS = Array.from({ length: 12 }, (_, i) => ({
+  value: i + 1,
+  label: new Date(2000, i).toLocaleString('default', { month: 'long' }),
+}));
+const YEARS = Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i);
+
+const STATUS_COLORS = { draft: 'warning', finalized: 'info', paid: 'success', cancelled: 'error' };
+const getStatusColor = (status) => STATUS_COLORS[status?.toLowerCase()] || 'default';
+const formatLabel = (key) => key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
 import { useSnackbar } from 'notistack';
 import { useAuth } from '../../../contexts/AuthContext';
 import http from '../../../http-common';
 import EditPayslipDialog from './EditPayslipDialog';
 import ConfirmDialog from '../../common/ConfirmDialog';
+import SectionError from '../../shared/SectionError';
 import useConfirmDialog from '../../../hooks/useConfirmDialog';
 import { formatCurrency } from '../../../utils/formatCurrency';
 
 const ModernPayrollManagement = () => {
+  const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const { isAdmin, isHR } = useAuth();
   const queryClient = useQueryClient();
   const { dialogProps, confirm } = useConfirmDialog();
-  
+
   const [activeTab, setActiveTab] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState('');
-  
-  // Loading state for non-query operations
   const [operationLoading, setOperationLoading] = useState(false);
-  
-  // Pagination state
+
+  // Pagination (payslips table)
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  
-  // Search state
+
+  // Search — payslips table
   const [searchQuery, setSearchQuery] = useState('');
+  // Search/filter — employee picker (Generate tab)
+  const [empSearch, setEmpSearch] = useState('');
+  const [empDept, setEmpDept] = useState('');
+  // Search — employee status tab
+  const [statusSearch, setStatusSearch] = useState('');
+
+  // Navigate to Generate tab (used by Overview quick-start)
+  const goToGenerateTab = () => setActiveTab(1);
   
   // Filters state
   const [filters, setFilters] = useState({
@@ -98,7 +122,7 @@ const ModernPayrollManagement = () => {
   });
   
   // ðŸš€ React Query for payslips
-  const { data: payslipsData, isLoading: isLoadingPayslips, refetch: refetchPayslips } = useQuery({
+  const { data: payslipsData, isLoading: isLoadingPayslips, isError: isErrorPayslips, refetch: refetchPayslips } = useQuery({
     queryKey: ['payslips', filters, page, rowsPerPage],
     queryFn: async () => {
       const params = {
@@ -150,16 +174,50 @@ const ModernPayrollManagement = () => {
     onError: (error) => console.error('Load templates error:', error)
   });
   
-  // Derive data from queries
+  // Derived data
   const payslips = payslipsData?.success ? (payslipsData.data?.payslips || []) : [];
   const totalRecords = payslipsData?.data?.pagination?.totalRecords || 0;
   const employees = employeesData?.success ? employeesData.data : [];
   const departments = departmentsData?.success ? departmentsData.data : [];
-  const templates = templatesData?.success ? templatesData.data || [] : [];
+  const templates = templatesData?.success
+    ? (Array.isArray(templatesData.data?.templates) ? templatesData.data.templates
+      : Array.isArray(templatesData.data) ? templatesData.data
+      : [])
+    : [];
   const loading = isLoadingPayslips;
+
+  // Current period label
+  const periodLabel = `${MONTHS.find(m => m.value === filters.month)?.label} ${filters.year}`;
+
+  // Stats derived from payslips (replaces useState+useEffect pattern)
+  const stats = useMemo(() => {
+    const s = { total: payslips.length, draft: 0, finalized: 0, paid: 0, totalAmount: 0 };
+    payslips.forEach(p => {
+      const key = p.status?.toLowerCase();
+      if (key && key in s) s[key]++;
+      s.totalAmount += parseFloat(p.netPay) || 0;
+    });
+    return s;
+  }, [payslips]);
+
+  // employeeId → payslip map (for Employee Status tab cross-reference)
+  const employeePayslipMap = useMemo(() => {
+    const map = {};
+    payslips.forEach(p => { if (p.employeeId) map[p.employeeId] = p; });
+    return map;
+  }, [payslips]);
+
+  // Employees filtered by search + department (for Generate tab picker)
+  const filteredEmployees = useMemo(() => {
+    return employees.filter(emp => {
+      const nameMatch = !empSearch ||
+        `${emp.firstName} ${emp.lastName} ${emp.employeeId}`.toLowerCase().includes(empSearch.toLowerCase());
+      const deptMatch = !empDept || emp.departmentId === empDept;
+      return nameMatch && deptMatch;
+    });
+  }, [employees, empSearch, empDept]);
   
-  // Dialogs
-  const [generateDialog, setGenerateDialog] = useState(false);
+  // Dialog state
   const [viewDialog, setViewDialog] = useState(false);
   const [selectedPayslip, setSelectedPayslip] = useState(null);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
@@ -172,40 +230,6 @@ const ModernPayrollManagement = () => {
   
   // Bulk operations
   const [selectedPayslipIds, setSelectedPayslipIds] = useState([]);
-  
-  // Stats
-  const [stats, setStats] = useState({
-    total: 0,
-    draft: 0,
-    finalized: 0,
-    paid: 0,
-    totalAmount: 0
-  });
-
-  // Calculate stats when payslips change
-  useEffect(() => {
-    if (payslips.length > 0) {
-      calculateStats(payslips);
-    }
-  }, [payslips]);
-
-  const calculateStats = (payslipList) => {
-    const newStats = {
-      total: payslipList.length,
-      draft: 0,
-      finalized: 0,
-      paid: 0,
-      totalAmount: 0
-    };
-    
-    payslipList.forEach(p => {
-      const s = p.status?.toLowerCase();
-      if (s && s in newStats) newStats[s]++;
-      newStats.totalAmount += parseFloat(p.netPay) || 0;
-    });
-    
-    setStats(newStats);
-  };
 
   // =====================================================
   // VALIDATION
@@ -288,7 +312,7 @@ const ModernPayrollManagement = () => {
           response.data.message || 'Payslips generated successfully',
           { variant: 'success' }
         );
-        setGenerateDialog(false);
+        setActiveTab(0); // Return to Overview after generation
         setSelectedEmployees([]);
         setValidationResults(null);
         refetchPayslips();
@@ -623,236 +647,441 @@ const ModernPayrollManagement = () => {
     }
   };
 
-  // =====================================================
-  // TAB: OVERVIEW / DASHBOARD
-  // =====================================================
-
-  const OverviewTab = () => (
-    <Box>
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Total Payslips
-              </Typography>
-              <Typography variant="h4">{stats.total}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Draft
-              </Typography>
-              <Typography variant="h4" color="warning.main">{stats.draft}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Finalized
-              </Typography>
-              <Typography variant="h4" color="info.main">{stats.finalized}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Paid
-              </Typography>
-              <Typography variant="h4" color="success.main">{stats.paid}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Total Payout Amount
-              </Typography>
-              <Typography variant="h4">
-                {formatCurrency(stats.totalAmount)}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-      
-      {/* Quick Actions */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>Quick Actions</Typography>
-        <Stack direction="row" spacing={2}>
-          <Button
-            data-testid="payroll-generate-btn"
-            variant="contained"
-            startIcon={<GenerateIcon />}
-            onClick={() => setGenerateDialog(true)}
-          >
-            Generate Payslips
-          </Button>
-          <Button
-            data-testid="payroll-export-btn"
-            variant="outlined"
-            startIcon={<ExportIcon />}
-            onClick={handleExportExcel}
-          >
-            Export Excel
-          </Button>
-          <Button
-            data-testid="payroll-refresh-btn"
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={refetchPayslips}
-          >
-            Refresh
-          </Button>
-        </Stack>
-      </Paper>
-      
-      {/* Payslips List */}
-      <PayslipsTable />
-    </Box>
+  // ── Shared period selector ─────────────────────────────
+  const PeriodSelector = ({ size = 'small' }) => (
+    <Stack direction="row" spacing={1.5} alignItems="center">
+      <FormControl size={size} sx={{ minWidth: 130 }}>
+        <InputLabel>Month</InputLabel>
+        <Select
+          value={filters.month}
+          onChange={(e) => { setFilters(f => ({ ...f, month: e.target.value })); setPage(0); }}
+          label="Month"
+        >
+          {MONTHS.map(m => <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>)}
+        </Select>
+      </FormControl>
+      <FormControl size={size} sx={{ minWidth: 90 }}>
+        <InputLabel>Year</InputLabel>
+        <Select
+          value={filters.year}
+          onChange={(e) => { setFilters(f => ({ ...f, year: e.target.value })); setPage(0); }}
+          label="Year"
+        >
+          {YEARS.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}
+        </Select>
+      </FormControl>
+    </Stack>
   );
 
-  // =====================================================
-  // TAB: GENERATE PAYSLIPS
-  // =====================================================
+  // ── TAB 0: OVERVIEW ────────────────────────────────────
+  // Workflow pipeline + summary stats + quick start
+  const OverviewTab = () => {
+    const noPayslip = employees.length - payslips.length;
+    const stages = [
+      {
+        label: 'Active Employees',
+        count: employees.length,
+        color: theme.palette.grey[600],
+        bgColor: alpha(theme.palette.grey[500], 0.07),
+        icon: <PeopleIcon />,
+        action: null,
+      },
+      {
+        label: 'Draft',
+        count: stats.draft,
+        color: theme.palette.warning.dark,
+        bgColor: alpha(theme.palette.warning.main, 0.08),
+        icon: <DraftIcon />,
+        action: stats.draft > 0
+          ? { label: 'View Drafts', onClick: () => { setFilters(f => ({ ...f, status: 'draft' })); setActiveTab(2); } }
+          : null,
+      },
+      {
+        label: 'Finalized',
+        count: stats.finalized,
+        color: theme.palette.info.dark,
+        bgColor: alpha(theme.palette.info.main, 0.08),
+        icon: <LockIcon />,
+        action: stats.finalized > 0
+          ? { label: 'Process Payments', onClick: () => setActiveTab(4) }
+          : null,
+      },
+      {
+        label: 'Paid',
+        count: stats.paid,
+        color: theme.palette.success.dark,
+        bgColor: alpha(theme.palette.success.main, 0.08),
+        icon: <PaidIcon />,
+        action: null,
+      },
+    ];
 
-  const GenerateTab = () => (
-    <Box>
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Generate Payslips
-        </Typography>
-        
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Month</InputLabel>
-              <Select
-                value={filters.month}
-                onChange={(e) => setFilters({ ...filters, month: e.target.value })}
-                label="Month"
-              >
-                {Array.from({ length: 12 }, (_, i) => (
-                  <MenuItem key={i + 1} value={i + 1}>
-                    {new Date(2000, i).toLocaleString('default', { month: 'long' })}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Year</InputLabel>
-              <Select
-                value={filters.year}
-                onChange={(e) => setFilters({ ...filters, year: e.target.value })}
-                label="Year"
-              >
-                {Array.from({ length: 11 }, (_, i) => {
-                  const year = new Date().getFullYear() - 5 + i;
-                  return <MenuItem key={year} value={year}>{year}</MenuItem>;
-                })}
-              </Select>
-            </FormControl>
-          </Grid>
-          
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <InputLabel>Payslip Template (Optional)</InputLabel>
-              <Select
-                value={filters.templateId}
-                onChange={(e) => setFilters({ ...filters, templateId: e.target.value })}
-                label="Payslip Template (Optional)"
-              >
-                <MenuItem value="">
-                  <em>Use Default Template</em>
-                </MenuItem>
-                {templates.map((template) => (
-                  <MenuItem key={template.id} value={template.id}>
-                    {template.name} {template.isDefault && '(Default)'}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
-              Select a custom template or leave blank to use the default Indian payslip template
-            </Typography>
-          </Grid>
-          
-          <Grid item xs={12}>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle1" gutterBottom>
-              Select Employees
-            </Typography>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={selectedEmployees.length === employees.length && employees.length > 0}
-                  indeterminate={selectedEmployees.length > 0 && selectedEmployees.length < employees.length}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedEmployees(employees.map(emp => emp.id));
-                    } else {
-                      setSelectedEmployees([]);
-                    }
+    return (
+      <Box>
+        {/* Period selector + actions row */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <PeriodSelector />
+          <Stack direction="row" spacing={1}>
+            <Button size="small" variant="outlined" startIcon={<ExportIcon />} onClick={handleExportExcel}>
+              Export Excel
+            </Button>
+            <Tooltip title="Refresh">
+              <IconButton size="small" onClick={refetchPayslips} disabled={loading}>
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        </Stack>
+
+        {/* Workflow Pipeline */}
+        <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+          <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 2 }}>
+            Payroll Workflow — {periodLabel}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'stretch', flexWrap: { xs: 'wrap', md: 'nowrap' }, gap: { xs: 1, md: 0 } }}>
+            {stages.map((stage, idx) => (
+              <React.Fragment key={stage.label}>
+                <Box
+                  onClick={stage.action?.onClick}
+                  sx={{
+                    flex: 1,
+                    minWidth: { xs: 'calc(50% - 4px)', md: 0 },
+                    bgcolor: stage.bgColor,
+                    border: `1px solid ${alpha(stage.color, 0.25)}`,
+                    borderRadius: 2,
+                    p: 2.5,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    cursor: stage.action ? 'pointer' : 'default',
+                    transition: 'box-shadow 0.15s',
+                    ...(stage.action && { '&:hover': { boxShadow: 4 } }),
                   }}
-                />
+                >
+                  <Box sx={{ color: stage.color }}>
+                    {React.cloneElement(stage.icon, { sx: { fontSize: 30 } })}
+                  </Box>
+                  <Typography variant="h3" fontWeight={700} sx={{ color: stage.color, lineHeight: 1.1 }}>
+                    {stage.count}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary" align="center" fontWeight={500}>
+                    {stage.label}
+                  </Typography>
+                  {stage.action && (
+                    <Typography variant="caption" sx={{ color: stage.color, fontWeight: 600 }}>
+                      {stage.action.label} →
+                    </Typography>
+                  )}
+                </Box>
+                {idx < stages.length - 1 && (
+                  <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', px: 0.5 }}>
+                    <ArrowIcon sx={{ color: 'text.disabled', fontSize: 20 }} />
+                  </Box>
+                )}
+              </React.Fragment>
+            ))}
+          </Box>
+          {!loading && noPayslip > 0 && (
+            <Alert
+              severity="warning"
+              sx={{ mt: 2 }}
+              action={
+                <Button size="small" color="warning" onClick={() => setActiveTab(1)}>
+                  Generate Now
+                </Button>
               }
-              label="Select All"
-            />
-            
-            <Box sx={{ maxHeight: 400, overflow: 'auto', mt: 2 }}>
-              {employees.map((employee) => (
-                <FormControlLabel
-                  key={employee.id}
-                  control={
-                    <Checkbox
-                      checked={selectedEmployees.includes(employee.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedEmployees([...selectedEmployees, employee.id]);
-                        } else {
-                          setSelectedEmployees(selectedEmployees.filter(id => id !== employee.id));
-                        }
-                      }}
-                    />
-                  }
-                  label={`${employee.employeeId} - ${employee.firstName} ${employee.lastName}`}
-                />
-              ))}
-            </Box>
+            >
+              {noPayslip} employee{noPayslip !== 1 ? 's' : ''} have no payslip for {periodLabel}
+            </Alert>
+          )}
+        </Paper>
+
+        {/* Summary cards */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid item xs={6} sm={3}>
+            <Card variant="outlined">
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Typography variant="caption" color="textSecondary">Total Payslips</Typography>
+                <Typography variant="h5" fontWeight={600}>{stats.total}</Typography>
+              </CardContent>
+            </Card>
           </Grid>
-          
-          <Grid item xs={12}>
+          <Grid item xs={6} sm={3}>
+            <Card variant="outlined">
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Typography variant="caption" color="textSecondary">Gross Payout</Typography>
+                <Typography variant="h5" fontWeight={600} color="primary.main">
+                  {formatCurrency(stats.totalAmount)}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Card variant="outlined">
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Typography variant="caption" color="textSecondary">Ready to Pay</Typography>
+                <Typography variant="h5" fontWeight={600} color="info.dark">{stats.finalized}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Card variant="outlined">
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Typography variant="caption" color="textSecondary">Completed (Paid)</Typography>
+                <Typography variant="h5" fontWeight={600} color="success.dark">{stats.paid}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        <Button
+          data-testid="payroll-generate-btn"
+          variant="contained"
+          size="large"
+          startIcon={<GenerateIcon />}
+          onClick={goToGenerateTab}
+        >
+          Generate Payslips for {periodLabel}
+        </Button>
+      </Box>
+    );
+  };
+
+  // ── TAB 1: GENERATE ────────────────────────────────────
+  // Step 1: period + template  |  Step 2: select employees  |  Step 3: validate & generate
+  const GenerateTab = () => {
+    const allFilteredSelected =
+      filteredEmployees.length > 0 &&
+      filteredEmployees.every(emp => selectedEmployees.includes(emp.id));
+    const someFilteredSelected = filteredEmployees.some(emp => selectedEmployees.includes(emp.id));
+
+    const toggleFiltered = (checked) => {
+      const ids = filteredEmployees.map(e => e.id);
+      setSelectedEmployees(prev =>
+        checked ? [...new Set([...prev, ...ids])] : prev.filter(id => !ids.includes(id))
+      );
+    };
+
+    return (
+      <Grid container spacing={3} alignItems="flex-start">
+        {/* LEFT — Config panel */}
+        <Grid item xs={12} md={4}>
+          <Paper variant="outlined" sx={{ p: 3 }}>
+            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+              1 · Pay Period &amp; Template
+            </Typography>
+            <Stack spacing={2} sx={{ mb: 3 }}>
+              <PeriodSelector size="medium" />
+              <FormControl fullWidth>
+                <InputLabel>Template (Optional)</InputLabel>
+                <Select
+                  value={filters.templateId}
+                  onChange={(e) => setFilters(f => ({ ...f, templateId: e.target.value }))}
+                  label="Template (Optional)"
+                >
+                  <MenuItem value=""><em>Default Template</em></MenuItem>
+                  {templates.map(t => (
+                    <MenuItem key={t.id} value={t.id}>
+                      {t.name}{t.isDefault ? ' (Default)' : ''}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Stack>
+
+            <Divider sx={{ mb: 2 }} />
+
+            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+              2 · Selection Summary
+            </Typography>
+            <Box sx={{
+              p: 2,
+              bgcolor: selectedEmployees.length > 0
+                ? alpha(theme.palette.primary.main, 0.06)
+                : alpha(theme.palette.grey[500], 0.06),
+              borderRadius: 2,
+              mb: 2,
+              textAlign: 'center',
+            }}>
+              <Typography variant="h3" fontWeight={700} color={selectedEmployees.length > 0 ? 'primary.main' : 'text.disabled'}>
+                {selectedEmployees.length}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                of {employees.length} employees selected
+              </Typography>
+            </Box>
+
             <Button
               data-testid="payroll-validate-generate-btn"
               variant="contained"
               size="large"
-              startIcon={<GenerateIcon />}
-              onClick={handleValidateAndGenerate}
-              disabled={loading || selectedEmployees.length === 0}
               fullWidth
+              startIcon={operationLoading ? <CircularProgress size={18} color="inherit" /> : <GenerateIcon />}
+              onClick={handleValidateAndGenerate}
+              disabled={operationLoading || selectedEmployees.length === 0}
             >
-              Validate & Generate {selectedEmployees.length} Payslip(s)
+              Validate &amp; Generate
             </Button>
-          </Grid>
+            {selectedEmployees.length > 0 && (
+              <Button
+                size="small"
+                color="inherit"
+                fullWidth
+                sx={{ mt: 1 }}
+                onClick={() => setSelectedEmployees([])}
+              >
+                Clear selection
+              </Button>
+            )}
+          </Paper>
         </Grid>
-      </Paper>
-    </Box>
-  );
+
+        {/* RIGHT — Employee picker */}
+        <Grid item xs={12} md={8}>
+          <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
+            {/* Header + search */}
+            <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
+                3 · Select Employees
+              </Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <TextField
+                  size="small"
+                  placeholder="Search name or ID..."
+                  value={empSearch}
+                  onChange={(e) => setEmpSearch(e.target.value)}
+                  sx={{ flex: 1 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon fontSize="small" color="action" />
+                      </InputAdornment>
+                    ),
+                    endAdornment: empSearch && (
+                      <InputAdornment position="end">
+                        <IconButton size="small" onClick={() => setEmpSearch('')}>
+                          <ClearIcon fontSize="small" />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <FormControl size="small" sx={{ minWidth: 160 }}>
+                  <InputLabel>Department</InputLabel>
+                  <Select
+                    value={empDept}
+                    onChange={(e) => setEmpDept(e.target.value)}
+                    label="Department"
+                  >
+                    <MenuItem value="">All Departments</MenuItem>
+                    {departments.map(d => (
+                      <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Stack>
+            </Box>
+
+            {/* Select all row */}
+            <Box sx={{
+              px: 2, py: 1,
+              borderBottom: 1, borderColor: 'divider',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={allFilteredSelected}
+                    indeterminate={someFilteredSelected && !allFilteredSelected}
+                    onChange={(e) => toggleFiltered(e.target.checked)}
+                    size="small"
+                  />
+                }
+                label={
+                  <Typography variant="body2">
+                    {(empSearch || empDept)
+                      ? `Select all filtered (${filteredEmployees.length})`
+                      : `Select all (${employees.length})`}
+                  </Typography>
+                }
+              />
+              <Typography variant="caption" color="textSecondary">
+                {filteredEmployees.length} of {employees.length} shown
+              </Typography>
+            </Box>
+
+            {/* Employee rows */}
+            <Box sx={{ maxHeight: 500, overflow: 'auto' }}>
+              {filteredEmployees.length === 0 ? (
+                <Box sx={{ p: 4, textAlign: 'center' }}>
+                  <Typography color="textSecondary" variant="body2">No employees match the filter</Typography>
+                </Box>
+              ) : (
+                filteredEmployees.map((emp) => {
+                  const isSelected = selectedEmployees.includes(emp.id);
+                  const payslip = employeePayslipMap[emp.id];
+                  return (
+                    <Box
+                      key={emp.id}
+                      onClick={() =>
+                        setSelectedEmployees(prev =>
+                          isSelected ? prev.filter(id => id !== emp.id) : [...prev, emp.id]
+                        )
+                      }
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        px: 2, py: 1,
+                        gap: 1.5,
+                        borderBottom: `1px solid ${theme.palette.divider}`,
+                        cursor: 'pointer',
+                        bgcolor: isSelected
+                          ? alpha(theme.palette.primary.main, 0.06)
+                          : 'transparent',
+                        '&:hover': {
+                          bgcolor: isSelected
+                            ? alpha(theme.palette.primary.main, 0.10)
+                            : alpha(theme.palette.action.hover, 0.5),
+                        },
+                        '&:last-child': { borderBottom: 'none' },
+                      }}
+                    >
+                      <Checkbox checked={isSelected} size="small" readOnly tabIndex={-1} />
+                      <Avatar sx={{
+                        width: 32, height: 32, fontSize: 13,
+                        bgcolor: theme.palette.primary.light,
+                        color: theme.palette.primary.contrastText,
+                      }}>
+                        {emp.firstName?.[0]}{emp.lastName?.[0]}
+                      </Avatar>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="body2" fontWeight={500} noWrap>
+                          {emp.firstName} {emp.lastName}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary" noWrap>
+                          {emp.employeeId}
+                          {emp.department?.name ? ` · ${emp.department.name}` : ''}
+                        </Typography>
+                      </Box>
+                      {payslip && (
+                        <Chip
+                          label={payslip.status}
+                          size="small"
+                          color={getStatusColor(payslip.status)}
+                          variant="outlined"
+                        />
+                      )}
+                    </Box>
+                  );
+                })
+              )}
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+    );
+  };
 
   // =====================================================
   // PAYSLIPS TABLE
@@ -995,7 +1224,13 @@ const ModernPayrollManagement = () => {
       )}
       
       {loading && <LinearProgress />}
-      
+
+      {isErrorPayslips ? (
+        <SectionError
+          message="Failed to load payslips. Please try again."
+          onRetry={refetchPayslips}
+        />
+      ) : (
       <TableContainer>
         <Table>
           <TableHead>
@@ -1129,8 +1364,9 @@ const ModernPayrollManagement = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      
-      <TablePagination
+      )}
+
+      {!isErrorPayslips && <TablePagination
         component="div"
         count={totalRecords}
         page={page}
@@ -1140,7 +1376,7 @@ const ModernPayrollManagement = () => {
           setRowsPerPage(parseInt(e.target.value, 10));
           setPage(0);
         }}
-      />
+      />}
     </Paper>
   );
 
@@ -1405,7 +1641,6 @@ const ModernPayrollManagement = () => {
           <Tab label="Overview" icon={<AssessmentIcon />} iconPosition="start" />
           <Tab label="Generate" icon={<GenerateIcon />} iconPosition="start" />
           <Tab label="Process Payments" icon={<PaymentIcon />} iconPosition="start" />
-          <Tab label="Reports" icon={<ReportIcon />} iconPosition="start" />
         </Tabs>
       </Paper>
       
@@ -1415,54 +1650,8 @@ const ModernPayrollManagement = () => {
         {activeTab === 2 && (
           <PayslipsTable 
             statusFilter="finalized" 
-            title="Finalized Payslips - Ready for Payment Processing"
+            title="Finalized Payslips — Ready for Payment Processing"
           />
-        )}
-        {activeTab === 3 && (
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>Reports & Analytics</Typography>
-            <Alert severity="info" sx={{ mb: 3 }}>
-              Comprehensive reporting features coming soon. For now, use the Export Excel button in the Overview tab.
-            </Alert>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent>
-                    <Typography color="textSecondary" gutterBottom>
-                      Department Summary
-                    </Typography>
-                    <Typography variant="body2">
-                      View payroll breakdown by department
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent>
-                    <Typography color="textSecondary" gutterBottom>
-                      Month-over-Month Variance
-                    </Typography>
-                    <Typography variant="body2">
-                      Compare payroll costs across months
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent>
-                    <Typography color="textSecondary" gutterBottom>
-                      Statutory Deductions
-                    </Typography>
-                    <Typography variant="body2">
-                      PF, ESI, PT, TDS summary reports
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          </Paper>
         )}
       </Box>
       

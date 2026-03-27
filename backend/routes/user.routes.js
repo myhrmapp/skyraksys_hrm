@@ -1,8 +1,10 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const Joi = require('joi');
 const { Op } = require('sequelize');
 const { authenticateToken, authorize } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
 const db = require('../models');
 const logger = require('../utils/logger');
 
@@ -63,10 +65,17 @@ router.get('/profile', authenticateToken, async (req, res, next) => {
   }
 });
 
+// Profile update validation schema
+const updateProfileSchema = Joi.object({
+  firstName: Joi.string().trim().min(1).max(100),
+  lastName: Joi.string().trim().min(1).max(100),
+  email: Joi.string().trim().email().max(255)
+}).min(1);
+
 // Update user profile
-router.put('/profile', authenticateToken, async (req, res, next) => {
+router.put('/profile', authenticateToken, validate(updateProfileSchema), async (req, res, next) => {
   try {
-    const { firstName, lastName, email } = req.body;
+    const { firstName, lastName, email } = req.validatedData;
     
     const user = await User.findByPk(req.user.id);
     if (!user) {

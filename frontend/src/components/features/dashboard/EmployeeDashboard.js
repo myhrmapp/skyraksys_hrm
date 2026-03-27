@@ -273,7 +273,7 @@ const EmployeeDashboard = () => {
                       size="small" 
                       variant="outlined"
                       color={activity.status === 'approved' ? 'success' : 'default'}
-                      sx={{ fontSize: '0.7rem' }}
+                      sx={{ fontSize: '0.75rem' }}
                     />
                   </ListItem>
                   {index < Math.min(employeeStats.recentActivity.length, 3) - 1 && <Divider />}

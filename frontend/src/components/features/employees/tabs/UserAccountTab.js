@@ -49,6 +49,8 @@ const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur
               onChange={handleSwitchChange}
               name="enableLogin"
               color="primary"
+              data-testid="user-enable-login-switch"
+              inputProps={{ 'data-testid': 'user-enable-login-input' }}
             />
           }
           label={
@@ -81,6 +83,7 @@ const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur
                 label="System Role (Required)"
                 onChange={(e) => onChange('userAccount.role', e.target.value)}
                 onBlur={() => onBlur && onBlur('userAccount.role')}
+                inputProps={{ 'data-testid': 'user-role-select' }}
               >
                 <MenuItem value="employee">Employee (Standard Access)</MenuItem>
                 <MenuItem value="manager">Manager (Team Access)</MenuItem>
@@ -121,6 +124,7 @@ const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur
               error={!!errors['userAccount.password']}
               helperText={errors['userAccount.password'] || 'Minimum 8 characters (uppercase, lowercase, number, special character)'}
               required={!formData.id} // Required for new users if login enabled
+              inputProps={{ 'data-testid': 'user-password-input' }}
             />
           </Grid>
 
@@ -137,6 +141,7 @@ const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur
               error={!!errors['userAccount.confirmPassword']}
               helperText={errors['userAccount.confirmPassword']}
               required={!formData.id}
+              inputProps={{ 'data-testid': 'user-confirm-password-input' }}
             />
           </Grid>
         </>

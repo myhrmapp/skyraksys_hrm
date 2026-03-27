@@ -102,16 +102,23 @@ const Layout = () => {
           ]
         },
         {
-          id: 'work',
-          label: 'Work',
-          icon: <ProjectIcon />,
+          id: 'leave',
+          label: 'Leave',
+          icon: <LeaveIcon />,
           items: [
             { label: 'Leave Requests', path: '/leave-management', icon: <CheckCircleOutline /> },
             { label: 'Leave Balances', path: '/admin/leave-balances', icon: <AccountBalanceWallet /> },
             { label: 'Leave Accrual', path: '/admin/leave-accrual', icon: <AccountBalanceWallet /> },
-            { label: 'Leave Types', path: '/admin/leave-types', icon: <CheckCircleOutline /> },
+            { label: 'Leave Types', path: '/admin/leave-types', icon: <CheckCircleOutline /> }
+          ]
+        },
+        {
+          id: 'time',
+          label: 'Time & Attendance',
+          icon: <TimesheetIcon />,
+          items: [
             { label: 'Timesheet Approvals', path: '/timesheets?view=approvals', icon: <TimesheetIcon /> },
-            { label: 'Attendance Mgmt', path: '/attendance-management', icon: <CalendarToday /> },
+            { label: 'Attendance', path: '/attendance-management', icon: <CalendarToday /> },
             { label: 'Projects', path: '/project-task-config', icon: <ProjectIcon /> }
           ]
         },
@@ -137,7 +144,7 @@ const Layout = () => {
         },
         {
           id: 'mystuff',
-          label: 'My Stuff',
+          label: 'My Work',
           icon: <PersonIcon />,
           divider: true,
           items: [
@@ -181,7 +188,7 @@ const Layout = () => {
         },
         {
           id: 'work',
-          label: 'Approvals & Work',
+          label: 'Approvals',
           icon: <CheckCircleOutline />,
           items: [
             { label: 'Leave Requests', path: '/leave-management', icon: <LeaveIcon /> },
@@ -191,7 +198,7 @@ const Layout = () => {
         },
         {
           id: 'mystuff',
-          label: 'My Stuff',
+          label: 'My Work',
           icon: <PersonIcon />,
           divider: true,
           items: [

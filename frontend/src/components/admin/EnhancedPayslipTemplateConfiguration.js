@@ -207,9 +207,15 @@ const EnhancedPayslipTemplateConfiguration = () => {
     setLoading('load-templates', true);
     try {
       const response = await payrollService.getPayslipTemplates();
-      // Handle both response.data.data and response.data structures
-      const templatesData = response.data?.data || response.data || [];
-      setTemplates(Array.isArray(templatesData) ? templatesData : []);
+      // Backend returns { success: true, data: { templates: [...], pagination: {} } }
+      const d = response.data;
+      const templatesData =
+        Array.isArray(d?.data?.templates) ? d.data.templates  // { data: { templates: [] } }
+        : Array.isArray(d?.data)          ? d.data            // { data: [] }
+        : Array.isArray(d?.templates)     ? d.templates       // { templates: [] }
+        : Array.isArray(d)                ? d                 // raw array
+        : [];
+      setTemplates(templatesData);
     } catch (error) {
       console.error('Failed to load templates:', error);
       showNotification('Failed to load payslip templates', 'error');

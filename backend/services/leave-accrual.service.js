@@ -183,7 +183,13 @@ class LeaveAccrualService {
     const balances = await db.LeaveBalance.findAll({
       where: { year },
       include: [
-        { model: db.Employee, as: 'employee', attributes: ['id', 'employeeId', 'firstName', 'lastName'] },
+        {
+          model: db.Employee,
+          as: 'employee',
+          attributes: ['id', 'employeeId', 'firstName', 'lastName'],
+          where: { deletedAt: null },  // exclude soft-deleted employees
+          required: true               // INNER JOIN — skip balances with no active employee
+        },
         { model: db.LeaveType, as: 'leaveType', attributes: ['id', 'name', 'maxDaysPerYear'] }
       ],
       order: [['employeeId', 'ASC']]

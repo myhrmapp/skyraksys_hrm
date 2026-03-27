@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Chip, Button, Avatar, Card, CardContent, CircularProgress, useTheme } from '@mui/material';
 import { ArrowBack as ArrowBackIcon, Save as SaveIcon, Lightbulb as LightbulbIcon } from '@mui/icons-material';
 
@@ -8,34 +8,44 @@ const EmployeeFormHeader = ({
   autoSaving,
   currentUser,
   onBack,
+  employeeName,
 }) => {
   const theme = useTheme();
+  // Tick every 30s so the "saved N mins ago" label stays current.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!lastSaved) return;
+    const id = setInterval(() => setTick(t => t + 1), 30000);
+    return () => clearInterval(id);
+  }, [lastSaved]);
 
   return (
     <Box sx={{ mb: 4 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Button
+            variant="text"
+            startIcon={<ArrowBackIcon />}
+            onClick={onBack}
+            size="small"
+            sx={{ color: 'text.secondary', textTransform: 'none', fontWeight: 500 }}
+          >
+            {isEditMode ? 'Back to Profile' : 'Back to Employees'}
+          </Button>
+        </Box>
+
         <Box>
           <Typography 
-            variant="h3" 
+            variant="h4" 
             component="h1" 
-            sx={{ 
-              fontWeight: 700,
-              color: 'primary.main',
-              mb: 0.5,
-              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.5rem' }
-            }}
+            sx={{ fontWeight: 700, color: 'text.primary', mb: 0.25 }}
           >
-            {isEditMode ? 'Edit Employee' : 'Add New Employee'}
+            {isEditMode
+              ? (employeeName ? `Edit — ${employeeName}` : 'Edit Employee')
+              : 'Add New Employee'}
           </Typography>
-          <Typography 
-            variant="body1" 
-            color="text.secondary"
-            sx={{ 
-              fontWeight: 500,
-              fontSize: { xs: '0.875rem', md: '1rem' }
-            }}
-          >
-            {isEditMode ? 'Update employee details and information' : 'Create a comprehensive employee profile with all necessary details'}
+          <Typography variant="body2" color="text.secondary">
+            {isEditMode ? 'Update employee details across all sections' : 'Fill in all sections to create a complete employee profile'}
           </Typography>
         </Box>
         
@@ -92,28 +102,7 @@ const EmployeeFormHeader = ({
               }}
             />
           )}
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={onBack}
-            variant="outlined"
-            sx={{ 
-              borderRadius: 2,
-              px: 3,
-              py: 1,
-              textTransform: 'none',
-              fontWeight: 600,
-              borderColor: theme.palette.divider,
-              color: theme.palette.text.secondary,
-              '&:hover': {
-                borderColor: theme.palette.primary.main,
-                bgcolor: 'rgba(99, 102, 241, 0.04)',
-                color: theme.palette.primary.main
-              },
-              transition: 'all 0.2s ease'
-            }}
-          >
-            Back
-          </Button>
+
         </Box>
       </Box>
 

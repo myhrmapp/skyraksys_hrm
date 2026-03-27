@@ -78,11 +78,12 @@ class LeaveBusinessService extends BaseBusinessService {
     });
 
     // Update leave balance: deduct from balance, add to pending
+    const leaveYear = new Date(data.startDate).getFullYear();
     const leaveBalance = await db.LeaveBalance.findOne({
       where: {
         employeeId: data.employeeId,
         leaveTypeId: data.leaveTypeId,
-        year: new Date().getFullYear()
+        year: leaveYear
       }
     });
 
@@ -490,7 +491,7 @@ class LeaveBusinessService extends BaseBusinessService {
     const end = new Date(endDate);
     const diffTime = Math.abs(end - start);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both days
-    return isHalfDay ? 0.5 : diffDays;
+    return isHalfDay ? diffDays - 0.5 : diffDays;
   }
 }
 

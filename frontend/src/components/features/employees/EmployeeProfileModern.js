@@ -104,7 +104,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
         <EmployeeProfileHeader 
           onBack={() => mode === 'self' ? navigate('/') : navigate('/employees')}
           editing={editing}
-          onEdit={() => setEditing(true)}
+          onEdit={() => mode === 'self' ? navigate(`/my-profile/edit/${employee?.id}`) : navigate(`/employees/${id || employee?.id}/edit`)}
           saving={saving}
           onSave={handleSave}
           onCancel={handleCancel}
@@ -119,7 +119,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
         {/* Profile Card (Avatar & Basic Info) */}
         <EmployeeProfileCard 
           employee={employee}
-          editing={editing}
+          editing={editing && mode === 'self'}
           selectedPhoto={selectedPhoto}
           photoPreview={photoPreview}
           onPhotoSelect={handlePhotoSelect}
@@ -155,7 +155,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
               editing={editing}
               onChange={handleSalaryChange}
               canEditSensitive={mode === 'self' ? false : canEditSensitive}
-              showSalary={mode === 'self' ? true : showSensitive}
+              showSalary={mode === 'self' ? true : (editing || showSensitive)}
               setShowSalary={setShowSensitive}
               formatCurrency={formatCurrency}
             />

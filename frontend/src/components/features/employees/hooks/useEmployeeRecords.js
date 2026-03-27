@@ -30,7 +30,7 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
       },
       {
         queryKey: ['leaves', 'history', queryParams],
-        queryFn: () => leaveService.getAll(queryParams),
+        queryFn: () => leaveService.getAll({ ...queryParams, limit: 500 }),
         enabled: !!queryParams,
         staleTime: 2 * 60 * 1000, // 2 minutes
       }
@@ -60,45 +60,38 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
   };
 
   const processTimesheets = (timesheets) => {
-    // Group timesheets by week (and employee if multiple) for display
+    // The Timesheet model stores one row per employee+project+task+week.
+    // Group by employee + week so multiple projects in the same week are merged.
+    // Model fields: weekStartDate, weekEndDate, weekNumber, year, totalHoursWorked, status
     const weeklyGroups = {};
-    
+
     timesheets.forEach(timesheet => {
-      const workDate = new Date(timesheet.workDate);
-      const year = workDate.getFullYear();
-      const weekNumber = getWeekNumber(workDate);
-      
-      // If we are viewing all employees, we need to group by employee as well
+      if (!timesheet.weekStartDate) return; // skip rows with no week date
+
+      const year = timesheet.year || new Date(timesheet.weekStartDate).getFullYear();
+      const weekNumber = timesheet.weekNumber || getWeekNumber(new Date(timesheet.weekStartDate));
+      if (isNaN(weekNumber) || isNaN(year)) return;
+
       const employeeId = timesheet.employeeId || 'unknown';
       const weekKey = `${employeeId}-${year}-W${weekNumber}`;
-      
+
       if (!weeklyGroups[weekKey]) {
-        // Calculate week start and end dates
-        // Prefer using the backend provided weekStartDate if available
-        let weekStart;
-        if (timesheet.weekStartDate) {
-          weekStart = new Date(timesheet.weekStartDate);
-        } else {
-          const firstDayOfYear = new Date(year, 0, 1);
-          const daysToAdd = (weekNumber - 1) * 7;
-          weekStart = new Date(firstDayOfYear.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
-          
-          // Adjust to start of week (Monday)
-          const dayOfWeek = weekStart.getDay();
-          const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-          weekStart.setDate(weekStart.getDate() - daysFromMonday);
-        }
-        
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-        
+        const weekStart = new Date(timesheet.weekStartDate);
+        const weekEnd = timesheet.weekEndDate
+          ? new Date(timesheet.weekEndDate)
+          : new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+
+        const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
         weeklyGroups[weekKey] = {
           id: weekKey,
-          week: `Week ${weekNumber} (${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}-${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${year})`,
-          year: year,
-          weekNumber: weekNumber,
+          week: `Week ${weekNumber} (${fmt(weekStart)}-${fmt(weekEnd)}, ${year})`,
+          year,
+          weekNumber,
           employeeId: timesheet.employee?.employeeId || timesheet.employeeId,
-          employeeName: timesheet.employee ? `${timesheet.employee.firstName} ${timesheet.employee.lastName}` : 'Unknown',
+          employeeName: timesheet.employee
+            ? `${timesheet.employee.firstName} ${timesheet.employee.lastName}`
+            : 'Unknown',
           timesheets: [],
           totalHours: 0,
           regularHours: 0,
@@ -107,47 +100,47 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
           submittedDate: null
         };
       }
-      
+
       weeklyGroups[weekKey].timesheets.push(timesheet);
     });
-    
-    // Process each week group to calculate totals and status
+
+    // Aggregate each week group
     const weeklyHistory = Object.values(weeklyGroups).map(week => {
-      // Ensure hoursWorked is treated as a number
-      const totalHours = week.timesheets.reduce((sum, ts) => sum + (Number(ts.hoursWorked) || 0), 0);
-      
-      // Calculate regular and overtime hours
-      // Assuming 40 hours is the standard work week
+      // Sum totalHoursWorked across all project/task rows for this week
+      const totalHours = week.timesheets.reduce(
+        (sum, ts) => sum + (Number(ts.totalHoursWorked) || 0), 0
+      );
+
       const regularHours = Math.min(totalHours, 40);
       const overtimeHours = Math.max(totalHours - 40, 0);
-      
-      // Determine week status
-      const submittedTimesheets = week.timesheets.filter(ts => ts.status === 'Submitted' || ts.status === 'Approved' || ts.status === 'Rejected');
+
+      // Status: if any row is Approved/Rejected/Submitted treat week as non-draft
+      const nonDraft = week.timesheets.filter(
+        ts => ['Submitted', 'Approved', 'Rejected'].includes(ts.status)
+      );
       const draftTimesheets = week.timesheets.filter(ts => ts.status === 'Draft');
-      
+
       let weekStatus = 'draft';
       let submittedDate = null;
-      
-      if (submittedTimesheets.length > 0) {
-        if (submittedTimesheets.every(ts => ts.status === 'Approved')) {
+
+      if (nonDraft.length > 0) {
+        if (nonDraft.every(ts => ts.status === 'Approved')) {
           weekStatus = 'approved';
-        } else if (submittedTimesheets.some(ts => ts.status === 'Rejected')) {
+        } else if (nonDraft.some(ts => ts.status === 'Rejected')) {
           weekStatus = 'rejected';
         } else {
           weekStatus = 'submitted';
         }
-        
-        // Get the latest submitted date
-        const submittedDates = submittedTimesheets
+
+        const dates = nonDraft
           .map(ts => ts.submittedAt || ts.updatedAt)
-          .filter(date => date)
+          .filter(Boolean)
           .sort((a, b) => new Date(b) - new Date(a));
-        
-        if (submittedDates.length > 0) {
-          submittedDate = new Date(submittedDates[0]).toLocaleDateString('en-US');
+        if (dates.length > 0) {
+          submittedDate = new Date(dates[0]).toLocaleDateString('en-US');
         }
       }
-      
+
       return {
         ...week,
         totalHours,
@@ -157,11 +150,11 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
         submittedDate: submittedDate || 'Not submitted',
         timesheetCount: week.timesheets.length,
         draftCount: draftTimesheets.length,
-        submittedCount: submittedTimesheets.length
+        submittedCount: nonDraft.length
       };
     });
-    
-    // Sort by year and week descending (most recent first)
+
+    // Most recent week first
     weeklyHistory.sort((a, b) => {
       if (a.year !== b.year) return b.year - a.year;
       return b.weekNumber - a.weekNumber;
@@ -174,39 +167,40 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
     // Group by Month (YYYY-MM)
     const monthlyGroups = {};
     
+    // Use weekStartDate (the model field) instead of workDate which doesn't exist.
+    // Each timesheet row covers Mon–Sun; count that week's Mon–Fri days as worked.
     timesheets.forEach(ts => {
-      if (!ts.workDate) return;
-      const date = new Date(ts.workDate);
+      if (!ts.weekStartDate) return;
+      const date = new Date(ts.weekStartDate);
+      if (isNaN(date.getTime())) return;
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      
+
       if (!monthlyGroups[monthKey]) {
         monthlyGroups[monthKey] = {
           month: monthName,
-          totalDays: 0, // Will be calculated based on month length excluding weekends
-          daysWorked: new Set(), // Use Set to count unique days
+          totalDays: 0,
+          daysWorked: new Set(),
           hoursWorked: 0
         };
-        
-        // Calculate total working days in this month (Mon-Fri)
+
+        // Count Mon–Fri working days in this month
         const year = date.getFullYear();
         const month = date.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         let workingDays = 0;
-        
         for (let d = 1; d <= daysInMonth; d++) {
-          const dayDate = new Date(year, month, d);
-          const dayOfWeek = dayDate.getDay();
-          if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Exclude Sun (0) and Sat (6)
-            workingDays++;
-          }
+          const dow = new Date(year, month, d).getDay();
+          if (dow !== 0 && dow !== 6) workingDays++;
         }
         monthlyGroups[monthKey].totalDays = workingDays;
       }
-      
-      if (Number(ts.hoursWorked) > 0) {
-        monthlyGroups[monthKey].daysWorked.add(ts.workDate); // Assuming workDate is YYYY-MM-DD string or unique per day
-        monthlyGroups[monthKey].hoursWorked += Number(ts.hoursWorked);
+
+      const hours = Number(ts.totalHoursWorked) || 0;
+      if (hours > 0) {
+        // Add weekStart as a proxy date so different weeks don't collapse to same key
+        monthlyGroups[monthKey].daysWorked.add(ts.weekStartDate);
+        monthlyGroups[monthKey].hoursWorked += hours;
       }
     });
     
@@ -240,13 +234,20 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
     }
 
     // Process leaves
-    if (leaveQuery.data?.data) {
-      const leaves = Array.isArray(leaveQuery.data.data) 
-        ? leaveQuery.data.data 
-        : (leaveQuery.data.data.data || []);
-      
+    // normalizeResponse may return the array directly (no wrapper) when the backend
+    // response has a nested 'data' property but no top-level 'pagination' key.
+    if (leaveQuery.data) {
+      let leaves;
+      if (Array.isArray(leaveQuery.data)) {
+        leaves = leaveQuery.data;                          // array returned directly
+      } else if (Array.isArray(leaveQuery.data?.data)) {
+        leaves = leaveQuery.data.data;                     // { data: [...] } wrapper
+      } else {
+        leaves = leaveQuery.data?.data?.data || [];        // nested double-wrap
+      }
+
       // Sort by applied date descending
-      const sortedLeaves = leaves.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const sortedLeaves = [...leaves].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setLeaveHistory(sortedLeaves);
     }
   }, [timesheetQuery.data, leaveQuery.data, targetEmployeeId]);

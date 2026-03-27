@@ -109,6 +109,17 @@ class LeaveService {
     return normalizeResponse(response);
   }
 
+  // Get ALL leave balances for admin view (all employees, all types)
+  async getAllBalances(params = {}) {
+    const response = await http.get('/admin/leave-balances', { params: { limit: 500, ...params } });
+    // Response shape: { data: { balances: [...], pagination: {...} } }
+    const d = response.data;
+    if (Array.isArray(d?.data?.balances)) return d.data.balances;
+    if (Array.isArray(d?.data)) return d.data;
+    if (Array.isArray(d)) return d;
+    return [];
+  }
+
   // --- Manager Methods ---
 
   // Get pending leave requests for manager approval

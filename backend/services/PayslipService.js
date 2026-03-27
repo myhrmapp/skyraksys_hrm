@@ -138,18 +138,19 @@ class PayslipService {
         issues.push('Salary structure is inactive');
       }
 
-      // Check 2: Timesheet data exists
+      // Check 2: Timesheet data exists (Timesheet uses weekStartDate, not month/year columns)
+      const periodStart = new Date(year, month - 1, 1);
+      const periodEnd = new Date(year, month, 0); // last day of month
       const timesheet = await db.Timesheet.findOne({
         where: {
           employeeId: emp.id,
-          month,
-          year
+          weekStartDate: { [Op.between]: [periodStart, periodEnd] }
         }
       });
 
       if (!timesheet) {
         issues.push('No timesheet data for this period');
-      } else if (timesheet.status !== 'approved' && timesheet.status !== 'Approved') {
+      } else if (timesheet.status?.toLowerCase() !== 'approved') {
         issues.push(`Timesheet not approved (status: ${timesheet.status})`);
       }
 

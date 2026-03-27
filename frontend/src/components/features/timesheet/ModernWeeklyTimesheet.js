@@ -388,7 +388,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
     setHasUnsavedChanges(true);
   };
   
-  const saveDraft = async () => {
+  const saveDraft = async (silent = false) => {
     try {
       setSaving(true);
       
@@ -463,7 +463,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
       
       setHasUnsavedChanges(false);
       setLastSaveTime(new Date());
-      showSuccess('Timesheet saved as draft');
+      if (!silent) showSuccess('Timesheet saved as draft');
     } catch (error) {
       logger.error('Error saving timesheet:', error);
       showError('Failed to save timesheet. Please try again.');
@@ -489,14 +489,13 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
       }
       
       const weekStart = currentWeek.format('YYYY-MM-DD');
-      
+      const currentEmployeeId = user?.employee?.id || user?.employeeId || user?.id;
 
+      // Save as draft first (silently — no toast), then submit
+      await saveDraft(true);
       
-      // First, save all timesheets as drafts if they don't exist
-      await saveDraft();
-      
-      // Get the current week's timesheets to submit
-      const response = await timesheetService.getByWeek(weekStart);
+      // Fetch this employee's timesheets for the week (server-side filtered by employeeId for admins too)
+      const response = await timesheetService.getByWeek(weekStart, currentEmployeeId);
       const weekTimesheets = response.data?.data || [];
       
       if (weekTimesheets.length === 0) {
@@ -504,14 +503,10 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
         return;
       }
       
-      // Filter only draft or rejected timesheets that belong to the current user
-      // Handle case-insensitive status and flexible employee ID matching
-      const currentUserId = user?.employee?.id || user?.id;
+      // Filter only draft or rejected timesheets
       const draftTimesheets = weekTimesheets.filter(ts => {
         const status = ts.status?.toLowerCase();
-        const isDraftOrRejected = status === 'draft' || status === 'rejected';
-        const isCurrentUser = ts.employeeId === currentUserId || ts.userId === currentUserId;
-        return isDraftOrRejected && isCurrentUser;
+        return status === 'draft' || status === 'rejected';
       });
       
       if (draftTimesheets.length === 0) {

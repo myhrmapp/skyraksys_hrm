@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Paper,
@@ -24,6 +24,7 @@ import {
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import { useSnackbar } from 'notistack';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { attendanceService } from '../../../services/attendance.service';
 
 const statusColors = {
@@ -38,64 +39,42 @@ const statusColors = {
 
 export default function MyAttendance() {
   const { enqueueSnackbar } = useSnackbar();
-  const [todayStatus, setTodayStatus] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [monthlyReport, setMonthlyReport] = useState(null);
+  const queryClient = useQueryClient();
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth() + 1);
 
-  const fetchTodayStatus = useCallback(async () => {
-    try {
-      const res = await attendanceService.getToday();
-      setTodayStatus(res.data);
-    } catch (error) {
-      // No check-in yet — that's normal
-      setTodayStatus(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { data: todayData, isLoading } = useQuery({
+    queryKey: ['attendance', 'today'],
+    queryFn: () => attendanceService.getToday().then(r => r.data).catch(() => null),
+    staleTime: 60 * 1000, // 1 minute
+  });
+  const todayStatus = todayData ?? null;
 
-  const fetchMonthlyReport = useCallback(async () => {
-    try {
-      const res = await attendanceService.getMyReport(year, month);
-      setMonthlyReport(res.data);
-    } catch (error) {
-      enqueueSnackbar('Failed to load monthly report', { variant: 'error' });
-    }
-  }, [year, month, enqueueSnackbar]);
+  const { data: reportData } = useQuery({
+    queryKey: ['attendance', 'monthly', year, month],
+    queryFn: () => attendanceService.getMyReport(year, month).then(r => r.data),
+    staleTime: 2 * 60 * 1000,
+  });
+  const monthlyReport = reportData ?? null;
 
-  useEffect(() => { fetchTodayStatus(); }, [fetchTodayStatus]);
-  useEffect(() => { fetchMonthlyReport(); }, [fetchMonthlyReport]);
-
-  const handleCheckIn = async () => {
-    setActionLoading(true);
-    try {
-      await attendanceService.checkIn();
-      enqueueSnackbar('Checked in successfully!', { variant: 'success' });
-      fetchTodayStatus();
-    } catch (err) {
-      enqueueSnackbar(err.response?.data?.message || 'Check-in failed', { variant: 'error' });
-    } finally {
-      setActionLoading(false);
-    }
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ['attendance', 'today'] });
+    queryClient.invalidateQueries({ queryKey: ['attendance', 'monthly', year, month] });
   };
 
-  const handleCheckOut = async () => {
-    setActionLoading(true);
-    try {
-      await attendanceService.checkOut();
-      enqueueSnackbar('Checked out successfully!', { variant: 'success' });
-      fetchTodayStatus();
-      fetchMonthlyReport(); // Refresh report after checkout
-    } catch (err) {
-      enqueueSnackbar(err.response?.data?.message || 'Check-out failed', { variant: 'error' });
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  const checkInMutation = useMutation({
+    mutationFn: () => attendanceService.checkIn(),
+    onSuccess: () => { enqueueSnackbar('Checked in successfully!', { variant: 'success' }); invalidate(); },
+    onError: (err) => enqueueSnackbar(err.response?.data?.message || 'Check-in failed', { variant: 'error' }),
+  });
 
+  const checkOutMutation = useMutation({
+    mutationFn: () => attendanceService.checkOut(),
+    onSuccess: () => { enqueueSnackbar('Checked out successfully!', { variant: 'success' }); invalidate(); },
+    onError: (err) => enqueueSnackbar(err.response?.data?.message || 'Check-out failed', { variant: 'error' }),
+  });
+
+  const actionLoading = checkInMutation.isPending || checkOutMutation.isPending;
   const hasCheckedIn = todayStatus?.checkIn != null;
   const hasCheckedOut = todayStatus?.checkOut != null;
 
@@ -104,7 +83,7 @@ export default function MyAttendance() {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
         <CircularProgress />
@@ -164,7 +143,7 @@ export default function MyAttendance() {
                     variant="contained"
                     color="success"
                     startIcon={<CheckInIcon />}
-                    onClick={handleCheckIn}
+                    onClick={() => checkInMutation.mutate()}
                     disabled={actionLoading}
                   >
                     Check In
@@ -176,7 +155,7 @@ export default function MyAttendance() {
                     variant="contained"
                     color="warning"
                     startIcon={<CheckOutIcon />}
-                    onClick={handleCheckOut}
+                    onClick={() => checkOutMutation.mutate()}
                     disabled={actionLoading}
                   >
                     Check Out

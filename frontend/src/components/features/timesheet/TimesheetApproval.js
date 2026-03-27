@@ -83,6 +83,13 @@ const TimesheetApproval = ({ embedded } = {}) => {
       return allTimesheets.sort((a, b) => new Date(b.weekStartDate) - new Date(a.weekStartDate));
     }
   });
+
+  // 🚀 React Query for timesheet stats (approved/rejected counts)
+  const { data: statsData, refetch: refetchStats } = useQuery({
+    queryKey: ['timesheets', 'stats'],
+    queryFn: () => timesheetService.getStats(),
+    select: (response) => response?.data || response || {},
+  });
   
   const timesheets = useMemo(() => timesheetsData || [], [timesheetsData]);
   
@@ -137,21 +144,18 @@ const TimesheetApproval = ({ embedded } = {}) => {
   useEffect(() => {
     calculateSummary();
     applyFilters();
-  }, [timesheets, statusFilter, searchQuery, projectFilter, dateRange,orderBy, order]);
+  }, [timesheets, statsData, statusFilter, searchQuery, projectFilter, dateRange, orderBy, order]);
 
   const calculateSummary = () => {
     const submitted = timesheets.filter(ts => ts.status?.toLowerCase() === 'submitted');
-    const approved = timesheets.filter(ts => ts.status?.toLowerCase() === 'approved');
-    const rejected = timesheets.filter(ts => ts.status?.toLowerCase() === 'rejected');
-    const draft = timesheets.filter(ts => ts.status?.toLowerCase() === 'draft');
     
     setSummary({
       totalPending: submitted.length,
       totalHours: submitted.reduce((sum, ts) => sum + parseFloat(ts.totalHours || ts.totalHoursWorked || 0), 0),
       employees: [...new Set(submitted.map(ts => ts.employeeId))].length,
-      approved: approved.length,
-      rejected: rejected.length,
-      draft: draft.length
+      approved: statsData?.approved ?? 0,
+      rejected: statsData?.rejected ?? 0,
+      draft: statsData?.draft ?? 0,
     });
   };
 
@@ -500,7 +504,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
             <Button
               variant="outlined"
               startIcon={<RefreshIcon />}
-              onClick={refetch}
+              onClick={() => { refetch(); refetchStats(); }}
             >
               Refresh
             </Button>

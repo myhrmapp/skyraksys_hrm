@@ -9,7 +9,8 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  useTheme
 } from '@mui/material';
 import {
   PersonOutline as PersonIcon,
@@ -19,6 +20,7 @@ import {
 import InfoField from './InfoField';
 
 const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
+  const theme = useTheme();
   return (
     <>
       {/* Personal Information */}
@@ -26,7 +28,7 @@ const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
             <Typography variant="h6" fontWeight={600}>
-              <PersonIcon sx={{ verticalAlign: 'middle', mr: 1, color: '#1976d2' }} />
+              <PersonIcon sx={{ verticalAlign: 'middle', mr: 1, color: theme.palette.primary.main }} />
               Personal Information
             </Typography>
             {editing && <Chip label="Editing" size="small" color="warning" icon={<EditIcon />} />}

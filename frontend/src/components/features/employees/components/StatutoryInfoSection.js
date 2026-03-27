@@ -6,7 +6,8 @@ import {
   Typography,
   Chip,
   Grid,
-  IconButton
+  IconButton,
+  useTheme
 } from '@mui/material';
 import {
   AccountBalance as AccountBalanceIcon,
@@ -24,13 +25,14 @@ const StatutoryInfoSection = ({
   showStatutory,
   setShowStatutory
 }) => {
+  const theme = useTheme();
   return (
     <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Typography variant="h6" fontWeight={600}>
-              <AccountBalanceIcon sx={{ verticalAlign: 'middle', mr: 1, color: '#f59e0b' }} />
+              <AccountBalanceIcon sx={{ verticalAlign: 'middle', mr: 1, color: theme.palette.warning.main }} />
               Statutory & Banking
             </Typography>
             {editing && <Chip label="Editing" size="small" color="warning" icon={<EditIcon />} />}

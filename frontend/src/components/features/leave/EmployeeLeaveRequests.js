@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -16,13 +16,11 @@ import {
   TableHead,
   TableRow,
   Chip,
-  Avatar,
   Stack,
   Divider,
   useTheme,
   Fade,
   Alert,
-  CircularProgress,
   LinearProgress
 } from '@mui/material';
 import {
@@ -31,18 +29,19 @@ import {
   Cancel as RejectedIcon,
   Pending as PendingIcon,
   Add as AddIcon,
-  History as HistoryIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
-import { leaveService } from '../../../services/leave.service';
+import { useLeaveRequests, useLeaveBalances } from '../../../hooks/queries/useLeaveQueries';
 
 const EmployeeLeaveRequests = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [leaveRequests, setLeaveRequests] = useState([]);
-  const [leaveBalance, setLeaveBalance] = useState({});
+
+  const { data: leaveRequestsData, isLoading: loadingRequests } = useLeaveRequests({});
+  const { data: leaveBalanceData, isLoading: loadingBalance } = useLeaveBalances(user?.employeeId);
+
+  const loading = loadingRequests || loadingBalance;
 
   const statusColors = {
     pending: 'warning',
@@ -57,59 +56,29 @@ const EmployeeLeaveRequests = () => {
     pending: <PendingIcon color="warning" />
   };
 
-  useEffect(() => {
-    loadEmployeeLeaves();
-  }, []);
+  // Normalise leave requests
+  const leaveRequests = React.useMemo(() => {
+    const raw = leaveRequestsData?.data;
+    const arr = Array.isArray(raw) ? raw : (raw?.data ?? []);
+    return [...arr].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }, [leaveRequestsData]);
 
-  const loadEmployeeLeaves = async () => {
-    try {
-      setLoading(true);
-      
-      // Load leave requests from API
-      const response = await leaveService.getAll();
-      if (response?.data) {
-        const leaves = Array.isArray(response.data) ? response.data : 
-                      (response.data.data ? response.data.data : []);
-        
-        // Sort by applied date descending
-        const sortedLeaves = leaves.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setLeaveRequests(sortedLeaves);
-      } else {
-        setLeaveRequests([]);
-      }
-
-      // Load leave balance from API
-      try {
-        const balanceResponse = await leaveService.getBalance(user?.employeeId || null);
-        if (balanceResponse?.data) {
-          const balanceData = Array.isArray(balanceResponse.data) ? balanceResponse.data : 
-            (balanceResponse.data.data ? balanceResponse.data.data : []);
-          // Transform API balance data into component format
-          const balanceMap = {};
-          balanceData.forEach(item => {
-            const typeName = (item.leaveType?.name || item.leaveTypeName || 'other').toLowerCase().replace(/\s+leave$/, '');
-            balanceMap[typeName] = {
-              total: item.totalEntitled || item.total || 0,
-              used: item.used || 0,
-              remaining: item.remaining || item.balance || 0
-            };
-          });
-          setLeaveBalance(balanceMap);
-        } else {
-          setLeaveBalance({});
-        }
-      } catch (balanceError) {
-        console.error('Error loading leave balance:', balanceError);
-        setLeaveBalance({});
-      }
-    } catch (error) {
-      console.error('Error loading leave data:', error);
-      setLeaveRequests([]);
-      setLeaveBalance({});
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Normalise leave balances into { [typeName]: { total, used, remaining } }
+  const leaveBalance = React.useMemo(() => {
+    const raw = leaveBalanceData?.data;
+    const arr = Array.isArray(raw) ? raw : (raw?.data ?? []);
+    const map = {};
+    arr.forEach(item => {
+      const typeName = (item.leaveType?.name || item.leaveTypeName || 'other')
+        .toLowerCase().replace(/\s+leave$/, '');
+      map[typeName] = {
+        total: item.totalEntitled || item.total || 0,
+        used: item.used || 0,
+        remaining: item.remaining || item.balance || 0
+      };
+    });
+    return map;
+  }, [leaveBalanceData]);
 
   const getLeaveTypeLabel = (type) => {
     // Handle both object (with name property) and string types

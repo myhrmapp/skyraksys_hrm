@@ -65,6 +65,7 @@ const LeaveBalanceModern = () => {
   const [selectedLeaveType, setSelectedLeaveType] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [searchQuery, setSearchQuery] = useState('');
+  const [employeeStatus, setEmployeeStatus] = useState('all'); // 'all' | 'active' | 'inactive'
 
   // Bulk initialization
   const [showBulkInit, setShowBulkInit] = useState(false);
@@ -94,10 +95,10 @@ const LeaveBalanceModern = () => {
     loadData();
   }, []);
 
-  // Load data when filters change
+  // Load data when server-side filters change (including employeeStatus)
   useEffect(() => {
     loadData(1);
-  }, [selectedEmployee, selectedLeaveType, selectedYear]);
+  }, [selectedEmployee, selectedLeaveType, selectedYear, employeeStatus]);
 
   const loadInitialData = async () => {
     try {
@@ -126,6 +127,7 @@ const LeaveBalanceModern = () => {
 
       if (selectedEmployee) params.employeeId = selectedEmployee;
       if (selectedLeaveType) params.leaveTypeId = selectedLeaveType;
+      if (employeeStatus !== 'all') params.employeeStatus = employeeStatus;
 
       const response = await leaveBalanceAdminService.getAll(params);
 
@@ -268,6 +270,7 @@ const LeaveBalanceModern = () => {
     setSelectedLeaveType('');
     setSelectedYear(new Date().getFullYear());
     setSearchQuery('');
+    setEmployeeStatus('all');
     setSuccess('Filters cleared');
   };
 
@@ -313,12 +316,13 @@ const LeaveBalanceModern = () => {
     return 'error';
   };
 
+  // Client-side filter: search only (within current page)
+  // employeeStatus is handled server-side for correct pagination
   const filteredBalances = balances.filter(balance => {
-    if (!balance.employee) return false;
     if (!searchQuery) return true;
     const searchLower = searchQuery.toLowerCase();
-    const employeeName = `${balance.employee.firstName || ''} ${balance.employee.lastName || ''}`.toLowerCase();
-    const employeeId = (balance.employee.employeeId || '').toLowerCase();
+    const employeeName = `${balance.employee?.firstName || ''} ${balance.employee?.lastName || ''}`.toLowerCase();
+    const employeeId = (balance.employee?.employeeId || '').toLowerCase();
     return employeeName.includes(searchLower) || employeeId.includes(searchLower);
   });
 
@@ -411,7 +415,7 @@ const LeaveBalanceModern = () => {
                 variant="outlined"
                 color="secondary"
                 onClick={handleResetFilters}
-                disabled={!selectedEmployee && !selectedLeaveType && !searchQuery && selectedYear === new Date().getFullYear()}
+                disabled={!selectedEmployee && !selectedLeaveType && !searchQuery && employeeStatus === 'all' && selectedYear === new Date().getFullYear()}
               >
                 Clear Filters
               </Button>
@@ -491,7 +495,22 @@ const LeaveBalanceModern = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={2}>
+              <FormControl fullWidth>
+                <InputLabel>Employee Status</InputLabel>
+                <Select
+                  value={employeeStatus}
+                  label="Employee Status"
+                  onChange={(e) => setEmployeeStatus(e.target.value)}
+                  inputProps={{ 'data-testid': 'leave-employee-status-select' }}
+                >
+                  <MenuItem value="all">All</MenuItem>
+                  <MenuItem value="active">Active</MenuItem>
+                  <MenuItem value="inactive">Inactive / Deleted</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={2}>
               <Button
                 fullWidth
                 variant="outlined"
@@ -503,10 +522,29 @@ const LeaveBalanceModern = () => {
               </Button>
             </Grid>
           </Grid>
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             <Typography variant="body2" color="text.secondary">
-              Showing {balances.length} of {totalRecords} leave balances for year {selectedYear}
+              Showing {filteredBalances.length} of {totalRecords} leave balances for year {selectedYear}
             </Typography>
+            {employeeStatus !== 'all' && (
+              <Chip
+                label={employeeStatus === 'active' ? 'Active employees only' : 'Inactive / Deleted employees only'}
+                size="small"
+                onDelete={() => setEmployeeStatus('all')}
+                color={employeeStatus === 'active' ? 'success' : 'default'}
+                variant="outlined"
+                sx={{ height: 28, fontSize: '0.75rem' }}
+              />
+            )}
+            {searchQuery && (
+              <Chip
+                label={`Search: "${searchQuery}"`}
+                size="small"
+                onDelete={() => setSearchQuery('')}
+                variant="outlined"
+                sx={{ height: 28, fontSize: '0.75rem' }}
+              />
+            )}
           </Box>
         </CardContent>
       </Card>
@@ -585,11 +623,30 @@ const LeaveBalanceModern = () => {
                       <TableRow hover sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
                         <TableCell>
                           <Box>
-                            <Typography variant="body2" fontWeight="bold">
-                              {balance.employee?.firstName} {balance.employee?.lastName}
-                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                              <Typography variant="body2" fontWeight="bold">
+                                {balance.employee
+                                  ? `${balance.employee.firstName} ${balance.employee.lastName}`
+                                  : 'Unknown Employee'}
+                              </Typography>
+                              {balance.employee?.deletedAt && (
+                                <Chip
+                                  label="Inactive"
+                                  size="small"
+                                  sx={{
+                                    height: 16,
+                                    fontSize: '0.65rem',
+                                    fontWeight: 600,
+                                    bgcolor: 'grey.200',
+                                    color: 'text.secondary',
+                                    borderRadius: '4px',
+                                    '& .MuiChip-label': { px: 0.75 }
+                                  }}
+                                />
+                              )}
+                            </Box>
                             <Typography variant="caption" color="text.secondary">
-                              {balance.employee?.employeeId}
+                              {balance.employee?.employeeId || '—'}
                             </Typography>
                           </Box>
                         </TableCell>

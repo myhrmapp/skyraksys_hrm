@@ -77,13 +77,19 @@ class TimesheetBusinessService extends BaseBusinessService {
     if (data.totalHours !== undefined && data.totalHoursWorked === undefined) {
       data.totalHoursWorked = data.totalHours;
     }
-    // Compute from daily hours if not provided
+    // Compute/validate totalHoursWorked against daily hours
+    const dayColumns = ['mondayHours', 'tuesdayHours', 'wednesdayHours', 'thursdayHours', 'fridayHours', 'saturdayHours', 'sundayHours'];
+    const dailySum = dayColumns.reduce((sum, col) => sum + parseFloat(data[col] || 0), 0);
+    const computedTotal = Number(dailySum.toFixed(2));
+
     if (!data.totalHoursWorked) {
-      const dayColumns = ['mondayHours', 'tuesdayHours', 'wednesdayHours', 'thursdayHours', 'fridayHours', 'saturdayHours', 'sundayHours'];
-      const total = dayColumns.reduce((sum, col) => sum + parseFloat(data[col] || 0), 0);
-      if (total > 0) {
-        data.totalHoursWorked = Number(total.toFixed(2));
+      if (computedTotal > 0) {
+        data.totalHoursWorked = computedTotal;
       }
+    } else if (computedTotal > 0 && Math.abs(parseFloat(data.totalHoursWorked) - computedTotal) > 0.01) {
+      throw new BadRequestError(
+        `Total hours (${data.totalHoursWorked}) does not match sum of daily hours (${computedTotal})`
+      );
     }
 
     // Create entry
@@ -164,6 +170,25 @@ class TimesheetBusinessService extends BaseBusinessService {
     const hasDayChange = dayColumns.some(col => data[col] !== undefined);
     if (hasDayChange || data.weekStartDate || data.weekEndDate || data.projectId || data.taskId) {
       await this.validateTimeEntry({ ...timeEntry.dataValues, ...data });
+    }
+
+    // Recalculate totalHoursWorked when daily hours are updated
+    if (hasDayChange) {
+      const merged = { ...timeEntry.dataValues, ...data };
+      const dailySum = dayColumns.reduce((sum, col) => sum + parseFloat(merged[col] || 0), 0);
+      data.totalHoursWorked = Number(dailySum.toFixed(2));
+    }
+
+    // Validate totalHoursWorked if explicitly provided with daily hours
+    if (data.totalHoursWorked !== undefined && !hasDayChange) {
+      const merged = { ...timeEntry.dataValues, ...data };
+      const dailySum = dayColumns.reduce((sum, col) => sum + parseFloat(merged[col] || 0), 0);
+      const computedTotal = Number(dailySum.toFixed(2));
+      if (computedTotal > 0 && Math.abs(parseFloat(data.totalHoursWorked) - computedTotal) > 0.01) {
+        throw new BadRequestError(
+          `Total hours (${data.totalHoursWorked}) does not match sum of daily hours (${computedTotal})`
+        );
+      }
     }
 
     await this.timesheetDataService.update(id, data);

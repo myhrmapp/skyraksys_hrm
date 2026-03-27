@@ -494,9 +494,19 @@ export const transformEmployeeDataForAPI = (formData) => {
   }
   }
 
-  // Note: userAccount is handled separately in user creation flow
-  // This endpoint only creates employee records, not user accounts
-  
+  // User account data - backend requires password and role for user creation
+  // during employee creation (EmployeeBusinessService.createEmployee always creates user)
+  if (formData.userAccount?.enableLogin && formData.userAccount?.password) {
+    transformedData.password = formData.userAccount.password;
+    transformedData.role = formData.userAccount.role || 'employee';
+    transformedData.enableLogin = true;
+    transformedData.forcePasswordChange = formData.userAccount.forcePasswordChange ?? true;
+  } else {
+    // Backend still creates user account - provide a default password
+    transformedData.password = formData.userAccount?.password || 'TempPass@123';
+    transformedData.role = formData.userAccount?.role || 'employee';
+  }
+
   return transformedData;
 };
 

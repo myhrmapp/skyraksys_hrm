@@ -117,7 +117,7 @@ const leaveQuerySchema = Joi.object({
   limit: Joi.number()
     .integer()
     .min(1)
-    .max(100)
+    .max(500)
     .default(10),
 
   employeeId: Joi.string()

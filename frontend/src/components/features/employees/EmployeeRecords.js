@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -24,7 +24,11 @@ import {
   useTheme,
   Autocomplete,
   TextField,
-  InputAdornment
+  InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import {
   ArrowBack as BackIcon,
@@ -67,13 +71,34 @@ const getStatusColor = (status) => {
 const LeaveHistoryTab = ({ loading, leaveHistory, showEmployeeName, employees = [] }) => {
   const [leavePage, setLeavePage] = useState(0);
   const [leaveRowsPerPage, setLeaveRowsPerPage] = useState(10);
-  const paginatedLeave = leaveHistory.slice(leavePage * leaveRowsPerPage, leavePage * leaveRowsPerPage + leaveRowsPerPage);
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const filteredLeave = statusFilter === 'all'
+    ? leaveHistory
+    : leaveHistory.filter(l => (l.status || '').toLowerCase() === statusFilter);
+  const paginatedLeave = filteredLeave.slice(leavePage * leaveRowsPerPage, leavePage * leaveRowsPerPage + leaveRowsPerPage);
 
   return (
   <Box>
-    <Typography variant="h6" gutterBottom>
-      Leave Request History
-    </Typography>
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+      <Typography variant="h6">
+        Leave Request History
+      </Typography>
+      <FormControl size="small" sx={{ minWidth: 160 }}>
+        <InputLabel>Status</InputLabel>
+        <Select
+          value={statusFilter}
+          label="Status"
+          onChange={(e) => { setStatusFilter(e.target.value); setLeavePage(0); }}
+        >
+          <MenuItem value="all">All Statuses</MenuItem>
+          <MenuItem value="pending">Pending</MenuItem>
+          <MenuItem value="submitted">Submitted</MenuItem>
+          <MenuItem value="approved">Approved</MenuItem>
+          <MenuItem value="rejected">Rejected</MenuItem>
+        </Select>
+      </FormControl>
+    </Box>
     
     <Card variant="outlined">
       <TableContainer>
@@ -100,7 +125,7 @@ const LeaveHistoryTab = ({ loading, leaveHistory, showEmployeeName, employees = 
                   ))}
                 </TableRow>
               ))
-            ) : leaveHistory.length === 0 ? (
+            ) : filteredLeave.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={showEmployeeName ? 7 : 6} align="center" sx={{ py: 3 }}>
                   <Typography color="text.secondary">No leave history found</Typography>
@@ -181,7 +206,7 @@ const LeaveHistoryTab = ({ loading, leaveHistory, showEmployeeName, employees = 
       </TableContainer>
       <TablePagination
         component="div"
-        count={leaveHistory.length}
+        count={filteredLeave.length}
         page={leavePage}
         onPageChange={(e, newPage) => setLeavePage(newPage)}
         rowsPerPage={leaveRowsPerPage}
@@ -196,13 +221,34 @@ const LeaveHistoryTab = ({ loading, leaveHistory, showEmployeeName, employees = 
 const TimesheetHistoryTab = ({ loading, timesheetHistory, showEmployeeName, employees = [] }) => {
   const [tsPage, setTsPage] = useState(0);
   const [tsRowsPerPage, setTsRowsPerPage] = useState(10);
-  const paginatedTimesheets = timesheetHistory.slice(tsPage * tsRowsPerPage, tsPage * tsRowsPerPage + tsRowsPerPage);
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const filteredTimesheets = statusFilter === 'all'
+    ? timesheetHistory
+    : timesheetHistory.filter(t => (t.status || '').toLowerCase() === statusFilter);
+  const paginatedTimesheets = filteredTimesheets.slice(tsPage * tsRowsPerPage, tsPage * tsRowsPerPage + tsRowsPerPage);
 
   return (
   <Box>
-    <Typography variant="h6" gutterBottom>
-      Timesheet Submission History
-    </Typography>
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+      <Typography variant="h6">
+        Timesheet Submission History
+      </Typography>
+      <FormControl size="small" sx={{ minWidth: 160 }}>
+        <InputLabel>Status</InputLabel>
+        <Select
+          value={statusFilter}
+          label="Status"
+          onChange={(e) => { setStatusFilter(e.target.value); setTsPage(0); }}
+        >
+          <MenuItem value="all">All Statuses</MenuItem>
+          <MenuItem value="draft">Draft</MenuItem>
+          <MenuItem value="submitted">Submitted</MenuItem>
+          <MenuItem value="approved">Approved</MenuItem>
+          <MenuItem value="rejected">Rejected</MenuItem>
+        </Select>
+      </FormControl>
+    </Box>
     
     <Card variant="outlined">
       <TableContainer>
@@ -229,7 +275,7 @@ const TimesheetHistoryTab = ({ loading, timesheetHistory, showEmployeeName, empl
                   ))}
                 </TableRow>
               ))
-            ) : timesheetHistory.length === 0 ? (
+            ) : filteredTimesheets.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={showEmployeeName ? 7 : 6} align="center" sx={{ py: 3 }}>
                   <Typography color="text.secondary">No timesheet history found</Typography>
@@ -301,7 +347,7 @@ const TimesheetHistoryTab = ({ loading, timesheetHistory, showEmployeeName, empl
       </TableContainer>
       <TablePagination
         component="div"
-        count={timesheetHistory.length}
+        count={filteredTimesheets.length}
         page={tsPage}
         onPageChange={(e, newPage) => setTsPage(newPage)}
         rowsPerPage={tsRowsPerPage}
@@ -402,39 +448,48 @@ const SummaryCard = ({ icon: Icon, count, label, color }) => (
 
 // --- Main Component ---
 
+const ALL_EMPLOYEES_OPTION = { id: 'ALL', firstName: 'All', lastName: 'Employees', employeeId: 'ALL', department: 'View All Records' };
+
 const EmployeeRecords = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState([ALL_EMPLOYEES_OPTION]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const searchTimerRef = React.useRef(null);
   
   // Check if user has permission to view other employees' records
   const canViewOthers = ['admin', 'hr', 'manager'].includes(user?.role);
 
-  // Fetch employees for search dropdown
+  // Server-side search: query backend as user types
+  const handleSearchInput = useCallback((event, inputValue) => {
+    if (!canViewOthers) return;
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(async () => {
+      try {
+        setSearchLoading(true);
+        const params = { limit: 20, ...(inputValue ? { search: inputValue } : {}) };
+        const response = await employeeService.getAll(params);
+        if (response.data) {
+          setEmployees([ALL_EMPLOYEES_OPTION, ...response.data]);
+        }
+      } catch (error) {
+        console.error('Error fetching employees:', error);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+  }, [canViewOthers]);
+
+  // Load initial employee list on mount; default admin/HR/manager to "All Employees"
   useEffect(() => {
     if (canViewOthers) {
-      const fetchEmployees = async () => {
-        try {
-          setSearchLoading(true);
-          const response = await employeeService.getAll();
-          if (response.data) {
-            setEmployees([
-              { id: 'ALL', firstName: 'All', lastName: 'Employees', employeeId: 'ALL', department: 'View All Records' },
-              ...response.data
-            ]);
-          }
-        } catch (error) {
-          console.error('Error fetching employees:', error);
-        } finally {
-          setSearchLoading(false);
-        }
-      };
-      fetchEmployees();
+      handleSearchInput(null, '');
+      setSelectedEmployee(prev => prev === null ? ALL_EMPLOYEES_OPTION : prev);
     }
-  }, [canViewOthers]);
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
+  }, [canViewOthers, handleSearchInput]);
 
   const { 
     loading, 
@@ -459,7 +514,11 @@ const EmployeeRecords = () => {
             </IconButton>
             <Box sx={{ flex: 1 }}>
               <Typography variant="h4" fontWeight="bold" gutterBottom>
-                {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}'s Records` : 'My Records'}
+                {selectedEmployee?.id === 'ALL'
+                  ? 'All Employee Records'
+                  : selectedEmployee
+                    ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}'s Records`
+                    : 'My Records'}
               </Typography>
               <Typography variant="subtitle1" color="text.secondary">
                 View historical attendance, leave, and timesheet data
@@ -472,9 +531,11 @@ const EmployeeRecords = () => {
                 <Autocomplete
                   options={employees}
                   loading={searchLoading}
+                  filterOptions={(x) => x}
                   getOptionLabel={(option) => `${option.firstName} ${option.lastName} (${option.employeeId})`}
                   value={selectedEmployee}
                   onChange={(event, newValue) => setSelectedEmployee(newValue)}
+                  onInputChange={handleSearchInput}
                   data-testid="employee-records-search"
                   renderInput={(params) => (
                     <TextField

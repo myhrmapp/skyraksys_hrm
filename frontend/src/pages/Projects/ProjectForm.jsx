@@ -47,8 +47,12 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
 
   const loadEmployees = async () => {
     try {
-      const response = await EmployeeService.getAll();
-      setEmployees(response.data.data || []);
+      const response = await EmployeeService.getAll({ limit: 500 });
+      // normalizeResponse returns { data: [...], pagination: {} } for paginated, or plain array
+      const list = Array.isArray(response) ? response
+        : Array.isArray(response?.data) ? response.data
+        : [];
+      setEmployees(list);
     } catch (error) {
       console.error('Error loading employees:', error);
     }

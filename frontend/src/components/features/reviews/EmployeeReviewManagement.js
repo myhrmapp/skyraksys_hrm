@@ -301,7 +301,7 @@ const EmployeeReviewManagement = () => {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => { setFormData(initialFormState); setCreateDialogOpen(true); }}
-              sx={{ bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }}
+              sx={{ bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.35)' } }}
             >
               New Review
             </Button>

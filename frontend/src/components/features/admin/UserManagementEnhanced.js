@@ -594,7 +594,7 @@ const UserManagementEnhanced = () => {
                   color: 'white',
                   border: '1px solid rgba(255,255,255,0.3)',
                   '&:hover': {
-                    bgcolor: 'rgba(255,255,255,0.1)',
+                    bgcolor: 'rgba(255,255,255,0.15)',
                     border: '1px solid rgba(255,255,255,0.5)'
                   }
                 }}

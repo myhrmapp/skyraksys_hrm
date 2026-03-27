@@ -204,7 +204,7 @@ const timesheetQuerySchema = Joi.object({
   limit: Joi.number()
     .integer()
     .min(1)
-    .max(200)
+    .max(500)
     .default(10),
 
   employeeId: Joi.string()

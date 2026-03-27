@@ -56,8 +56,12 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
 
   const loadProjects = async () => {
     try {
-      const response = await ProjectService.getActiveProjects();
-      setProjects(response.data.data || []);
+      // Fetch all projects regardless of status so the user can assign tasks to any project
+      const response = await ProjectService.getAll();
+      const list = Array.isArray(response?.data?.data) ? response.data.data
+        : Array.isArray(response?.data) ? response.data
+        : [];
+      setProjects(list);
     } catch (error) {
       console.error('Error loading projects:', error);
     }
@@ -65,8 +69,12 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
 
   const loadEmployees = async () => {
     try {
-      const response = await EmployeeService.getAll();
-      setEmployees(response.data.data || []);
+      const response = await EmployeeService.getAll({ limit: 500 });
+      // normalizeResponse returns { data: [...], pagination: {} } for paginated, or plain array
+      const list = Array.isArray(response) ? response
+        : Array.isArray(response?.data) ? response.data
+        : [];
+      setEmployees(list);
     } catch (error) {
       console.error('Error loading employees:', error);
     }

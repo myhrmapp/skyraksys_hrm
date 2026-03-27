@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -36,9 +36,11 @@ import SalaryStructureTab from './tabs/SalaryStructureTab';
 import ContactEmergencyTab from './tabs/ContactEmergencyTab';
 import StatutoryBankingTab from './tabs/StatutoryBankingTab';
 import UserAccountTab from './tabs/UserAccountTab';
+import ValidationSummaryDialog from '../../shared/ValidationSummaryDialog';
 
-const TabBasedEmployeeForm = () => {
+const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
   const navigate = useNavigate();
+  const [showValidationSummary, setShowValidationSummary] = useState(false);
   
   const {
     // State
@@ -75,7 +77,6 @@ const TabBasedEmployeeForm = () => {
     handleBackToEmployees,
     handlePhotoSelect,
     handlePhotoRemove,
-    handleSaveAsDraft,
     handleCancelNavigation,
     handleConfirmNavigation,
     
@@ -83,7 +84,7 @@ const TabBasedEmployeeForm = () => {
     draftRestoreDialog,
     handleRestoreDraft,
     handleDismissDraft
-  } = useEmployeeForm();
+  } = useEmployeeForm({ mode });
 
   // Handle login redirect
   const handleLoginRedirect = () => {
@@ -193,12 +194,14 @@ const TabBasedEmployeeForm = () => {
           autoSaving={autoSaving}
           currentUser={currentUser}
           onBack={handleBackToEmployees}
+          employeeName={isEditMode && formData.firstName ? `${formData.firstName} ${formData.lastName}`.trim() : null}
         />
 
         {/* Progress Messages */}
         {submitError && (
           <Alert 
             severity="error" 
+            data-testid="employee-form-error-alert"
             sx={{ 
               mb: 3,
               borderRadius: 2,
@@ -214,6 +217,7 @@ const TabBasedEmployeeForm = () => {
         {submitSuccess && (
           <Alert 
             severity="success" 
+            data-testid="employee-form-success-alert"
             sx={{ 
               mb: 3,
               borderRadius: 2
@@ -237,6 +241,7 @@ const TabBasedEmployeeForm = () => {
             activeTab={activeTab}
             handleTabChange={handleTabChange}
             getTabValidationStatus={getTabValidationStatus}
+            hideSensitiveTabs={mode === 'self'}
           />
 
           {/* Tab Panels */}
@@ -291,6 +296,7 @@ const TabBasedEmployeeForm = () => {
             />
           </TabPanel>
           
+          {mode !== 'self' && (
           <TabPanel value={activeTab} index={3}>
             {/* Combined Statutory, Banking & Access Tab */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -313,13 +319,17 @@ const TabBasedEmployeeForm = () => {
               />
             </Box>
           </TabPanel>
+          )}
 
           <EmployeeFormActions
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             onBack={handleBackToEmployees}
-            onSaveDraft={handleSaveAsDraft}
-            onSubmit={handleSubmit}
+          onSubmit={() => {
+              const allTabsValid = Object.values(getTabValidationStatus).every(t => !t.hasErrors);
+              if (!allTabsValid) { setShowValidationSummary(true); return; }
+              handleSubmit();
+            }}
             isLoading={isLoading}
             isEditMode={isEditMode}
             isCurrentTabValid={isCurrentTabValid}
@@ -429,6 +439,19 @@ const TabBasedEmployeeForm = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Cross-tab Validation Summary Dialog */}
+      <ValidationSummaryDialog
+        open={showValidationSummary}
+        onClose={() => setShowValidationSummary(false)}
+        onGoToTab={(tabIndex) => setActiveTab(tabIndex)}
+        tabErrors={[
+          { tabIndex: 0, tabLabel: 'Personal Info', fields: getTabValidationStatus[0]?.errorFields || [] },
+          { tabIndex: 1, tabLabel: 'Employment & Compensation', fields: getTabValidationStatus[1]?.errorFields || [] },
+          { tabIndex: 2, tabLabel: 'Contact & Emergency', fields: getTabValidationStatus[2]?.errorFields || [] },
+          ...(mode !== 'self' ? [{ tabIndex: 3, tabLabel: 'Statutory, Banking & Access', fields: getTabValidationStatus[3]?.errorFields || [] }] : []),
+        ]}
+      />
     </Box>
   );
 };

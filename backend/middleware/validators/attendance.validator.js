@@ -34,6 +34,14 @@ const attendanceSchema = {
     limit: Joi.number().integer().positive().max(100).default(10)
   }),
 
+  update: Joi.object({
+    date: Joi.date().iso().optional(),
+    status: Joi.string().valid('present', 'absent', 'late', 'half_day', 'on_leave', 'holiday', 'weekend').optional(),
+    checkIn: Joi.date().iso().optional().allow(null),
+    checkOut: Joi.date().iso().optional().allow(null),
+    notes: Joi.string().max(500).optional().allow('', null)
+  }),
+
   monthlyReport: Joi.object({
     year: Joi.number().integer().min(2000).max(2100).required(),
     month: Joi.number().integer().min(1).max(12).required()

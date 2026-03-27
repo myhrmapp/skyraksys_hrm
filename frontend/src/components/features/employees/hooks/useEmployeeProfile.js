@@ -12,6 +12,15 @@ export const useEmployeeProfile = (mode = 'admin') => {
   const { user } = useAuth();
   const { showNotification } = useNotifications();
 
+  // Show success toast when returning from the tab-driven edit form
+  useEffect(() => {
+    if (location.state?.snackbar) {
+      showNotification(location.state.snackbar, 'success');
+      // Clear the state so it doesn't re-fire on re-render
+      window.history.replaceState({}, '');
+    }
+  }, [location.state?.snackbar, showNotification]);
+
   // 🚀 React Query hooks for data fetching and mutations
   const { data: employeeData, isLoading: isLoadingEmployee } = useEmployee(
     mode === 'self' ? null : id,
@@ -120,12 +129,12 @@ export const useEmployeeProfile = (mode = 'admin') => {
     }
   }, [employeeData, mode, employee?.id]);
 
-  // Check for edit mode in location state
+  // When navigated here with editMode=true (e.g. from employee list), redirect to full tab form
   useEffect(() => {
-    if (location.state?.editMode && (isAdmin || isHR || user?.role === 'manager')) {
-      setEditing(true);
+    if (location.state?.editMode && id && (isAdmin || isHR || user?.role === 'manager')) {
+      navigate(`/employees/${id}/edit`, { replace: true });
     }
-  }, [location.state?.editMode, isAdmin, isHR, user?.role]);
+  }, [location.state?.editMode, id, isAdmin, isHR, user?.role, navigate]);
 
   // 🚀 Handle save with React Query mutation
   const handleSave = async () => {
@@ -219,26 +228,29 @@ export const useEmployeeProfile = (mode = 'admin') => {
   };
 
   // Handle nested salary field changes
+  // Fields arrive as 'salary.basicSalary', 'salary.allowances.hra', etc.
   const handleSalaryChange = (field, value) => {
     setEmployee(prev => {
       const salary = { ...(prev.salary || {}) };
-      
-      // Handle nested fields like 'allowances.hra', 'deductions.pf', etc.
-      if (field.includes('.')) {
-        const [parent, child] = field.split('.');
+
+      // Strip leading 'salary.' prefix — we're already inside the salary object
+      const path = field.startsWith('salary.') ? field.slice('salary.'.length) : field;
+
+      if (path.includes('.')) {
+        // e.g. 'allowances.hra' → parent='allowances', child='hra'
+        const dotIdx = path.indexOf('.');
+        const parent = path.slice(0, dotIdx);
+        const child = path.slice(dotIdx + 1);
         salary[parent] = {
           ...(salary[parent] || {}),
-          [child]: value === '' ? 0 : (parseFloat(value) || 0)
+          [child]: value === '' ? 0 : (parseFloat(value) || 0),
         };
       } else {
-        // Handle top-level salary fields
-        salary[field] = value === '' ? null : (parseFloat(value) || value);
+        // e.g. 'basicSalary', 'currency'
+        salary[path] = value === '' ? null : (parseFloat(value) || value);
       }
-      
-      return {
-        ...prev,
-        salary
-      };
+
+      return { ...prev, salary };
     });
   };
 

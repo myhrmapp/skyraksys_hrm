@@ -392,9 +392,9 @@ const getStatistics = async (req, res, next) => {
     // Calculate statistics (implement as needed)
     const stats = {
       totalRequests: await leaveDataService.count(),
-      pendingRequests: await leaveDataService.count({ where: { status: 'Pending' } }),
-      approvedRequests: await leaveDataService.count({ where: { status: 'Approved' } }),
-      rejectedRequests: await leaveDataService.count({ where: { status: 'Rejected' } })
+      pendingRequests: await leaveDataService.count({ status: 'Pending' }),
+      approvedRequests: await leaveDataService.count({ status: 'Approved' }),
+      rejectedRequests: await leaveDataService.count({ status: 'Rejected' })
     };
     
     res.json(ApiResponse.success(stats));

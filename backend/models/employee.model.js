@@ -175,6 +175,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       defaultValue: 'Indian'
     },
+    country: {
+      type: DataTypes.STRING,
+      defaultValue: 'India'
+    },
     // Work Details
     workLocation: {
       type: DataTypes.STRING
@@ -241,13 +245,29 @@ module.exports = (sequelize, DataTypes) => {
               basicSalary: parseFloat(ss.basicSalary) || 0,
               allowances: {
                 hra: parseFloat(ss.hra) || 0,
+                transport: 0,
+                medical: 0,
+                food: 0,
+                communication: 0,
+                special: 0,
                 other: parseFloat(ss.allowances) || 0
               },
               deductions: {
                 pf: parseFloat(ss.pfContribution) || 0,
-                tds: parseFloat(ss.tds) || 0,
+                incomeTax: parseFloat(ss.tds) || 0,
                 professionalTax: parseFloat(ss.professionalTax) || 0,
+                esi: parseFloat(ss.esi) || 0,
                 other: parseFloat(ss.otherDeductions) || 0
+              },
+              benefits: {
+                bonus: 0,
+                incentive: 0,
+                overtime: 0
+              },
+              taxInformation: {
+                taxRegime: 'old',
+                ctc: 0,
+                takeHome: 0
               },
               currency: ss.currency || 'INR',
               effectiveFrom: ss.effectiveFrom,

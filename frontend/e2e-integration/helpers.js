@@ -198,7 +198,9 @@ async function waitForPageLoad(page, timeout = 10000) {
   // Wait for any loading skeletons/spinners to disappear
   const spinner = page.locator('[role="progressbar"], .MuiSkeleton-root');
   if (await spinner.count() > 0) {
-    await spinner.first().waitFor({ state: 'hidden', timeout });
+    await spinner.first().waitFor({ state: 'hidden', timeout }).catch(() => {
+      // Spinner may be a persistent global indicator — continue anyway
+    });
   }
 }
 

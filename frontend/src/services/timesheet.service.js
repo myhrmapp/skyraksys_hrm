@@ -174,6 +174,12 @@ class TimesheetService {
     return response.data;
   }
 
+  // Get timesheet statistics summary
+  async getStats(params = {}) {
+    const response = await http.get('/timesheets/stats/summary', { params });
+    return response.data;
+  }
+
   // Approve a timesheet
   async approve(id, data) {
     const response = await http.post(`/timesheets/${id}/approve`, data);

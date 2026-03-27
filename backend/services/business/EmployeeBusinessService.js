@@ -620,6 +620,7 @@ class EmployeeBusinessService extends BaseBusinessService {
       result.pfContribution = Number(salaryInput.deductions.pf || salaryInput.deductions.pfContribution) || 0;
       result.tds = Number(salaryInput.deductions.incomeTax || salaryInput.deductions.tds) || 0;
       result.professionalTax = Number(salaryInput.deductions.professionalTax) || 0;
+      result.esi = Number(salaryInput.deductions.esi) || 0;
       result.otherDeductions = Number(salaryInput.deductions.other || salaryInput.deductions.otherDeductions) || 0;
     }
 
@@ -628,6 +629,7 @@ class EmployeeBusinessService extends BaseBusinessService {
     if (salaryInput.pfContribution !== undefined) result.pfContribution = Number(salaryInput.pfContribution) || 0;
     if (salaryInput.tds !== undefined) result.tds = Number(salaryInput.tds) || 0;
     if (salaryInput.professionalTax !== undefined) result.professionalTax = Number(salaryInput.professionalTax) || 0;
+    if (salaryInput.esi !== undefined) result.esi = Number(salaryInput.esi) || 0;
     if (salaryInput.otherDeductions !== undefined) result.otherDeductions = Number(salaryInput.otherDeductions) || 0;
     if (salaryInput.currency !== undefined) result.currency = salaryInput.currency;
 

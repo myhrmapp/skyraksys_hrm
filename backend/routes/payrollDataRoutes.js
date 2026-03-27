@@ -67,7 +67,7 @@ router.get('/summary',
  */
 router.get('/employee/:employeeId',
   // No authorize middleware - controller handles RBAC for employee own-data access
-  validateParams(validators.uuidParamSchema),
+  validateParams(validators.employeeIdParamSchema),
   payrollController.getByEmployee
 );
 

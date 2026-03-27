@@ -22,9 +22,11 @@ import {
   VpnKey as VpnKeyIcon,
   Phone as PhoneIcon,
   Place as PlaceIcon,
-  CalendarToday as CalendarIcon
+  CalendarToday as CalendarIcon,
+  People as PeopleIcon
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
+import EmptyState from '../../../shared/EmptyState';
 
 const EmployeeTableView = ({ 
   employees, 
@@ -48,7 +50,17 @@ const EmployeeTableView = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {employees.map((emp) => (
+          {employees.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6} sx={{ py: 0, border: 0 }}>
+                <EmptyState
+                  icon={<PeopleIcon sx={{ fontSize: 48 }} />}
+                  title="No employees found"
+                  description="Try different filters or search terms."
+                />
+              </TableCell>
+            </TableRow>
+          ) : employees.map((emp) => (
             <TableRow 
               key={emp.id} 
               hover 

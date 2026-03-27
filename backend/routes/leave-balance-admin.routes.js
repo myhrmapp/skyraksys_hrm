@@ -8,6 +8,7 @@ const logger = require('../utils/logger');
 const LeaveBalance = db.LeaveBalance;
 const LeaveType = db.LeaveType;
 const Employee = db.Employee;
+const { Op } = require('sequelize');
 const router = express.Router();
 
 // Middleware to ensure all routes are authenticated and admin/HR only
@@ -23,6 +24,7 @@ router.get('/', async (req, res, next) => {
             employeeId, 
             leaveTypeId, 
             year = new Date().getFullYear(),
+            employeeStatus = 'all',   // 'all' | 'active' | 'inactive'
             sortBy = 'createdAt', 
             sortOrder = 'DESC' 
         } = req.query;
@@ -33,14 +35,25 @@ router.get('/', async (req, res, next) => {
         if (employeeId) where.employeeId = employeeId;
         if (leaveTypeId) where.leaveTypeId = leaveTypeId;
 
+        // Build employee include filter based on status
+        const employeeInclude = {
+            model: Employee,
+            as: 'employee',
+            attributes: ['id', 'employeeId', 'firstName', 'lastName', 'email', 'deletedAt'],
+            paranoid: false
+        };
+        if (employeeStatus === 'active') {
+            employeeInclude.where = { deletedAt: null };
+            employeeInclude.required = true;
+        } else if (employeeStatus === 'inactive') {
+            employeeInclude.where = { deletedAt: { [Op.ne]: null } };
+            employeeInclude.required = true;
+        }
+
         const { count, rows: balances } = await LeaveBalance.findAndCountAll({
             where,
             include: [
-                {
-                    model: Employee,
-                    as: 'employee',
-                    attributes: ['id', 'employeeId', 'firstName', 'lastName', 'email']
-                },
+                employeeInclude,
                 {
                     model: LeaveType,
                     as: 'leaveType',
