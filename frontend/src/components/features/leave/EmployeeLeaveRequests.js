@@ -16,9 +16,6 @@ import {
   TableHead,
   TableRow,
   Chip,
-  Stack,
-  Divider,
-  useTheme,
   Fade,
   Alert,
   LinearProgress
@@ -34,7 +31,6 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useLeaveRequests, useLeaveBalances } from '../../../hooks/queries/useLeaveQueries';
 
 const EmployeeLeaveRequests = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
 

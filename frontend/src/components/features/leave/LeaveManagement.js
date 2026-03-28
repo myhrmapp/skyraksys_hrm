@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Container,
@@ -34,7 +34,6 @@ import {
   Badge,
   Avatar,
   Stack,
-  Divider,
   InputAdornment,
   useTheme,
   alpha,
@@ -43,11 +42,8 @@ import {
 } from '@mui/material';
 import {
   CalendarToday as CalendarIcon,
-  CheckCircle as ApproveIcon,
-  Cancel as RejectIcon,
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
-  Pending as PendingIcon,
   Add as AddIcon,
   FilterList as FilterIcon,
   Download as DownloadIcon,
@@ -64,7 +60,7 @@ const ModernLeaveManagement = () => {
   const { showSuccess, showError } = useNotification(); // ✅ Already destructured
   const theme = useTheme();
   const navigate = useNavigate();
-  const { user, isEmployee } = useAuth();
+  const { isEmployee } = useAuth();
   
   // Hooks must be called first, before any conditional logic
   const [activeTab, setActiveTab] = useState(0);
@@ -72,8 +68,8 @@ const ModernLeaveManagement = () => {
   const tabs = ['All', 'Pending', 'Approved', 'Rejected'];
   
   // 🚀 React Query hooks for data fetching
-  const { data: leaveRequestsData, isLoading: isLoadingRequests } = useLeaveRequests({ limit: 500 });
-  const { data: leaveBalancesData, isLoading: isLoadingBalances } = useQuery({
+  const { data: leaveRequestsData } = useLeaveRequests({ limit: 500 });
+  const { data: leaveBalancesData } = useQuery({
     queryKey: ['leave-balances-all'],
     queryFn: () => leaveService.getAllBalances(),
     staleTime: 2 * 60 * 1000,
@@ -96,7 +92,7 @@ const ModernLeaveManagement = () => {
   const leaveBalances = toArray(leaveBalancesData);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [approvalDialog, setApprovalDialog] = useState(false);
-  const [approvalAction, setApprovalAction] = useState('');
+  const [approvalAction] = useState('');
   const [approvalComments, setApprovalComments] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [page, setPage] = useState(0);
@@ -104,7 +100,7 @@ const ModernLeaveManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [, setFilterOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null); // { id, action: 'Approved'|'Rejected' }
   const [quickRejectComments, setQuickRejectComments] = useState('');
 
@@ -179,8 +175,7 @@ const ModernLeaveManagement = () => {
   
   // Redirect employees to their personal leave page
   if (isEmployee) {
-    navigate('/leave-requests');
-    return null;
+    return <Navigate to="/leave-requests" replace />;
   }
 
   // Derive leave types from API (with color mapping fallback)

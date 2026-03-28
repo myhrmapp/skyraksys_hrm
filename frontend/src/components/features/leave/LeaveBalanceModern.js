@@ -92,13 +92,12 @@ const LeaveBalanceModern = () => {
   // Load initial data on mount
   useEffect(() => {
     loadInitialData();
-    loadData();
   }, []);
 
   // Load data when server-side filters change (including employeeStatus)
   useEffect(() => {
     loadData(1);
-  }, [selectedEmployee, selectedLeaveType, selectedYear, employeeStatus]);
+  }, [selectedEmployee, selectedLeaveType, selectedYear, employeeStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadInitialData = async () => {
     try {

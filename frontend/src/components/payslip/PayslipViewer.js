@@ -11,7 +11,6 @@ import {
   Typography,
   CircularProgress,
   Alert,
-  Divider,
   IconButton,
   Tooltip,
   Paper
@@ -50,7 +49,7 @@ const PayslipViewer = ({
     if (employee && selectedMonth && mode === 'view') {
       loadPayslipData();
     }
-  }, [employee, selectedMonth, mode]);
+  }, [employee, selectedMonth, mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadPayslipData = async () => {
     setLoading(true);

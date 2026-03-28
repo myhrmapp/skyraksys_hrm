@@ -340,8 +340,8 @@ describe('AuditService', () => {
 
   describe('getUserActivity()', () => {
     test('should retrieve user activity within date range', async () => {
-      const startDate = new Date('2026-02-01');
-      const endDate = new Date('2026-02-28');
+      const startDate = new Date(Date.now() - 24 * 60 * 60 * 1000); // yesterday
+      const endDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // tomorrow
 
       // Create log within range
       await auditService.log({
@@ -381,8 +381,8 @@ describe('AuditService', () => {
         success: true
       });
 
-      const startDate = new Date('2026-02-01');
-      const endDate = new Date('2026-02-28');
+      const startDate = new Date(Date.now() - 24 * 60 * 60 * 1000); // yesterday
+      const endDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // tomorrow
 
       const failed = await auditService.getFailedOperations(startDate, endDate);
 

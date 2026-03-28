@@ -36,20 +36,64 @@ test.describe.serial('Timesheet — Flow 1: CRUD Lifecycle', () => {
   });
 
   test('1b — Employee can create a draft timesheet', async ({ page }) => {
-    // First get a project to log time against
+    // Get current employee's ID (required by validation middleware)
+    const meRes = await page.request.get(`${API_URL}/auth/me`);
+    const meBody = await meRes.json();
+    const employeeId = meBody.data?.employee?.id;
+    expect(employeeId, 'Employee record not found for current user').toBeTruthy();
+
+    // Get projects to find one with tasks accessible to this employee
     const projRes = await page.request.get(`${API_URL}/projects`);
     const projBody = await projRes.json();
-    const projects = projBody.data || projBody;
-    const project = Array.isArray(projects) ? projects[0] : null;
+    const projects = Array.isArray(projBody.data) ? projBody.data : (projBody.data?.rows || [projBody.data]);
 
-    const weekStart = currentMonday();
+    // Find a project that has tasks this employee can see
+    let project = null;
+    let task = null;
+    for (const p of projects) {
+      if (!p || !p.id) continue;
+      if (p.tasks && p.tasks.length > 0) {
+        project = p;
+        task = p.tasks[0];
+        break;
+      }
+      const taskRes = await page.request.get(`${API_URL}/tasks?projectId=${p.id}`);
+      if (taskRes.ok()) {
+        const taskBody = await taskRes.json();
+        const tasks = Array.isArray(taskBody.data) ? taskBody.data : (taskBody.data?.data || []);
+        if (tasks.length > 0) {
+          project = p;
+          task = tasks[0];
+          break;
+        }
+      }
+    }
+
+    expect(project, 'No project with tasks found for employee').toBeTruthy();
+    expect(task, 'No task found for employee').toBeTruthy();
+
+    // Use UTC date arithmetic to avoid timezone issues
+    const weekStart = currentMonday(); // YYYY-MM-DD string (Monday)
+    const [y, m, d] = weekStart.split('-').map(Number);
+    const weekEndDate = new Date(Date.UTC(y, m - 1, d + 6));
+    const weekEnd = weekEndDate.toISOString().split('T')[0];
+
     const payload = {
+      employeeId,
       weekStartDate: weekStart,
-      status: 'draft',
-      entries: project ? [
-        { projectId: project.id, taskId: null, monday: 8, tuesday: 8, wednesday: 8, thursday: 8, friday: 8, saturday: 0, sunday: 0, notes: 'E2E test entry' },
-      ] : [],
-      totalHours: project ? 40 : 0,
+      weekEndDate: weekEnd,
+      projectId: project.id,
+      taskId: task.id,
+      mondayHours: 8,
+      tuesdayHours: 8,
+      wednesdayHours: 8,
+      thursdayHours: 8,
+      fridayHours: 8,
+      saturdayHours: 0,
+      sundayHours: 0,
+      totalHours: 40,
+      status: 'Draft',
+      notes: 'E2E test entry',
     };
 
     const res = await page.request.post(`${API_URL}/timesheets`, {
@@ -61,11 +105,12 @@ test.describe.serial('Timesheet — Flow 1: CRUD Lifecycle', () => {
     // Might already have a timesheet for this week — accept conflict too
     if (res.status() === 409 || res.status() === 400) {
       // Already exists — fetch it instead
-      const listRes = await page.request.get(`${API_URL}/timesheets/week/${weekStart}`);
+      const listRes = await page.request.get(`${API_URL}/timesheets/me`);
       if (listRes.ok()) {
         const listBody = await listRes.json();
-        const ts = listBody.data;
-        if (ts && ts.id) createdTimesheetId = ts.id;
+        const entries = Array.isArray(listBody.data) ? listBody.data : (listBody.data?.data || []);
+        const ts = entries.find(e => e && e.id);
+        if (ts) createdTimesheetId = ts.id;
       }
     } else {
       expect(res.ok(), `Create failed ${res.status()}: ${JSON.stringify(body)}`).toBeTruthy();

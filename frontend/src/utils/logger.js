@@ -1,5 +1,6 @@
 // Development logging utility
 // Centralized console logging that can be toggled for production
+/* eslint-disable no-console */
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 

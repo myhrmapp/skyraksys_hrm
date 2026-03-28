@@ -40,8 +40,10 @@ const PINCODE_REGEX = /^[0-9]{6}$/;
  */
 export const validateEmployeeForm = (formData, options = {}) => {
   const errors = {};
-  const { mode = 'create', originalData = {} } = options;
-  const isEditMode = mode === 'edit' || formData._isEditMode;
+  // eslint-disable-next-line no-unused-vars
+  const { mode = 'create', originalData: _originalData = {} } = options;
+  // eslint-disable-next-line no-unused-vars
+  const _isEditMode = mode === 'edit' || formData._isEditMode;
   
   // ========== REQUIRED FIELDS ==========
   
@@ -502,8 +504,12 @@ export const transformEmployeeDataForAPI = (formData) => {
     transformedData.enableLogin = true;
     transformedData.forcePasswordChange = formData.userAccount.forcePasswordChange ?? true;
   } else {
-    // Backend still creates user account - provide a default password
-    transformedData.password = formData.userAccount?.password || 'TempPass@123';
+    // Backend still creates user account - generate a random temporary password
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%^&*';
+    const randomValues = new Uint32Array(16);
+    crypto.getRandomValues(randomValues);
+    const tempPassword = Array.from(randomValues, v => chars[v % chars.length]).join('');
+    transformedData.password = formData.userAccount?.password || tempPassword;
     transformedData.role = formData.userAccount?.role || 'employee';
   }
 

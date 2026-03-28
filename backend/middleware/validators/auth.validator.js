@@ -21,9 +21,7 @@ const loginSchema = Joi.object({
 
   password: Joi.string()
     .required()
-    .min(6)
     .messages({
-      'string.min': 'Password must be at least 6 characters',
       'any.required': 'Password is required'
     })
 });
@@ -312,7 +310,7 @@ const adminLockSchema = Joi.object({
  */
 const refreshTokenSchema = Joi.object({
   refreshToken: Joi.string()
-    .required()
+    .optional()
     .messages({
       'any.required': 'Refresh token is required'
     })

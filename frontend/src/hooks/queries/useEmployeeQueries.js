@@ -44,7 +44,6 @@ export const useEmployee = (id, options = {}) => {
  */
 export const useCreateEmployee = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
 
   return useMutation({
     mutationFn: ({ data, photo }) => {
@@ -70,7 +69,6 @@ export const useCreateEmployee = () => {
  */
 export const useUpdateEmployee = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
 
   return useMutation({
     mutationFn: ({ id, data }) => employeeService.update(id, data),

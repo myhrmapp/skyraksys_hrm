@@ -279,9 +279,9 @@ describe('💰 PAYSLIP GENERATION E2E TESTS', () => {
         .set('Authorization', `Bearer ${testData.tokens.employee}`);
       
       expect(res.status).toBe(200);
-      expect(res.body.data).toBeInstanceOf(Array);
+      expect(res.body.data.payslips).toBeInstanceOf(Array);
       
-      const allOwn = res.body.data.every(p => p.employeeId === testData.employees.employee.id);
+      const allOwn = res.body.data.payslips.every(p => p.employeeId === testData.employees.employee.id);
       expect(allOwn).toBe(true);
       
       console.log('✅ Employee sees only own payslips');

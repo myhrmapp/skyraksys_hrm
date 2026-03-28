@@ -102,6 +102,12 @@ module.exports = (sequelize, DataTypes) => {
     cancelledAt: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    approvedBy: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: { model: 'employees', key: 'id' },
+      comment: 'Employee ID of the approver (manager/HR)'
     }
   }, {
     tableName: 'leave_requests',

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-21T19:10:22.321Z",
+  "generatedAt": "2026-03-28T07:47:16.066Z",
   "appName": "SkyrakSys HRM",
   "version": "1.0.0",
   "totalGuides": 99,
@@ -30,13 +30,17 @@
           "steps": [
             "Log in as **Administrator**",
             "Navigate to **Employees** → Click **Add Employee**",
-            "Fill in personal details (name, email, phone)",
-            "Click **Next** → Fill employment info (department, position)",
-            "Verify the expected outcome"
+            "Fill **Personal Info**: first name, last name, email, phone, nationality, city, state, PIN code",
+            "Click **Next** → Fill **Employment Info**: department, position, hire date, employment type",
+            "Click **Next** → Fill **Emergency Contact**: contact name and phone number",
+            "Click **Next** → Fill **Statutory & Banking**: PAN, Aadhaar, bank name, account and IFSC",
+            "Toggle **Enable Login** → set password and confirm password",
+            "Click **Submit** → verify the new employee appears in the Employees list",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:54:17.762Z"
+          "duration": 20999,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:01.907Z"
         },
         {
           "testId": "BW-011",
@@ -55,14 +59,16 @@
           "screenshotUrl": "guides/screenshots/BW-011.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Employees** → Click **Add Employee**",
-            "Fill in personal details (name, email, phone)",
-            "Search employee → Click **Create Login**",
-            "Verify the expected outcome"
+            "Navigate to **Employees** → search for the target employee by name",
+            "Click the employee row to open their profile",
+            "Click **Create Login** (or go to **Statutory & Banking** tab → User Account section)",
+            "Enter email, set password and confirm → click **Save**",
+            "Verify a success message confirms the login account was created",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:54:23.224Z"
+          "duration": 5026,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:06.941Z"
         },
         {
           "testId": "BW-012",
@@ -81,13 +87,15 @@
           "screenshotUrl": "guides/screenshots/BW-012.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **Employees** → Click **Add Employee**",
-            "Fill in personal details (name, email, phone)",
-            "Verify the expected outcome"
+            "Log out of the admin account",
+            "Log back in using the **new employee's credentials** (email + password)",
+            "Verify the **Employee Dashboard** loads with a personalised welcome",
+            "Confirm the sidebar shows: My Timesheet, My Leave, My Payslips, My Attendance, My Profile",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:54:25.889Z"
+          "duration": 2146,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:09.096Z"
         },
         {
           "testId": "BW-013",
@@ -106,13 +114,15 @@
           "screenshotUrl": "guides/screenshots/BW-013.png",
           "steps": [
             "Log in as **HR Manager**",
-            "Navigate to **Employees** → Click **Add Employee**",
-            "Fill in personal details (name, email, phone)",
-            "Verify the expected outcome"
+            "Navigate to **Employees** → locate the new employee in the list",
+            "Click **Edit** → switch to the **Employment Info** tab",
+            "Select the correct **Department** and **Position** from the dropdowns",
+            "Click **Save** → verify the profile now shows the assigned department and position",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:54:29.656Z"
+          "duration": 3358,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:12.466Z"
         },
         {
           "testId": "BW-190",
@@ -132,12 +142,15 @@
           "screenshotUrl": "guides/screenshots/BW-190.png",
           "steps": [
             "Log in as **Administrator**",
-            "Add → Edit → Delete an employee end-to-end",
-            "Verify the expected outcome"
+            "Navigate to **Employees** → click **Add Employee** → fill all required fields",
+            "Click **Submit** → verify the employee appears in the list with correct details",
+            "Click **Edit** on the employee → change the first name → click **Save**",
+            "Click **Terminate/Delete** → confirm the action → verify the employee is removed or marked Terminated",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:40.725Z"
+          "duration": 11543,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:43.753Z"
         },
         {
           "testId": "BW-191",
@@ -156,12 +169,14 @@
           "screenshotUrl": "guides/screenshots/BW-191.png",
           "steps": [
             "Log in as **Administrator**",
-            "Use search bar and status/department filters",
-            "Verify the expected outcome"
+            "Navigate to **Employees** → type an employee name in the **Search** bar",
+            "Filter by **Status** (Active, Terminated, On Leave) using the dropdown",
+            "Filter by **Department** → verify the table updates to show only matching employees",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:51.504Z"
+          "duration": 10755,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:54.517Z"
         },
         {
           "testId": "BW-192",
@@ -180,12 +195,14 @@
           "screenshotUrl": "guides/screenshots/BW-192.png",
           "steps": [
             "Log in as **Administrator**",
-            "Click **Export** button → Verify download",
-            "Verify the expected outcome"
+            "Navigate to **Employees** → apply any desired filters (department, status)",
+            "Click the **Export** button → verify a CSV or Excel file downloads",
+            "Open the downloaded file → verify it contains correct, complete employee data",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:55.273Z"
+          "duration": 3624,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:58.149Z"
         },
         {
           "testId": "BW-193",
@@ -205,11 +222,16 @@
           "screenshotUrl": "guides/screenshots/BW-193.png",
           "steps": [
             "Log in as **Administrator**",
-            "Verify the expected outcome"
+            "Navigate to **Employees** → click **Add Employee**",
+            "Enter an invalid email format (e.g., missing @) → verify the email validation error",
+            "Enter a non-10-digit phone number → verify the phone validation error",
+            "Enter an invalid PAN format → verify the PAN validation error",
+            "Click **Submit** while errors exist → verify the form does not proceed",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:59.852Z"
+          "duration": 4789,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:47:02.946Z"
         },
         {
           "testId": "BW-194",
@@ -228,12 +250,16 @@
           "screenshotUrl": "guides/screenshots/BW-194.png",
           "steps": [
             "Log in as **Administrator**",
-            "Click through Personal, Employment, Emergency, Statutory tabs",
-            "Verify the expected outcome"
+            "Navigate to **Employees** → click an employee row to open their full profile",
+            "Click the **Personal Info** tab → verify name, contact, and address details",
+            "Click the **Employment Info** tab → verify department, position, and hire date",
+            "Click the **Emergency Contact** tab → verify emergency contact name and phone",
+            "Click the **Statutory & Banking** tab → verify PAN, Aadhaar, and bank account info",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:04:03.474Z"
+          "duration": 3488,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:47:06.441Z"
         },
         {
           "testId": "BW-195",
@@ -253,11 +279,14 @@
           "screenshotUrl": "guides/screenshots/BW-195.png",
           "steps": [
             "Log in as **Team Lead / Manager**",
-            "Verify the expected outcome"
+            "Log in as **Manager** → navigate to **Employees** (My Team view)",
+            "Verify the list shows **only employees** who report to this manager",
+            "Compare with the admin view → confirm the manager sees fewer total employees",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:04:06.976Z"
+          "duration": 3503,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:47:09.954Z"
         },
         {
           "testId": "BW-196",
@@ -277,11 +306,15 @@
           "screenshotUrl": "guides/screenshots/BW-196.png",
           "steps": [
             "Log in as **Administrator**",
-            "Verify the expected outcome"
+            "Navigate to **Employees** → open an employee's profile → click the **Salary** tab",
+            "Fill in **Basic Salary** → add allowances: HRA, transport, medical",
+            "Add deductions: PF, ESI, professional tax",
+            "Click **Save** → verify the salary structure is saved and gross/net totals display correctly",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:04:11.166Z"
+          "duration": 6007,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:47:15.970Z"
         }
       ]
     },
@@ -309,13 +342,16 @@
           "screenshotUrl": "guides/screenshots/BW-020.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **Leave Request** → Select leave type",
-            "Fill start/end dates and reason → Click **Submit**",
-            "Verify the expected outcome"
+            "Navigate to **My Leave** → click **New Leave Request**",
+            "Select **Leave Type** from the dropdown (Annual, Sick, Casual, etc.)",
+            "Pick **Start Date** and **End Date** using the date picker",
+            "Enter a **Reason** in the text area → click **Submit**",
+            "Verify the request appears in the list with **Pending** status",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:54:38.545Z"
+          "duration": 8302,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:20.774Z"
         },
         {
           "testId": "BW-021",
@@ -334,12 +370,16 @@
           "screenshotUrl": "guides/screenshots/BW-021.png",
           "steps": [
             "Log in as **Team Lead / Manager**",
-            "Navigate to **Leave Management** → Click **Approve**",
-            "Verify the expected outcome"
+            "Navigate to **Leave Management** → open the **Pending** tab",
+            "Locate the employee's leave request in the table",
+            "Click **Approve** → optionally add a review comment",
+            "Click **Confirm** → verify the status changes to **Approved**",
+            "Confirm the employee's leave balance decreases accordingly",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:54:42.113Z"
+          "duration": 4054,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:24.836Z"
         },
         {
           "testId": "BW-022",
@@ -358,12 +398,14 @@
           "screenshotUrl": "guides/screenshots/BW-022.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **Leave Management** → Click **Approve**",
-            "Verify the expected outcome"
+            "Navigate to **My Leave** (employee view)",
+            "Verify the approved request shows status **Approved** with the approver's name",
+            "Check the leave balance cards at the top — balance should be reduced by the approved days",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:54:44.460Z"
+          "duration": 2138,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:26.985Z"
         },
         {
           "testId": "BW-023",
@@ -382,13 +424,15 @@
           "screenshotUrl": "guides/screenshots/BW-023.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **Leave Request** → Select leave type",
-            "Navigate to **Leave Management** → Click **Reject**",
-            "Verify the expected outcome"
+            "Navigate to **Leave Management** → open the **Pending** tab",
+            "Click **Reject** on the target request → enter a mandatory rejection reason",
+            "Click **Confirm** → verify the status changes to **Rejected**",
+            "Verify the employee's leave balance is **fully restored**",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:54:53.572Z"
+          "duration": 9552,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:36.546Z"
         },
         {
           "testId": "BW-024",
@@ -407,12 +451,15 @@
           "screenshotUrl": "guides/screenshots/BW-024.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **Leave Requests** → View balance cards",
-            "Verify the expected outcome"
+            "Navigate to **My Leave** (employee view)",
+            "View the **Leave Balance** cards: Annual, Sick, Casual days available",
+            "Submit a leave request → verify the balance decreases immediately",
+            "Cancel or reject the request → verify the balance is fully restored",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:54:55.961Z"
+          "duration": 2178,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:38.730Z"
         },
         {
           "testId": "BW-025",
@@ -431,12 +478,15 @@
           "screenshotUrl": "guides/screenshots/BW-025.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **My Leaves** → Click **Cancel** on pending request",
-            "Verify the expected outcome"
+            "Navigate to **My Leave** → find a leave request with **Pending** status",
+            "Click **Cancel** on the request → confirm the cancellation",
+            "Verify status changes to **Cancelled**",
+            "Verify the leave balance is fully **restored**",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:55:04.123Z"
+          "duration": 7705,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:46.442Z"
         },
         {
           "testId": "BW-026",
@@ -456,11 +506,14 @@
           "screenshotUrl": "guides/screenshots/BW-026.png",
           "steps": [
             "Log in as **Employee**",
-            "Verify the expected outcome"
+            "Navigate to **My Leave** → submit a leave request for specific dates",
+            "Attempt to submit a second request for overlapping dates",
+            "Verify the system shows an **overlap error** and blocks the duplicate submission",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:55:11.057Z"
+          "duration": 6383,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:52.832Z"
         },
         {
           "testId": "BW-027",
@@ -480,12 +533,14 @@
           "screenshotUrl": "guides/screenshots/BW-027.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **Leave Requests** → View balance cards",
-            "Verify the expected outcome"
+            "Navigate to **My Leave** → confirm leave balance shows **0 days** remaining",
+            "Attempt to submit a new leave request for those leave type days",
+            "Verify the system shows an **Insufficient balance** error and prevents submission",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:55:17.940Z"
+          "duration": 6450,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:36:59.289Z"
         },
         {
           "testId": "BW-028",
@@ -504,12 +559,16 @@
           "screenshotUrl": "guides/screenshots/BW-028.png",
           "steps": [
             "Log in as **Administrator**",
-            "Open **Leave Management** → Search and filter requests",
-            "Verify the expected outcome"
+            "Navigate to **Leave Management** (admin/HR view)",
+            "Use the **search bar** to filter by employee name",
+            "Filter by **Status** (Pending, Approved, Rejected, Cancelled)",
+            "Filter by **Date Range** to narrow to a specific period",
+            "Approve or reject requests in bulk or individually as needed",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:55:24.608Z"
+          "duration": 6220,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:37:05.516Z"
         },
         {
           "testId": "BW-029",
@@ -529,12 +588,15 @@
           "screenshotUrl": "guides/screenshots/BW-029.png",
           "steps": [
             "Log in as **Administrator**",
-            "Open **Leave Types** → Add / Edit / Delete leave types",
-            "Verify the expected outcome"
+            "Navigate to **Organization** → click the **Leave Types** tab",
+            "Click **Add Leave Type** → enter name, default days, and carry-forward rules",
+            "Click **Save** → verify the new leave type appears in the list",
+            "Click **Edit** to modify an entry → click **Delete** to remove it",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:55:48.147Z"
+          "duration": 7485,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:37:13.009Z"
         },
         {
           "testId": "BW-030",
@@ -554,11 +616,14 @@
           "screenshotUrl": "guides/screenshots/BW-030.png",
           "steps": [
             "Log in as **Administrator**",
-            "Verify the expected outcome"
+            "Navigate to **Leave Management** → view an employee's leave balance",
+            "Verify annual leave is accrued based on the employee's hire date and company policy",
+            "Check that any carry-forward balance from the previous year is applied",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:55:55.487Z"
+          "duration": 6450,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:37:19.466Z"
         },
         {
           "testId": "BW-031",
@@ -577,11 +642,14 @@
           "screenshotUrl": "guides/screenshots/BW-031.png",
           "steps": [
             "Log in as **Employee**",
-            "Verify the expected outcome"
+            "Navigate to **My Leave** → submit a leave request for specific dates",
+            "Attempt to submit a second request for overlapping dates",
+            "Verify the system shows an **overlap error** and blocks the duplicate submission",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:56:04.465Z"
+          "duration": 9168,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:37:28.643Z"
         }
       ]
     },
@@ -609,12 +677,15 @@
           "screenshotUrl": "guides/screenshots/BW-040.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **My Attendance** → Click **Check In** then **Check Out**",
-            "Verify the expected outcome"
+            "Navigate to **My Attendance** → verify today's record is displayed",
+            "Click **Check In** → a timestamp is recorded for the start of the work day",
+            "After work, click **Check Out** → the system calculates total hours worked",
+            "Verify the daily record shows check-in time, check-out time, and duration",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:56:10.564Z"
+          "duration": 5765,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:37:34.418Z"
         },
         {
           "testId": "BW-041",
@@ -633,12 +704,15 @@
           "screenshotUrl": "guides/screenshots/BW-041.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Attendance Management** → Use filters/mark attendance",
-            "Verify the expected outcome"
+            "Navigate to **Attendance Management** → search for the target employee",
+            "Select the date and choose the attendance type (Present, Absent, Half Day, On Leave)",
+            "Click **Mark Attendance** → verify the record is saved",
+            "Check the employee's attendance calendar reflects the admin-marked entry",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:56:14.782Z"
+          "duration": 3782,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:37:38.206Z"
         },
         {
           "testId": "BW-042",
@@ -657,12 +731,14 @@
           "screenshotUrl": "guides/screenshots/BW-042.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **My Attendance** → Change month/year dropdowns",
-            "Verify the expected outcome"
+            "Navigate to **My Attendance** → the current month is shown by default",
+            "Use the **Month** and **Year** dropdowns to navigate to a previous period",
+            "Verify historical attendance records load correctly for the selected month",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:56:18.922Z"
+          "duration": 3737,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:37:41.951Z"
         },
         {
           "testId": "BW-043",
@@ -681,12 +757,15 @@
           "screenshotUrl": "guides/screenshots/BW-043.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Attendance Management** → Use filters/mark attendance",
-            "Verify the expected outcome"
+            "Navigate to **Attendance Management** → use the search bar to find an employee",
+            "Apply a **Department** filter to narrow the employee list",
+            "Set a **Date Range** filter → verify the summary updates with filtered data",
+            "Review totals: Present days, Absent days, and total hours worked",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:56:23.225Z"
+          "duration": 3602,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:37:45.560Z"
         },
         {
           "testId": "BW-044",
@@ -706,11 +785,15 @@
           "screenshotUrl": "guides/screenshots/BW-044.png",
           "steps": [
             "Log in as **Employee**",
-            "Verify the expected outcome"
+            "Employee checks in for the day but does not check out (simulate missed check-out)",
+            "Navigate to **Attendance Management** as admin → locate the incomplete record",
+            "Click **Edit** → manually set the check-out time",
+            "Verify total hours are recalculated and the record is now complete",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:56:26.713Z"
+          "duration": 3108,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:37:48.674Z"
         }
       ]
     },
@@ -738,12 +821,15 @@
           "screenshotUrl": "guides/screenshots/BW-050.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **Timesheets** → Add task → Fill weekly hours",
-            "Verify the expected outcome"
+            "Navigate to **My Timesheet** → verify the current week is displayed",
+            "Click **Add Entry** → select a **Project** and **Task** from the dropdowns",
+            "Enter hours for each day of the week (Mon–Fri) in the time grid",
+            "Click **Save Draft** → verify hours are saved and the weekly total updates",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
+          "duration": 17395,
           "status": "recorded",
-          "recordedAt": "2026-03-21T18:56:35.302Z"
+          "recordedAt": "2026-03-28T07:38:06.161Z"
         },
         {
           "testId": "BW-051",
@@ -762,12 +848,15 @@
           "screenshotUrl": "guides/screenshots/BW-051.png",
           "steps": [
             "Log in as **Employee**",
-            "Click **Submit** to send timesheet for approval",
-            "Verify the expected outcome"
+            "Navigate to **My Timesheet** → review all draft entries for the week",
+            "Verify the total hours and project breakdown look correct",
+            "Click **Submit for Approval** → confirm the submission",
+            "Verify the timesheet status changes to **Submitted** and all fields become read-only",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
+          "duration": 2187,
           "status": "recorded",
-          "recordedAt": "2026-03-21T18:56:42.669Z"
+          "recordedAt": "2026-03-28T07:38:09.917Z"
         },
         {
           "testId": "BW-052",
@@ -786,12 +875,15 @@
           "screenshotUrl": "guides/screenshots/BW-052.png",
           "steps": [
             "Log in as **Employee**",
-            "Click **Submit** to send timesheet for approval",
-            "Verify the expected outcome"
+            "Navigate to **My Timesheet** → find a timesheet with **Submitted** status",
+            "Attempt to edit any hour entry → verify all fields are **read-only**",
+            "Verify the Submit button is replaced by a status badge",
+            "Confirm the timesheet can only be modified after a manager rejects it",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:56:45.224Z"
+          "duration": 2257,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:38:13.645Z"
         },
         {
           "testId": "BW-053",
@@ -810,12 +902,15 @@
           "screenshotUrl": "guides/screenshots/BW-053.png",
           "steps": [
             "Log in as **Team Lead / Manager**",
-            "Navigate to **Timesheet Approvals** → Click **Approve**",
-            "Verify the expected outcome"
+            "Navigate to **Timesheet Approvals** (manager view) → view pending team timesheets",
+            "Click on an employee's submitted timesheet to review hours by project and day",
+            "Click **Approve** → optionally add a comment",
+            "Verify the timesheet status changes to **Approved** in the approvals list",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:56:50.341Z"
+          "duration": 4681,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:38:18.333Z"
         },
         {
           "testId": "BW-054",
@@ -834,12 +929,15 @@
           "screenshotUrl": "guides/screenshots/BW-054.png",
           "steps": [
             "Log in as **Team Lead / Manager**",
-            "Navigate to **Timesheet Approvals** → Click **Reject** with comments",
-            "Verify the expected outcome"
+            "Navigate to **Timesheet Approvals** → find a pending team timesheet",
+            "Click **Reject** → enter a mandatory rejection reason in the text field",
+            "Click **Confirm** → verify status changes to **Rejected**",
+            "Employee can now reopen and resubmit the timesheet with corrections",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:56:55.485Z"
+          "duration": 4781,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:38:23.123Z"
         },
         {
           "testId": "BW-055",
@@ -858,12 +956,15 @@
           "screenshotUrl": "guides/screenshots/BW-055.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **Timesheet Approvals** → Click **Reject** with comments",
-            "Verify the expected outcome"
+            "Navigate to **My Timesheet** → find a timesheet with **Rejected** status",
+            "Read the rejection comment from the manager",
+            "Click **Edit** to reopen the timesheet → correct the hours or project entries",
+            "Click **Submit** again → verify status returns to **Submitted** for re-approval",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:01.166Z"
+          "duration": 2173,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:38:25.304Z"
         },
         {
           "testId": "BW-056",
@@ -882,13 +983,15 @@
           "screenshotUrl": "guides/screenshots/BW-056.png",
           "steps": [
             "Log in as **Team Lead / Manager**",
-            "Navigate to **Timesheet Approvals** → Click **Approve**",
-            "Select multiple timesheets → Use **Bulk Approve**",
-            "Verify the expected outcome"
+            "Navigate to **Timesheet Approvals** → switch to the list/table view",
+            "Select multiple pending timesheets using the row checkboxes",
+            "Click **Bulk Approve** at the top of the list → confirm the action",
+            "Verify all selected timesheets change to **Approved** status simultaneously",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:06.331Z"
+          "duration": 4681,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:38:29.993Z"
         },
         {
           "testId": "BW-057",
@@ -907,12 +1010,14 @@
           "screenshotUrl": "guides/screenshots/BW-057.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **Timesheet History** → View/export past timesheets",
-            "Verify the expected outcome"
+            "Navigate to **Timesheet History** → select a date range for the report",
+            "Optionally filter by employee, project, or status",
+            "Click **Export** → verify a CSV or Excel file downloads to your device",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:10.278Z"
+          "duration": 3523,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:38:33.523Z"
         },
         {
           "testId": "BW-058",
@@ -931,11 +1036,15 @@
           "screenshotUrl": "guides/screenshots/BW-058.png",
           "steps": [
             "Log in as **Employee**",
-            "Verify the expected outcome"
+            "Navigate to **My Timesheet** → click **Add Entry** → select **Project A**",
+            "Enter hours for Project A for the week → click **Save Draft**",
+            "Click **Add Entry** again → select **Project B** → enter additional hours",
+            "Verify both project entries appear and the weekly total aggregates all hours",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
+          "duration": 17328,
           "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:15.067Z"
+          "recordedAt": "2026-03-28T07:38:50.927Z"
         },
         {
           "testId": "BW-059",
@@ -955,11 +1064,15 @@
           "screenshotUrl": "guides/screenshots/BW-059.png",
           "steps": [
             "Log in as **Employee**",
-            "Verify the expected outcome"
+            "Navigate to **My Timesheet** → try submitting without entering any hours",
+            "Verify the validation error: **No hours entered for this week**",
+            "Try entering a negative number in any day field → verify it is rejected",
+            "Enter valid hours → verify the submit button becomes active",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
+          "duration": 17331,
           "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:19.317Z"
+          "recordedAt": "2026-03-28T07:39:09.877Z"
         },
         {
           "testId": "BW-060",
@@ -979,12 +1092,15 @@
           "screenshotUrl": "guides/screenshots/BW-060.png",
           "steps": [
             "Log in as **Employee**",
-            "Click **Submit** to send timesheet for approval",
-            "Verify the expected outcome"
+            "Navigate to **My Timesheet** → ensure the week has no entries",
+            "Click **Submit** on the empty timesheet",
+            "Verify the system shows an error: hours are required before submitting",
+            "Add at least one hour → verify **Submit** is now allowed",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:21.958Z"
+          "duration": 2106,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:39:13.501Z"
         },
         {
           "testId": "BW-061",
@@ -1004,11 +1120,14 @@
           "screenshotUrl": "guides/screenshots/BW-061.png",
           "steps": [
             "Log in as **Employee**",
-            "Verify the expected outcome"
+            "Navigate to **My Timesheet** → enter more than 8 hours for a single day",
+            "Verify overtime hours are highlighted or flagged in the grid",
+            "Submit the timesheet → verify overtime is visible in the manager approval view",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
+          "duration": 17370,
           "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:25.956Z"
+          "recordedAt": "2026-03-28T07:39:30.981Z"
         }
       ]
     },
@@ -1036,12 +1155,15 @@
           "screenshotUrl": "guides/screenshots/BW-070.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Payroll Management** → Review tabs",
-            "Verify the expected outcome"
+            "Navigate to **Payroll Management** → verify the page loads with all tabs",
+            "Click **Payroll List** tab → view all payroll records for the current period",
+            "Click **Generate Payroll** tab → view the generation form",
+            "Click **Payslip Templates** tab → view configured salary templates",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:29.159Z"
+          "duration": 2341,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:39:35.094Z"
         },
         {
           "testId": "BW-071",
@@ -1060,12 +1182,15 @@
           "screenshotUrl": "guides/screenshots/BW-071.png",
           "steps": [
             "Log in as **Administrator**",
-            "Go to **Generate** tab → Click **Validate & Generate**",
-            "Verify the expected outcome"
+            "Navigate to **Payroll Management** → click the **Generate Payroll** tab",
+            "Select **Month** and **Year** from the dropdowns",
+            "Click **Validate & Generate** → review the preview: salaries, allowances, deductions",
+            "Click **Confirm Generate** → verify payroll records are created with **Draft** status",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:33.430Z"
+          "duration": 3405,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:39:38.507Z"
         },
         {
           "testId": "BW-072",
@@ -1084,12 +1209,15 @@
           "screenshotUrl": "guides/screenshots/BW-072.png",
           "steps": [
             "Log in as **Administrator**",
-            "Select payroll records → Click **Finalize**",
-            "Verify the expected outcome"
+            "Navigate to **Payroll Management** → select **Draft** payroll records using checkboxes",
+            "Review all employee payroll entries for accuracy",
+            "Click **Finalize** → confirm the action in the dialog",
+            "Verify status changes from **Draft** to **Finalized** (editing is now locked)",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:39.307Z"
+          "duration": 2743,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:39:41.261Z"
         },
         {
           "testId": "BW-073",
@@ -1108,12 +1236,15 @@
           "screenshotUrl": "guides/screenshots/BW-073.png",
           "steps": [
             "Log in as **Administrator**",
-            "Select finalized records → Click **Mark as Paid**",
-            "Verify the expected outcome"
+            "Navigate to **Payroll Management** → select **Finalized** payroll records",
+            "Click **Mark as Paid** → enter the payment date and payment method",
+            "Confirm the action → verify status changes to **Paid**",
+            "Employee payslips are now available for download from **My Payslips**",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:45.298Z"
+          "duration": 2875,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:39:44.145Z"
         },
         {
           "testId": "BW-074",
@@ -1132,12 +1263,14 @@
           "screenshotUrl": "guides/screenshots/BW-074.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **My Payslips** → View summary and history",
-            "Verify the expected outcome"
+            "Navigate to **My Payslips** (employee view)",
+            "View the payslip summary: gross pay, total deductions, and net pay",
+            "Check the payslip history showing previous months with their payment status",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:48.108Z"
+          "duration": 2134,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:39:46.287Z"
         },
         {
           "testId": "BW-075",
@@ -1156,13 +1289,15 @@
           "screenshotUrl": "guides/screenshots/BW-075.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **My Payslips** → View summary and history",
-            "Click **Download** on a payslip row",
-            "Verify the expected outcome"
+            "Navigate to **My Payslips** → find a payslip with **Paid** status",
+            "Click the **Download** button on the payslip row",
+            "Verify a PDF payslip opens or downloads to your device",
+            "Confirm the PDF contains: employee name, pay period, earnings breakdown, deductions, net pay",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:50.601Z"
+          "duration": 2155,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:39:48.449Z"
         },
         {
           "testId": "BW-076",
@@ -1181,12 +1316,14 @@
           "screenshotUrl": "guides/screenshots/BW-076.png",
           "steps": [
             "Log in as **Administrator**",
-            "Use search bar → Click **Export**",
-            "Verify the expected outcome"
+            "Navigate to **Payroll Management** → use the search bar to filter by employee name",
+            "Filter by **Month**, **Year**, or **Status** (Draft, Finalized, Paid)",
+            "Click **Export** → verify payroll data downloads as a CSV or Excel file",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
+          "duration": 17508,
           "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:55.324Z"
+          "recordedAt": "2026-03-28T07:40:06.020Z"
         },
         {
           "testId": "BW-077",
@@ -1205,12 +1342,16 @@
           "screenshotUrl": "guides/screenshots/BW-077.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Payroll Template Config**",
-            "Verify the expected outcome"
+            "Navigate to **Payroll Template Configuration** (admin only)",
+            "View existing templates or click **Add Template** to create a new one",
+            "Configure **Earnings**: basic salary, HRA, transport allowance, medical allowance",
+            "Configure **Deductions**: PF, ESI, professional tax → click **Save**",
+            "Assign the template to specific departments or individual employees",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:57:58.318Z"
+          "duration": 2302,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:40:09.881Z"
         },
         {
           "testId": "BW-078",
@@ -1230,11 +1371,15 @@
           "screenshotUrl": "guides/screenshots/BW-078.png",
           "steps": [
             "Log in as **HR Manager**",
-            "Verify the expected outcome"
+            "Log in as **HR Manager** → navigate to **Payroll Management**",
+            "Verify HR can view all employee payroll records",
+            "Verify HR can generate, finalize, and mark payroll as paid",
+            "Confirm HR access level is equivalent to admin for payroll operations",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
+          "duration": 17418,
           "status": "recorded",
-          "recordedAt": "2026-03-21T18:58:02.152Z"
+          "recordedAt": "2026-03-28T07:40:27.402Z"
         },
         {
           "testId": "BW-079",
@@ -1254,12 +1399,14 @@
           "screenshotUrl": "guides/screenshots/BW-079.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **My Payslips** → View summary and history",
-            "Verify the expected outcome"
+            "Log in as **Employee** → attempt to navigate to **Payroll Management**",
+            "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+            "Navigate to **My Payslips** → verify the employee can only see their own payslips",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:58:06.643Z"
+          "duration": 4083,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:40:32.969Z"
         },
         {
           "testId": "BW-080",
@@ -1279,11 +1426,15 @@
           "screenshotUrl": "guides/screenshots/BW-080.png",
           "steps": [
             "Log in as **Administrator**",
-            "Verify the expected outcome"
+            "Generate payroll for an employee with a known salary structure",
+            "Verify **Gross Pay** = basic salary + HRA + all configured allowances",
+            "Verify **Deductions** = PF + ESI + income tax + any other configured deductions",
+            "Verify **Net Pay** = Gross Pay − Total Deductions → cross-check with salary structure",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:58:10.119Z"
+          "duration": 2229,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:40:35.199Z"
         },
         {
           "testId": "BW-081",
@@ -1303,11 +1454,15 @@
           "screenshotUrl": "guides/screenshots/BW-081.png",
           "steps": [
             "Log in as **Administrator**",
-            "Verify the expected outcome"
+            "Navigate to **Payroll Management** → find a **Draft** payroll entry",
+            "Update the employee's salary structure (e.g., change basic salary)",
+            "Return to payroll → click **Regenerate** on the draft entry",
+            "Verify the payroll amounts are recalculated and net pay reflects the changes",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:58:14.449Z"
+          "duration": 3386,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:40:38.591Z"
         }
       ]
     },
@@ -1335,12 +1490,14 @@
           "screenshotUrl": "guides/screenshots/BW-090.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **My Tasks** → Use priority filter",
-            "Verify the expected outcome"
+            "Navigate to **My Tasks** → view all tasks assigned to you",
+            "Filter by **Priority** (High, Medium, Low) using the dropdown",
+            "Filter by **Status** (To Do, In Progress, Done) → verify counts update",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:58:18.064Z"
+          "duration": 33567,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:41:12.168Z"
         },
         {
           "testId": "BW-091",
@@ -1359,12 +1516,15 @@
           "screenshotUrl": "guides/screenshots/BW-091.png",
           "steps": [
             "Log in as **Employee**",
-            "Click status dropdown on a task → Select new status",
-            "Verify the expected outcome"
+            "Navigate to **My Tasks** → find a task assigned to you",
+            "Click the **Status** dropdown on the task card or row",
+            "Select a new status (e.g., **To Do** → **In Progress**)",
+            "Verify the task updates in the list immediately with the new status",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:58:22.440Z"
+          "duration": 33770,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:41:45.953Z"
         },
         {
           "testId": "BW-092",
@@ -1383,12 +1543,15 @@
           "screenshotUrl": "guides/screenshots/BW-092.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Project Config** → Click **Add Project** → Fill form",
-            "Verify the expected outcome"
+            "Navigate to **Project Configuration** → click **Add Project**",
+            "Fill in project name, description, start date, and end date",
+            "Assign team members to the project → click **Save**",
+            "Verify the new project appears in the project list with correct details",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:58:32.713Z"
+          "duration": 9161,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:41:55.121Z"
         },
         {
           "testId": "BW-093",
@@ -1407,12 +1570,14 @@
           "screenshotUrl": "guides/screenshots/BW-093.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Task Config** → Click **Add Task** → Fill form",
-            "Verify the expected outcome"
+            "Navigate to **Project Configuration** → select an existing project",
+            "Click **Add Task** → fill task name, description, priority, assignee, and due date",
+            "Click **Save** → verify the task appears under the project with all details correct",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:58:40.230Z"
+          "duration": 6680,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:42:01.809Z"
         },
         {
           "testId": "BW-094",
@@ -1431,11 +1596,15 @@
           "screenshotUrl": "guides/screenshots/BW-094.png",
           "steps": [
             "Log in as **Administrator**",
-            "Verify the expected outcome"
+            "Navigate to **Project Configuration** → click **Edit** on an existing project",
+            "Modify the project name or end date → click **Save** → verify the changes",
+            "Select an empty project → click **Delete** → confirm deletion",
+            "Verify the deleted project no longer appears in the list",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:58:49.679Z"
+          "duration": 8714,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:42:10.530Z"
         },
         {
           "testId": "BW-095",
@@ -1454,11 +1623,15 @@
           "screenshotUrl": "guides/screenshots/BW-095.png",
           "steps": [
             "Log in as **Administrator**",
-            "Verify the expected outcome"
+            "Navigate to **Project Configuration** (admin/manager) → select a project",
+            "Click **Add Task** → fill task name, description, priority, assignee, and due date",
+            "Click **Save** → verify the task appears under the project",
+            "The assigned employee navigates to **My Tasks** → confirms the task appears",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:58:58.507Z"
+          "duration": 38084,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:42:48.624Z"
         },
         {
           "testId": "BW-096",
@@ -1478,11 +1651,14 @@
           "screenshotUrl": "guides/screenshots/BW-096.png",
           "steps": [
             "Log in as **Employee**",
-            "Verify the expected outcome"
+            "Log in as **Employee** → navigate to **My Tasks** → verify only assigned tasks are shown",
+            "Attempt to access **Project Configuration** → verify access is denied",
+            "Log in as **Manager** → verify access to manage team projects and tasks",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:59:03.115Z"
+          "duration": 4086,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:42:52.716Z"
         }
       ]
     },
@@ -1510,12 +1686,15 @@
           "screenshotUrl": "guides/screenshots/BW-100.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Reviews** → Click **New Review** → Fill form",
-            "Verify the expected outcome"
+            "Navigate to **Employee Reviews** → click **New Review**",
+            "Select the employee, review period, and type (Annual, Mid-Year, Probation)",
+            "Enter performance ratings for each competency and add written feedback",
+            "Click **Save** → verify the review appears in the list with **Draft** status",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:59:11.472Z"
+          "duration": 7481,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:43:00.205Z"
         },
         {
           "testId": "BW-101",
@@ -1534,12 +1713,15 @@
           "screenshotUrl": "guides/screenshots/BW-101.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Reviews** → Click **Self-Assess** on your review",
-            "Verify the expected outcome"
+            "log in as **Employee** → navigate to **My Reviews**",
+            "Find a review with **Pending Self-Assessment** status → click **Self-Assess**",
+            "Fill in ratings and comments for each competency area",
+            "Click **Submit** → verify status updates and the manager is notified",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:59:14.467Z"
+          "duration": 2257,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:43:02.468Z"
         },
         {
           "testId": "BW-102",
@@ -1558,12 +1740,15 @@
           "screenshotUrl": "guides/screenshots/BW-102.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Reviews** → Click **Approve** → Confirm",
-            "Verify the expected outcome"
+            "Navigate to **Employee Reviews** (manager view) → find a review awaiting approval",
+            "Review the employee's self-assessment ratings alongside your own manager ratings",
+            "Click **Approve** → confirm the action in the dialog",
+            "Verify review status changes to **Approved** and the employee can view the final outcome",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:59:17.396Z"
+          "duration": 2290,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:43:04.765Z"
         },
         {
           "testId": "BW-103",
@@ -1582,12 +1767,14 @@
           "screenshotUrl": "guides/screenshots/BW-103.png",
           "steps": [
             "Log in as **Administrator**",
-            "Use search bar and status filter on **Reviews** page",
-            "Verify the expected outcome"
+            "Navigate to **Employee Reviews** → type an employee name in the search bar",
+            "Filter by **Status** (Draft, Pending, Manager Review, Approved)",
+            "Filter by **Review Period** → verify results update to match the selected filters",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:59:23.283Z"
+          "duration": 5036,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:43:09.809Z"
         },
         {
           "testId": "BW-104",
@@ -1606,12 +1793,14 @@
           "screenshotUrl": "guides/screenshots/BW-104.png",
           "steps": [
             "Log in as **Administrator**",
-            "Click **Edit** on a review → Make changes or **Cancel**",
-            "Verify the expected outcome"
+            "Navigate to **Employee Reviews** → find a review with **Draft** status",
+            "Click **Edit** → modify ratings or written comments → click **Save**",
+            "Click **Delete** on a draft review → confirm the deletion → verify it is removed",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:59:26.323Z"
+          "duration": 2418,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:43:12.234Z"
         },
         {
           "testId": "BW-105",
@@ -1631,11 +1820,14 @@
           "screenshotUrl": "guides/screenshots/BW-105.png",
           "steps": [
             "Log in as **Administrator**",
-            "Verify the expected outcome"
+            "Manager creates review → Employee completes self-assessment",
+            "Manager adds final ratings → both versions are visible side by side",
+            "Manager approves → both parties can view the final approved review",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T18:59:35.365Z"
+          "duration": 8114,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:43:20.362Z"
         }
       ]
     },
@@ -1663,13 +1855,15 @@
           "screenshotUrl": "guides/screenshots/BW-110.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Organization** → **Departments** tab",
-            "Use **Add**, **Edit**, or **Delete** buttons",
-            "Verify the expected outcome"
+            "Navigate to **Organization** → click the **Departments** tab",
+            "Click **Add Department** → enter department name and optional description",
+            "Click **Save** → verify the department appears in the department list",
+            "Click **Edit** to rename it → click **Delete** → confirm removal",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:00:03.500Z"
+          "duration": 12438,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:43:32.807Z"
         },
         {
           "testId": "BW-111",
@@ -1688,13 +1882,15 @@
           "screenshotUrl": "guides/screenshots/BW-111.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Organization** → **Positions** tab",
-            "Use **Add**, **Edit**, or **Delete** buttons",
-            "Verify the expected outcome"
+            "Navigate to **Organization** → click the **Positions** tab",
+            "Click **Add Position** → enter job title, select department, and set job level",
+            "Click **Save** → verify the position appears in the positions list",
+            "Click **Edit** to update details → click **Delete** → confirm removal",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:00:27.530Z"
+          "duration": 23713,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:43:56.527Z"
         },
         {
           "testId": "BW-112",
@@ -1713,13 +1909,15 @@
           "screenshotUrl": "guides/screenshots/BW-112.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Organization** → **Holidays** tab",
-            "Use **Add**, **Edit**, or **Delete** buttons",
-            "Verify the expected outcome"
+            "Navigate to **Organization** → click the **Holidays** tab",
+            "Click **Add Holiday** → enter holiday name, date, and type (National / Regional / Optional)",
+            "Click **Save** → verify the holiday appears in the holidays list",
+            "Click **Edit** to change the date → click **Delete** → confirm removal",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:00:51.534Z"
+          "duration": 8219,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:44:04.754Z"
         },
         {
           "testId": "BW-113",
@@ -1739,12 +1937,13 @@
           "steps": [
             "Log in as **Administrator**",
             "Navigate to **Organization** → **Departments** tab",
-            "Use **Add**, **Edit**, or **Delete** buttons",
-            "Verify the expected outcome"
+            "Type a department name in the **Search** bar",
+            "Verify the list filters in real time to show only matching departments",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:00:56.324Z"
+          "duration": 4478,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:44:09.239Z"
         },
         {
           "testId": "BW-114",
@@ -1764,13 +1963,15 @@
           "screenshotUrl": "guides/screenshots/BW-114.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **Organization** → **Departments** tab",
-            "Use **Add**, **Edit**, or **Delete** buttons",
-            "Verify the expected outcome"
+            "Navigate to **Organization** → **Departments** tab → click **Add Department**",
+            "Leave the department name field empty → click **Save**",
+            "Verify validation error: **Department name is required**",
+            "Fill in the name → verify the error clears and saving succeeds",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:01:17.655Z"
+          "duration": 20849,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:44:30.096Z"
         },
         {
           "testId": "BW-115",
@@ -1790,12 +1991,14 @@
           "screenshotUrl": "guides/screenshots/BW-115.png",
           "steps": [
             "Log in as **Employee**",
-            "Use **Add**, **Edit**, or **Delete** buttons",
-            "Verify the expected outcome"
+            "Log in as **Employee** → attempt to access **Organization** settings",
+            "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+            "Log in as **Admin** → verify full CRUD access to Departments, Positions, and Holidays",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:01:21.848Z"
+          "duration": 4022,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:44:34.127Z"
         },
         {
           "testId": "BW-116",
@@ -1816,12 +2019,14 @@
           "steps": [
             "Log in as **Administrator**",
             "Navigate to **Organization** → **Departments** tab",
-            "Use **Add**, **Edit**, or **Delete** buttons",
-            "Verify the expected outcome"
+            "Attempt to delete a department that has active employees assigned",
+            "Verify system shows a **warning** or prevents deletion with a clear error message",
+            "Reassign employees to another department first → verify deletion now succeeds",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:01:29.462Z"
+          "duration": 7035,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:44:41.168Z"
         }
       ]
     },
@@ -1849,13 +2054,15 @@
           "screenshotUrl": "guides/screenshots/BW-120.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **User Management**",
-            "Go to **Create** tab → Fill email, name, password, role",
-            "Verify the expected outcome"
+            "Navigate to **User Management** → click the **Create User** tab",
+            "Fill in: **Email**, **First Name**, **Last Name**, **Password**, **Confirm Password**, **Role**",
+            "Click **Create User** → verify a success message is displayed",
+            "Switch to the **Manage** tab → verify the new user appears with the correct role",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:01:35.122Z"
+          "duration": 5148,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:44:46.324Z"
         },
         {
           "testId": "BW-121",
@@ -1874,13 +2081,15 @@
           "screenshotUrl": "guides/screenshots/BW-121.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **User Management**",
-            "Go to **Manage** tab → Search and filter users",
-            "Verify the expected outcome"
+            "Navigate to **User Management** → click the **Manage** tab",
+            "Type a name or email in the **Search** bar → verify real-time filtering",
+            "Filter by **Role** (Admin, HR, Manager, Employee)",
+            "Filter by **Status** (Active, Inactive) → verify results update correctly",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:01:41.091Z"
+          "duration": 5326,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:44:51.656Z"
         },
         {
           "testId": "BW-122",
@@ -1900,13 +2109,15 @@
           "screenshotUrl": "guides/screenshots/BW-122.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **User Management**",
-            "Test form validation by submitting empty/mismatched data",
-            "Verify the expected outcome"
+            "Navigate to **User Management** → click **Create User**",
+            "Submit the empty form → verify all required field errors appear simultaneously",
+            "Enter mismatched passwords → verify **Passwords must match** error",
+            "Enter an already-used email → verify **Email already in use** error",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:01:46.366Z"
+          "duration": 4778,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:44:56.441Z"
         },
         {
           "testId": "BW-123",
@@ -1926,12 +2137,14 @@
           "screenshotUrl": "guides/screenshots/BW-123.png",
           "steps": [
             "Log in as **Employee**",
-            "Navigate to **User Management**",
-            "Verify the expected outcome"
+            "Log in as **Employee** → attempt to navigate to **User Management**",
+            "Verify redirect to the employee dashboard or **Access Denied** message is shown",
+            "Log in as **Admin** → verify full access: create, edit, activate/deactivate users",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:01:50.822Z"
+          "duration": 4110,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:00.558Z"
         },
         {
           "testId": "BW-124",
@@ -1951,12 +2164,15 @@
           "screenshotUrl": "guides/screenshots/BW-124.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **User Management**",
-            "Verify the expected outcome"
+            "Navigate to **User Management** → **Manage** tab → find the target user",
+            "Click **Edit** → change the **Role** dropdown (e.g., Employee → Manager)",
+            "Click **Save** → verify the role badge updates in the user list",
+            "The user's sidebar menu and access permissions reflect the new role on next login",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:01:57.363Z"
+          "duration": 5835,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:06.399Z"
         },
         {
           "testId": "BW-125",
@@ -1976,12 +2192,15 @@
           "screenshotUrl": "guides/screenshots/BW-125.png",
           "steps": [
             "Log in as **Administrator**",
-            "Navigate to **User Management**",
-            "Verify the expected outcome"
+            "Navigate to **User Management** → **Manage** tab → find an active user",
+            "Toggle the **Active** switch to **Inactive** → confirm the action",
+            "Verify the user row shows an **Inactive** badge",
+            "Attempt to log in as the deactivated user → verify **Account disabled** error",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:03.679Z"
+          "duration": 5456,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:11.862Z"
         }
       ]
     },
@@ -2008,13 +2227,14 @@
           "screenshotUrl": "guides/screenshots/BW-150.png",
           "steps": [
             "Log in as **Employee**",
-            "Attempt to access a restricted page as **Employee**",
-            "Verify access is granted or denied based on role",
-            "Verify the expected outcome"
+            "Log in as **Employee** → attempt to navigate to an admin-only page (e.g., User Management)",
+            "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+            "Confirm the employee sidebar does not show any admin-only menu items",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:33.262Z"
+          "duration": 4232,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:38.638Z"
         },
         {
           "testId": "BW-151",
@@ -2033,13 +2253,14 @@
           "screenshotUrl": "guides/screenshots/BW-151.png",
           "steps": [
             "Log in as **Employee**",
-            "Attempt to access a restricted page as **Employee**",
-            "Verify access is granted or denied based on role",
-            "Verify the expected outcome"
+            "Log in as **Employee** → attempt to navigate to an admin-only page (e.g., User Management)",
+            "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+            "Confirm the employee sidebar does not show any admin-only menu items",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:37.569Z"
+          "duration": 4162,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:42.809Z"
         },
         {
           "testId": "BW-152",
@@ -2058,13 +2279,14 @@
           "screenshotUrl": "guides/screenshots/BW-152.png",
           "steps": [
             "Log in as **Employee**",
-            "Attempt to access a restricted page as **Employee**",
-            "Verify access is granted or denied based on role",
-            "Verify the expected outcome"
+            "Log in as **Employee** → attempt to navigate to an admin-only page (e.g., User Management)",
+            "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+            "Confirm the employee sidebar does not show any admin-only menu items",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:41.841Z"
+          "duration": 4232,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:47.048Z"
         },
         {
           "testId": "BW-153",
@@ -2083,13 +2305,14 @@
           "screenshotUrl": "guides/screenshots/BW-153.png",
           "steps": [
             "Log in as **Employee**",
-            "Attempt to access a restricted page as **Employee**",
-            "Verify access is granted or denied based on role",
-            "Verify the expected outcome"
+            "Log in as **Employee** → attempt to navigate to an admin-only page (e.g., User Management)",
+            "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+            "Confirm the employee sidebar does not show any admin-only menu items",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:46.096Z"
+          "duration": 4176,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:51.232Z"
         },
         {
           "testId": "BW-154",
@@ -2108,13 +2331,13 @@
           "screenshotUrl": "guides/screenshots/BW-154.png",
           "steps": [
             "Log in as **Team Lead / Manager**",
-            "Attempt to access a restricted page as **Team Lead / Manager**",
-            "Verify access is granted or denied based on role",
-            "Verify the expected outcome"
+            "Log in as **Manager** → attempt to access admin-restricted pages (User Management, Payroll Config)",
+            "Verify the page redirects or shows an **Access Denied** response for each restricted page",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:50.341Z"
+          "duration": 4149,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:55.388Z"
         },
         {
           "testId": "BW-155",
@@ -2133,13 +2356,14 @@
           "screenshotUrl": "guides/screenshots/BW-155.png",
           "steps": [
             "Log in as **Team Lead / Manager**",
-            "Attempt to access a restricted page as **Team Lead / Manager**",
-            "Verify access is granted or denied based on role",
-            "Verify the expected outcome"
+            "Log in as **Manager** → navigate to each manager-allowed section",
+            "Verify access to: Leave Approvals, Timesheet Approvals, Team Members, Projects",
+            "Confirm each page loads without errors or permission prompts",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:52.692Z"
+          "duration": 2356,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:57.751Z"
         },
         {
           "testId": "BW-156",
@@ -2158,13 +2382,14 @@
           "screenshotUrl": "guides/screenshots/BW-156.png",
           "steps": [
             "Log in as **HR Manager**",
-            "Attempt to access a restricted page as **HR Manager**",
-            "Verify access is granted or denied based on role",
-            "Verify the expected outcome"
+            "Log in as **HR Manager** → navigate to HR-specific sections",
+            "Verify access to: Payroll Management, Employee Management, Leave Management",
+            "Confirm HR has read and write access for employee records and payroll actions",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:56.518Z"
+          "duration": 4346,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:02.105Z"
         },
         {
           "testId": "BW-157",
@@ -2183,13 +2408,14 @@
           "screenshotUrl": "guides/screenshots/BW-157.png",
           "steps": [
             "Log in as **Administrator**",
-            "Attempt to access a restricted page as **Administrator**",
-            "Verify access is granted or denied based on role",
-            "Verify the expected outcome"
+            "Log in as **Administrator** → verify full system access",
+            "Navigate to all major sections: User Management, Organization, Payroll, Reports, Settings",
+            "Verify no **Access Denied** messages and all CRUD operations are available",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:01.343Z"
+          "duration": 4487,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:06.601Z"
         },
         {
           "testId": "BW-158",
@@ -2210,12 +2436,13 @@
           "steps": [
             "Log in as **Employee**",
             "Attempt to access a restricted page as **Employee**",
-            "Verify access is granted or denied based on role",
-            "Verify the expected outcome"
+            "Verify the response matches expected role-based permission (allow or deny)",
+            "Confirm API returns **403 Forbidden** for unauthorized role access attempts",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:06.004Z"
+          "duration": 4455,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:11.070Z"
         }
       ]
     },
@@ -2243,12 +2470,14 @@
           "screenshotUrl": "guides/screenshots/BW-170.png",
           "steps": [
             "Log in as **Administrator**",
-            "Verify sidebar navigation items are visible",
-            "Verify the expected outcome"
+            "Log in as **Administrator** → verify all admin sidebar sections are visible",
+            "Sections expected: Dashboard, Employees, Leave, Timesheets, Payroll, Organization, User Management, Reports, Settings, Help",
+            "Click each top-level menu item → verify the correct page loads without errors",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:08.780Z"
+          "duration": 2384,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:13.462Z"
         },
         {
           "testId": "BW-171",
@@ -2267,12 +2496,14 @@
           "screenshotUrl": "guides/screenshots/BW-171.png",
           "steps": [
             "Log in as **Employee**",
-            "Verify sidebar navigation items are visible",
-            "Verify the expected outcome"
+            "Log in as **Employee** → verify the employee sidebar is shown",
+            "Sections expected: Dashboard, My Timesheet, My Leave, My Payslips, My Attendance, My Reviews, My Tasks, My Profile, Help",
+            "Click each item → verify correct page loads without Access Denied errors",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:11.223Z"
+          "duration": 2266,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:15.737Z"
         },
         {
           "testId": "BW-172",
@@ -2291,13 +2522,14 @@
           "screenshotUrl": "guides/screenshots/BW-172.png",
           "steps": [
             "Log in as **Employee**",
-            "Verify sidebar navigation items are visible",
-            "Click profile avatar → Verify dropdown menu",
-            "Verify the expected outcome"
+            "Click the **profile avatar** in the top-right corner of the header",
+            "Verify the dropdown shows: **My Profile**, **Change Password**, and **Logout**",
+            "Click **My Profile** → verify the profile page loads with correct user details",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:13.594Z"
+          "duration": 2470,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:18.215Z"
         },
         {
           "testId": "BW-173",
@@ -2316,13 +2548,14 @@
           "screenshotUrl": "guides/screenshots/BW-173.png",
           "steps": [
             "Log in as **Administrator**",
-            "Verify sidebar navigation items are visible",
-            "Navigate to a non-existent URL → Verify 404 page",
-            "Verify the expected outcome"
+            "Navigate to a non-existent URL (e.g., /this-page-does-not-exist)",
+            "Verify the **404 — Page Not Found** screen appears with a helpful message",
+            "Click **Go to Dashboard** or use the browser back button → verify redirect to the home page",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:18.167Z"
+          "duration": 4299,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:22.522Z"
         }
       ]
     },
@@ -2350,12 +2583,15 @@
           "screenshotUrl": "guides/screenshots/BW-180.png",
           "steps": [
             "Log in as **Administrator**",
-            "Execute the **Admin opens reports page and verifies date filter and export button** workflow",
-            "Verify the expected outcome"
+            "Navigate to **Reports** (admin/HR only)",
+            "View available report types: Employee Summary, Leave Report, Payroll Summary, Timesheet Report",
+            "Select parameters (date range, department) → click **Generate**",
+            "Verify the report table loads with correct aggregated data",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:20.959Z"
+          "duration": 2520,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:25.049Z"
         },
         {
           "testId": "BW-181",
@@ -2374,12 +2610,15 @@
           "screenshotUrl": "guides/screenshots/BW-181.png",
           "steps": [
             "Log in as **Administrator**",
-            "Execute the **Admin opens settings hub and navigates through email/preferences/advanced tabs** workflow",
-            "Verify the expected outcome"
+            "Navigate to **Settings Hub** (admin only)",
+            "View the available settings categories: General, Email, Security, Notifications",
+            "Update a setting (e.g., company name or email config) → click **Save**",
+            "Verify the change is persisted after a page refresh",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:23.383Z"
+          "duration": 2249,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:27.306Z"
         },
         {
           "testId": "BW-182",
@@ -2398,12 +2637,15 @@
           "screenshotUrl": "guides/screenshots/BW-182.png",
           "steps": [
             "Log in as **Administrator**",
-            "Execute the **Admin opens restore management page and verifies reviews/balances/users tabs** workflow",
-            "Verify the expected outcome"
+            "Navigate to **Restore Management** (admin only)",
+            "View the **Backup History** tab → confirm backup records are listed with timestamps",
+            "Check the **Data Import** tab → verify the import interface is accessible",
+            "Check the **Audit Trail** tab → view recent system changes and restore points",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:26.283Z"
+          "duration": 2282,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:29.596Z"
         },
         {
           "testId": "BW-183",
@@ -2422,12 +2664,14 @@
           "screenshotUrl": "guides/screenshots/BW-183.png",
           "steps": [
             "Log in as **Administrator**",
-            "Execute the **Admin exports report data and verifies download triggers** workflow",
-            "Verify the expected outcome"
+            "Navigate to **Reports** → generate any available report",
+            "Click **Export** → verify the report downloads in CSV or PDF format",
+            "Open the downloaded file → verify it contains correct report data",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:03:29.036Z"
+          "duration": 2594,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:46:32.202Z"
         }
       ]
     },
@@ -2455,12 +2699,15 @@
           "screenshotUrl": "guides/screenshots/BW-130.png",
           "steps": [
             "Log in as **Administrator**",
-            "Execute the **Full hire-to-paycheck: create employee → assign dept → create login → generate payslip** workflow",
-            "Verify the expected outcome"
+            "Configure employee salary structure → ensure timesheets are submitted and approved",
+            "Generate payroll for the same period → verify payroll uses approved timesheet hours",
+            "Finalize and mark payroll as Paid → employee downloads the payslip",
+            "Verify the payslip shows correct regular and overtime pay using the timesheet data",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:11.058Z"
+          "duration": 6396,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:18.267Z"
         },
         {
           "testId": "BW-131",
@@ -2479,11 +2726,14 @@
           "screenshotUrl": "guides/screenshots/BW-131.png",
           "steps": [
             "Log in as **Employee**",
-            "Verify the expected outcome"
+            "Employee submits a leave request for specific dates → manager approves it",
+            "Navigate to **Attendance Management** → view the approved leave dates",
+            "Verify those dates automatically show **On Leave** status in the attendance record",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:21.493Z"
+          "duration": 10172,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:28.446Z"
         },
         {
           "testId": "BW-132",
@@ -2502,11 +2752,15 @@
           "screenshotUrl": "guides/screenshots/BW-132.png",
           "steps": [
             "Log in as **Employee**",
-            "Verify the expected outcome"
+            "Employee submits weekly timesheets → manager approves them",
+            "Admin generates payroll for the same period",
+            "Verify payroll calculation includes the **approved timesheet hours**",
+            "Confirm the payslip shows correct total hours worked and corresponding pay",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:26.257Z"
+          "duration": 3589,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:32.042Z"
         },
         {
           "testId": "BW-133",
@@ -2526,12 +2780,15 @@
           "screenshotUrl": "guides/screenshots/BW-133.png",
           "steps": [
             "Log in as **Administrator**",
-            "Execute the **Dashboard stat cards reflect actual employee/leave/attendance counts** workflow",
-            "Verify the expected outcome"
+            "Log in as **Administrator** → view the system dashboard with organisation-wide statistics",
+            "Verify stats: total employees, pending leave requests, pending timesheets, payroll status",
+            "Log in as **Manager** → confirm the dashboard shows team-specific metrics",
+            "Log in as **Employee** → confirm personal stats: leave balance, timesheet status, latest payslip",
+            "Verify the expected outcome is achieved"
           ],
-          "duration": null,
-          "status": "recorded",
-          "recordedAt": "2026-03-21T19:02:28.889Z"
+          "duration": 2350,
+          "status": "passed",
+          "recordedAt": "2026-03-28T07:45:34.399Z"
         }
       ]
     }
@@ -2556,13 +2813,17 @@
       "steps": [
         "Log in as **Administrator**",
         "Navigate to **Employees** → Click **Add Employee**",
-        "Fill in personal details (name, email, phone)",
-        "Click **Next** → Fill employment info (department, position)",
-        "Verify the expected outcome"
+        "Fill **Personal Info**: first name, last name, email, phone, nationality, city, state, PIN code",
+        "Click **Next** → Fill **Employment Info**: department, position, hire date, employment type",
+        "Click **Next** → Fill **Emergency Contact**: contact name and phone number",
+        "Click **Next** → Fill **Statutory & Banking**: PAN, Aadhaar, bank name, account and IFSC",
+        "Toggle **Enable Login** → set password and confirm password",
+        "Click **Submit** → verify the new employee appears in the Employees list",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:54:17.762Z"
+      "duration": 20999,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:01.907Z"
     },
     {
       "testId": "BW-011",
@@ -2581,14 +2842,16 @@
       "screenshotUrl": "guides/screenshots/BW-011.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Employees** → Click **Add Employee**",
-        "Fill in personal details (name, email, phone)",
-        "Search employee → Click **Create Login**",
-        "Verify the expected outcome"
+        "Navigate to **Employees** → search for the target employee by name",
+        "Click the employee row to open their profile",
+        "Click **Create Login** (or go to **Statutory & Banking** tab → User Account section)",
+        "Enter email, set password and confirm → click **Save**",
+        "Verify a success message confirms the login account was created",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:54:23.224Z"
+      "duration": 5026,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:06.941Z"
     },
     {
       "testId": "BW-012",
@@ -2607,13 +2870,15 @@
       "screenshotUrl": "guides/screenshots/BW-012.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **Employees** → Click **Add Employee**",
-        "Fill in personal details (name, email, phone)",
-        "Verify the expected outcome"
+        "Log out of the admin account",
+        "Log back in using the **new employee's credentials** (email + password)",
+        "Verify the **Employee Dashboard** loads with a personalised welcome",
+        "Confirm the sidebar shows: My Timesheet, My Leave, My Payslips, My Attendance, My Profile",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:54:25.889Z"
+      "duration": 2146,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:09.096Z"
     },
     {
       "testId": "BW-013",
@@ -2632,13 +2897,15 @@
       "screenshotUrl": "guides/screenshots/BW-013.png",
       "steps": [
         "Log in as **HR Manager**",
-        "Navigate to **Employees** → Click **Add Employee**",
-        "Fill in personal details (name, email, phone)",
-        "Verify the expected outcome"
+        "Navigate to **Employees** → locate the new employee in the list",
+        "Click **Edit** → switch to the **Employment Info** tab",
+        "Select the correct **Department** and **Position** from the dropdowns",
+        "Click **Save** → verify the profile now shows the assigned department and position",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:54:29.656Z"
+      "duration": 3358,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:12.466Z"
     },
     {
       "testId": "BW-020",
@@ -2658,13 +2925,16 @@
       "screenshotUrl": "guides/screenshots/BW-020.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **Leave Request** → Select leave type",
-        "Fill start/end dates and reason → Click **Submit**",
-        "Verify the expected outcome"
+        "Navigate to **My Leave** → click **New Leave Request**",
+        "Select **Leave Type** from the dropdown (Annual, Sick, Casual, etc.)",
+        "Pick **Start Date** and **End Date** using the date picker",
+        "Enter a **Reason** in the text area → click **Submit**",
+        "Verify the request appears in the list with **Pending** status",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:54:38.545Z"
+      "duration": 8302,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:20.774Z"
     },
     {
       "testId": "BW-021",
@@ -2683,12 +2953,16 @@
       "screenshotUrl": "guides/screenshots/BW-021.png",
       "steps": [
         "Log in as **Team Lead / Manager**",
-        "Navigate to **Leave Management** → Click **Approve**",
-        "Verify the expected outcome"
+        "Navigate to **Leave Management** → open the **Pending** tab",
+        "Locate the employee's leave request in the table",
+        "Click **Approve** → optionally add a review comment",
+        "Click **Confirm** → verify the status changes to **Approved**",
+        "Confirm the employee's leave balance decreases accordingly",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:54:42.113Z"
+      "duration": 4054,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:24.836Z"
     },
     {
       "testId": "BW-022",
@@ -2707,12 +2981,14 @@
       "screenshotUrl": "guides/screenshots/BW-022.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **Leave Management** → Click **Approve**",
-        "Verify the expected outcome"
+        "Navigate to **My Leave** (employee view)",
+        "Verify the approved request shows status **Approved** with the approver's name",
+        "Check the leave balance cards at the top — balance should be reduced by the approved days",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:54:44.460Z"
+      "duration": 2138,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:26.985Z"
     },
     {
       "testId": "BW-023",
@@ -2731,13 +3007,15 @@
       "screenshotUrl": "guides/screenshots/BW-023.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **Leave Request** → Select leave type",
-        "Navigate to **Leave Management** → Click **Reject**",
-        "Verify the expected outcome"
+        "Navigate to **Leave Management** → open the **Pending** tab",
+        "Click **Reject** on the target request → enter a mandatory rejection reason",
+        "Click **Confirm** → verify the status changes to **Rejected**",
+        "Verify the employee's leave balance is **fully restored**",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:54:53.572Z"
+      "duration": 9552,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:36.546Z"
     },
     {
       "testId": "BW-024",
@@ -2756,12 +3034,15 @@
       "screenshotUrl": "guides/screenshots/BW-024.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **Leave Requests** → View balance cards",
-        "Verify the expected outcome"
+        "Navigate to **My Leave** (employee view)",
+        "View the **Leave Balance** cards: Annual, Sick, Casual days available",
+        "Submit a leave request → verify the balance decreases immediately",
+        "Cancel or reject the request → verify the balance is fully restored",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:54:55.961Z"
+      "duration": 2178,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:38.730Z"
     },
     {
       "testId": "BW-025",
@@ -2780,12 +3061,15 @@
       "screenshotUrl": "guides/screenshots/BW-025.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **My Leaves** → Click **Cancel** on pending request",
-        "Verify the expected outcome"
+        "Navigate to **My Leave** → find a leave request with **Pending** status",
+        "Click **Cancel** on the request → confirm the cancellation",
+        "Verify status changes to **Cancelled**",
+        "Verify the leave balance is fully **restored**",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:55:04.123Z"
+      "duration": 7705,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:46.442Z"
     },
     {
       "testId": "BW-026",
@@ -2805,11 +3089,14 @@
       "screenshotUrl": "guides/screenshots/BW-026.png",
       "steps": [
         "Log in as **Employee**",
-        "Verify the expected outcome"
+        "Navigate to **My Leave** → submit a leave request for specific dates",
+        "Attempt to submit a second request for overlapping dates",
+        "Verify the system shows an **overlap error** and blocks the duplicate submission",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:55:11.057Z"
+      "duration": 6383,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:52.832Z"
     },
     {
       "testId": "BW-027",
@@ -2829,12 +3116,14 @@
       "screenshotUrl": "guides/screenshots/BW-027.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **Leave Requests** → View balance cards",
-        "Verify the expected outcome"
+        "Navigate to **My Leave** → confirm leave balance shows **0 days** remaining",
+        "Attempt to submit a new leave request for those leave type days",
+        "Verify the system shows an **Insufficient balance** error and prevents submission",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:55:17.940Z"
+      "duration": 6450,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:36:59.289Z"
     },
     {
       "testId": "BW-028",
@@ -2853,12 +3142,16 @@
       "screenshotUrl": "guides/screenshots/BW-028.png",
       "steps": [
         "Log in as **Administrator**",
-        "Open **Leave Management** → Search and filter requests",
-        "Verify the expected outcome"
+        "Navigate to **Leave Management** (admin/HR view)",
+        "Use the **search bar** to filter by employee name",
+        "Filter by **Status** (Pending, Approved, Rejected, Cancelled)",
+        "Filter by **Date Range** to narrow to a specific period",
+        "Approve or reject requests in bulk or individually as needed",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:55:24.608Z"
+      "duration": 6220,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:37:05.516Z"
     },
     {
       "testId": "BW-029",
@@ -2878,12 +3171,15 @@
       "screenshotUrl": "guides/screenshots/BW-029.png",
       "steps": [
         "Log in as **Administrator**",
-        "Open **Leave Types** → Add / Edit / Delete leave types",
-        "Verify the expected outcome"
+        "Navigate to **Organization** → click the **Leave Types** tab",
+        "Click **Add Leave Type** → enter name, default days, and carry-forward rules",
+        "Click **Save** → verify the new leave type appears in the list",
+        "Click **Edit** to modify an entry → click **Delete** to remove it",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:55:48.147Z"
+      "duration": 7485,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:37:13.009Z"
     },
     {
       "testId": "BW-030",
@@ -2903,11 +3199,14 @@
       "screenshotUrl": "guides/screenshots/BW-030.png",
       "steps": [
         "Log in as **Administrator**",
-        "Verify the expected outcome"
+        "Navigate to **Leave Management** → view an employee's leave balance",
+        "Verify annual leave is accrued based on the employee's hire date and company policy",
+        "Check that any carry-forward balance from the previous year is applied",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:55:55.487Z"
+      "duration": 6450,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:37:19.466Z"
     },
     {
       "testId": "BW-031",
@@ -2926,11 +3225,14 @@
       "screenshotUrl": "guides/screenshots/BW-031.png",
       "steps": [
         "Log in as **Employee**",
-        "Verify the expected outcome"
+        "Navigate to **My Leave** → submit a leave request for specific dates",
+        "Attempt to submit a second request for overlapping dates",
+        "Verify the system shows an **overlap error** and blocks the duplicate submission",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:56:04.465Z"
+      "duration": 9168,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:37:28.643Z"
     },
     {
       "testId": "BW-040",
@@ -2950,12 +3252,15 @@
       "screenshotUrl": "guides/screenshots/BW-040.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **My Attendance** → Click **Check In** then **Check Out**",
-        "Verify the expected outcome"
+        "Navigate to **My Attendance** → verify today's record is displayed",
+        "Click **Check In** → a timestamp is recorded for the start of the work day",
+        "After work, click **Check Out** → the system calculates total hours worked",
+        "Verify the daily record shows check-in time, check-out time, and duration",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:56:10.564Z"
+      "duration": 5765,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:37:34.418Z"
     },
     {
       "testId": "BW-041",
@@ -2974,12 +3279,15 @@
       "screenshotUrl": "guides/screenshots/BW-041.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Attendance Management** → Use filters/mark attendance",
-        "Verify the expected outcome"
+        "Navigate to **Attendance Management** → search for the target employee",
+        "Select the date and choose the attendance type (Present, Absent, Half Day, On Leave)",
+        "Click **Mark Attendance** → verify the record is saved",
+        "Check the employee's attendance calendar reflects the admin-marked entry",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:56:14.782Z"
+      "duration": 3782,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:37:38.206Z"
     },
     {
       "testId": "BW-042",
@@ -2998,12 +3306,14 @@
       "screenshotUrl": "guides/screenshots/BW-042.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **My Attendance** → Change month/year dropdowns",
-        "Verify the expected outcome"
+        "Navigate to **My Attendance** → the current month is shown by default",
+        "Use the **Month** and **Year** dropdowns to navigate to a previous period",
+        "Verify historical attendance records load correctly for the selected month",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:56:18.922Z"
+      "duration": 3737,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:37:41.951Z"
     },
     {
       "testId": "BW-043",
@@ -3022,12 +3332,15 @@
       "screenshotUrl": "guides/screenshots/BW-043.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Attendance Management** → Use filters/mark attendance",
-        "Verify the expected outcome"
+        "Navigate to **Attendance Management** → use the search bar to find an employee",
+        "Apply a **Department** filter to narrow the employee list",
+        "Set a **Date Range** filter → verify the summary updates with filtered data",
+        "Review totals: Present days, Absent days, and total hours worked",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:56:23.225Z"
+      "duration": 3602,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:37:45.560Z"
     },
     {
       "testId": "BW-044",
@@ -3047,11 +3360,15 @@
       "screenshotUrl": "guides/screenshots/BW-044.png",
       "steps": [
         "Log in as **Employee**",
-        "Verify the expected outcome"
+        "Employee checks in for the day but does not check out (simulate missed check-out)",
+        "Navigate to **Attendance Management** as admin → locate the incomplete record",
+        "Click **Edit** → manually set the check-out time",
+        "Verify total hours are recalculated and the record is now complete",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:56:26.713Z"
+      "duration": 3108,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:37:48.674Z"
     },
     {
       "testId": "BW-050",
@@ -3071,12 +3388,15 @@
       "screenshotUrl": "guides/screenshots/BW-050.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **Timesheets** → Add task → Fill weekly hours",
-        "Verify the expected outcome"
+        "Navigate to **My Timesheet** → verify the current week is displayed",
+        "Click **Add Entry** → select a **Project** and **Task** from the dropdowns",
+        "Enter hours for each day of the week (Mon–Fri) in the time grid",
+        "Click **Save Draft** → verify hours are saved and the weekly total updates",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
+      "duration": 17395,
       "status": "recorded",
-      "recordedAt": "2026-03-21T18:56:35.302Z"
+      "recordedAt": "2026-03-28T07:38:06.161Z"
     },
     {
       "testId": "BW-051",
@@ -3095,12 +3415,15 @@
       "screenshotUrl": "guides/screenshots/BW-051.png",
       "steps": [
         "Log in as **Employee**",
-        "Click **Submit** to send timesheet for approval",
-        "Verify the expected outcome"
+        "Navigate to **My Timesheet** → review all draft entries for the week",
+        "Verify the total hours and project breakdown look correct",
+        "Click **Submit for Approval** → confirm the submission",
+        "Verify the timesheet status changes to **Submitted** and all fields become read-only",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
+      "duration": 2187,
       "status": "recorded",
-      "recordedAt": "2026-03-21T18:56:42.669Z"
+      "recordedAt": "2026-03-28T07:38:09.917Z"
     },
     {
       "testId": "BW-052",
@@ -3119,12 +3442,15 @@
       "screenshotUrl": "guides/screenshots/BW-052.png",
       "steps": [
         "Log in as **Employee**",
-        "Click **Submit** to send timesheet for approval",
-        "Verify the expected outcome"
+        "Navigate to **My Timesheet** → find a timesheet with **Submitted** status",
+        "Attempt to edit any hour entry → verify all fields are **read-only**",
+        "Verify the Submit button is replaced by a status badge",
+        "Confirm the timesheet can only be modified after a manager rejects it",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:56:45.224Z"
+      "duration": 2257,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:38:13.645Z"
     },
     {
       "testId": "BW-053",
@@ -3143,12 +3469,15 @@
       "screenshotUrl": "guides/screenshots/BW-053.png",
       "steps": [
         "Log in as **Team Lead / Manager**",
-        "Navigate to **Timesheet Approvals** → Click **Approve**",
-        "Verify the expected outcome"
+        "Navigate to **Timesheet Approvals** (manager view) → view pending team timesheets",
+        "Click on an employee's submitted timesheet to review hours by project and day",
+        "Click **Approve** → optionally add a comment",
+        "Verify the timesheet status changes to **Approved** in the approvals list",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:56:50.341Z"
+      "duration": 4681,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:38:18.333Z"
     },
     {
       "testId": "BW-054",
@@ -3167,12 +3496,15 @@
       "screenshotUrl": "guides/screenshots/BW-054.png",
       "steps": [
         "Log in as **Team Lead / Manager**",
-        "Navigate to **Timesheet Approvals** → Click **Reject** with comments",
-        "Verify the expected outcome"
+        "Navigate to **Timesheet Approvals** → find a pending team timesheet",
+        "Click **Reject** → enter a mandatory rejection reason in the text field",
+        "Click **Confirm** → verify status changes to **Rejected**",
+        "Employee can now reopen and resubmit the timesheet with corrections",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:56:55.485Z"
+      "duration": 4781,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:38:23.123Z"
     },
     {
       "testId": "BW-055",
@@ -3191,12 +3523,15 @@
       "screenshotUrl": "guides/screenshots/BW-055.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **Timesheet Approvals** → Click **Reject** with comments",
-        "Verify the expected outcome"
+        "Navigate to **My Timesheet** → find a timesheet with **Rejected** status",
+        "Read the rejection comment from the manager",
+        "Click **Edit** to reopen the timesheet → correct the hours or project entries",
+        "Click **Submit** again → verify status returns to **Submitted** for re-approval",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:01.166Z"
+      "duration": 2173,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:38:25.304Z"
     },
     {
       "testId": "BW-056",
@@ -3215,13 +3550,15 @@
       "screenshotUrl": "guides/screenshots/BW-056.png",
       "steps": [
         "Log in as **Team Lead / Manager**",
-        "Navigate to **Timesheet Approvals** → Click **Approve**",
-        "Select multiple timesheets → Use **Bulk Approve**",
-        "Verify the expected outcome"
+        "Navigate to **Timesheet Approvals** → switch to the list/table view",
+        "Select multiple pending timesheets using the row checkboxes",
+        "Click **Bulk Approve** at the top of the list → confirm the action",
+        "Verify all selected timesheets change to **Approved** status simultaneously",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:06.331Z"
+      "duration": 4681,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:38:29.993Z"
     },
     {
       "testId": "BW-057",
@@ -3240,12 +3577,14 @@
       "screenshotUrl": "guides/screenshots/BW-057.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **Timesheet History** → View/export past timesheets",
-        "Verify the expected outcome"
+        "Navigate to **Timesheet History** → select a date range for the report",
+        "Optionally filter by employee, project, or status",
+        "Click **Export** → verify a CSV or Excel file downloads to your device",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:10.278Z"
+      "duration": 3523,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:38:33.523Z"
     },
     {
       "testId": "BW-058",
@@ -3264,11 +3603,15 @@
       "screenshotUrl": "guides/screenshots/BW-058.png",
       "steps": [
         "Log in as **Employee**",
-        "Verify the expected outcome"
+        "Navigate to **My Timesheet** → click **Add Entry** → select **Project A**",
+        "Enter hours for Project A for the week → click **Save Draft**",
+        "Click **Add Entry** again → select **Project B** → enter additional hours",
+        "Verify both project entries appear and the weekly total aggregates all hours",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
+      "duration": 17328,
       "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:15.067Z"
+      "recordedAt": "2026-03-28T07:38:50.927Z"
     },
     {
       "testId": "BW-059",
@@ -3288,11 +3631,15 @@
       "screenshotUrl": "guides/screenshots/BW-059.png",
       "steps": [
         "Log in as **Employee**",
-        "Verify the expected outcome"
+        "Navigate to **My Timesheet** → try submitting without entering any hours",
+        "Verify the validation error: **No hours entered for this week**",
+        "Try entering a negative number in any day field → verify it is rejected",
+        "Enter valid hours → verify the submit button becomes active",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
+      "duration": 17331,
       "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:19.317Z"
+      "recordedAt": "2026-03-28T07:39:09.877Z"
     },
     {
       "testId": "BW-060",
@@ -3312,12 +3659,15 @@
       "screenshotUrl": "guides/screenshots/BW-060.png",
       "steps": [
         "Log in as **Employee**",
-        "Click **Submit** to send timesheet for approval",
-        "Verify the expected outcome"
+        "Navigate to **My Timesheet** → ensure the week has no entries",
+        "Click **Submit** on the empty timesheet",
+        "Verify the system shows an error: hours are required before submitting",
+        "Add at least one hour → verify **Submit** is now allowed",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:21.958Z"
+      "duration": 2106,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:39:13.501Z"
     },
     {
       "testId": "BW-061",
@@ -3337,11 +3687,14 @@
       "screenshotUrl": "guides/screenshots/BW-061.png",
       "steps": [
         "Log in as **Employee**",
-        "Verify the expected outcome"
+        "Navigate to **My Timesheet** → enter more than 8 hours for a single day",
+        "Verify overtime hours are highlighted or flagged in the grid",
+        "Submit the timesheet → verify overtime is visible in the manager approval view",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
+      "duration": 17370,
       "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:25.956Z"
+      "recordedAt": "2026-03-28T07:39:30.981Z"
     },
     {
       "testId": "BW-070",
@@ -3361,12 +3714,15 @@
       "screenshotUrl": "guides/screenshots/BW-070.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Payroll Management** → Review tabs",
-        "Verify the expected outcome"
+        "Navigate to **Payroll Management** → verify the page loads with all tabs",
+        "Click **Payroll List** tab → view all payroll records for the current period",
+        "Click **Generate Payroll** tab → view the generation form",
+        "Click **Payslip Templates** tab → view configured salary templates",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:29.159Z"
+      "duration": 2341,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:39:35.094Z"
     },
     {
       "testId": "BW-071",
@@ -3385,12 +3741,15 @@
       "screenshotUrl": "guides/screenshots/BW-071.png",
       "steps": [
         "Log in as **Administrator**",
-        "Go to **Generate** tab → Click **Validate & Generate**",
-        "Verify the expected outcome"
+        "Navigate to **Payroll Management** → click the **Generate Payroll** tab",
+        "Select **Month** and **Year** from the dropdowns",
+        "Click **Validate & Generate** → review the preview: salaries, allowances, deductions",
+        "Click **Confirm Generate** → verify payroll records are created with **Draft** status",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:33.430Z"
+      "duration": 3405,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:39:38.507Z"
     },
     {
       "testId": "BW-072",
@@ -3409,12 +3768,15 @@
       "screenshotUrl": "guides/screenshots/BW-072.png",
       "steps": [
         "Log in as **Administrator**",
-        "Select payroll records → Click **Finalize**",
-        "Verify the expected outcome"
+        "Navigate to **Payroll Management** → select **Draft** payroll records using checkboxes",
+        "Review all employee payroll entries for accuracy",
+        "Click **Finalize** → confirm the action in the dialog",
+        "Verify status changes from **Draft** to **Finalized** (editing is now locked)",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:39.307Z"
+      "duration": 2743,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:39:41.261Z"
     },
     {
       "testId": "BW-073",
@@ -3433,12 +3795,15 @@
       "screenshotUrl": "guides/screenshots/BW-073.png",
       "steps": [
         "Log in as **Administrator**",
-        "Select finalized records → Click **Mark as Paid**",
-        "Verify the expected outcome"
+        "Navigate to **Payroll Management** → select **Finalized** payroll records",
+        "Click **Mark as Paid** → enter the payment date and payment method",
+        "Confirm the action → verify status changes to **Paid**",
+        "Employee payslips are now available for download from **My Payslips**",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:45.298Z"
+      "duration": 2875,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:39:44.145Z"
     },
     {
       "testId": "BW-074",
@@ -3457,12 +3822,14 @@
       "screenshotUrl": "guides/screenshots/BW-074.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **My Payslips** → View summary and history",
-        "Verify the expected outcome"
+        "Navigate to **My Payslips** (employee view)",
+        "View the payslip summary: gross pay, total deductions, and net pay",
+        "Check the payslip history showing previous months with their payment status",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:48.108Z"
+      "duration": 2134,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:39:46.287Z"
     },
     {
       "testId": "BW-075",
@@ -3481,13 +3848,15 @@
       "screenshotUrl": "guides/screenshots/BW-075.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **My Payslips** → View summary and history",
-        "Click **Download** on a payslip row",
-        "Verify the expected outcome"
+        "Navigate to **My Payslips** → find a payslip with **Paid** status",
+        "Click the **Download** button on the payslip row",
+        "Verify a PDF payslip opens or downloads to your device",
+        "Confirm the PDF contains: employee name, pay period, earnings breakdown, deductions, net pay",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:50.601Z"
+      "duration": 2155,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:39:48.449Z"
     },
     {
       "testId": "BW-076",
@@ -3506,12 +3875,14 @@
       "screenshotUrl": "guides/screenshots/BW-076.png",
       "steps": [
         "Log in as **Administrator**",
-        "Use search bar → Click **Export**",
-        "Verify the expected outcome"
+        "Navigate to **Payroll Management** → use the search bar to filter by employee name",
+        "Filter by **Month**, **Year**, or **Status** (Draft, Finalized, Paid)",
+        "Click **Export** → verify payroll data downloads as a CSV or Excel file",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
+      "duration": 17508,
       "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:55.324Z"
+      "recordedAt": "2026-03-28T07:40:06.020Z"
     },
     {
       "testId": "BW-077",
@@ -3530,12 +3901,16 @@
       "screenshotUrl": "guides/screenshots/BW-077.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Payroll Template Config**",
-        "Verify the expected outcome"
+        "Navigate to **Payroll Template Configuration** (admin only)",
+        "View existing templates or click **Add Template** to create a new one",
+        "Configure **Earnings**: basic salary, HRA, transport allowance, medical allowance",
+        "Configure **Deductions**: PF, ESI, professional tax → click **Save**",
+        "Assign the template to specific departments or individual employees",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:57:58.318Z"
+      "duration": 2302,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:40:09.881Z"
     },
     {
       "testId": "BW-078",
@@ -3555,11 +3930,15 @@
       "screenshotUrl": "guides/screenshots/BW-078.png",
       "steps": [
         "Log in as **HR Manager**",
-        "Verify the expected outcome"
+        "Log in as **HR Manager** → navigate to **Payroll Management**",
+        "Verify HR can view all employee payroll records",
+        "Verify HR can generate, finalize, and mark payroll as paid",
+        "Confirm HR access level is equivalent to admin for payroll operations",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
+      "duration": 17418,
       "status": "recorded",
-      "recordedAt": "2026-03-21T18:58:02.152Z"
+      "recordedAt": "2026-03-28T07:40:27.402Z"
     },
     {
       "testId": "BW-079",
@@ -3579,12 +3958,14 @@
       "screenshotUrl": "guides/screenshots/BW-079.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **My Payslips** → View summary and history",
-        "Verify the expected outcome"
+        "Log in as **Employee** → attempt to navigate to **Payroll Management**",
+        "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+        "Navigate to **My Payslips** → verify the employee can only see their own payslips",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:58:06.643Z"
+      "duration": 4083,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:40:32.969Z"
     },
     {
       "testId": "BW-080",
@@ -3604,11 +3985,15 @@
       "screenshotUrl": "guides/screenshots/BW-080.png",
       "steps": [
         "Log in as **Administrator**",
-        "Verify the expected outcome"
+        "Generate payroll for an employee with a known salary structure",
+        "Verify **Gross Pay** = basic salary + HRA + all configured allowances",
+        "Verify **Deductions** = PF + ESI + income tax + any other configured deductions",
+        "Verify **Net Pay** = Gross Pay − Total Deductions → cross-check with salary structure",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:58:10.119Z"
+      "duration": 2229,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:40:35.199Z"
     },
     {
       "testId": "BW-081",
@@ -3628,11 +4013,15 @@
       "screenshotUrl": "guides/screenshots/BW-081.png",
       "steps": [
         "Log in as **Administrator**",
-        "Verify the expected outcome"
+        "Navigate to **Payroll Management** → find a **Draft** payroll entry",
+        "Update the employee's salary structure (e.g., change basic salary)",
+        "Return to payroll → click **Regenerate** on the draft entry",
+        "Verify the payroll amounts are recalculated and net pay reflects the changes",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:58:14.449Z"
+      "duration": 3386,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:40:38.591Z"
     },
     {
       "testId": "BW-090",
@@ -3652,12 +4041,14 @@
       "screenshotUrl": "guides/screenshots/BW-090.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **My Tasks** → Use priority filter",
-        "Verify the expected outcome"
+        "Navigate to **My Tasks** → view all tasks assigned to you",
+        "Filter by **Priority** (High, Medium, Low) using the dropdown",
+        "Filter by **Status** (To Do, In Progress, Done) → verify counts update",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:58:18.064Z"
+      "duration": 33567,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:41:12.168Z"
     },
     {
       "testId": "BW-091",
@@ -3676,12 +4067,15 @@
       "screenshotUrl": "guides/screenshots/BW-091.png",
       "steps": [
         "Log in as **Employee**",
-        "Click status dropdown on a task → Select new status",
-        "Verify the expected outcome"
+        "Navigate to **My Tasks** → find a task assigned to you",
+        "Click the **Status** dropdown on the task card or row",
+        "Select a new status (e.g., **To Do** → **In Progress**)",
+        "Verify the task updates in the list immediately with the new status",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:58:22.440Z"
+      "duration": 33770,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:41:45.953Z"
     },
     {
       "testId": "BW-092",
@@ -3700,12 +4094,15 @@
       "screenshotUrl": "guides/screenshots/BW-092.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Project Config** → Click **Add Project** → Fill form",
-        "Verify the expected outcome"
+        "Navigate to **Project Configuration** → click **Add Project**",
+        "Fill in project name, description, start date, and end date",
+        "Assign team members to the project → click **Save**",
+        "Verify the new project appears in the project list with correct details",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:58:32.713Z"
+      "duration": 9161,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:41:55.121Z"
     },
     {
       "testId": "BW-093",
@@ -3724,12 +4121,14 @@
       "screenshotUrl": "guides/screenshots/BW-093.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Task Config** → Click **Add Task** → Fill form",
-        "Verify the expected outcome"
+        "Navigate to **Project Configuration** → select an existing project",
+        "Click **Add Task** → fill task name, description, priority, assignee, and due date",
+        "Click **Save** → verify the task appears under the project with all details correct",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:58:40.230Z"
+      "duration": 6680,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:42:01.809Z"
     },
     {
       "testId": "BW-094",
@@ -3748,11 +4147,15 @@
       "screenshotUrl": "guides/screenshots/BW-094.png",
       "steps": [
         "Log in as **Administrator**",
-        "Verify the expected outcome"
+        "Navigate to **Project Configuration** → click **Edit** on an existing project",
+        "Modify the project name or end date → click **Save** → verify the changes",
+        "Select an empty project → click **Delete** → confirm deletion",
+        "Verify the deleted project no longer appears in the list",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:58:49.679Z"
+      "duration": 8714,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:42:10.530Z"
     },
     {
       "testId": "BW-095",
@@ -3771,11 +4174,15 @@
       "screenshotUrl": "guides/screenshots/BW-095.png",
       "steps": [
         "Log in as **Administrator**",
-        "Verify the expected outcome"
+        "Navigate to **Project Configuration** (admin/manager) → select a project",
+        "Click **Add Task** → fill task name, description, priority, assignee, and due date",
+        "Click **Save** → verify the task appears under the project",
+        "The assigned employee navigates to **My Tasks** → confirms the task appears",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:58:58.507Z"
+      "duration": 38084,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:42:48.624Z"
     },
     {
       "testId": "BW-096",
@@ -3795,11 +4202,14 @@
       "screenshotUrl": "guides/screenshots/BW-096.png",
       "steps": [
         "Log in as **Employee**",
-        "Verify the expected outcome"
+        "Log in as **Employee** → navigate to **My Tasks** → verify only assigned tasks are shown",
+        "Attempt to access **Project Configuration** → verify access is denied",
+        "Log in as **Manager** → verify access to manage team projects and tasks",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:59:03.115Z"
+      "duration": 4086,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:42:52.716Z"
     },
     {
       "testId": "BW-100",
@@ -3819,12 +4229,15 @@
       "screenshotUrl": "guides/screenshots/BW-100.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Reviews** → Click **New Review** → Fill form",
-        "Verify the expected outcome"
+        "Navigate to **Employee Reviews** → click **New Review**",
+        "Select the employee, review period, and type (Annual, Mid-Year, Probation)",
+        "Enter performance ratings for each competency and add written feedback",
+        "Click **Save** → verify the review appears in the list with **Draft** status",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:59:11.472Z"
+      "duration": 7481,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:43:00.205Z"
     },
     {
       "testId": "BW-101",
@@ -3843,12 +4256,15 @@
       "screenshotUrl": "guides/screenshots/BW-101.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Reviews** → Click **Self-Assess** on your review",
-        "Verify the expected outcome"
+        "log in as **Employee** → navigate to **My Reviews**",
+        "Find a review with **Pending Self-Assessment** status → click **Self-Assess**",
+        "Fill in ratings and comments for each competency area",
+        "Click **Submit** → verify status updates and the manager is notified",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:59:14.467Z"
+      "duration": 2257,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:43:02.468Z"
     },
     {
       "testId": "BW-102",
@@ -3867,12 +4283,15 @@
       "screenshotUrl": "guides/screenshots/BW-102.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Reviews** → Click **Approve** → Confirm",
-        "Verify the expected outcome"
+        "Navigate to **Employee Reviews** (manager view) → find a review awaiting approval",
+        "Review the employee's self-assessment ratings alongside your own manager ratings",
+        "Click **Approve** → confirm the action in the dialog",
+        "Verify review status changes to **Approved** and the employee can view the final outcome",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:59:17.396Z"
+      "duration": 2290,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:43:04.765Z"
     },
     {
       "testId": "BW-103",
@@ -3891,12 +4310,14 @@
       "screenshotUrl": "guides/screenshots/BW-103.png",
       "steps": [
         "Log in as **Administrator**",
-        "Use search bar and status filter on **Reviews** page",
-        "Verify the expected outcome"
+        "Navigate to **Employee Reviews** → type an employee name in the search bar",
+        "Filter by **Status** (Draft, Pending, Manager Review, Approved)",
+        "Filter by **Review Period** → verify results update to match the selected filters",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:59:23.283Z"
+      "duration": 5036,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:43:09.809Z"
     },
     {
       "testId": "BW-104",
@@ -3915,12 +4336,14 @@
       "screenshotUrl": "guides/screenshots/BW-104.png",
       "steps": [
         "Log in as **Administrator**",
-        "Click **Edit** on a review → Make changes or **Cancel**",
-        "Verify the expected outcome"
+        "Navigate to **Employee Reviews** → find a review with **Draft** status",
+        "Click **Edit** → modify ratings or written comments → click **Save**",
+        "Click **Delete** on a draft review → confirm the deletion → verify it is removed",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:59:26.323Z"
+      "duration": 2418,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:43:12.234Z"
     },
     {
       "testId": "BW-105",
@@ -3940,11 +4363,14 @@
       "screenshotUrl": "guides/screenshots/BW-105.png",
       "steps": [
         "Log in as **Administrator**",
-        "Verify the expected outcome"
+        "Manager creates review → Employee completes self-assessment",
+        "Manager adds final ratings → both versions are visible side by side",
+        "Manager approves → both parties can view the final approved review",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T18:59:35.365Z"
+      "duration": 8114,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:43:20.362Z"
     },
     {
       "testId": "BW-110",
@@ -3964,13 +4390,15 @@
       "screenshotUrl": "guides/screenshots/BW-110.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Organization** → **Departments** tab",
-        "Use **Add**, **Edit**, or **Delete** buttons",
-        "Verify the expected outcome"
+        "Navigate to **Organization** → click the **Departments** tab",
+        "Click **Add Department** → enter department name and optional description",
+        "Click **Save** → verify the department appears in the department list",
+        "Click **Edit** to rename it → click **Delete** → confirm removal",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:00:03.500Z"
+      "duration": 12438,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:43:32.807Z"
     },
     {
       "testId": "BW-111",
@@ -3989,13 +4417,15 @@
       "screenshotUrl": "guides/screenshots/BW-111.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Organization** → **Positions** tab",
-        "Use **Add**, **Edit**, or **Delete** buttons",
-        "Verify the expected outcome"
+        "Navigate to **Organization** → click the **Positions** tab",
+        "Click **Add Position** → enter job title, select department, and set job level",
+        "Click **Save** → verify the position appears in the positions list",
+        "Click **Edit** to update details → click **Delete** → confirm removal",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:00:27.530Z"
+      "duration": 23713,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:43:56.527Z"
     },
     {
       "testId": "BW-112",
@@ -4014,13 +4444,15 @@
       "screenshotUrl": "guides/screenshots/BW-112.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Organization** → **Holidays** tab",
-        "Use **Add**, **Edit**, or **Delete** buttons",
-        "Verify the expected outcome"
+        "Navigate to **Organization** → click the **Holidays** tab",
+        "Click **Add Holiday** → enter holiday name, date, and type (National / Regional / Optional)",
+        "Click **Save** → verify the holiday appears in the holidays list",
+        "Click **Edit** to change the date → click **Delete** → confirm removal",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:00:51.534Z"
+      "duration": 8219,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:44:04.754Z"
     },
     {
       "testId": "BW-113",
@@ -4040,12 +4472,13 @@
       "steps": [
         "Log in as **Administrator**",
         "Navigate to **Organization** → **Departments** tab",
-        "Use **Add**, **Edit**, or **Delete** buttons",
-        "Verify the expected outcome"
+        "Type a department name in the **Search** bar",
+        "Verify the list filters in real time to show only matching departments",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:00:56.324Z"
+      "duration": 4478,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:44:09.239Z"
     },
     {
       "testId": "BW-114",
@@ -4065,13 +4498,15 @@
       "screenshotUrl": "guides/screenshots/BW-114.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **Organization** → **Departments** tab",
-        "Use **Add**, **Edit**, or **Delete** buttons",
-        "Verify the expected outcome"
+        "Navigate to **Organization** → **Departments** tab → click **Add Department**",
+        "Leave the department name field empty → click **Save**",
+        "Verify validation error: **Department name is required**",
+        "Fill in the name → verify the error clears and saving succeeds",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:01:17.655Z"
+      "duration": 20849,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:44:30.096Z"
     },
     {
       "testId": "BW-115",
@@ -4091,12 +4526,14 @@
       "screenshotUrl": "guides/screenshots/BW-115.png",
       "steps": [
         "Log in as **Employee**",
-        "Use **Add**, **Edit**, or **Delete** buttons",
-        "Verify the expected outcome"
+        "Log in as **Employee** → attempt to access **Organization** settings",
+        "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+        "Log in as **Admin** → verify full CRUD access to Departments, Positions, and Holidays",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:01:21.848Z"
+      "duration": 4022,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:44:34.127Z"
     },
     {
       "testId": "BW-116",
@@ -4117,12 +4554,14 @@
       "steps": [
         "Log in as **Administrator**",
         "Navigate to **Organization** → **Departments** tab",
-        "Use **Add**, **Edit**, or **Delete** buttons",
-        "Verify the expected outcome"
+        "Attempt to delete a department that has active employees assigned",
+        "Verify system shows a **warning** or prevents deletion with a clear error message",
+        "Reassign employees to another department first → verify deletion now succeeds",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:01:29.462Z"
+      "duration": 7035,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:44:41.168Z"
     },
     {
       "testId": "BW-120",
@@ -4142,13 +4581,15 @@
       "screenshotUrl": "guides/screenshots/BW-120.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **User Management**",
-        "Go to **Create** tab → Fill email, name, password, role",
-        "Verify the expected outcome"
+        "Navigate to **User Management** → click the **Create User** tab",
+        "Fill in: **Email**, **First Name**, **Last Name**, **Password**, **Confirm Password**, **Role**",
+        "Click **Create User** → verify a success message is displayed",
+        "Switch to the **Manage** tab → verify the new user appears with the correct role",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:01:35.122Z"
+      "duration": 5148,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:44:46.324Z"
     },
     {
       "testId": "BW-121",
@@ -4167,13 +4608,15 @@
       "screenshotUrl": "guides/screenshots/BW-121.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **User Management**",
-        "Go to **Manage** tab → Search and filter users",
-        "Verify the expected outcome"
+        "Navigate to **User Management** → click the **Manage** tab",
+        "Type a name or email in the **Search** bar → verify real-time filtering",
+        "Filter by **Role** (Admin, HR, Manager, Employee)",
+        "Filter by **Status** (Active, Inactive) → verify results update correctly",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:01:41.091Z"
+      "duration": 5326,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:44:51.656Z"
     },
     {
       "testId": "BW-122",
@@ -4193,13 +4636,15 @@
       "screenshotUrl": "guides/screenshots/BW-122.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **User Management**",
-        "Test form validation by submitting empty/mismatched data",
-        "Verify the expected outcome"
+        "Navigate to **User Management** → click **Create User**",
+        "Submit the empty form → verify all required field errors appear simultaneously",
+        "Enter mismatched passwords → verify **Passwords must match** error",
+        "Enter an already-used email → verify **Email already in use** error",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:01:46.366Z"
+      "duration": 4778,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:44:56.441Z"
     },
     {
       "testId": "BW-123",
@@ -4219,12 +4664,14 @@
       "screenshotUrl": "guides/screenshots/BW-123.png",
       "steps": [
         "Log in as **Employee**",
-        "Navigate to **User Management**",
-        "Verify the expected outcome"
+        "Log in as **Employee** → attempt to navigate to **User Management**",
+        "Verify redirect to the employee dashboard or **Access Denied** message is shown",
+        "Log in as **Admin** → verify full access: create, edit, activate/deactivate users",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:01:50.822Z"
+      "duration": 4110,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:00.558Z"
     },
     {
       "testId": "BW-124",
@@ -4244,12 +4691,15 @@
       "screenshotUrl": "guides/screenshots/BW-124.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **User Management**",
-        "Verify the expected outcome"
+        "Navigate to **User Management** → **Manage** tab → find the target user",
+        "Click **Edit** → change the **Role** dropdown (e.g., Employee → Manager)",
+        "Click **Save** → verify the role badge updates in the user list",
+        "The user's sidebar menu and access permissions reflect the new role on next login",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:01:57.363Z"
+      "duration": 5835,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:06.399Z"
     },
     {
       "testId": "BW-125",
@@ -4269,12 +4719,15 @@
       "screenshotUrl": "guides/screenshots/BW-125.png",
       "steps": [
         "Log in as **Administrator**",
-        "Navigate to **User Management**",
-        "Verify the expected outcome"
+        "Navigate to **User Management** → **Manage** tab → find an active user",
+        "Toggle the **Active** switch to **Inactive** → confirm the action",
+        "Verify the user row shows an **Inactive** badge",
+        "Attempt to log in as the deactivated user → verify **Account disabled** error",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:03.679Z"
+      "duration": 5456,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:11.862Z"
     },
     {
       "testId": "BW-130",
@@ -4294,12 +4747,15 @@
       "screenshotUrl": "guides/screenshots/BW-130.png",
       "steps": [
         "Log in as **Administrator**",
-        "Execute the **Full hire-to-paycheck: create employee → assign dept → create login → generate payslip** workflow",
-        "Verify the expected outcome"
+        "Configure employee salary structure → ensure timesheets are submitted and approved",
+        "Generate payroll for the same period → verify payroll uses approved timesheet hours",
+        "Finalize and mark payroll as Paid → employee downloads the payslip",
+        "Verify the payslip shows correct regular and overtime pay using the timesheet data",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:11.058Z"
+      "duration": 6396,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:18.267Z"
     },
     {
       "testId": "BW-131",
@@ -4318,11 +4774,14 @@
       "screenshotUrl": "guides/screenshots/BW-131.png",
       "steps": [
         "Log in as **Employee**",
-        "Verify the expected outcome"
+        "Employee submits a leave request for specific dates → manager approves it",
+        "Navigate to **Attendance Management** → view the approved leave dates",
+        "Verify those dates automatically show **On Leave** status in the attendance record",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:21.493Z"
+      "duration": 10172,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:28.446Z"
     },
     {
       "testId": "BW-132",
@@ -4341,11 +4800,15 @@
       "screenshotUrl": "guides/screenshots/BW-132.png",
       "steps": [
         "Log in as **Employee**",
-        "Verify the expected outcome"
+        "Employee submits weekly timesheets → manager approves them",
+        "Admin generates payroll for the same period",
+        "Verify payroll calculation includes the **approved timesheet hours**",
+        "Confirm the payslip shows correct total hours worked and corresponding pay",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:26.257Z"
+      "duration": 3589,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:32.042Z"
     },
     {
       "testId": "BW-133",
@@ -4365,12 +4828,15 @@
       "screenshotUrl": "guides/screenshots/BW-133.png",
       "steps": [
         "Log in as **Administrator**",
-        "Execute the **Dashboard stat cards reflect actual employee/leave/attendance counts** workflow",
-        "Verify the expected outcome"
+        "Log in as **Administrator** → view the system dashboard with organisation-wide statistics",
+        "Verify stats: total employees, pending leave requests, pending timesheets, payroll status",
+        "Log in as **Manager** → confirm the dashboard shows team-specific metrics",
+        "Log in as **Employee** → confirm personal stats: leave balance, timesheet status, latest payslip",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:28.889Z"
+      "duration": 2350,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:34.399Z"
     },
     {
       "testId": "BW-150",
@@ -4389,13 +4855,14 @@
       "screenshotUrl": "guides/screenshots/BW-150.png",
       "steps": [
         "Log in as **Employee**",
-        "Attempt to access a restricted page as **Employee**",
-        "Verify access is granted or denied based on role",
-        "Verify the expected outcome"
+        "Log in as **Employee** → attempt to navigate to an admin-only page (e.g., User Management)",
+        "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+        "Confirm the employee sidebar does not show any admin-only menu items",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:33.262Z"
+      "duration": 4232,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:38.638Z"
     },
     {
       "testId": "BW-151",
@@ -4414,13 +4881,14 @@
       "screenshotUrl": "guides/screenshots/BW-151.png",
       "steps": [
         "Log in as **Employee**",
-        "Attempt to access a restricted page as **Employee**",
-        "Verify access is granted or denied based on role",
-        "Verify the expected outcome"
+        "Log in as **Employee** → attempt to navigate to an admin-only page (e.g., User Management)",
+        "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+        "Confirm the employee sidebar does not show any admin-only menu items",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:37.569Z"
+      "duration": 4162,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:42.809Z"
     },
     {
       "testId": "BW-152",
@@ -4439,13 +4907,14 @@
       "screenshotUrl": "guides/screenshots/BW-152.png",
       "steps": [
         "Log in as **Employee**",
-        "Attempt to access a restricted page as **Employee**",
-        "Verify access is granted or denied based on role",
-        "Verify the expected outcome"
+        "Log in as **Employee** → attempt to navigate to an admin-only page (e.g., User Management)",
+        "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+        "Confirm the employee sidebar does not show any admin-only menu items",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:41.841Z"
+      "duration": 4232,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:47.048Z"
     },
     {
       "testId": "BW-153",
@@ -4464,13 +4933,14 @@
       "screenshotUrl": "guides/screenshots/BW-153.png",
       "steps": [
         "Log in as **Employee**",
-        "Attempt to access a restricted page as **Employee**",
-        "Verify access is granted or denied based on role",
-        "Verify the expected outcome"
+        "Log in as **Employee** → attempt to navigate to an admin-only page (e.g., User Management)",
+        "Verify the page redirects to the employee dashboard or shows **Access Denied**",
+        "Confirm the employee sidebar does not show any admin-only menu items",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:46.096Z"
+      "duration": 4176,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:51.232Z"
     },
     {
       "testId": "BW-154",
@@ -4489,13 +4959,13 @@
       "screenshotUrl": "guides/screenshots/BW-154.png",
       "steps": [
         "Log in as **Team Lead / Manager**",
-        "Attempt to access a restricted page as **Team Lead / Manager**",
-        "Verify access is granted or denied based on role",
-        "Verify the expected outcome"
+        "Log in as **Manager** → attempt to access admin-restricted pages (User Management, Payroll Config)",
+        "Verify the page redirects or shows an **Access Denied** response for each restricted page",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:50.341Z"
+      "duration": 4149,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:55.388Z"
     },
     {
       "testId": "BW-155",
@@ -4514,13 +4984,14 @@
       "screenshotUrl": "guides/screenshots/BW-155.png",
       "steps": [
         "Log in as **Team Lead / Manager**",
-        "Attempt to access a restricted page as **Team Lead / Manager**",
-        "Verify access is granted or denied based on role",
-        "Verify the expected outcome"
+        "Log in as **Manager** → navigate to each manager-allowed section",
+        "Verify access to: Leave Approvals, Timesheet Approvals, Team Members, Projects",
+        "Confirm each page loads without errors or permission prompts",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:52.692Z"
+      "duration": 2356,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:45:57.751Z"
     },
     {
       "testId": "BW-156",
@@ -4539,13 +5010,14 @@
       "screenshotUrl": "guides/screenshots/BW-156.png",
       "steps": [
         "Log in as **HR Manager**",
-        "Attempt to access a restricted page as **HR Manager**",
-        "Verify access is granted or denied based on role",
-        "Verify the expected outcome"
+        "Log in as **HR Manager** → navigate to HR-specific sections",
+        "Verify access to: Payroll Management, Employee Management, Leave Management",
+        "Confirm HR has read and write access for employee records and payroll actions",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:02:56.518Z"
+      "duration": 4346,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:02.105Z"
     },
     {
       "testId": "BW-157",
@@ -4564,13 +5036,14 @@
       "screenshotUrl": "guides/screenshots/BW-157.png",
       "steps": [
         "Log in as **Administrator**",
-        "Attempt to access a restricted page as **Administrator**",
-        "Verify access is granted or denied based on role",
-        "Verify the expected outcome"
+        "Log in as **Administrator** → verify full system access",
+        "Navigate to all major sections: User Management, Organization, Payroll, Reports, Settings",
+        "Verify no **Access Denied** messages and all CRUD operations are available",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:01.343Z"
+      "duration": 4487,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:06.601Z"
     },
     {
       "testId": "BW-158",
@@ -4591,12 +5064,13 @@
       "steps": [
         "Log in as **Employee**",
         "Attempt to access a restricted page as **Employee**",
-        "Verify access is granted or denied based on role",
-        "Verify the expected outcome"
+        "Verify the response matches expected role-based permission (allow or deny)",
+        "Confirm API returns **403 Forbidden** for unauthorized role access attempts",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:06.004Z"
+      "duration": 4455,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:11.070Z"
     },
     {
       "testId": "BW-170",
@@ -4616,12 +5090,14 @@
       "screenshotUrl": "guides/screenshots/BW-170.png",
       "steps": [
         "Log in as **Administrator**",
-        "Verify sidebar navigation items are visible",
-        "Verify the expected outcome"
+        "Log in as **Administrator** → verify all admin sidebar sections are visible",
+        "Sections expected: Dashboard, Employees, Leave, Timesheets, Payroll, Organization, User Management, Reports, Settings, Help",
+        "Click each top-level menu item → verify the correct page loads without errors",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:08.780Z"
+      "duration": 2384,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:13.462Z"
     },
     {
       "testId": "BW-171",
@@ -4640,12 +5116,14 @@
       "screenshotUrl": "guides/screenshots/BW-171.png",
       "steps": [
         "Log in as **Employee**",
-        "Verify sidebar navigation items are visible",
-        "Verify the expected outcome"
+        "Log in as **Employee** → verify the employee sidebar is shown",
+        "Sections expected: Dashboard, My Timesheet, My Leave, My Payslips, My Attendance, My Reviews, My Tasks, My Profile, Help",
+        "Click each item → verify correct page loads without Access Denied errors",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:11.223Z"
+      "duration": 2266,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:15.737Z"
     },
     {
       "testId": "BW-172",
@@ -4664,13 +5142,14 @@
       "screenshotUrl": "guides/screenshots/BW-172.png",
       "steps": [
         "Log in as **Employee**",
-        "Verify sidebar navigation items are visible",
-        "Click profile avatar → Verify dropdown menu",
-        "Verify the expected outcome"
+        "Click the **profile avatar** in the top-right corner of the header",
+        "Verify the dropdown shows: **My Profile**, **Change Password**, and **Logout**",
+        "Click **My Profile** → verify the profile page loads with correct user details",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:13.594Z"
+      "duration": 2470,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:18.215Z"
     },
     {
       "testId": "BW-173",
@@ -4689,13 +5168,14 @@
       "screenshotUrl": "guides/screenshots/BW-173.png",
       "steps": [
         "Log in as **Administrator**",
-        "Verify sidebar navigation items are visible",
-        "Navigate to a non-existent URL → Verify 404 page",
-        "Verify the expected outcome"
+        "Navigate to a non-existent URL (e.g., /this-page-does-not-exist)",
+        "Verify the **404 — Page Not Found** screen appears with a helpful message",
+        "Click **Go to Dashboard** or use the browser back button → verify redirect to the home page",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:18.167Z"
+      "duration": 4299,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:22.522Z"
     },
     {
       "testId": "BW-180",
@@ -4715,12 +5195,15 @@
       "screenshotUrl": "guides/screenshots/BW-180.png",
       "steps": [
         "Log in as **Administrator**",
-        "Execute the **Admin opens reports page and verifies date filter and export button** workflow",
-        "Verify the expected outcome"
+        "Navigate to **Reports** (admin/HR only)",
+        "View available report types: Employee Summary, Leave Report, Payroll Summary, Timesheet Report",
+        "Select parameters (date range, department) → click **Generate**",
+        "Verify the report table loads with correct aggregated data",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:20.959Z"
+      "duration": 2520,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:25.049Z"
     },
     {
       "testId": "BW-181",
@@ -4739,12 +5222,15 @@
       "screenshotUrl": "guides/screenshots/BW-181.png",
       "steps": [
         "Log in as **Administrator**",
-        "Execute the **Admin opens settings hub and navigates through email/preferences/advanced tabs** workflow",
-        "Verify the expected outcome"
+        "Navigate to **Settings Hub** (admin only)",
+        "View the available settings categories: General, Email, Security, Notifications",
+        "Update a setting (e.g., company name or email config) → click **Save**",
+        "Verify the change is persisted after a page refresh",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:23.383Z"
+      "duration": 2249,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:27.306Z"
     },
     {
       "testId": "BW-182",
@@ -4763,12 +5249,15 @@
       "screenshotUrl": "guides/screenshots/BW-182.png",
       "steps": [
         "Log in as **Administrator**",
-        "Execute the **Admin opens restore management page and verifies reviews/balances/users tabs** workflow",
-        "Verify the expected outcome"
+        "Navigate to **Restore Management** (admin only)",
+        "View the **Backup History** tab → confirm backup records are listed with timestamps",
+        "Check the **Data Import** tab → verify the import interface is accessible",
+        "Check the **Audit Trail** tab → view recent system changes and restore points",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:26.283Z"
+      "duration": 2282,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:29.596Z"
     },
     {
       "testId": "BW-183",
@@ -4787,12 +5276,14 @@
       "screenshotUrl": "guides/screenshots/BW-183.png",
       "steps": [
         "Log in as **Administrator**",
-        "Execute the **Admin exports report data and verifies download triggers** workflow",
-        "Verify the expected outcome"
+        "Navigate to **Reports** → generate any available report",
+        "Click **Export** → verify the report downloads in CSV or PDF format",
+        "Open the downloaded file → verify it contains correct report data",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:29.036Z"
+      "duration": 2594,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:32.202Z"
     },
     {
       "testId": "BW-190",
@@ -4812,12 +5303,15 @@
       "screenshotUrl": "guides/screenshots/BW-190.png",
       "steps": [
         "Log in as **Administrator**",
-        "Add → Edit → Delete an employee end-to-end",
-        "Verify the expected outcome"
+        "Navigate to **Employees** → click **Add Employee** → fill all required fields",
+        "Click **Submit** → verify the employee appears in the list with correct details",
+        "Click **Edit** on the employee → change the first name → click **Save**",
+        "Click **Terminate/Delete** → confirm the action → verify the employee is removed or marked Terminated",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:40.725Z"
+      "duration": 11543,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:43.753Z"
     },
     {
       "testId": "BW-191",
@@ -4836,12 +5330,14 @@
       "screenshotUrl": "guides/screenshots/BW-191.png",
       "steps": [
         "Log in as **Administrator**",
-        "Use search bar and status/department filters",
-        "Verify the expected outcome"
+        "Navigate to **Employees** → type an employee name in the **Search** bar",
+        "Filter by **Status** (Active, Terminated, On Leave) using the dropdown",
+        "Filter by **Department** → verify the table updates to show only matching employees",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:51.504Z"
+      "duration": 10755,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:54.517Z"
     },
     {
       "testId": "BW-192",
@@ -4860,12 +5356,14 @@
       "screenshotUrl": "guides/screenshots/BW-192.png",
       "steps": [
         "Log in as **Administrator**",
-        "Click **Export** button → Verify download",
-        "Verify the expected outcome"
+        "Navigate to **Employees** → apply any desired filters (department, status)",
+        "Click the **Export** button → verify a CSV or Excel file downloads",
+        "Open the downloaded file → verify it contains correct, complete employee data",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:55.273Z"
+      "duration": 3624,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:46:58.149Z"
     },
     {
       "testId": "BW-193",
@@ -4885,11 +5383,16 @@
       "screenshotUrl": "guides/screenshots/BW-193.png",
       "steps": [
         "Log in as **Administrator**",
-        "Verify the expected outcome"
+        "Navigate to **Employees** → click **Add Employee**",
+        "Enter an invalid email format (e.g., missing @) → verify the email validation error",
+        "Enter a non-10-digit phone number → verify the phone validation error",
+        "Enter an invalid PAN format → verify the PAN validation error",
+        "Click **Submit** while errors exist → verify the form does not proceed",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:03:59.852Z"
+      "duration": 4789,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:47:02.946Z"
     },
     {
       "testId": "BW-194",
@@ -4908,12 +5411,16 @@
       "screenshotUrl": "guides/screenshots/BW-194.png",
       "steps": [
         "Log in as **Administrator**",
-        "Click through Personal, Employment, Emergency, Statutory tabs",
-        "Verify the expected outcome"
+        "Navigate to **Employees** → click an employee row to open their full profile",
+        "Click the **Personal Info** tab → verify name, contact, and address details",
+        "Click the **Employment Info** tab → verify department, position, and hire date",
+        "Click the **Emergency Contact** tab → verify emergency contact name and phone",
+        "Click the **Statutory & Banking** tab → verify PAN, Aadhaar, and bank account info",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:04:03.474Z"
+      "duration": 3488,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:47:06.441Z"
     },
     {
       "testId": "BW-195",
@@ -4933,11 +5440,14 @@
       "screenshotUrl": "guides/screenshots/BW-195.png",
       "steps": [
         "Log in as **Team Lead / Manager**",
-        "Verify the expected outcome"
+        "Log in as **Manager** → navigate to **Employees** (My Team view)",
+        "Verify the list shows **only employees** who report to this manager",
+        "Compare with the admin view → confirm the manager sees fewer total employees",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:04:06.976Z"
+      "duration": 3503,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:47:09.954Z"
     },
     {
       "testId": "BW-196",
@@ -4957,11 +5467,15 @@
       "screenshotUrl": "guides/screenshots/BW-196.png",
       "steps": [
         "Log in as **Administrator**",
-        "Verify the expected outcome"
+        "Navigate to **Employees** → open an employee's profile → click the **Salary** tab",
+        "Fill in **Basic Salary** → add allowances: HRA, transport, medical",
+        "Add deductions: PF, ESI, professional tax",
+        "Click **Save** → verify the salary structure is saved and gross/net totals display correctly",
+        "Verify the expected outcome is achieved"
       ],
-      "duration": null,
-      "status": "recorded",
-      "recordedAt": "2026-03-21T19:04:11.166Z"
+      "duration": 6007,
+      "status": "passed",
+      "recordedAt": "2026-03-28T07:47:15.970Z"
     }
   ]
 }

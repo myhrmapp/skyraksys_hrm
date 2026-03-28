@@ -23,66 +23,43 @@ module.exports = (sequelize, DataTypes) => {
     },
     
     // What happened
+    // NOTE: DB column is VARCHAR(50) (base migration). DB-level enforcement is
+    // handled by CHECK constraint chk_audit_logs_action_values (migration 20260327000001).
+    // Using STRING(50) + validate.isIn for app-layer validation to match the DB type.
     action: {
-      type: DataTypes.ENUM(
-        // CRUD operations
-        'CREATED',
-        'UPDATED',
-        'DELETED',
-        'RESTORED',
-
-        // Status workflows
-        'STATUS_CHANGED',
-        'APPROVED',
-        'REJECTED',
-        'SUBMITTED',
-
-        // Leave / payroll management
-        'BALANCE_ADJUSTED',
-        'PAYMENT_PROCESSED',
-
-        // Auth — login/logout
-        'LOGIN_SUCCESS',
-        'LOGIN_FAILED',
-        'LOGOUT',
-        'ACCOUNT_LOCKED_TEMP',
-        'ACCOUNT_LOCKED_MANUAL',
-
-        // Auth — tokens
-        'TOKEN_REFRESHED',
-        'TOKEN_REFRESH_FAILED',
-
-        // Auth — passwords
-        'PASSWORD_CHANGED',
-        'PASSWORD_RESET_BY_ADMIN',
-        'PASSWORD_RESET_REQUESTED',
-        'PASSWORD_RESET_COMPLETED',
-
-        // Permissions
-        'PERMISSION_CHANGED',
-
-        // Data operations
-        'EXPORTED',
-        'IMPORTED',
-
-        // System config
-        'EMAIL_CONFIG_UPDATED',
-        'VIEW_SYSTEM_CONFIG',
-        'UPDATE_SYSTEM_CONFIG',
-        'SYSTEM_CONFIG_ACCESS_GRANTED',
-        'SYSTEM_CONFIG_ACCESS_DENIED',
-        'SYSTEM_CONFIG_PASSWORD_VERIFY_FAILED',
-
-        // Security
-        'DISTRIBUTED_ATTACK_DETECTED',
-
-        // Timesheet
-        'TIMESHEET_APPROVED',
-        'TIMESHEET_REJECTED',
-        'TIMESHEET_STATUS_CHANGE'
-      ),
+      type: DataTypes.STRING(50),
       allowNull: false,
-      comment: 'Type of action performed (UPPER_CASE convention)'
+      comment: 'Type of action performed (UPPER_CASE convention)',
+      validate: {
+        isIn: [[
+          // CRUD operations
+          'CREATED', 'UPDATED', 'DELETED', 'RESTORED',
+          // Status workflows
+          'STATUS_CHANGED', 'APPROVED', 'REJECTED', 'SUBMITTED',
+          // Leave / payroll management
+          'BALANCE_ADJUSTED', 'PAYMENT_PROCESSED',
+          // Auth — login/logout
+          'LOGIN_SUCCESS', 'LOGIN_FAILED', 'LOGOUT',
+          'ACCOUNT_LOCKED_TEMP', 'ACCOUNT_LOCKED_MANUAL',
+          // Auth — tokens
+          'TOKEN_REFRESHED', 'TOKEN_REFRESH_FAILED',
+          // Auth — passwords
+          'PASSWORD_CHANGED', 'PASSWORD_RESET_BY_ADMIN',
+          'PASSWORD_RESET_REQUESTED', 'PASSWORD_RESET_COMPLETED',
+          // Permissions
+          'PERMISSION_CHANGED',
+          // Data operations
+          'EXPORTED', 'IMPORTED',
+          // System config
+          'EMAIL_CONFIG_UPDATED', 'VIEW_SYSTEM_CONFIG', 'UPDATE_SYSTEM_CONFIG',
+          'SYSTEM_CONFIG_ACCESS_GRANTED', 'SYSTEM_CONFIG_ACCESS_DENIED',
+          'SYSTEM_CONFIG_PASSWORD_VERIFY_FAILED',
+          // Security
+          'DISTRIBUTED_ATTACK_DETECTED',
+          // Timesheet
+          'TIMESHEET_APPROVED', 'TIMESHEET_REJECTED', 'TIMESHEET_STATUS_CHANGE'
+        ]]
+      }
     },
     
     // What was affected

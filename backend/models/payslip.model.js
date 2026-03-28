@@ -262,7 +262,7 @@ module.exports = (sequelize, DataTypes) => {
       {
         unique: true,
         fields: ['employeeId', 'month', 'year'],
-        name: 'unique_employee_month_year'
+        name: 'idx_payslips_emp_period'
       },
       {
         fields: ['month', 'year'],
@@ -275,7 +275,7 @@ module.exports = (sequelize, DataTypes) => {
       {
         unique: true,
         fields: ['payslipNumber'],
-        name: 'idx_payslips_number_unique'
+        name: 'idx_payslips_number'
       },
       {
         fields: ['templateId'],

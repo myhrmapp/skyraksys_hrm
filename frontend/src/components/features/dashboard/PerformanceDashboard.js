@@ -11,20 +11,12 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
-  TableHead,
   TableRow,
   Paper,
   IconButton,
-  Tooltip,
   Switch,
   FormControlLabel,
   Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
   Tabs,
   Tab,
   Stack,
@@ -35,16 +27,11 @@ import {
   Speed as SpeedIcon,
   Memory as MemoryIcon,
   NetworkCheck as NetworkIcon,
-  Cached as CacheIcon,
   Timeline as TimelineIcon,
   Refresh as RefreshIcon,
-  Settings as SettingsIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckIcon,
   Computer as ServerIcon,
   Devices as ClientIcon,
   Api as ApiIcon,
-  Storage as StorageIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
 import performanceService from '../../../services/performance.service';
@@ -114,7 +101,7 @@ const PerformanceDashboard = () => {
     } else if (activeTab === 1 && isAdmin) {
       fetchServerMetrics();
     }
-  }, [activeTab, isAdmin]);
+  }, [activeTab, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto refresh
   useEffect(() => {
@@ -129,7 +116,7 @@ const PerformanceDashboard = () => {
     }, 5000); // Refresh every 5 seconds
 
     return () => clearInterval(interval);
-  }, [activeTab, autoRefresh, isAdmin]);
+  }, [activeTab, autoRefresh, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getServerPerformanceScore = () => {
     if (!serverMetrics || !apiMetrics) return 0;

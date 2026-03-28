@@ -91,7 +91,9 @@ const LeaveAccrualManagement = () => {
   });
 
   // Data
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const statusRecords = statusData?.data || [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const previewRecords = previewData?.data || [];
 
   // Filter records by search

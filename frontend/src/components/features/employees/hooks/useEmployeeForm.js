@@ -287,7 +287,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
       
       setFormData(transformedData);
     }
-  }, [employee, isEditMode, formData.id]);
+  }, [employee, isEditMode, formData.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Warn user about unsaved changes when leaving page
   useEffect(() => {
@@ -719,7 +719,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     } else {
       navigate(destination);
     }
-  }, [navigate, hasUnsavedChanges, isEditMode, id]);
+  }, [navigate, hasUnsavedChanges, isEditMode, id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCancelNavigation = () => {
     setShowUnsavedDialog(false);

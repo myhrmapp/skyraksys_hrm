@@ -62,18 +62,16 @@ const Login = () => {
       return;
     }
 
-    // Password min length (backend loginSchema requires min:6)
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
     setLoading(true);
     setError('');
 
     try {
-      await login(formData.email, formData.password);
-      navigate('/dashboard');
+      const result = await login(formData.email, formData.password);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.error || 'Login failed. Please check your credentials.');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {

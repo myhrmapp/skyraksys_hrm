@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { formatCurrency, CURRENCY_SYMBOL } from '../../utils/formatCurrency';
 import './PayslipTemplate.css';
 

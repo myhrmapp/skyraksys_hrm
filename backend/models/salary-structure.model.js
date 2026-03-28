@@ -57,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
     indexes: [
       {
         fields: ['employeeId'],
-        name: 'idx_salary_structures_employee_id'
+        name: 'idx_salary_structures_employee'
       },
       {
         unique: true,

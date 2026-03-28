@@ -26,7 +26,6 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   Tooltip,
-  Badge,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -49,7 +48,6 @@ import {
   People,
   Help,
   ArrowBack,
-  Close,
   AdminPanelSettings,
   SupervisorAccount,
   Person,

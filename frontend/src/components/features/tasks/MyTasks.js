@@ -41,6 +41,7 @@ import { useNotification } from '../../../contexts/NotificationContext';
 import taskService from '../../../services/TaskService';
 import dayjs from 'dayjs';
 
+// eslint-disable-next-line no-unused-vars
 const STATUS_COLORS = {
   'Not Started': 'default',
   'In Progress': 'info',

@@ -15,6 +15,7 @@ export const ROLES = {
 // Define route access permissions
 export const ROUTE_PERMISSIONS = {
   // Dashboard Routes
+  '/dashboard': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/admin-dashboard': [ROLES.ADMIN, ROLES.HR],
   '/employee-dashboard': [ROLES.EMPLOYEE],
   '/manager-dashboard': [ROLES.MANAGER],
@@ -28,6 +29,7 @@ export const ROUTE_PERMISSIONS = {
   '/employees/:id/user-account': [ROLES.ADMIN, ROLES.HR],
   '/employee-records': [ROLES.ADMIN, ROLES.HR],
   '/my-profile': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
+  '/my-profile/edit/:id': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   
   // Leave Management Routes
   '/leave-management': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER],
@@ -77,7 +79,10 @@ export const ROUTE_PERMISSIONS = {
   '/admin/payslip-templates-old': [ROLES.ADMIN, ROLES.HR],
   
   // Debug Routes
-  '/debug/validation': [ROLES.ADMIN]
+  '/debug/validation': [ROLES.ADMIN],
+  
+  // Utility Routes
+  '/user-guide': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE]
 };
 
 // Helper function to check if user has access to route

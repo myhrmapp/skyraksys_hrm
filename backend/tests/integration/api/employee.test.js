@@ -90,7 +90,8 @@ describe('Employee API', () => {
         hireDate: new Date().toISOString().split('T')[0],
         departmentId: testDepartment.id,
         positionId: testPosition.id,
-        status: 'Active'
+        status: 'Active',
+        password: 'Password123!'
       };
 
       const response = await request(app)

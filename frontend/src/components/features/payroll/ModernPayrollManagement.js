@@ -1,9 +1,10 @@
-﻿/**
+﻿/* eslint-disable unicode-bom */
+/**
  * Modern Payroll Management System - Admin/HR Interface
  * Workflow-driven payslip generation, approval, and payment processing
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Container,
@@ -59,24 +60,11 @@ import {
   Search as SearchIcon,
   Clear as ClearIcon,
   ArrowForward as ArrowIcon,
-  CheckCircle as CheckCircleIcon,
-  RadioButtonUnchecked as UncheckedIcon,
   People as PeopleIcon,
   MonetizationOn as PaidIcon,
   HourglassEmpty as DraftIcon,
 } from '@mui/icons-material';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-
-// ── Shared constants ───────────────────────────────
-const MONTHS = Array.from({ length: 12 }, (_, i) => ({
-  value: i + 1,
-  label: new Date(2000, i).toLocaleString('default', { month: 'long' }),
-}));
-const YEARS = Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i);
-
-const STATUS_COLORS = { draft: 'warning', finalized: 'info', paid: 'success', cancelled: 'error' };
-const getStatusColor = (status) => STATUS_COLORS[status?.toLowerCase()] || 'default';
-const formatLabel = (key) => key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+import { useQuery } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { useAuth } from '../../../contexts/AuthContext';
 import http from '../../../http-common';
@@ -86,15 +74,21 @@ import SectionError from '../../shared/SectionError';
 import useConfirmDialog from '../../../hooks/useConfirmDialog';
 import { formatCurrency } from '../../../utils/formatCurrency';
 
+// ── Shared constants ───────────────────────────────
+const MONTHS = Array.from({ length: 12 }, (_, i) => ({
+  value: i + 1,
+  label: new Date(2000, i).toLocaleString('default', { month: 'long' }),
+}));
+const YEARS = Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i);
+
 const ModernPayrollManagement = () => {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const { isAdmin, isHR } = useAuth();
-  const queryClient = useQueryClient();
   const { dialogProps, confirm } = useConfirmDialog();
 
   const [activeTab, setActiveTab] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentMethod] = useState('');
   const [operationLoading, setOperationLoading] = useState(false);
 
   // Pagination (payslips table)
@@ -106,7 +100,8 @@ const ModernPayrollManagement = () => {
   // Search/filter — employee picker (Generate tab)
   const [empSearch, setEmpSearch] = useState('');
   const [empDept, setEmpDept] = useState('');
-  // Search — employee status tab
+  // Search — employee status tab (reserved for future use)
+  // eslint-disable-next-line no-unused-vars
   const [statusSearch, setStatusSearch] = useState('');
 
   // Navigate to Generate tab (used by Overview quick-start)
@@ -175,9 +170,15 @@ const ModernPayrollManagement = () => {
   });
   
   // Derived data
-  const payslips = payslipsData?.success ? (payslipsData.data?.payslips || []) : [];
+  const payslips = useMemo(
+    () => payslipsData?.success ? (payslipsData.data?.payslips || []) : [],
+    [payslipsData]
+  );
   const totalRecords = payslipsData?.data?.pagination?.totalRecords || 0;
-  const employees = employeesData?.success ? employeesData.data : [];
+  const employees = useMemo(
+    () => employeesData?.success ? employeesData.data : [],
+    [employeesData]
+  );
   const departments = departmentsData?.success ? departmentsData.data : [];
   const templates = templatesData?.success
     ? (Array.isArray(templatesData.data?.templates) ? templatesData.data.templates
@@ -330,6 +331,7 @@ const ModernPayrollManagement = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleGenerateAll = () => {
     confirm({
       title: 'Generate All Payslips',

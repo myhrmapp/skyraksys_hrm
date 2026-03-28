@@ -1,10 +1,10 @@
 import React from 'react';
-import { Box, Paper, Typography, Grid, Divider, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, Paper, Typography, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 
 const PayslipPreview = ({ template, sampleData }) => {
   if (!template) return null;
 
-  const { styling, headerFields, earningsFields, deductionsFields, footerFields } = template;
+  const { styling } = template;
   const { companyInfo, watermark } = styling;
 
   // Default sample data if not provided

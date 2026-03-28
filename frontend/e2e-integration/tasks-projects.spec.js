@@ -171,7 +171,7 @@ test.describe.serial('Tasks — Flow 2: Task CRUD', () => {
   test('2d — Admin can update a task status', async ({ page }) => {
     if (!createdTaskId) { test.skip(); return; }
     const res = await page.request.put(`${API_URL}/tasks/${createdTaskId}`, {
-      data: { status: 'in_progress' },
+      data: { status: 'In Progress' },
       failOnStatusCode: false,
     });
     if (res.ok()) {
@@ -181,17 +181,17 @@ test.describe.serial('Tasks — Flow 2: Task CRUD', () => {
   });
 
   test('2e — Filter tasks by status', async ({ page }) => {
-    const res = await page.request.get(`${API_URL}/tasks?status=todo`);
+    const res = await page.request.get(`${API_URL}/tasks?status=Not Started`);
     expect(res.ok()).toBeTruthy();
     const body = await res.json();
     expect(body.success).toBe(true);
     if (Array.isArray(body.data)) {
-      body.data.forEach(t => expect(t.status).toBe('todo'));
+      body.data.forEach(t => expect(t.status).toBe('Not Started'));
     }
   });
 
   test('2f — Filter tasks by priority', async ({ page }) => {
-    const res = await page.request.get(`${API_URL}/tasks?priority=high`);
+    const res = await page.request.get(`${API_URL}/tasks?priority=High`);
     expect(res.ok()).toBeTruthy();
     const body = await res.json();
     expect(body.success).toBe(true);

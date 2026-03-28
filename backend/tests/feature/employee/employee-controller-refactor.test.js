@@ -91,6 +91,7 @@ describe('Employee Controller Refactoring - Smoke Tests', () => {
         firstName: 'Test',
         lastName: 'Employee',
         email: `test.employee.${Date.now()}@test.com`,
+        password: 'Password123!',
         phone: '9876543210',
         hireDate: new Date().toISOString().split('T')[0],
         departmentId: testDepartment.id,

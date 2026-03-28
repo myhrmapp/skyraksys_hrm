@@ -8,7 +8,6 @@ import {
   Alert,
   Stack,
   Divider,
-  IconButton,
   Collapse,
   Chip,
   Link,
@@ -26,7 +25,6 @@ import {
   Error as ErrorIcon,
   Info,
   ContentCopy,
-  Email
 } from '@mui/icons-material';
 
 /**
@@ -72,9 +70,13 @@ class SmartErrorBoundary extends Component {
 
     // Log error to console in development
     if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
       console.group('🚨 Error Boundary Caught Error');
+      // eslint-disable-next-line no-console
       console.error('Error:', error);
+      // eslint-disable-next-line no-console
       console.error('Error Info:', errorInfo);
+      // eslint-disable-next-line no-console
       console.groupEnd();
     }
 
@@ -126,13 +128,9 @@ class SmartErrorBoundary extends Component {
     const errorData = {
       errorId: this.state.errorId,
       message: error.message,
-      stack: error.stack,
       componentStack: errorInfo.componentStack,
       timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      url: window.location.href,
-      userId: localStorage.getItem('userId'),
-      sessionId: sessionStorage.getItem('sessionId')
+      url: window.location.href
     };
 
     // Store error locally for potential later sending
@@ -291,12 +289,12 @@ class SmartErrorBoundary extends Component {
    */
   getSafeLocalStorage() {
     const safe = {};
-    const sensitiveKeys = ['accessToken', 'refreshToken', 'password'];
+    const sensitiveKeys = ['accessToken', 'refreshToken', 'password', 'token', 'secret', 'email', 'userId', 'userRole', 'sessionId'];
     
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && !sensitiveKeys.some(sensitive => key.includes(sensitive))) {
+        if (key && !sensitiveKeys.some(sensitive => key.toLowerCase().includes(sensitive.toLowerCase()))) {
           safe[key] = localStorage.getItem(key);
         }
       }
@@ -312,12 +310,12 @@ class SmartErrorBoundary extends Component {
    */
   getSafeSessionStorage() {
     const safe = {};
-    const sensitiveKeys = ['token', 'password', 'secret'];
+    const sensitiveKeys = ['accessToken', 'refreshToken', 'password', 'token', 'secret', 'email', 'userId', 'userRole', 'sessionId'];
     
     try {
       for (let i = 0; i < sessionStorage.length; i++) {
         const key = sessionStorage.key(i);
-        if (key && !sensitiveKeys.some(sensitive => key.includes(sensitive))) {
+        if (key && !sensitiveKeys.some(sensitive => key.toLowerCase().includes(sensitive.toLowerCase()))) {
           safe[key] = sessionStorage.getItem(key);
         }
       }
@@ -413,7 +411,7 @@ class SmartErrorBoundary extends Component {
     }
 
     const { fallback, level = 'page', showRetry = true, showHome = true, showReport = true } = this.props;
-    const { retryCount, isRecovering, showDetails, showTechnicalDetails } = this.state;
+    const { retryCount, isRecovering, showDetails } = this.state;
     const severity = this.getErrorSeverity();
 
     // Use custom fallback if provided

@@ -3,7 +3,6 @@ import { Box, Typography, Button, Stack } from '@mui/material';
 import { 
   Add as AddIcon,
   Download as DownloadIcon,
-  Upload as UploadIcon
 } from '@mui/icons-material';
 
 const EmployeeListHeader = ({ canEdit, onAddEmployee, onExport }) => {

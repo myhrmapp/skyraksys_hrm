@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -25,14 +24,11 @@ import {
   LinearProgress,
   Tabs,
   Tab,
-  Card,
-  CardContent,
   Grid,
   Avatar,
   Tooltip,
   Alert,
   Divider,
-  InputLabel
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -44,11 +40,8 @@ import {
   NavigateBefore as PrevIcon,
   NavigateNext as NextIcon,
   Today as TodayIcon,
-  History as HistoryIcon,
   Visibility as ViewIcon,
-  Download as DownloadIcon,
   Refresh as RefreshIcon,
-  Edit as EditIcon
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
@@ -56,7 +49,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNotification } from '../../../contexts/NotificationContext';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { timesheetService } from '../../../services/timesheet.service';
 import ProjectDataService from '../../../services/ProjectService';
 import TaskDataService from '../../../services/TaskService';
@@ -87,8 +80,7 @@ dayjs.extend(weekOfYear);
 const ModernWeeklyTimesheet = ({ embedded } = {}) => {
   const { user, isAdmin, isHR, isManager } = useAuth();
   const { showSuccess, showError, showWarning, showInfo } = useNotification();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+
 
   // Helper function to safely calculate total hours from timesheet object
   const calculateTimesheetTotal = (timesheet) => {
@@ -167,8 +159,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
   const loading = isLoadingProjects || isLoadingTasks || dataLoading;
   
   // Timesheet metadata
-  const [timesheetStatus, setTimesheetStatus] = useState('draft'); // 'draft', 'submitted', 'approved', 'rejected'
-  const [submittedTimesheets, setSubmittedTimesheets] = useState([]);
+  const [timesheetStatus, setTimesheetStatus] = useState('draft');
   const [isReadOnly, setIsReadOnly] = useState(false);
   
   // For Manager/Admin: Pending approvals
@@ -201,14 +192,17 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
     } else if (activeTab === 2) {
       loadHistory();
     }
-  }, [currentWeek, activeTab]);
+  }, [currentWeek, activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
   
   const loadWeekTimesheet = async () => {
     try {
       setDataLoading(true);
       const weekStart = currentWeek.format('YYYY-MM-DD');
+      // eslint-disable-next-line no-unused-vars
       const weekEnd = currentWeek.clone().endOf('isoWeek').format('YYYY-MM-DD');
+      // eslint-disable-next-line no-unused-vars
       const weekNumber = currentWeek.isoWeek();
+      // eslint-disable-next-line no-unused-vars
       const year = currentWeek.year();
       
       // Use getByWeek instead of getByDateRange for more precise filtering

@@ -33,7 +33,6 @@ import {
   Cancel as RejectIcon,
   Person as PersonIcon,
   CalendarToday as CalendarIcon,
-  AccessTime as TimeIcon,
   Visibility as ViewIcon,
   Assignment as AssignmentIcon,
   TrendingUp as TrendingUpIcon

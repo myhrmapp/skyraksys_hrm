@@ -9,7 +9,6 @@ import {
   Select,
   FormControlLabel,
   Checkbox,
-  Typography,
   Alert,
   Grid
 } from '@mui/material';

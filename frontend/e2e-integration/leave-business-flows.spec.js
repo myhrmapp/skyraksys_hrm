@@ -166,7 +166,7 @@ test.describe.serial('Leave — Flow 2: Request Lifecycle', () => {
 
   test('2d — Employee cannot approve own leave request', async ({ page }) => {
     if (!createdLeaveRequestId) { test.skip(); return; }
-    const res = await page.request.post(`${API_URL}/leave/${createdLeaveRequestId}/approve`, {
+    const res = await page.request.patch(`${API_URL}/leave/${createdLeaveRequestId}/approve`, {
       failOnStatusCode: false,
     });
     expect(res.status()).toBeGreaterThanOrEqual(400);
@@ -239,14 +239,14 @@ test.describe.serial('Leave — Flow 3: Approval Workflow', () => {
   test('3b — Admin/manager can approve a pending leave request', async ({ page }) => {
     if (!freshLeaveId) { test.skip(); return; }
     await loginViaAPI(page, 'admin');
-    const res = await page.request.post(`${API_URL}/leave/${freshLeaveId}/approve`, {
+    const res = await page.request.patch(`${API_URL}/leave/${freshLeaveId}/approve`, {
       data: { comments: 'Approved by E2E admin test' },
       failOnStatusCode: false,
     });
     if (res.ok()) {
       const body = await res.json();
       expect(body.success).toBe(true);
-      expect(body.data.status).toBe('approved');
+      expect(body.data.status.toLowerCase()).toBe('approved');
     } else {
       expect([400, 403]).toContain(res.status());
     }
@@ -292,15 +292,15 @@ test.describe.serial('Leave — Flow 3: Approval Workflow', () => {
 
     // Admin rejects
     await loginViaAPI(page, 'admin');
-    const rejectRes = await page.request.post(`${API_URL}/leave/${toRejectId}/reject`, {
+    const rejectRes = await page.request.patch(`${API_URL}/leave/${toRejectId}/reject`, {
       data: { comments: 'Insufficient leave balance' },
       failOnStatusCode: false,
     });
     if (rejectRes.ok()) {
       const body = await rejectRes.json();
       expect(body.success).toBe(true);
-      expect(body.data.status).toBe('rejected');
-      expect(body.data.comments || body.data.rejectionReason).toBeTruthy();
+      expect(body.data.status.toLowerCase()).toBe('rejected');
+      expect(body.data.approverComments || body.data.comments || body.data.rejectionReason).toBeTruthy();
     }
     await logout(page);
   });

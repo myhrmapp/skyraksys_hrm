@@ -44,17 +44,12 @@ import {
   DragIndicator as DragIcon,
   CloudUpload as UploadIcon,
   Image as ImageIcon,
-  Palette as PaletteIcon,
   Code as CodeIcon,
-  Visibility as VisibilityIcon,
   ExpandMore as ExpandMoreIcon,
-  ContentCopy as CopyIcon,
-  Download as DownloadIcon,
   Lightbulb as LightbulbIcon
 } from '@mui/icons-material';
 // Disabled for migration - drag/drop needs alternative implementation
 // import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { useAuth } from '../../contexts/AuthContext';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { payrollService } from '../../services/payroll.service';
@@ -64,7 +59,6 @@ import PayslipPreview from './PayslipPreview';
 import { TabPanel } from '../common/TabbedPage';
 
 const EnhancedPayslipTemplateConfiguration = () => {
-  const { user } = useAuth();
   const { isLoading, setLoading } = useLoading();
   const { showNotification } = useNotification();
   const { dialogProps, confirm } = useConfirmDialog();
@@ -419,6 +413,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
     }));
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleDragEnd = (result, section) => {
     if (!result.destination) return;
 
@@ -606,7 +601,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [templateDialog, activeTab]);
+  }, [templateDialog, activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Box sx={{ p: 3 }} data-testid="payslip-template-config-page">
@@ -1578,7 +1573,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
         <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
             {/* Left side - Help text */}
-            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' }, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.5 }}>
               <LightbulbIcon fontSize="small" /> Tip: Use Ctrl+← → to navigate tabs, Ctrl+S to save
             </Typography>
 

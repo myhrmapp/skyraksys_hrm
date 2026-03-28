@@ -28,6 +28,90 @@
 				"cwd": "${workspaceFolder}/frontend"
 			},
 			"problemMatcher": []
+		},
+		{
+			"label": "build-frontend",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts build 2>&1 | tee build_output2.txt",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "build-frontend-check",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts build 2>&1 > build_output2.txt",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "build-frontend-v2",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts build > build_output2.txt 2>&1",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "read-build-output",
+			"type": "shell",
+			"command": "type frontend\\build_output2.txt",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "build-frontend-v3",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts build > build_output3.txt 2>&1 && echo BUILD_SUCCESS",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "check-warnings",
+			"type": "shell",
+			"command": "findstr /C:\"WARNING\" /C:\"Line \" /C:\"src\\\" frontend\\build_output3.txt | findstr /V \"chunk.js\" | findstr /V \"build\\\\\"",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "build-frontend-final",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts build > build_output_final.txt 2>&1 && echo BUILD_SUCCESS || echo BUILD_FAILED",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "run-all-backend-tests",
+			"type": "shell",
+			"command": "cd backend && npm test -- --forceExit 2>&1 | tee ../test_output.txt",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "run-all-backend-tests-v2",
+			"type": "shell",
+			"command": "cd backend && npm test -- --forceExit > ../test_output.txt 2>&1 && echo TEST_PASS || echo TEST_FAIL",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "run-all-backend-tests-v3",
+			"type": "shell",
+			"command": "cd backend && npm test -- --forceExit > ../test_output2.txt 2>&1 && echo TEST_PASS || echo TEST_FAIL",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "run-all-backend-tests-v4",
+			"type": "shell",
+			"command": "cd backend && npm test -- --forceExit > ../test_output3.txt 2>&1 && echo TEST_PASS || echo TEST_FAIL",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "run-playwright-e2e",
+			"type": "shell",
+			"command": "cd frontend && npx playwright test > ../e2e_output.txt 2>&1 && echo E2E_PASS || echo E2E_FAIL",
+			"isBackground": false,
+			"group": "test"
 		}
 	]
 }

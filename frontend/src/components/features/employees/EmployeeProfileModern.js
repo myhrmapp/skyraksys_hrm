@@ -38,7 +38,6 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
     employee,
     loading,
     editing,
-    setEditing,
     saving,
     handleSave,
     handleCancel,

@@ -5,12 +5,10 @@ import {
   Card,
   CardContent,
   Typography,
-  Chip,
   Button,
   Tab,
   Tabs,
   Badge,
-  Alert,
   CircularProgress,
   useTheme,
   useMediaQuery
@@ -21,7 +19,6 @@ import {
   BeachAccess as LeaveIcon,
   Assignment as TimesheetIcon,
   CheckCircle as ApproveIcon,
-  Cancel as RejectIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLoading } from '../../contexts/LoadingContext';
@@ -82,7 +79,7 @@ const ManagerDashboard = () => {
     } finally {
       setLoading('manager-dashboard', false);
     }
-  }, [setLoading, showNotification]);
+  }, [setLoading, showNotification]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     loadDashboardData();

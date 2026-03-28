@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -30,13 +30,13 @@ const LeaveRequest = () => {
   const { showSuccess, showError } = useNotification();
 
   // 🚀 React Query hooks for data fetching
-  const { data: leaveTypesData, isLoading: isLoadingTypes } = useQuery({
+  const { data: leaveTypesData } = useQuery({
     queryKey: ['leaveTypes'],
     queryFn: () => leaveService.getLeaveTypes(),
     enabled: !!user,
   });
   
-  const { data: balancesData, isLoading: isLoadingBalances } = useLeaveBalances(user?.employeeId, {
+  const { data: balancesData } = useLeaveBalances(user?.employeeId, {
     enabled: !!user?.employeeId,
   });
   

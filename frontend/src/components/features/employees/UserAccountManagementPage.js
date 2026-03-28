@@ -21,7 +21,6 @@ import {
   DialogActions,
   DialogContentText,
   Tooltip,
-  IconButton,
   useTheme,
   alpha
 } from '@mui/material';
@@ -100,7 +99,7 @@ const UserAccountManagementPage = () => {
       return;
     }
     loadEmployee();
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadEmployee = async () => {
     try {

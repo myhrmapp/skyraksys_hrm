@@ -123,7 +123,7 @@ const EmployeeReviewManagement = () => {
   const statusMutation = useUpdateReviewStatus();
   const deleteMutation = useDeleteEmployeeReview();
 
-  const reviews = reviewsData?.reviews || [];
+  const reviews = useMemo(() => reviewsData?.reviews || [], [reviewsData]);
   const totalCount = reviewsData?.totalCount || 0;
   const employees = employeesData?.data || employeesData || [];
 

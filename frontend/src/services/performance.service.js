@@ -231,4 +231,5 @@ class PerformanceService {
   }
 }
 
-export default new PerformanceService();
+const performanceServiceInstance = new PerformanceService();
+export default performanceServiceInstance;

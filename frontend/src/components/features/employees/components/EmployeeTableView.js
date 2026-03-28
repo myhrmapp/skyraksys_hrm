@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import {
   Edit as EditIcon,
-  Delete as DeleteIcon,
   Visibility as VisibilityIcon,
   VpnKey as VpnKeyIcon,
   Phone as PhoneIcon,

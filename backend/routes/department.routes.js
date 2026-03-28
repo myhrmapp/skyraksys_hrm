@@ -126,6 +126,13 @@ router.get('/', authenticateToken, async (req, res, next) => {
 // Get department by ID
 router.get('/:id', authenticateToken, async (req, res, next) => {
   try {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid department ID format'
+      });
+    }
     const department = await Department.findByPk(req.params.id, {
       include: [
         {

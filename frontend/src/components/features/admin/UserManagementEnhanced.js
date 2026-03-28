@@ -47,7 +47,6 @@ import {
   PersonAdd as PersonAddIcon,
   Business as BusinessIcon,
   Search as SearchIcon,
-  FilterList as FilterListIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   VpnKey as VpnKeyIcon,
@@ -126,7 +125,7 @@ const UserManagementEnhanced = () => {
     if (activeTab === 1) {
       loadUsers();
     }
-  }, [activeTab, page, rowsPerPage, searchQuery, filterRole, filterStatus]);
+  }, [activeTab, page, rowsPerPage, searchQuery, filterRole, filterStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadUsers = async () => {
     setLoading(true);
@@ -273,6 +272,7 @@ const UserManagementEnhanced = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleRoleChange = async (userId, newRole) => {
     setLoading(true);
     setError('');

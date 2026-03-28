@@ -5,7 +5,7 @@
  */
 
 import http from '../http-common';
-import API_ENDPOINTS, { getEndpoint } from '../config/apiEndpoints';
+import { getEndpoint } from '../config/apiEndpoints';
 
 class ApiService {
   /**

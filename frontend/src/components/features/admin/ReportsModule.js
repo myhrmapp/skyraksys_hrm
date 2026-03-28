@@ -10,44 +10,29 @@ import {
   CardContent,
   Avatar,
   Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Tabs,
   Tab,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  TextField,
   CircularProgress,
   Alert,
-  Stack,
   Chip,
   useTheme,
   alpha,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
-  Divider
 } from '@mui/material';
 import {
-  Assessment as ReportsIcon,
   People as PeopleIcon,
   EventNote as LeaveIcon,
   Schedule as TimesheetIcon,
   AccountBalance as PayrollIcon,
   Download as DownloadIcon,
-  DateRange as DateRangeIcon,
   TrendingUp as TrendingUpIcon,
-  ExpandMore as ExpandMoreIcon,
   Business as DepartmentIcon,
   Person as PersonIcon,
   CalendarToday as CalendarIcon,
@@ -72,7 +57,7 @@ import { formatCurrency } from '../../../utils/formatCurrency';
 
 const ReportsModule = () => {
   const theme = useTheme();
-  const { user, isAdmin, isHR } = useAuth();
+  const { isAdmin, isHR } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   
   // State management
@@ -96,7 +81,7 @@ const ReportsModule = () => {
     if (isAdmin || isHR) {
       loadReportData();
     }
-  }, [filters]);
+  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Compute date range boundaries from filter
   const getDateBounds = () => {

@@ -27,7 +27,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress,
   Tooltip,
   Stack,
   InputAdornment,
@@ -45,19 +44,13 @@ import {
   Cancel as RejectIcon,
   Visibility as ViewIcon,
   FilterList as FilterIcon,
-  ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon,
   Refresh as RefreshIcon,
   Search as SearchIcon,
   Download as DownloadIcon,
   PendingActions as PendingIcon,
   AccessTime as TimeIcon,
-  People as PeopleIcon,
   CheckCircleOutline as ApprovedIcon,
   HighlightOff as RejectedIcon,
-  DateRange as DateRangeIcon,
-  ArrowUpward as ArrowUpwardIcon,
-  ArrowDownward as ArrowDownwardIcon
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { timesheetService } from '../../../services/timesheet.service';
@@ -144,7 +137,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
   useEffect(() => {
     calculateSummary();
     applyFilters();
-  }, [timesheets, statsData, statusFilter, searchQuery, projectFilter, dateRange, orderBy, order]);
+  }, [timesheets, statsData, statusFilter, searchQuery, projectFilter, dateRange, orderBy, order]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const calculateSummary = () => {
     const submitted = timesheets.filter(ts => ts.status?.toLowerCase() === 'submitted');

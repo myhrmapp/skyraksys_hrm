@@ -33,7 +33,6 @@ const EmployeeList = () => {
     employees,
     departments,
     totalRecords,
-    loading,
     error,
     searchTerm,
     statusFilter,
@@ -72,7 +71,6 @@ const EmployeeList = () => {
     handleUserAccountDataChange,
     handleCreateUserSubmit,
     handleChangePage,
-    handleChangeRowsPerPage
   } = useEmployeeList();
 
   // Filters are now fully server-side via useEmployeeList hook

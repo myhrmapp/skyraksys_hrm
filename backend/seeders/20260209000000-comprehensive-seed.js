@@ -422,18 +422,24 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    // Delete in reverse dependency order
+    // Use TRUNCATE CASCADE to handle all FK dependencies
     console.log('🔄 Removing all seeded data...');
-    await queryInterface.bulkDelete('payslip_templates', null, {});
-    await queryInterface.bulkDelete('salary_structures', null, {});
-    await queryInterface.bulkDelete('tasks', null, {});
-    await queryInterface.bulkDelete('projects', null, {});
-    await queryInterface.bulkDelete('leave_balances', null, {});
-    await queryInterface.bulkDelete('leave_types', null, {});
-    await queryInterface.bulkDelete('employees', null, {});
-    await queryInterface.bulkDelete('users', null, {});
-    await queryInterface.bulkDelete('positions', null, {});
-    await queryInterface.bulkDelete('departments', null, {});
+    const tables = [
+      'payslip_audit_logs', 'payslips', 'payslip_templates', 'salary_structures',
+      'payroll_data', 'timesheets', 'tasks', 'projects',
+      'leave_requests', 'leave_balances', 'leave_types',
+      'attendances', 'employee_reviews',
+      'password_reset_tokens', 'refresh_tokens', 'audit_logs',
+      'employees', 'users', 'positions', 'departments', 'holidays', 'system_configs'
+    ];
+    for (const table of tables) {
+      try {
+        await queryInterface.sequelize.query(`TRUNCATE TABLE "${table}" CASCADE`);
+      } catch (e) {
+        // Table may not exist yet, skip
+        console.log(`  ⚠️  Skipping ${table}: ${e.message}`);
+      }
+    }
     console.log('✅ All seeded data removed');
   }
 };

@@ -21,7 +21,6 @@ import {
   IconButton,
   Skeleton,
   Fade,
-  useTheme,
   Autocomplete,
   TextField,
   InputAdornment,

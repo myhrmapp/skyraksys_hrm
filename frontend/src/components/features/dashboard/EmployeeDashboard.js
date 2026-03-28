@@ -1,14 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Grid,
-  Paper,
   Typography,
   Box,
   Card,
   CardContent,
-  Button,
   Chip,
   Stack,
   useTheme,
@@ -26,10 +24,8 @@ import {
   Person as PersonIcon,
   EventNote as LeaveIcon,
   Schedule as TimesheetIcon,
-  Add as AddIcon,
   TrendingUp as StatsIcon,
   CalendarMonth as CalendarIcon,
-  CheckCircle as ApprovedIcon,
   Pending as PendingIcon,
   Schedule as ClockIcon
 } from '@mui/icons-material';

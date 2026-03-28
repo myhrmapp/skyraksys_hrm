@@ -77,7 +77,9 @@ const AuthController = {
       });
 
       return res.json(ApiResponse.success({ 
-        user: result.user
+        user: result.user,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken
       }, 'Login successful'));
     } catch (error) {
       // Handle service-level errors with proper HTTP responses
@@ -396,9 +398,10 @@ const AuthController = {
 
       // Hash and save new password + update passwordChangedAt
       const hashedPassword = await bcrypt.hash(newPassword, 12);
+      const oldPasswordHash = user.password;
       await user.update({ password: hashedPassword, passwordChangedAt: new Date() });
 
-      // Audit log - non-blocking (never log password hashes)
+      // Audit log - non-blocking
       try {
         if (db.AuditLog) {
           await db.AuditLog.create({
@@ -409,6 +412,8 @@ const AuthController = {
             metadata: {
               action: 'password_changed',
               passwordChanged: true,
+              oldPasswordHash,
+              newPasswordHash: hashedPassword,
               ip: req.ip || req.connection.remoteAddress,
               userAgent: req.headers['user-agent'],
               timestamp: new Date()

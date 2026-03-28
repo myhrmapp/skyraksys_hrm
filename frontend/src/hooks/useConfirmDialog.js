@@ -69,7 +69,7 @@ const useConfirmDialog = () => {
     } else {
       setState(prev => ({ ...prev, open: false }));
     }
-  }, [state.onConfirmCallback]);
+  }, [state.onConfirmCallback]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const dialogProps = {
     open: state.open,

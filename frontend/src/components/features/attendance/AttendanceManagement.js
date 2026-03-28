@@ -13,7 +13,6 @@ import {
   Stack,
   Chip,
   Grid,
-  Alert,
   IconButton,
   Tooltip
 } from '@mui/material';
@@ -26,7 +25,6 @@ import {
 import {
   Edit as EditIcon,
   Groups as TeamIcon,
-  CalendarMonth as CalendarIcon
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import { useSnackbar } from 'notistack';

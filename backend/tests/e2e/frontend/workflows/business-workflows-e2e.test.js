@@ -268,7 +268,7 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
         email: 'manager@company.com',
         firstName: 'Team',
         lastName: 'Manager',
-        password: 'manager123',
+        password: 'Manager123!',
         role: 'manager',
         employeeId: 'SKYT0002',
         phone: '9876543210',
@@ -327,7 +327,7 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
         .post('/api/auth/login')
         .send({
           email: 'manager@company.com',
-          password: 'manager123'
+          password: 'Manager123!'
         });
       
       expect(loginRes.status).toBe(200);
@@ -347,7 +347,7 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
         email: 'employee@company.com',
         firstName: 'John',
         lastName: 'Developer',
-        password: 'employee123',
+        password: 'Employee123!',
         role: 'employee',
         employeeId: 'SKYT0003',
         phone: '9876543211',
@@ -392,12 +392,12 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
         .post('/api/auth/login')
         .send({
           email: 'employee@company.com',
-          password: 'employee123'
+          password: 'Employee123!'
         });
       
       expect(loginRes.status).toBe(200);
       testData.tokens.employee = loginRes.body.data.accessToken;
-      
+
       console.log('✅ Team member created and assigned to manager');
     });
     
@@ -465,7 +465,7 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
         .post('/api/auth/login')
         .send({
           email: 'employee@company.com',
-          password: 'employee123'
+          password: 'Employee123!'
         });
       
       expect(loginRes.status).toBe(401);
@@ -509,7 +509,7 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
         .post('/api/auth/login')
         .send({
           email: 'employee@company.com',
-          password: 'employee123'
+          password: 'Employee123!'
         });
       
       activeEmployeeToken = loginRes.body.data.accessToken;

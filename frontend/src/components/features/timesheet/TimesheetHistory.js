@@ -13,8 +13,6 @@ import {
   Chip,
   IconButton,
   Grid,
-  Card,
-  CardContent,
   FormControl,
   InputLabel,
   Select,
@@ -31,7 +29,6 @@ import {
   DialogActions,
   Button,
   Divider,
-  Avatar,
   useTheme,
   alpha
 } from '@mui/material';
@@ -59,11 +56,12 @@ const TimesheetHistory = ({ embedded } = {}) => {
   const { user } = useAuth();
   const myEmployeeId = user?.employee?.id || user?.employeeId;
   
+  // eslint-disable-next-line no-unused-vars
   const [apiPage, setApiPage] = useState(1);
   const pageSize = 50;
   
   // React Query for timesheets — paginated
-  const { data: timesheetsData, isLoading: loading, refetch } = useQuery({
+  const { data: timesheetsData, isLoading: loading } = useQuery({
     queryKey: ['timesheets', 'history', myEmployeeId, apiPage],
     queryFn: () => timesheetService.getAll({ limit: pageSize, page: apiPage, employeeId: myEmployeeId }),
     enabled: !!myEmployeeId,
@@ -87,7 +85,7 @@ const TimesheetHistory = ({ embedded } = {}) => {
 
   useEffect(() => {
     applyFilters();
-  }, [timesheets, statusFilter, dateRange]);
+  }, [timesheets, statusFilter, dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyFilters = () => {
     let filtered = [...timesheets];

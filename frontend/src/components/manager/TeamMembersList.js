@@ -21,7 +21,6 @@ import {
   Email as EmailIcon,
   Phone as PhoneIcon,
   Work as WorkIcon,
-  Schedule as ScheduleIcon,
   CalendarToday as CalendarIcon
 } from '@mui/icons-material';
 import dayjs from 'dayjs';

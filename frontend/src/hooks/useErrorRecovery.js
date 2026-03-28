@@ -107,7 +107,7 @@ export const useErrorRecovery = (options = {}) => {
             );
           }
         } else if (enableNotifications && showErrorMessage) {
-          showError(this.getErrorMessage(error));
+          showError(getErrorMessage(error));
         }
         
         // Return fallback value if provided
@@ -119,7 +119,7 @@ export const useErrorRecovery = (options = {}) => {
       }
 
       // Attempt recovery
-      return this.attemptRecovery(
+      return attemptRecovery(
         operation,
         error,
         operationId,
@@ -242,7 +242,7 @@ export const useErrorRecovery = (options = {}) => {
           
           // Recursive recovery attempt if we haven't hit max attempts
           if (recoveryAttempts + 1 < config.maxAttempts) {
-            return this.attemptRecovery(
+            return attemptRecovery(
               operation,
               retryError,
               operationId,
@@ -277,7 +277,7 @@ export const useErrorRecovery = (options = {}) => {
               persist: true,
               action: {
                 label: 'Report Issue',
-                callback: () => this.reportError(finalError, operationId)
+                callback: () => reportError(finalError, operationId)
               }
             }
           );

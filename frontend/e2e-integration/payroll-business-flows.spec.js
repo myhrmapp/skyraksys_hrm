@@ -96,7 +96,9 @@ test.describe.serial('Payroll — Flow 2: Payslip Generation', () => {
     expect(res.ok()).toBeTruthy();
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(Array.isArray(body.data)).toBe(true);
+    // API may return { payslips: [...], pagination: {...} } or plain array
+    const payslips = body.data?.payslips || body.data;
+    expect(Array.isArray(payslips)).toBe(true);
   });
 
   test('2b — Validate payslip generation before running', async ({ page }) => {

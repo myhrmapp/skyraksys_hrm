@@ -77,7 +77,6 @@ class ErrorBoundary extends React.Component {
         message: error.message,
         stack: error.stack,
         componentStack: errorInfo.componentStack,
-        props: this.props,
         url: window.location.href,
         userAgent: navigator.userAgent,
         timestamp: new Date().toISOString(),
@@ -157,7 +156,7 @@ class ErrorBoundary extends React.Component {
           onGoHome={this.handleGoHome}
           onCopyError={this.handleCopyError}
           fallback={this.props.fallback}
-          showDetails={this.props.showDetails !== false}
+          showDetails={process.env.NODE_ENV === 'production' ? (this.props.showDetails === true) : (this.props.showDetails !== false)}
         />
       );
     }

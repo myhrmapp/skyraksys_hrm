@@ -250,7 +250,7 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
       const sortedLeaves = [...leaves].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setLeaveHistory(sortedLeaves);
     }
-  }, [timesheetQuery.data, leaveQuery.data, targetEmployeeId]);
+  }, [timesheetQuery.data, leaveQuery.data, targetEmployeeId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Refresh function
   const refresh = useCallback(() => {

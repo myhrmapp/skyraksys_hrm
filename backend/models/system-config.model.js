@@ -53,22 +53,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'system_configs',
     timestamps: true,
-    paranoid: false, // Don't soft-delete, keep full history
-    indexes: [
-      {
-        name: 'system_configs_category_key_version_idx',
-        unique: true,
-        fields: ['category', 'key', 'version']
-      },
-      {
-        name: 'system_configs_category_key_idx',
-        fields: ['category', 'key']
-      },
-      {
-        name: 'system_configs_changed_by_idx',
-        fields: ['changedBy']
-      }
-    ]
+    paranoid: false // Don't soft-delete, keep full history
+    // Indexes are managed exclusively by migrations to avoid duplicates:
+    //   uq_system_configs_category_key_version  (unique, via 20260211000006)
+    //   idx_system_configs_cat_key_ver          (via 20260210000000)
+    //   idx_system_configs_changed_by           (via 20260210000000)
   });
 
   SystemConfig.associate = function(models) {

@@ -24,7 +24,6 @@ import {
   Tooltip,
   IconButton,
   Checkbox,
-  FormControlLabel
 } from '@mui/material';
 import {
   CheckCircle as ApproveIcon,
@@ -37,7 +36,6 @@ import {
   Cancel as RejectedIcon,
   Schedule as PendingIcon,
   Article as DraftIcon,
-  SelectAll as SelectAllIcon,
   PlaylistAddCheck as BulkApproveIcon,
   PlaylistRemove as BulkRejectIcon
 } from '@mui/icons-material';
@@ -99,7 +97,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
     } finally {
       setLoading('approve-timesheet', false);
     }
-  }, [setLoading, showNotification, onApprovalUpdate]);
+  }, [setLoading, showNotification, onApprovalUpdate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleReject = useCallback(async (timesheet) => {
     if (!rejectionReason.trim()) {

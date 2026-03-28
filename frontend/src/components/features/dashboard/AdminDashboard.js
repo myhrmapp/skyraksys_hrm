@@ -38,7 +38,7 @@ import { dashboardService } from '../../../services/dashboard.service';
 const Dashboard = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { user, isEmployee, isAdmin, isHR, isManager } = useAuth();
+  const { isEmployee, isAdmin, isHR, isManager } = useAuth();
   const { showNotification } = useNotification();
   
   const [refreshing, setRefreshing] = useState(false);
