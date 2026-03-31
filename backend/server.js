@@ -126,6 +126,10 @@ app.use(responseTime((req, res, time) => {
   res.setHeader('X-Response-Time', `${time.toFixed(2)}ms`);
 }));
 
+// Request tracking for performance metrics
+const requestTracker = require('./middleware/requestTracker');
+app.use(requestTracker.middleware());
+
 // Security middleware
 app.use(helmet());
 

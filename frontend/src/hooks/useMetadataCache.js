@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { employeeService } from '../services/employee.service';
+import { useAuth } from '../contexts/AuthContext';
 
 // Lightweight in-memory cache for metadata to avoid repeat fetches
 const cache = {
@@ -9,6 +10,7 @@ const cache = {
 };
 
 export function useMetadataCache(options = { includeManagers: true }) {
+  const { user: authUser } = useAuth();
   const [departments, setDepartments] = useState(cache.departments || []);
   const [positions, setPositions] = useState(cache.positions || []);
   const [managers, setManagers] = useState(cache.managers || []);
@@ -22,8 +24,8 @@ export function useMetadataCache(options = { includeManagers: true }) {
       // Only fetch if missing
       const needDepts = !cache.departments;
       const needPositions = !cache.positions;
-      const user = options.user || (typeof window !== 'undefined' && window.__authUser);
-      const canFetchManagers = user && (user.role === 'admin' || user.role === 'hr' || user.role === 'manager');
+      const user = options.user || authUser;
+      const canFetchManagers = user && ['admin', 'hr', 'manager'].includes(user.role);
       const needManagers = options.includeManagers && !cache.managers && canFetchManagers;
       if (!needDepts && !needPositions && !needManagers) return;
 
@@ -59,7 +61,7 @@ export function useMetadataCache(options = { includeManagers: true }) {
     }
     load();
     return () => { mounted.current = false; };
-  }, [options.includeManagers]);
+  }, [options.includeManagers, authUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { departments, positions, managers, loading, error };
 }

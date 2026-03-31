@@ -1,8 +1,29 @@
 <#
 .SYNOPSIS
-    Setup SSH key on remote server using PowerShell process automation
+    Install your SSH public key on the production server (one-time setup).
+
 .DESCRIPTION
-    Creates an SSH connection using Process with stdin redirection to handle password
+    PURPOSE:
+      Copies your local SSH public key (~/.ssh/id_rsa_skyraksys.pub) into
+      ~/.ssh/authorized_keys on the server so that subsequent SSH and PuTTY
+      connections authenticate without a password prompt.
+
+    WHEN TO USE:
+      Run once before using deploy-docker-from-windows.ps1 if you want
+      passwordless authentication. Not required if you are comfortable
+      entering the password each time (the deploy script uses password auth).
+
+    WHAT IT DOES:
+      1. Reads ~/.ssh/id_rsa_skyraksys.pub from this machine
+      2. SSHes into 46.225.73.94 as Rakesh using password auth
+      3. Appends the public key to ~/.ssh/authorized_keys on the server
+      4. If step 3 fails (home directory permission issue), retries as root
+         and fixes ownership before installing the key
+      5. Verifies the key works by attempting key-based SSH authentication
+
+    RUNS FROM: Windows developer machine
+    SERVER:    skyait.skyraksys.com (46.225.73.94)
+    USER:      Rakesh
 #>
 
 $ServerIP = "46.225.73.94"
@@ -87,7 +108,7 @@ Write-Host "Verify result: $verifyResult"
 if ("$verifyResult" -match "KEY_AUTH_VERIFIED") {
     Write-Host "`nSUCCESS! Key-based auth is working." -ForegroundColor Green
     Write-Host "You can now run the full deployment:" -ForegroundColor Cyan
-    Write-Host "  powershell -ExecutionPolicy Bypass -File deploy-to-server.ps1 -SkipKeySetup" -ForegroundColor White
+    Write-Host "  powershell -ExecutionPolicy Bypass -File deploy-docker-from-windows.ps1" -ForegroundColor White
 } else {
     Write-Host "`nKey verification failed." -ForegroundColor Red
     Write-Host "Please manually SSH and run:" -ForegroundColor Yellow

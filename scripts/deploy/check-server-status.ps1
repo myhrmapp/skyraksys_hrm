@@ -1,4 +1,25 @@
-# Check server status and installed software
+# ==============================================================================
+# SkyrakSys HRM — Pre/Post-Deploy Server Environment Check (Windows)
+#
+# PURPOSE:
+#   Verifies the production server environment is ready for deployment,
+#   or diagnoses why a deployment may have failed.
+#
+# WHAT IT CHECKS:
+#   - Docker installed?
+#   - Docker Compose installed?
+#   - App repository cloned at ~/skyraksys_hrm?
+#   - Available disk space on /
+#
+# NOTE: This checks the server environment only — it does NOT check whether
+#   containers are running or whether HTTP endpoints are reachable.
+#   For container health: SSH in and run: docker compose ps
+#   For HTTP health:      curl https://skyait.skyraksys.com/api/health
+#
+# REQUIRES: PuTTY (plink) installed on this machine
+# RUNS FROM: Windows developer machine
+# SERVER:    skyait.skyraksys.com (46.225.73.94)
+# ==============================================================================
 
 $SERVER_IP = "46.225.73.94"
 $SERVER_USER = "Rakesh"

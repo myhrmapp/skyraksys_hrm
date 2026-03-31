@@ -7,13 +7,17 @@ dns.setDefaultResultOrder('ipv4first');
 /**
  * Playwright Excel-Driven E2E Test Configuration
  * ================================================
- * Comprehensive UI tests driven by Excel test-data workbook.
- * Uses data-testid selectors via an object repository for stability.
+ * Same test suite as playwright.config.js but with Excel-specific reporters
+ * (JSON + JUnit output for spreadsheet sync) and extended timeout.
+ * Points to the same unified e2e/specs/ directory.
+ *
+ * Prefer playwright.config.js for day-to-day runs.
+ * Use this config when you need Excel-formatted output.
  *
  * Prerequisites:
- *   1. Backend running:   cd backend && npm start
+ *   1. Backend running:   cd backend && node server.js
  *   2. Frontend running:  cd frontend && npm start
- *   3. Test data:         node e2e-excel/utils/generateTestData.js
+ *   3. Test data:         node e2e/utils/generateTestData.js
  *
  * Usage:
  *   npx playwright test -c playwright-excel.config.js                  # run all
@@ -23,19 +27,19 @@ dns.setDefaultResultOrder('ipv4first');
  *   npm run test:e2e:excel                                             # npm shortcut
  */
 module.exports = defineConfig({
-  testDir: './e2e-excel/specs',
+  testDir: './e2e/specs',
   fullyParallel: false,          // sequential — tests may share DB state
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: 1,                    // single worker to avoid conflicts
   reporter: [
-    ['html', { open: 'never', outputFolder: 'playwright-report-excel' }],
+    ['html', { open: 'never', outputFolder: 'playwright-report' }],
     ['json', { outputFile: 'test-results/employee-test-results.json' }],
     ['junit', { outputFile: 'test-results/employee-test-results.xml' }],
-    ['./e2e-excel/lib/progress-reporter.js'],
+    ['./e2e/lib/progress-reporter.js'],
     ['list'],
   ],
-  timeout: 45000,                // 45s per test (some workflows need more time)
+  timeout: 60000,                // 60s per test
 
   use: {
     baseURL: 'http://localhost:3000',

@@ -4,13 +4,14 @@ import * as Storage from '../utils/storage';
 
 const API_BASE_URL = __DEV__
   ? Platform.OS === 'web'
-    ? 'http://localhost:5000/api'   // Web browser → localhost
+    ? 'http://localhost:5000/api'   // Web browser (expo start --web) → backend on :5000
     : Platform.OS === 'android'
     ? 'http://10.0.2.2:5000/api'   // Android emulator → host machine
     : 'http://localhost:5000/api'   // iOS simulator → localhost
-  : 'https://api.skyraksys.com/api';
+  : '/api';  // Production: relative path — nginx proxies /api → backend:5000
 
-// For physical device use your machine's local IP e.g. 'http://192.168.x.x:5000/api'
+// For physical device local testing, replace the dev URL with your machine's LAN IP:
+// e.g. 'http://192.168.x.x:5000/api'
 
 const TOKEN_KEY = 'accessToken';
 const REFRESH_KEY = 'refreshToken';

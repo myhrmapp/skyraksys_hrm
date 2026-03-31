@@ -4,6 +4,7 @@ const os = require('os');
 const process = require('process');
 const { authenticateToken, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const requestTracker = require('../middleware/requestTracker');
 
 // Use standard authorize middleware
 const requireAdmin = authorize('admin');
@@ -178,7 +179,16 @@ router.get('/api-metrics', authenticateToken, requireAdmin, async (req, res, nex
     });
     const cpuUsagePercent = ((1 - totalIdle / totalTick) * 100).toFixed(1);
 
+    // Get tracked request metrics
+    const trackedMetrics = requestTracker.getMetrics();
+
     const apiMetrics = {
+      // Request tracking data (used by frontend dashboard)
+      requests: trackedMetrics.requests,
+      responseTime: trackedMetrics.responseTime,
+      endpoints: trackedMetrics.endpoints,
+      cache: { hitRate: 'N/A' },
+      // Server resource data
       server: {
         cpuUsagePercent: parseFloat(cpuUsagePercent),
         loadAverage: {

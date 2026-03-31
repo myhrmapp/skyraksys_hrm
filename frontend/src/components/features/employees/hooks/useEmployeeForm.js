@@ -178,15 +178,19 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
       setLoadingRefData(true);
       setSubmitError('');
 
+      const canFetchManagers = authUser && ['admin', 'hr', 'manager'].includes(authUser.role);
+
       const [deptResponse, mgrsResponse] = await Promise.all([
         employeeService.getDepartments().catch(err => {
           console.error('Error loading departments:', err);
           return { data: { data: [] } };
         }),
-        employeeService.getManagers().catch(err => {
-          console.error('Error loading managers:', err);
-          return { data: { data: [] } };
-        })
+        canFetchManagers
+          ? employeeService.getManagers().catch(err => {
+              console.error('Error loading managers:', err);
+              return { data: { data: [] } };
+            })
+          : Promise.resolve({ data: { data: [] } })
       ]);
       
       setDepartments(Array.isArray(deptResponse) ? deptResponse : deptResponse?.data?.data || deptResponse?.data || []);
@@ -204,7 +208,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     } finally {
       setLoadingRefData(false);
     }
-  }, []);
+  }, [authUser]);
 
   // Check authentication on component mount
   useEffect(() => {

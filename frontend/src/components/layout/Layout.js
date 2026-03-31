@@ -160,7 +160,8 @@ const Layout = () => {
           label: 'Help',
           icon: <Help />,
           items: [
-            { label: 'User Guide', path: '/user-guide', icon: <Help /> }
+            { label: 'User Guide', path: '/user-guide', icon: <Help /> },
+            { label: 'System Showcase', path: '/system-showcase', icon: <DashboardIcon /> }
           ]
         }
       ];
@@ -216,7 +217,8 @@ const Layout = () => {
           label: 'Help',
           icon: <Help />,
           items: [
-            { label: 'User Guide', path: '/user-guide', icon: <Help /> }
+            { label: 'User Guide', path: '/user-guide', icon: <Help /> },
+            { label: 'System Showcase', path: '/system-showcase', icon: <DashboardIcon /> }
           ]
         }
       ];
@@ -251,7 +253,8 @@ const Layout = () => {
         label: 'Help',
         icon: <Help />,
         items: [
-          { label: 'User Guide', path: '/user-guide', icon: <Help /> }
+          { label: 'User Guide', path: '/user-guide', icon: <Help /> },
+          { label: 'System Showcase', path: '/system-showcase', icon: <DashboardIcon /> }
         ]
       }
     ];

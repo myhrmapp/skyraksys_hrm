@@ -113,7 +113,7 @@ const PerformanceDashboard = () => {
       } else if (activeTab === 1 && isAdmin) {
         fetchServerMetrics();
       }
-    }, 5000); // Refresh every 5 seconds
+    }, 30000); // Refresh every 30 seconds
 
     return () => clearInterval(interval);
   }, [activeTab, autoRefresh, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -124,21 +124,24 @@ const PerformanceDashboard = () => {
     let score = 100;
     
     // API error rate penalty
-    const errorRate = parseFloat(apiMetrics.requests.errorRate);
+    const errorRate = parseFloat(apiMetrics.requests?.errorRate || 0);
     if (errorRate > 5) score -= 20;
     if (errorRate > 10) score -= 30;
     
     // Response time penalty
-    if (apiMetrics.responseTime.average > 500) score -= 15;
-    if (apiMetrics.responseTime.average > 1000) score -= 25;
+    const avgTime = apiMetrics.responseTime?.average || 0;
+    if (avgTime > 500) score -= 15;
+    if (avgTime > 1000) score -= 25;
     
     // Memory usage penalty
-    if (serverMetrics.memory.system.usagePercent > 80) score -= 20;
-    if (serverMetrics.memory.system.usagePercent > 90) score -= 30;
+    const memPercent = serverMetrics.memory?.system?.usagePercent || 0;
+    if (memPercent > 80) score -= 20;
+    if (memPercent > 90) score -= 30;
     
     // CPU load penalty
-    if (serverMetrics.cpu.loadAverage['1min'] > 2) score -= 15;
-    if (serverMetrics.cpu.loadAverage['1min'] > 4) score -= 25;
+    const cpuLoad = serverMetrics.cpu?.loadAverage?.['1min'] || 0;
+    if (cpuLoad > 2) score -= 15;
+    if (cpuLoad > 4) score -= 25;
     
     return Math.max(0, Math.min(100, score));
   };
@@ -444,10 +447,10 @@ const PerformanceDashboard = () => {
               <Grid item xs={12} md={3}>
                 <MetricCard
                   title="CPU Load (1m)"
-                  value={serverMetrics.cpu.loadAverage['1min'].toFixed(2)}
-                  color={serverMetrics.cpu.loadAverage['1min'] > 2 ? 'error' : 'success'}
+                  value={(serverMetrics.cpu?.loadAverage?.['1min'] || 0).toFixed(2)}
+                  color={(serverMetrics.cpu?.loadAverage?.['1min'] || 0) > 2 ? 'error' : 'success'}
                   icon={<SpeedIcon color="primary" />}
-                  subtitle={`${serverMetrics.cpu.count} cores`}
+                  subtitle={`${serverMetrics.cpu?.count || 0} cores`}
                 />
               </Grid>
 
@@ -455,8 +458,8 @@ const PerformanceDashboard = () => {
               <Grid item xs={12} md={3}>
                 <ProgressCard
                   title="System Memory"
-                  value={serverMetrics.memory.system.used * 1024 * 1024}
-                  total={serverMetrics.memory.system.total * 1024 * 1024}
+                  value={(serverMetrics.memory?.system?.used || 0) * 1024 * 1024}
+                  total={(serverMetrics.memory?.system?.total || 1) * 1024 * 1024}
                   icon={<MemoryIcon color="primary" />}
                 />
               </Grid>
@@ -465,10 +468,10 @@ const PerformanceDashboard = () => {
               <Grid item xs={12} md={3}>
                 <MetricCard
                   title="API Response"
-                  value={`${apiMetrics.responseTime.average}ms`}
-                  color={apiMetrics.responseTime.average > 500 ? 'error' : 'success'}
+                  value={`${apiMetrics.responseTime?.average || 0}ms`}
+                  color={(apiMetrics.responseTime?.average || 0) > 500 ? 'error' : 'success'}
                   icon={<ApiIcon color="primary" />}
-                  subtitle={`P95: ${apiMetrics.responseTime.p95}ms`}
+                  subtitle={`P95: ${apiMetrics.responseTime?.p95 || 0}ms`}
                 />
               </Grid>
 
@@ -483,26 +486,26 @@ const PerformanceDashboard = () => {
                       <TableBody>
                         <TableRow>
                           <TableCell>Hostname</TableCell>
-                          <TableCell align="right">{serverMetrics.server.hostname}</TableCell>
+                          <TableCell align="right">{serverMetrics.server?.hostname || 'N/A'}</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Platform</TableCell>
-                          <TableCell align="right">{serverMetrics.server.platform} ({serverMetrics.server.arch})</TableCell>
+                          <TableCell align="right">{serverMetrics.server?.platform || 'N/A'} ({serverMetrics.server?.arch || 'N/A'})</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Node.js Version</TableCell>
-                          <TableCell align="right">{serverMetrics.server.nodeVersion}</TableCell>
+                          <TableCell align="right">{serverMetrics.server?.nodeVersion || 'N/A'}</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Uptime</TableCell>
-                          <TableCell align="right">{formatUptime(serverMetrics.server.uptime)}</TableCell>
+                          <TableCell align="right">{formatUptime(serverMetrics.server?.uptime || 0)}</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Environment</TableCell>
                           <TableCell align="right">
                             <Chip 
-                              label={serverMetrics.server.environment} 
-                              color={serverMetrics.server.environment === 'production' ? 'success' : 'warning'}
+                              label={serverMetrics.server?.environment || 'unknown'} 
+                              color={serverMetrics.server?.environment === 'production' ? 'success' : 'warning'}
                               size="small"
                             />
                           </TableCell>
@@ -523,22 +526,24 @@ const PerformanceDashboard = () => {
                     <Stack spacing={2}>
                       <Box>
                         <Typography variant="caption" color="text.secondary">Total Requests</Typography>
-                        <Typography variant="h6">{apiMetrics.requests.total.toLocaleString()}</Typography>
+                        <Typography variant="h6">{(apiMetrics.requests?.total || 0).toLocaleString()}</Typography>
                       </Box>
                       <Box>
                         <Typography variant="caption" color="text.secondary">Success Rate</Typography>
                         <Typography variant="h6" color="success.main">
-                          {((apiMetrics.requests.successful / apiMetrics.requests.total) * 100).toFixed(1)}%
+                          {apiMetrics.requests?.total > 0
+                            ? ((apiMetrics.requests.successful / apiMetrics.requests.total) * 100).toFixed(1)
+                            : '0.0'}%
                         </Typography>
                       </Box>
                       <Box>
                         <Typography variant="caption" color="text.secondary">Cache Hit Rate</Typography>
-                        <Typography variant="h6" color="info.main">{apiMetrics.cache.hitRate}</Typography>
+                        <Typography variant="h6" color="info.main">{apiMetrics.cache?.hitRate || 'N/A'}</Typography>
                       </Box>
                       <Divider />
                       <Typography variant="subtitle2" color="text.secondary">Top Endpoints</Typography>
-                      {apiMetrics.endpoints.slice(0, 3).map((endpoint, index) => (
-                        <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      {(apiMetrics.endpoints || []).slice(0, 3).map((endpoint, idx) => (
+                        <Box key={endpoint.path || idx} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                           <Typography variant="caption">{endpoint.path}</Typography>
                           <Typography variant="caption">{endpoint.avgTime}ms</Typography>
                         </Box>

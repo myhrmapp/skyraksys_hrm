@@ -54,9 +54,6 @@
     "e2e:status": "node run-test.js --status",
     "e2e:last": "node run-test.js --last",
     "e2e:excel": "npx playwright test --config=playwright-excel.config.js",
-    "guide:generate": "node e2e-excel/utils/generate-guide-manifest.js",
-    "guide:record": "npx playwright test --config=playwright-guide.config.js business-workflows",
-    "guide:record:headed": "npx playwright test --config=playwright-guide.config.js business-workflows --headed",
     "eject": "react-scripts eject",
     "performance:test": "npm run build && npx lighthouse http://localhost:3000 --output=html --output-path=./performance-report.html",
     "test:coverage": "react-scripts test --coverage --watchAll=false",
@@ -77,12 +74,14 @@
     "test:e2e:chromium": "npx playwright test --project=chromium",
     "test:e2e:firefox": "npx playwright test --project=firefox",
     "test:e2e:webkit": "npx playwright test --project=webkit",
-    "generate:testdata": "node e2e-excel/utils/generateTestData.js",
+    "generate:testdata": "node e2e/utils/generateTestData.js",
+    "test:e2e:integration": "npx playwright test specs/integration/",
+    "test:e2e:ui-only": "npx playwright test --ignore=e2e/specs/integration",
     "test:e2e:excel": "npx playwright test -c playwright-excel.config.js",
     "test:e2e:excel:headed": "npx playwright test -c playwright-excel.config.js --headed",
     "test:e2e:excel:ui": "npx playwright test -c playwright-excel.config.js --ui",
     "test:e2e:excel:debug": "npx playwright test -c playwright-excel.config.js --debug",
-    "test:e2e:excel:report": "npx playwright show-report playwright-report-excel"
+    "test:e2e:excel:report": "npx playwright show-report playwright-report"
   },
   "eslintConfig": {
     "extends": [

@@ -1,13 +1,27 @@
-# SkyrakSys HRM - One-Click Docker Deployment from Windows
-# 
-# This script will:
-#   1. Upload the deployment script to server
-#   2. Execute deployment remotely
-#   3. Monitor deployment progress
+# ==============================================================================
+# SkyrakSys HRM — One-Click First-Time Deploy (Windows)
 #
-# Server: skyait.skyraksys.com (46.225.73.94)
-# User: Rakesh
-# Password: t]%eCt!49!0>
+# PURPOSE:
+#   Launcher for first-time production server setup, run from a Windows machine.
+#   Uses PuTTY (plink + pscp) to:
+#     1. Upload scripts/deploy/server-full-setup.sh to /tmp/ on the server
+#     2. Execute it as root (via sudo) — this does the actual provisioning
+#     3. Hit the /api/health endpoint to verify the API is responding
+#
+# WHEN TO USE:
+#   Once only — when setting up a fresh or wiped Ubuntu server for the first time.
+#   For day-to-day code updates, SSH in and run redeploy.sh instead.
+#
+# REQUIRES:
+#   - PuTTY installed on this machine (provides plink and pscp commands)
+#   - Network access to 46.225.73.94 on port 22
+#   - scripts/deploy/server-full-setup.sh present in the local repo
+#
+# RUNS FROM: Windows developer machine (NOT the server)
+# DURATION:  ~15-20 minutes
+# SERVER:    skyait.skyraksys.com (46.225.73.94)
+# USER:      Rakesh
+# ==============================================================================
 
 $ErrorActionPreference = "Stop"
 
@@ -51,14 +65,14 @@ if ($testConnection -match "Connected") {
 # Step 1: Upload deployment script
 Write-Info "Step 1: Uploading deployment script to server..."
 
-$scriptPath = "scripts\deploy\cleanup-and-deploy-docker.sh"
+$scriptPath = "scripts\deploy\server-full-setup.sh"
 if (!(Test-Path $scriptPath)) {
     Write-Error-Custom "Deployment script not found: $scriptPath"
     exit 1
 }
 
 # Use pscp (PuTTY SCP) to upload
-pscp -batch -pw $SERVER_PASSWORD $scriptPath ${SERVER_USER}@${SERVER_IP}:/tmp/cleanup-and-deploy-docker.sh
+pscp -batch -pw $SERVER_PASSWORD $scriptPath ${SERVER_USER}@${SERVER_IP}:/tmp/server-full-setup.sh
 
 if ($LASTEXITCODE -eq 0) {
     Write-Success "Deployment script uploaded"
@@ -69,7 +83,7 @@ if ($LASTEXITCODE -eq 0) {
 
 # Step 2: Make script executable
 Write-Info "Step 2: Making script executable..."
-plink -ssh -batch -pw $SERVER_PASSWORD ${SERVER_USER}@${SERVER_IP} "chmod +x /tmp/cleanup-and-deploy-docker.sh"
+plink -ssh -batch -pw $SERVER_PASSWORD ${SERVER_USER}@${SERVER_IP} "chmod +x /tmp/server-full-setup.sh"
 Write-Success "Script permissions set"
 
 # Step 3: Execute deployment
@@ -78,7 +92,7 @@ Write-Warning "This will take 10-15 minutes. Please wait..."
 Write-Host ""
 
 # Run deployment as root (using sudo)
-$deployCommand = "echo '$SERVER_PASSWORD' | sudo -S bash /tmp/cleanup-and-deploy-docker.sh"
+$deployCommand = "echo '$SERVER_PASSWORD' | sudo -S bash /tmp/server-full-setup.sh"
 
 plink -ssh -batch -pw $SERVER_PASSWORD ${SERVER_USER}@${SERVER_IP} $deployCommand
 

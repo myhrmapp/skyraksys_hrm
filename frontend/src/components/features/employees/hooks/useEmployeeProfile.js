@@ -27,11 +27,6 @@ export const useEmployeeProfile = (mode = 'admin') => {
     { enabled: mode !== 'self' }
   );
 
-  // Debug: log mode, id, and employeeData
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('[useEmployeeProfile] mode:', mode, 'id:', id, 'employeeData:', employeeData);
-  }, [mode, id, employeeData]);
   const updateMutation = useUpdateEmployee();
 
   // State
@@ -65,10 +60,11 @@ export const useEmployeeProfile = (mode = 'admin') => {
 
   // 🚀 Load reference data (departments, positions, managers)
   useEffect(() => {
+    if (!user) return; // Wait for auth to load
     const loadRefData = async () => {
       try {
         setLoadingRefData(true);
-        const canFetchManagers = isAdmin || isHR || user?.role === 'manager';
+        const canFetchManagers = ['admin', 'hr', 'manager'].includes(user?.role);
         const [deptResponse, posResponse, mgrResponse] = await Promise.all([
           employeeService.getDepartments().catch(err => {
             console.error('Error loading departments:', err);
@@ -97,7 +93,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
     };
 
     loadRefData();
-  }, []);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 🚀 Handle self-mode data fetching (my profile)
   useEffect(() => {
@@ -106,8 +102,6 @@ export const useEmployeeProfile = (mode = 'admin') => {
         setLoadingSelf(true);
         try {
           const empData = await employeeService.getMyProfile();
-          // Debug: log API response for /me
-          console.log('[useEmployeeProfile] /me API response:', empData);
           if (empData) {
             setEmployee(empData);
             setOriginalEmployee({ ...empData });
@@ -131,8 +125,6 @@ export const useEmployeeProfile = (mode = 'admin') => {
   // 🚀 Populate employee data from React Query when available (admin/manager mode)
   useEffect(() => {
     if (mode !== 'self' && employeeData && !employee?.id) {
-      // Debug: log setting employee from React Query
-      console.log('[useEmployeeProfile] Setting employee from React Query:', employeeData);
       setEmployee(employeeData);
       setOriginalEmployee({ ...employeeData });
       if (employeeData.photoUrl) {
@@ -140,11 +132,6 @@ export const useEmployeeProfile = (mode = 'admin') => {
       }
     }
   }, [employeeData, mode, employee?.id]);
-
-  // Debug: log employee state changes
-  useEffect(() => {
-    console.log('[useEmployeeProfile] employee state changed:', employee);
-  }, [employee]);
 
   // When navigated here with editMode=true (e.g. from employee list), redirect to full tab form
   useEffect(() => {

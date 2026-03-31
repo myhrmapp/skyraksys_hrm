@@ -17,18 +17,11 @@ class EmployeeService {
   // Get current user's employee profile
   async getMyProfile() {
     const response = await http.get('/employees/me');
-    // Debug: log the raw Axios response
-    // eslint-disable-next-line no-console
-    console.log('[employeeService.getMyProfile] raw response:', response);
     if (response && response.data && response.data.data) {
-      // eslint-disable-next-line no-console
-      console.log('[employeeService.getMyProfile] returning response.data.data:', response.data.data);
       return response.data.data;
     }
     // Fallback to normalizeResponse if structure changes
     const normalized = normalizeResponse(response);
-    // eslint-disable-next-line no-console
-    console.log('[employeeService.getMyProfile] returning normalized:', normalized);
     return normalized;
   }
 
@@ -206,27 +199,14 @@ class EmployeeService {
     return response;
   }
 
-  // Get managers for dropdown
+  // Get managers for dropdown (admin/hr/manager only)
   async getManagers() {
     try {
       const response = await http.get('/employees/managers');
       return { data: { data: response.data?.data || response.data } };
     } catch (error) {
       console.error('Error fetching managers:', error);
-      // Fallback: get all employees and filter managers
-      try {
-        const allEmployees = await this.getAll();
-        const employees = allEmployees.data || allEmployees;
-        const managers = employees.filter(emp => 
-          emp.position?.level === 'Manager' || 
-          emp.position?.title?.toLowerCase().includes('manager') ||
-          emp.role === 'manager'
-        );
-        return { data: { data: managers } };
-      } catch (fallbackError) {
-        console.error('Fallback manager fetch failed:', fallbackError);
-        return { data: { data: [] } };
-      }
+      return { data: { data: [] } };
     }
   }
 
