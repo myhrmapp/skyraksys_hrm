@@ -1104,7 +1104,7 @@ test.describe.serial('Flow 4 — Attendance Workflows via UI', () => {
     await logout(page);
   });
 
-  test('4d —
+  test('4d — Admin can view attendance management page', async ({ page }) => {
     await loginViaAPI(page, 'admin');
     await page.goto('/attendance-management');
     await waitForPageLoad(page);

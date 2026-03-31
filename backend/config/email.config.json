@@ -4,11 +4,11 @@
   "smtpSecure": false,
   "smtpUser": "audit@test.com",
   "smtpPassword": {
-    "encrypted": "6c0bcc91c9b197dc07",
-    "iv": "9ab466b5fe8dfae161f9ecfb8eb9ac17",
-    "authTag": "df7aacf256eb6c3250fe490010e46d1f"
+    "encrypted": "527060f8def48569a8",
+    "iv": "cbd94bcbf2d3438a4421907644f431e2",
+    "authTag": "6ec5699dea9c869b665493f89ac280e4"
   },
   "emailFrom": "audit@test.com",
-  "updatedAt": "2026-03-28T03:08:39.556Z",
+  "updatedAt": "2026-03-29T16:18:16.608Z",
   "updatedBy": "admin@env-test.com"
 }

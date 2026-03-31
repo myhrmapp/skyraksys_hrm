@@ -975,7 +975,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                         <FormControl fullWidth>
                           <InputLabel>Logo Position</InputLabel>
                           <Select
-                            value={templateForm.styling.companyInfo.logoPosition}
+                            value={["left","center","right"].includes(templateForm.styling.companyInfo.logoPosition) ? templateForm.styling.companyInfo.logoPosition : ""}
                             onChange={(e) => setTemplateForm(prev => ({
                               ...prev,
                               styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, logoPosition: e.target.value }}
@@ -991,7 +991,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                         <FormControl fullWidth>
                           <InputLabel>Logo Size</InputLabel>
                           <Select
-                            value={templateForm.styling.companyInfo.logoSize}
+                            value={["small","medium","large"].includes(templateForm.styling.companyInfo.logoSize) ? templateForm.styling.companyInfo.logoSize : ""}
                             onChange={(e) => setTemplateForm(prev => ({
                               ...prev,
                               styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, logoSize: e.target.value }}
@@ -1323,7 +1323,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                         <FormControl fullWidth>
                           <InputLabel>Font Family</InputLabel>
                           <Select
-                            value={templateForm.styling.fontFamily}
+                            value={["Arial, sans-serif","'Times New Roman', serif","Helvetica, sans-serif","Georgia, serif","'Courier New', monospace"].includes(templateForm.styling.fontFamily) ? templateForm.styling.fontFamily : ""}
                             onChange={(e) => setTemplateForm(prev => ({
                               ...prev,
                               styling: { ...prev.styling, fontFamily: e.target.value }
@@ -1378,7 +1378,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                         <FormControl fullWidth>
                           <InputLabel>Page Size</InputLabel>
                           <Select
-                            value={templateForm.styling.pageSize}
+                            value={["A4","Letter"].includes(templateForm.styling.pageSize) ? templateForm.styling.pageSize : ""}
                             onChange={(e) => setTemplateForm(prev => ({
                               ...prev,
                               styling: { ...prev.styling, pageSize: e.target.value }
@@ -1393,7 +1393,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                         <FormControl fullWidth>
                           <InputLabel>Orientation</InputLabel>
                           <Select
-                            value={templateForm.styling.orientation}
+                            value={["portrait","landscape"].includes(templateForm.styling.orientation) ? templateForm.styling.orientation : ""}
                             onChange={(e) => setTemplateForm(prev => ({
                               ...prev,
                               styling: { ...prev.styling, orientation: e.target.value }

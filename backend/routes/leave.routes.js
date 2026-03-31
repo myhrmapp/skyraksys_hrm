@@ -16,7 +16,7 @@ const router = express.Router();
 const leaveController = require('../controllers/leaveController');
 
 // Middleware
-const { authenticateToken, authorize, isManagerOrAbove } = require('../middleware/auth');
+const { authenticateToken, authorize, isManagerOrAbove, canAccessEmployee } = require('../middleware/auth');
 const { validate, validateQuery, validateParams } = require('../middleware/validate');
 const validators = require('../middleware/validators');
 
@@ -62,6 +62,7 @@ router.get('/statistics',
  * @access Private (Own balance or Admin/HR)
  */
 router.get('/balance/:employeeId', 
+  canAccessEmployee,
   leaveController.getBalance
 );
 
@@ -374,6 +375,43 @@ router.post('/:id/approve-cancellation',
 );
 
 /**
+ * Helper: Restore leave balance when deleting a leave request
+ * Handles Pending (restore pending→balance) and Approved (restore taken→balance) leaves
+ */
+async function restoreBalanceAndDelete(leave) {
+  const transaction = await db.sequelize.transaction();
+  try {
+    if (['Pending', 'Approved'].includes(leave.status)) {
+      const leaveYear = new Date(leave.startDate).getFullYear();
+      const leaveBalance = await db.LeaveBalance.findOne({
+        where: {
+          employeeId: leave.employeeId,
+          leaveTypeId: leave.leaveTypeId,
+          year: leaveYear
+        },
+        transaction
+      });
+      if (leaveBalance) {
+        const days = Number(leave.totalDays);
+        if (leave.status === 'Pending') {
+          leaveBalance.totalPending = Number(leaveBalance.totalPending) - days;
+          leaveBalance.balance = Number(leaveBalance.balance) + days;
+        } else if (leave.status === 'Approved') {
+          leaveBalance.totalTaken = Number(leaveBalance.totalTaken) - days;
+          leaveBalance.balance = Number(leaveBalance.balance) + days;
+        }
+        await leaveBalance.save({ transaction });
+      }
+    }
+    await leave.destroy({ transaction });
+    await transaction.commit();
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+}
+
+/**
  * @route DELETE /api/leaves/:id
  * @desc Delete leave request with role-based restrictions
  *   - Admin: can delete any leave in any status
@@ -401,7 +439,7 @@ router.delete('/:id',
 
       // Admin can delete any leave in any status
       if (role === 'admin') {
-        await leave.destroy();
+        await restoreBalanceAndDelete(leave);
         return res.json({ success: true, message: 'Leave request deleted successfully' });
       }
 
@@ -419,23 +457,20 @@ router.delete('/:id',
       }
 
       if (role === 'hr') {
-        // HR can delete any pending leave request
-        await leave.destroy();
+        await restoreBalanceAndDelete(leave);
         return res.json({ success: true, message: 'Leave request deleted successfully' });
       }
 
       if (role === 'manager') {
-        // Manager can delete own pending OR subordinates' pending
         if (leave.employeeId === employee.id) {
-          await leave.destroy();
+          await restoreBalanceAndDelete(leave);
           return res.json({ success: true, message: 'Leave request deleted successfully' });
         }
-        // Check if the leave belongs to a subordinate
         const subordinate = await db.Employee.findOne({
           where: { id: leave.employeeId, managerId: employee.id }
         });
         if (subordinate) {
-          await leave.destroy();
+          await restoreBalanceAndDelete(leave);
           return res.json({ success: true, message: 'Leave request deleted successfully' });
         }
         return res.status(403).json({
@@ -452,7 +487,7 @@ router.delete('/:id',
         });
       }
 
-      await leave.destroy();
+      await restoreBalanceAndDelete(leave);
       res.json({ success: true, message: 'Leave request deleted successfully' });
     } catch (error) {
       next(error);

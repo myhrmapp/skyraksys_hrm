@@ -104,12 +104,12 @@ test.describe.serial('Timesheet — Flow 1: CRUD Lifecycle', () => {
 
     // Might already have a timesheet for this week — accept conflict too
     if (res.status() === 409 || res.status() === 400) {
-      // Already exists — fetch it instead
+      // Already exists — fetch a draft one so submit tests can still run
       const listRes = await page.request.get(`${API_URL}/timesheets/me`);
       if (listRes.ok()) {
         const listBody = await listRes.json();
         const entries = Array.isArray(listBody.data) ? listBody.data : (listBody.data?.data || []);
-        const ts = entries.find(e => e && e.id);
+        const ts = entries.find(e => e && e.id && e.status?.toLowerCase() === 'draft');
         if (ts) createdTimesheetId = ts.id;
       }
     } else {
@@ -391,6 +391,195 @@ test.describe('Timesheet — Flow 4: UI Rendering', () => {
     if (await saveDraftBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
       await expect(saveDraftBtn).toBeVisible();
     }
+    await logout(page);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// FLOW 5 (continued) — RBAC EDGE CASES
+// ══════════════════════════════════════════════════════════════════════════
+test.describe('Timesheet — Flow 5b: RBAC Edge Cases', () => {
+  test('5e — HR can access approval queue', async ({ page }) => {
+    await loginViaAPI(page, 'hr');
+    const res = await page.request.get(`${API_URL}/timesheets/approval/pending`);
+    expect(res.ok()).toBeTruthy();
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(Array.isArray(body.data)).toBe(true);
+    await logout(page);
+  });
+
+  test('5f — HR can approve a submitted timesheet (same as manager)', async ({ page }) => {
+    if (!createdTimesheetId) { test.skip(); return; }
+    await loginViaAPI(page, 'hr');
+    const res = await page.request.post(`${API_URL}/timesheets/${createdTimesheetId}/approve`, {
+      data: { comments: 'HR approved via E2E' },
+      failOnStatusCode: false,
+    });
+    // Acceptable outcomes: 200 approved, 400 (already approved/not submitted), 403 (ownership rules)
+    expect([200, 400, 403, 404]).toContain(res.status());
+    await logout(page);
+  });
+
+  test('5g — HR can reject a submitted timesheet', async ({ page }) => {
+    await loginViaAPI(page, 'admin');
+    // Create + submit a fresh timesheet to reject
+    const weekStart = pastDateISO(21); // 3 weeks ago
+    const createRes = await page.request.post(`${API_URL}/timesheets`, {
+      data: { weekStartDate: weekStart, status: 'draft', entries: [], totalHours: 0 },
+      failOnStatusCode: false,
+    });
+    let tsId = null;
+    if (createRes.ok()) {
+      const body = await createRes.json();
+      tsId = body.data?.id;
+      if (tsId) {
+        await page.request.patch(`${API_URL}/timesheets/${tsId}/submit`, { failOnStatusCode: false });
+      }
+    }
+    await logout(page);
+
+    if (tsId) {
+      await loginViaAPI(page, 'hr');
+      const res = await page.request.post(`${API_URL}/timesheets/${tsId}/reject`, {
+        data: { comments: 'HR rejected via E2E — incorrect project.' },
+        failOnStatusCode: false,
+      });
+      if (res.ok()) {
+        const body = await res.json();
+        expect(body.success).toBe(true);
+        expect(body.data.status.toLowerCase()).toBe('rejected');
+      } else {
+        // Already rejected/approved or permission issue — acceptable
+        expect([400, 403, 404]).toContain(res.status());
+      }
+      await logout(page);
+    }
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// FLOW 6 — STATS AND SUMMARY ENDPOINTS
+// ══════════════════════════════════════════════════════════════════════════
+test.describe('Timesheet — Flow 6: Stats & Summary', () => {
+  test('6a — GET /timesheets/stats/summary returns valid shape (manager)', async ({ page }) => {
+    await loginViaAPI(page, 'manager');
+    const res = await page.request.get(`${API_URL}/timesheets/stats/summary`, {
+      failOnStatusCode: false,
+    });
+    // Endpoint exists and returns JSON — 200 or 403 acceptable (some configs restrict)
+    expect([200, 403]).toContain(res.status());
+    if (res.ok()) {
+      const body = await res.json();
+      expect(body.success).toBe(true);
+    }
+    await logout(page);
+  });
+
+  test('6b — GET /timesheets/stats/summary returns valid shape (admin)', async ({ page }) => {
+    await loginViaAPI(page, 'admin');
+    const res = await page.request.get(`${API_URL}/timesheets/stats/summary`, {
+      failOnStatusCode: false,
+    });
+    if (res.ok()) {
+      const body = await res.json();
+      expect(body.success).toBe(true);
+      // Should contain numeric stats
+      const data = body.data || body;
+      expect(typeof data).toBe('object');
+    } else {
+      expect([403, 404]).toContain(res.status());
+    }
+    await logout(page);
+  });
+
+  test('6c — GET /timesheets/summary returns own hours breakdown (employee)', async ({ page }) => {
+    await loginViaAPI(page, 'employee');
+    const res = await page.request.get(`${API_URL}/timesheets/summary`, {
+      failOnStatusCode: false,
+    });
+    expect([200, 404]).toContain(res.status());
+    if (res.ok()) {
+      const body = await res.json();
+      expect(body.success).toBe(true);
+    }
+    await logout(page);
+  });
+
+  test('6d — GET /timesheets/stats/summary by HR returns data', async ({ page }) => {
+    await loginViaAPI(page, 'hr');
+    const res = await page.request.get(`${API_URL}/timesheets/stats/summary`, {
+      failOnStatusCode: false,
+    });
+    expect([200, 403]).toContain(res.status());
+    await logout(page);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// FLOW 7 — BULK OPERATIONS API
+// ══════════════════════════════════════════════════════════════════════════
+test.describe('Timesheet — Flow 7: Bulk Operations', () => {
+  test('7a — POST /bulk-approve with empty array returns 400', async ({ page }) => {
+    await loginViaAPI(page, 'admin');
+    const res = await page.request.post(`${API_URL}/timesheets/bulk-approve`, {
+      data: { timesheetIds: [] },
+      failOnStatusCode: false,
+    });
+    // Empty array should be a validation error
+    expect(res.status()).toBeGreaterThanOrEqual(400);
+    await logout(page);
+  });
+
+  test('7b — POST /bulk-reject with empty array returns 400', async ({ page }) => {
+    await loginViaAPI(page, 'manager');
+    const res = await page.request.post(`${API_URL}/timesheets/bulk-reject`, {
+      data: { timesheetIds: [], comments: 'batch reject' },
+      failOnStatusCode: false,
+    });
+    expect(res.status()).toBeGreaterThanOrEqual(400);
+    await logout(page);
+  });
+
+  test('7c — POST /bulk-reject without comments returns 400', async ({ page }) => {
+    await loginViaAPI(page, 'manager');
+    const res = await page.request.post(`${API_URL}/timesheets/bulk-reject`, {
+      data: { timesheetIds: ['00000000-0000-0000-0000-000000000001'] },
+      failOnStatusCode: false,
+    });
+    // Comments required for rejection
+    expect(res.status()).toBeGreaterThanOrEqual(400);
+    await logout(page);
+  });
+
+  test('7d — Employee cannot call /bulk-approve', async ({ page }) => {
+    await loginViaAPI(page, 'employee');
+    const res = await page.request.post(`${API_URL}/timesheets/bulk-approve`, {
+      data: { timesheetIds: ['00000000-0000-0000-0000-000000000001'] },
+      failOnStatusCode: false,
+    });
+    expect(res.status()).toBeGreaterThanOrEqual(400);
+    await logout(page);
+  });
+
+  test('7e — Employee cannot call /bulk-reject', async ({ page }) => {
+    await loginViaAPI(page, 'employee');
+    const res = await page.request.post(`${API_URL}/timesheets/bulk-reject`, {
+      data: { timesheetIds: ['00000000-0000-0000-0000-000000000001'], comments: 'test' },
+      failOnStatusCode: false,
+    });
+    expect(res.status()).toBeGreaterThanOrEqual(400);
+    await logout(page);
+  });
+
+  test('7f — HR can call /bulk-approve (authorized role)', async ({ page }) => {
+    await loginViaAPI(page, 'hr');
+    const res = await page.request.post(`${API_URL}/timesheets/bulk-approve`, {
+      data: { timesheetIds: ['00000000-0000-0000-0000-000000000001'] },
+      failOnStatusCode: false,
+    });
+    // 400 (not found/not submitted) is OK; 403 is a failure
+    expect(res.status()).not.toBe(403);
     await logout(page);
   });
 });

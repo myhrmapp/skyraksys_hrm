@@ -6,7 +6,6 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   Switch,
   Platform,
@@ -14,6 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { leavesApi, LeaveType, CreateLeavePayload } from '../../api/leaves';
+import { showSuccess, showError } from '../../utils/toast';
 
 // Platform-aware date input — native HTML <input type="date"> on web,
 // text button that opens DateTimePicker on iOS/Android
@@ -93,6 +93,7 @@ export default function LeaveRequestScreen() {
   const [endDate, setEndDate] = useState(new Date());
   const [reason, setReason] = useState('');
   const [isHalfDay, setIsHalfDay] = useState(false);
+  const [halfDayType, setHalfDayType] = useState<'First Half' | 'Second Half'>('First Half');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -106,15 +107,15 @@ export default function LeaveRequestScreen() {
 
   const handleSubmit = async () => {
     if (!selectedType) {
-      Alert.alert('Error', 'Please select a leave type');
+      showError('Please select a leave type');
       return;
     }
-    if (!reason.trim()) {
-      Alert.alert('Error', 'Please provide a reason');
+    if (!reason.trim() || reason.trim().length < 10) {
+      showError('Reason must be at least 10 characters');
       return;
     }
     if (endDate < startDate) {
-      Alert.alert('Error', 'End date cannot be before start date');
+      showError('End date cannot be before start date');
       return;
     }
 
@@ -126,17 +127,20 @@ export default function LeaveRequestScreen() {
         endDate: formatDate(endDate),
         reason: reason.trim(),
         isHalfDay,
+        ...(isHalfDay && { halfDayType }),
       };
       await leavesApi.create(payload);
-      Alert.alert('Success', 'Leave request submitted', [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      showSuccess('Leave request submitted successfully');
+      navigation.goBack();
     } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.message || 'Failed to submit leave request');
+      showError(err?.response?.data?.message || 'Failed to submit leave request');
     } finally {
       setLoading(false);
     }
   };
+
+  const twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -160,7 +164,7 @@ export default function LeaveRequestScreen() {
       <Text style={styles.label}>Start Date</Text>
       <DateField
         value={startDate}
-        minDate={new Date()}
+        minDate={twoWeeksAgo}
         label="Start Date"
         onChange={(d) => {
           setStartDate(d);
@@ -188,13 +192,31 @@ export default function LeaveRequestScreen() {
         />
       </View>
 
+      {/* Half Day Type — shown only when Half Day is on */}
+      {isHalfDay && (
+        <View style={styles.halfDayRow}>
+          {(['First Half', 'Second Half'] as const).map((opt) => (
+            <TouchableOpacity
+              key={opt}
+              style={[styles.halfDayChip, halfDayType === opt && styles.halfDayChipActive]}
+              onPress={() => setHalfDayType(opt)}
+            >
+              <Text style={[styles.halfDayChipText, halfDayType === opt && styles.halfDayChipTextActive]}>
+                {opt}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
       {/* Reason */}
       <Text style={styles.label}>Reason</Text>
       <TextInput
+        testID="leave-reason"
         style={styles.textArea}
         value={reason}
         onChangeText={setReason}
-        placeholder="Describe your reason for leave..."
+        placeholder="Describe your reason for leave (min 10 characters)..."
         placeholderTextColor={colors.textSecondary}
         multiline
         numberOfLines={4}
@@ -203,6 +225,7 @@ export default function LeaveRequestScreen() {
 
       {/* Submit */}
       <TouchableOpacity
+        testID="leave-submit-btn"
         style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
         onPress={handleSubmit}
         disabled={loading}
@@ -245,6 +268,27 @@ const styles = StyleSheet.create({
   },
   typeChipText: { ...typography.body, color: colors.text },
   typeChipTextActive: { color: '#fff', fontWeight: '600' },
+  halfDayRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  halfDayChip: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+  },
+  halfDayChipActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  halfDayChipText: { ...typography.captionBold, color: colors.text },
+  halfDayChipTextActive: { color: '#fff' },
   dateBtn: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.md,

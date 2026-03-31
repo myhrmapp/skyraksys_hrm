@@ -26,6 +26,12 @@ export const useEmployeeProfile = (mode = 'admin') => {
     mode === 'self' ? null : id,
     { enabled: mode !== 'self' }
   );
+
+  // Debug: log mode, id, and employeeData
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[useEmployeeProfile] mode:', mode, 'id:', id, 'employeeData:', employeeData);
+  }, [mode, id, employeeData]);
   const updateMutation = useUpdateEmployee();
 
   // State
@@ -39,6 +45,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
   const [positions, setPositions] = useState([]);
   const [managers, setManagers] = useState([]);
   const [loadingRefData, setLoadingRefData] = useState(true);
+  const [loadingSelf, setLoadingSelf] = useState(mode === 'self');
   
   // Photo upload state
   const [selectedPhoto, setSelectedPhoto] = useState(null);
@@ -61,6 +68,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
     const loadRefData = async () => {
       try {
         setLoadingRefData(true);
+        const canFetchManagers = isAdmin || isHR || user?.role === 'manager';
         const [deptResponse, posResponse, mgrResponse] = await Promise.all([
           employeeService.getDepartments().catch(err => {
             console.error('Error loading departments:', err);
@@ -70,12 +78,14 @@ export const useEmployeeProfile = (mode = 'admin') => {
             console.error('Error loading positions:', err);
             return { data: { data: [] } };
           }),
-          employeeService.getManagers().catch(err => {
-            console.error('Error loading managers:', err);
-            return { data: { data: [] } };
-          })
+          canFetchManagers
+            ? employeeService.getManagers().catch(err => {
+                console.error('Error loading managers:', err);
+                return { data: { data: [] } };
+              })
+            : Promise.resolve({ data: { data: [] } })
         ]);
-        
+
         setDepartments(deptResponse.data?.data || []);
         setPositions(posResponse.data?.data || []);
         setManagers(mgrResponse.data?.data || []);
@@ -93,26 +103,27 @@ export const useEmployeeProfile = (mode = 'admin') => {
   useEffect(() => {
     if (mode === 'self') {
       const fetchMyProfile = async () => {
+        setLoadingSelf(true);
         try {
-          const response = await employeeService.getMyProfile();
-          const empData = response?.data;
+          const empData = await employeeService.getMyProfile();
+          // Debug: log API response for /me
+          console.log('[useEmployeeProfile] /me API response:', empData);
           if (empData) {
             setEmployee(empData);
             setOriginalEmployee({ ...empData });
-            
             if (empData.photoUrl) {
               setPhotoPreview(`${process.env.REACT_APP_BACKEND_URL || ''}${empData.photoUrl}`);
             }
           }
         } catch (error) {
           console.error('Error fetching my profile:', error);
-          // Don't show notification if user is not authenticated (expected behavior)
           if (error?.response?.status !== 401) {
             showNotification('Failed to load profile data', 'error');
           }
+        } finally {
+          setLoadingSelf(false);
         }
       };
-      
       fetchMyProfile();
     }
   }, [mode, showNotification]);
@@ -120,14 +131,20 @@ export const useEmployeeProfile = (mode = 'admin') => {
   // 🚀 Populate employee data from React Query when available (admin/manager mode)
   useEffect(() => {
     if (mode !== 'self' && employeeData && !employee?.id) {
+      // Debug: log setting employee from React Query
+      console.log('[useEmployeeProfile] Setting employee from React Query:', employeeData);
       setEmployee(employeeData);
       setOriginalEmployee({ ...employeeData });
-      
       if (employeeData.photoUrl) {
         setPhotoPreview(`${process.env.REACT_APP_BACKEND_URL || ''}${employeeData.photoUrl}`);
       }
     }
   }, [employeeData, mode, employee?.id]);
+
+  // Debug: log employee state changes
+  useEffect(() => {
+    console.log('[useEmployeeProfile] employee state changed:', employee);
+  }, [employee]);
 
   // When navigated here with editMode=true (e.g. from employee list), redirect to full tab form
   useEffect(() => {
@@ -274,7 +291,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
   };
 
   // Derive combined loading state
-  const loading = (mode === 'self' ? false : isLoadingEmployee) || loadingRefData;
+  const loading = (mode === 'self' ? loadingSelf : isLoadingEmployee) || loadingRefData;
   const saving = updateMutation.isPending;
 
   return {

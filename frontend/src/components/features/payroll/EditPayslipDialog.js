@@ -28,6 +28,7 @@ import useConfirmDialog from '../../../hooks/useConfirmDialog';
 const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
   const [earnings, setEarnings] = useState({});
   const [deductions, setDeductions] = useState({});
+  const [overtimeHours, setOvertimeHours] = useState(0);
   const [reason, setReason] = useState('');
   const [errors, setErrors] = useState({});
   const [addComponentDialog, setAddComponentDialog] = useState({ open: false, type: null, name: '' });
@@ -38,6 +39,7 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
     if (payslip) {
       setEarnings(payslip.earnings || {});
       setDeductions(payslip.deductions || {});
+      setOvertimeHours(payslip.attendance?.overtimeHours || 0);
       setReason('');
       setErrors({});
     }
@@ -144,6 +146,7 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
         payslipId: payslip.id,
         earnings,
         deductions,
+        attendance: { overtimeHours: parseFloat(overtimeHours) || 0 },
         reason: reason.trim()
       });
     }
@@ -308,7 +311,26 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
           </Grid>
 
           {/* Net Pay Summary */}
-          <Grid item xs={12}>
+          <Grid item xs={12} md={6}>
+            <Paper elevation={1} sx={{ p: 2, bgcolor: 'info.50' }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
+                ⏱️ Overtime Hours
+              </Typography>
+              <TextField
+                fullWidth
+                label="Overtime Hours"
+                type="number"
+                value={overtimeHours}
+                onChange={(e) => setOvertimeHours(Math.max(0, parseFloat(e.target.value) || 0))}
+                inputProps={{ min: 0, step: 0.5 }}
+                size="small"
+                helperText="OT pay auto-calculated at 1.5x hourly rate during generation. Edit the overtimePay earning above to adjust the amount."
+              />
+            </Paper>
+          </Grid>
+
+          {/* Net Pay Amount */}
+          <Grid item xs={12} md={6}>
             <Paper 
               elevation={3} 
               sx={{ 

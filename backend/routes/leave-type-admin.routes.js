@@ -41,7 +41,7 @@ router.get('/:id', async (req, res, next) => {
 // POST /api/admin/leave-types — Create a new leave type
 router.post('/', async (req, res, next) => {
   try {
-    const { name, description, maxDaysPerYear, carryForward, maxCarryForwardDays, isActive } = req.body;
+    const { name, description, maxDaysPerYear, carryForward, maxCarryForwardDays, isActive, isPaid } = req.body;
 
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: 'Leave type name is required' });
@@ -59,7 +59,8 @@ router.post('/', async (req, res, next) => {
       maxDaysPerYear: maxDaysPerYear ?? 20,
       carryForward: carryForward ?? false,
       maxCarryForwardDays: maxCarryForwardDays ?? 0,
-      isActive: isActive ?? true
+      isActive: isActive ?? true,
+      isPaid: isPaid ?? true
     });
 
     logger.info(`Leave type created: ${leaveType.name} by user ${req.user.id}`);
@@ -78,7 +79,7 @@ router.put('/:id', async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Leave type not found' });
     }
 
-    const { name, description, maxDaysPerYear, carryForward, maxCarryForwardDays, isActive } = req.body;
+    const { name, description, maxDaysPerYear, carryForward, maxCarryForwardDays, isActive, isPaid } = req.body;
 
     // If name is being changed, check for duplicates
     if (name && name.trim() !== leaveType.name) {
@@ -97,7 +98,8 @@ router.put('/:id', async (req, res, next) => {
       maxDaysPerYear: maxDaysPerYear ?? leaveType.maxDaysPerYear,
       carryForward: carryForward ?? leaveType.carryForward,
       maxCarryForwardDays: maxCarryForwardDays ?? leaveType.maxCarryForwardDays,
-      isActive: isActive ?? leaveType.isActive
+      isActive: isActive ?? leaveType.isActive,
+      isPaid: isPaid ?? leaveType.isPaid
     });
 
     logger.info(`Leave type updated: ${leaveType.name} by user ${req.user.id}`);

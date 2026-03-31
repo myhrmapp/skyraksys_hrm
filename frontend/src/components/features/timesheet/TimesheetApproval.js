@@ -108,7 +108,6 @@ const TimesheetApproval = ({ embedded } = {}) => {
       showAlert('error', error.message || 'Failed to reject timesheets');
     }
   });
-  const [filteredTimesheets, setFilteredTimesheets] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedTimesheet, setSelectedTimesheet] = useState(null);
@@ -125,118 +124,61 @@ const TimesheetApproval = ({ embedded } = {}) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [orderBy, setOrderBy] = useState('weekStartDate');
   const [order, setOrder] = useState('desc');
-  const [summary, setSummary] = useState({
-    totalPending: 0,
-    totalHours: 0,
-    employees: 0,
-    approved: 0,
-    rejected: 0,
-    draft: 0
-  });
-
-  useEffect(() => {
-    calculateSummary();
-    applyFilters();
-  }, [timesheets, statsData, statusFilter, searchQuery, projectFilter, dateRange, orderBy, order]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const calculateSummary = () => {
-    const submitted = timesheets.filter(ts => ts.status?.toLowerCase() === 'submitted');
-    
-    setSummary({
-      totalPending: submitted.length,
-      totalHours: submitted.reduce((sum, ts) => sum + parseFloat(ts.totalHours || ts.totalHoursWorked || 0), 0),
-      employees: [...new Set(submitted.map(ts => ts.employeeId))].length,
-      approved: statsData?.approved ?? 0,
-      rejected: statsData?.rejected ?? 0,
-      draft: statsData?.draft ?? 0,
-    });
-  };
-
-  const applyFilters = () => {
-    // Short-circuit: if no timesheets, just ensure filteredTimesheets is empty
-    if (timesheets.length === 0) {
-      if (filteredTimesheets.length > 0) {
-        setFilteredTimesheets([]);
-        setPage(0);
+  // M-04: compute derived data with useMemo — no intermediate state / no cascading effects
+  const filteredTimesheets = useMemo(() => {
+    let filtered = timesheets.filter((ts) => {
+      if (statusFilter && ts.status !== statusFilter) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const name = `${ts.employee?.firstName ?? ''} ${ts.employee?.lastName ?? ''}`.toLowerCase();
+        if (!name.includes(q) && !(ts.employee?.employeeId ?? '').toLowerCase().includes(q)) return false;
       }
-      return;
-    }
-    
-    let filtered = [...timesheets];
+      if (projectFilter && ts.projectId !== projectFilter) return false;
+      if (dateRange.start && dayjs(ts.weekStartDate).isBefore(dayjs(dateRange.start))) return false;
+      if (dateRange.end   && dayjs(ts.weekStartDate).isAfter(dayjs(dateRange.end)))   return false;
+      return true;
+    });
 
-    // Status filter
-    if (statusFilter) {
-      filtered = filtered.filter(ts => ts.status === statusFilter);
-    }
-
-    // Search filter (employee name or ID)
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(ts => 
-        ts.employee?.firstName?.toLowerCase().includes(query) ||
-        ts.employee?.lastName?.toLowerCase().includes(query) ||
-        ts.employee?.employeeId?.toLowerCase().includes(query)
-      );
-    }
-
-    // Project filter
-    if (projectFilter) {
-      filtered = filtered.filter(ts => ts.projectId === projectFilter);
-    }
-
-    // Date range filter
-    if (dateRange.start) {
-      filtered = filtered.filter(ts => 
-        dayjs(ts.weekStartDate).isAfter(dayjs(dateRange.start).subtract(1, 'day'))
-      );
-    }
-    if (dateRange.end) {
-      filtered = filtered.filter(ts => 
-        dayjs(ts.weekStartDate).isBefore(dayjs(dateRange.end).add(1, 'day'))
-      );
-    }
-
-    // Sorting
     filtered.sort((a, b) => {
-      let aValue, bValue;
-      
+      let aVal, bVal;
       switch (orderBy) {
         case 'employee':
-          aValue = `${a.employee?.firstName} ${a.employee?.lastName}`.toLowerCase();
-          bValue = `${b.employee?.firstName} ${b.employee?.lastName}`.toLowerCase();
+          aVal = `${a.employee?.firstName} ${a.employee?.lastName}`.toLowerCase();
+          bVal = `${b.employee?.firstName} ${b.employee?.lastName}`.toLowerCase();
           break;
         case 'hours':
-          aValue = parseFloat(a.totalHoursWorked || 0);
-          bValue = parseFloat(b.totalHoursWorked || 0);
+          aVal = parseFloat(a.totalHoursWorked || 0);
+          bVal = parseFloat(b.totalHoursWorked || 0);
           break;
         case 'status':
-          aValue = a.status;
-          bValue = b.status;
+          aVal = a.status;
+          bVal = b.status;
           break;
         case 'submittedAt':
-          aValue = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
-          bValue = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
+          aVal = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
+          bVal = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
           break;
         default: // weekStartDate
-          aValue = new Date(a.weekStartDate).getTime();
-          bValue = new Date(b.weekStartDate).getTime();
+          aVal = new Date(a.weekStartDate).getTime();
+          bVal = new Date(b.weekStartDate).getTime();
       }
-
-      if (order === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
+      return order === 'asc' ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
     });
 
-    // Only update state if the result actually changed
-    const hasChanged = filtered.length !== filteredTimesheets.length ||
-      filtered.some((ts, i) => ts.id !== filteredTimesheets[i]?.id);
-    if (hasChanged) {
-      setFilteredTimesheets(filtered);
-      setPage(0);
-    }
-  };
+    return filtered;
+  }, [timesheets, statusFilter, searchQuery, projectFilter, dateRange, orderBy, order]);
+
+  const summary = useMemo(() => {
+    const submitted = timesheets.filter((ts) => ts.status?.toLowerCase() === 'submitted');
+    return {
+      totalPending: submitted.length,
+      totalHours: submitted.reduce((sum, ts) => sum + parseFloat(ts.totalHours ?? ts.totalHoursWorked ?? 0), 0),
+      employees: new Set(submitted.map((ts) => ts.employeeId)).size,
+      approved: statsData?.approved ?? 0,
+      rejected: statsData?.rejected ?? 0,
+      draft:    statsData?.draft    ?? 0,
+    };
+  }, [timesheets, statsData]);
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -274,14 +216,22 @@ const TimesheetApproval = ({ embedded } = {}) => {
       return;
     }
 
+    // H-02: reject MUST collect comments — open the approval dialog
+    if (action === 'reject') {
+      setSelectedTimesheet(null); // null signals handleApprovalSubmit to use selectedIds
+      setApprovalAction('reject');
+      setComments('');
+      setApprovalDialogOpen(true);
+      return;
+    }
+
     confirm({
-      title: `${action === 'approve' ? 'Approve' : 'Reject'} Timesheets`,
-      message: `Are you sure you want to ${action} ${selectedIds.length} timesheet(s)?`,
+      title: 'Approve Timesheets',
+      message: `Are you sure you want to approve ${selectedIds.length} timesheet(s)?`,
       variant: 'warning',
-      confirmText: action === 'approve' ? 'Approve' : 'Reject',
+      confirmText: 'Approve',
       onConfirm: async () => {
-        const mutation = action === 'approve' ? approveMutation : rejectMutation;
-        mutation.mutate({ ids: selectedIds, comments: '' }, {
+        approveMutation.mutate({ ids: selectedIds, comments: '' }, {
           onSuccess: () => {
             setSelectedIds([]);
           }

@@ -78,10 +78,10 @@ export const useLeaveTypes = (options = {}) => {
 
 /**
  * Create leave request mutation
+ * Toasts are handled by the call-site (LeaveRequest.js) to avoid duplicates.
  */
 export const useCreateLeaveRequest = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
 
   return useMutation({
     mutationFn: (leaveData) => leaveService.create(leaveData),
@@ -90,22 +90,16 @@ export const useCreateLeaveRequest = () => {
       queryClient.invalidateQueries({ 
         queryKey: leaveKeys.balances(newLeave.employeeId) 
       });
-      enqueueSnackbar('Leave request created successfully', { variant: 'success' });
-    },
-    onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to create leave request', { 
-        variant: 'error' 
-      });
     },
   });
 };
 
 /**
  * Approve leave request mutation
+ * Toasts are handled by the call-site (LeaveManagement.js) to avoid duplicates.
  */
 export const useApproveLeaveRequest = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
 
   return useMutation({
     mutationFn: ({ id, comments }) => leaveService.approve(id, comments),
@@ -113,22 +107,16 @@ export const useApproveLeaveRequest = () => {
       queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
       queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: leaveKeys.pendingApprovals() });
-      enqueueSnackbar('Leave request approved', { variant: 'success' });
-    },
-    onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to approve leave request', { 
-        variant: 'error' 
-      });
     },
   });
 };
 
 /**
  * Reject leave request mutation
+ * Toasts are handled by the call-site (LeaveManagement.js) to avoid duplicates.
  */
 export const useRejectLeaveRequest = () => {
   const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
 
   return useMutation({
     mutationFn: ({ id, comments }) => leaveService.reject(id, comments),
@@ -136,12 +124,6 @@ export const useRejectLeaveRequest = () => {
       queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
       queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: leaveKeys.pendingApprovals() });
-      enqueueSnackbar('Leave request rejected', { variant: 'success' });
-    },
-    onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to reject leave request', { 
-        variant: 'error' 
-      });
     },
   });
 };

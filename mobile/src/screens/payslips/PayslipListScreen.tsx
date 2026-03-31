@@ -42,7 +42,7 @@ export default function PayslipListScreen() {
   };
 
   const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
 
   const renderPayslip = ({ item }: { item: Payslip }) => {
     const monthName = new Date(item.year, item.month - 1).toLocaleString('default', {
@@ -52,6 +52,7 @@ export default function PayslipListScreen() {
 
     return (
       <TouchableOpacity
+        testID={`payslip-card-${item.id}`}
         style={styles.card}
         onPress={() => navigation.navigate('PayslipDetail', { payslipId: item.id })}
         activeOpacity={0.7}
@@ -69,19 +70,19 @@ export default function PayslipListScreen() {
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Earnings</Text>
             <Text style={[styles.detailValue, { color: colors.success }]}>
-              {formatCurrency(item.grossSalary)}
+              {formatCurrency(item.grossEarnings ?? item.grossSalary ?? 0)}
             </Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Deductions</Text>
             <Text style={[styles.detailValue, { color: colors.error }]}>
-              -{formatCurrency(item.totalDeductions)}
+              -{formatCurrency(item.totalDeductions ?? 0)}
             </Text>
           </View>
         </View>
         <View style={styles.cardRight}>
           <Text style={styles.netLabel}>Net Pay</Text>
-          <Text style={styles.netAmount}>{formatCurrency(item.netSalary)}</Text>
+          <Text style={styles.netAmount}>{formatCurrency(item.netPay ?? item.netSalary ?? 0)}</Text>
           <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
         </View>
       </TouchableOpacity>
@@ -130,13 +131,13 @@ const styles = StyleSheet.create({
   monthBadgeText: { ...typography.label, color: colors.primary, fontSize: 13 },
   yearText: { ...typography.small, color: colors.primary, fontSize: 10 },
   cardCenter: { flex: 1 },
-  monthName: { ...typography.label, color: colors.text, marginBottom: 4 },
+  monthName: { ...typography.captionBold, color: colors.text, marginBottom: 4 },
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 },
   detailLabel: { ...typography.small, color: colors.textSecondary },
   detailValue: { ...typography.small, fontWeight: '600' },
   cardRight: { alignItems: 'flex-end', marginLeft: spacing.sm },
   netLabel: { ...typography.small, color: colors.textSecondary },
-  netAmount: { ...typography.label, color: colors.primary, fontSize: 16 },
+  netAmount: { ...typography.captionBold, color: colors.primary, fontSize: 16 },
   emptyState: { alignItems: 'center', paddingVertical: spacing.xl * 3 },
   emptyText: { ...typography.body, color: colors.textSecondary, marginTop: spacing.md },
 });

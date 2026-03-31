@@ -121,6 +121,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: true,
       references: { model: 'employees', key: 'id' }
+    },
+    rejectedBy: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: { model: 'employees', key: 'id' }
     }
   }, {
     tableName: 'timesheets',
@@ -144,6 +149,7 @@ module.exports = (sequelize, DataTypes) => {
     Timesheet.belongsTo(models.Project, { foreignKey: 'projectId', as: 'project' });
     Timesheet.belongsTo(models.Task, { foreignKey: 'taskId', as: 'task' });
     Timesheet.belongsTo(models.Employee, { foreignKey: 'approvedBy', as: 'approver' });
+    Timesheet.belongsTo(models.Employee, { foreignKey: 'rejectedBy', as: 'rejector' });
   };
 
   return Timesheet;

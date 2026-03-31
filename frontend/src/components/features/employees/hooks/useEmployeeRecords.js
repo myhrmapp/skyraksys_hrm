@@ -5,26 +5,39 @@ import { timesheetService } from '../../../../services/timesheet.service';
 import { leaveService } from '../../../../services/leave.service';
 
 export const useEmployeeRecords = (targetEmployeeId = null) => {
-  const { user } = useAuth();
-  
+  const { user, hasAnyRole } = useAuth();
+  const canViewAll = hasAnyRole(['admin', 'hr', 'manager']);
+
   // Determine query parameters based on targetEmployeeId
   const queryParams = useMemo(() => {
-    if (targetEmployeeId === 'ALL') {
-      return {}; // Fetch all records
-    } else if (targetEmployeeId) {
-      return { employeeId: targetEmployeeId }; // Specific employee
-    } else {
-      const myId = user?.employeeId || user?.employee?.id;
-      return myId ? { employeeId: myId } : null; // Current user
+    const myId = user?.employeeId || user?.employee?.id;
+    
+    // For admins/HR/managers, if "ALL" is selected, we want to fetch all records.
+    // The services interpret an empty object `{}` as "no filter".
+    if (canViewAll && targetEmployeeId === 'ALL') {
+      return {};
     }
-  }, [targetEmployeeId, user]);
+    
+    // If a specific employee is targeted (from search), use their ID.
+    if (targetEmployeeId) {
+      return { employeeId: targetEmployeeId };
+    }
+    
+    // Default: any logged-in user fetching their own records.
+    if (myId) {
+      return { employeeId: myId };
+    }
+
+    // If no ID can be determined (e.g., user not fully loaded), disable queries.
+    return null;
+  }, [targetEmployeeId, user, canViewAll]);
 
   // 🚀 Use React Query's useQueries for parallel data fetching
   const queries = useQueries({
     queries: [
       {
         queryKey: ['timesheets', 'history', queryParams],
-        queryFn: () => timesheetService.getHistory(null, queryParams),
+        queryFn: () => timesheetService.getHistory(queryParams),
         enabled: !!queryParams,
         staleTime: 2 * 60 * 1000, // 2 minutes
       },

@@ -40,6 +40,7 @@ function App() {
         <LoadingProvider>
             <SnackbarProvider 
               maxSnack={3}
+              preventDuplicate
               anchorOrigin={{
                 vertical: 'top',
                 horizontal: 'right',

@@ -275,7 +275,7 @@ const PayslipController = {
    */
   async updatePayslip(req, res, next) {
     try {
-      const { earnings, deductions, reason, status } = req.body;
+      const { earnings, deductions, reason, status, attendance } = req.body;
 
       const currentUser = {
         id: req.user.id,
@@ -304,7 +304,7 @@ const PayslipController = {
 
       const payslip = await payslipService.updatePayslip(
         req.params.id,
-        { earnings, deductions },
+        { earnings, deductions, attendance },
         reason,
         currentUser,
         req.ip,

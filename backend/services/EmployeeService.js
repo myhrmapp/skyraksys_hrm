@@ -305,7 +305,7 @@ class EmployeeService extends BaseService {
       const structureData = {
         employeeId,
         basicSalary: salaryData.basicSalary,
-        effectiveFrom: salaryData.effectiveFrom || new Date().toISOString().split('T')[0],
+        effectiveFrom: salaryData.effectiveFrom || require('../utils/dateUtils').formatDateLocal(),
         isActive: true
       };
 

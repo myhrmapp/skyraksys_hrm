@@ -42,6 +42,11 @@ class LeaveApprovalService {
       return true;
     }
 
+    // Prevent self-approval
+    if (leaveRequest.employeeId === approverId) {
+      throw new ForbiddenError('You cannot approve your own leave request.');
+    }
+
     // Managers can only approve their direct reports' requests
     if (approverRole === 'manager') {
       const employee = await this.Employee.findByPk(leaveRequest.employeeId);

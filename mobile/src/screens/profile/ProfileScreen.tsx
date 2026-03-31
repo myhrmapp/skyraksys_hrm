@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   Switch,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as LocalAuthentication from 'expo-local-authentication';
@@ -62,14 +63,20 @@ export default function ProfileScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: () => logout(),
-      },
-    ]);
+    if (Platform.OS === 'web') {
+      if (globalThis.confirm('Are you sure you want to logout?')) {
+        logout();
+      }
+    } else {
+      Alert.alert('Logout', 'Are you sure you want to logout?', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: () => logout(),
+        },
+      ]);
+    }
   };
 
   const displayName = profile
@@ -138,6 +145,7 @@ export default function ProfileScreen() {
               </View>
             </View>
             <Switch
+              testID="view-mode-switch"
               value={viewMode === 'manager'}
               onValueChange={(val) => setViewMode(val ? 'manager' : 'employee')}
               trackColor={{ false: colors.border, true: colors.primary + '80' }}
@@ -161,7 +169,7 @@ export default function ProfileScreen() {
       </View>
 
       {/* Logout */}
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+      <TouchableOpacity testID="logout-btn" style={styles.logoutBtn} onPress={handleLogout}>
         <Ionicons name="log-out-outline" size={22} color={colors.error} />
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
@@ -214,7 +222,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   infoLabel: { ...typography.body, color: colors.textSecondary },
-  infoValue: { ...typography.label, color: colors.text },
+  infoValue: { ...typography.body, color: colors.text },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -236,7 +244,7 @@ const styles = StyleSheet.create({
     borderColor: colors.error + '40',
     marginTop: spacing.md,
   },
-  logoutText: { ...typography.label, color: colors.error },
+  logoutText: { ...typography.captionBold, color: colors.error },
   version: {
     ...typography.small,
     color: colors.textSecondary,

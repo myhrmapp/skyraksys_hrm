@@ -853,7 +853,7 @@ test.describe('Flow 9 — UI Page Rendering', () => {
 
     // Should see Alice Brown's name
     await expect(
-      page.getByText('Alice', { exact: false })
+      page.getByText('Alice Brown', { exact: true })
     ).toBeVisible({ timeout: 15000 });
 
     await logout(page);

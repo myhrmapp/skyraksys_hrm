@@ -159,7 +159,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
               <InputLabel>Project</InputLabel>
               <Select
                 name="projectId"
-                value={formData.projectId}
+                value={projects.some(p => p.id === formData.projectId) ? formData.projectId : ""}
                 onChange={handleChange}
                 label="Project"
               >
@@ -192,7 +192,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
               <InputLabel>Assign To</InputLabel>
               <Select
                 name="assignedTo"
-                value={formData.assignedTo}
+                value={employees.some(e => e.id === formData.assignedTo) ? formData.assignedTo : ""}
                 onChange={handleChange}
                 label="Assign To"
               >
@@ -212,7 +212,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
             <InputLabel>Status</InputLabel>
             <Select
               name="status"
-              value={formData.status}
+              value={["Not Started","In Progress","Completed","On Hold"].includes(formData.status) ? formData.status : ""}
               onChange={handleChange}
               label="Status"
             >
@@ -229,7 +229,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
             <InputLabel>Priority</InputLabel>
             <Select
               name="priority"
-              value={formData.priority}
+              value={["Low","Medium","High","Critical"].includes(formData.priority) ? formData.priority : ""}
               onChange={handleChange}
               label="Priority"
             >

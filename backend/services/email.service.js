@@ -455,7 +455,7 @@ class EmailService {
     const replacements = {
       '{{name}}': data.name || 'User',
       '{{resetLink}}': data.resetLink,
-      '{{expiresAt}}': data.expiresAt.toLocaleString(),
+      '{{expiresAt}}': data.expiresAt.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }),
       '{{expiresIn}}': data.expiresIn || '1 hour',
       '{{year}}': new Date().getFullYear()
     };

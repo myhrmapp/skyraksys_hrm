@@ -116,7 +116,7 @@ const ModernPayrollManagement = () => {
     templateId: ''
   });
   
-  // ðŸš€ React Query for payslips
+  // 🚀 React Query for payslips
   const { data: payslipsData, isLoading: isLoadingPayslips, isError: isErrorPayslips, refetch: refetchPayslips } = useQuery({
     queryKey: ['payslips', filters, page, rowsPerPage],
     queryFn: async () => {
@@ -137,7 +137,7 @@ const ModernPayrollManagement = () => {
     }
   });
   
-  // ðŸš€ React Query for employees
+  // 🚀 React Query for employees
   const { data: employeesData } = useQuery({
     queryKey: ['employees', 'active'],
     queryFn: async () => {
@@ -149,7 +149,7 @@ const ModernPayrollManagement = () => {
     onError: (error) => console.error('Load employees error:', error)
   });
   
-  // ðŸš€ React Query for departments
+  // 🚀 React Query for departments
   const { data: departmentsData } = useQuery({
     queryKey: ['departments'],
     queryFn: async () => {
@@ -159,7 +159,7 @@ const ModernPayrollManagement = () => {
     onError: (error) => console.error('Load departments error:', error)
   });
   
-  // ðŸš€ React Query for templates
+  // 🚀 React Query for templates
   const { data: templatesData } = useQuery({
     queryKey: ['payslip-templates', 'active'],
     queryFn: async () => {
@@ -222,6 +222,7 @@ const ModernPayrollManagement = () => {
   const [viewDialog, setViewDialog] = useState(false);
   const [selectedPayslip, setSelectedPayslip] = useState(null);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
+  const [overtimeOverrides, setOvertimeOverrides] = useState({});
   const [editDialog, setEditDialog] = useState(false);
   const [payslipToEdit, setPayslipToEdit] = useState(null);
   
@@ -305,6 +306,16 @@ const ModernPayrollManagement = () => {
       if (filters.templateId) {
         payload.templateId = filters.templateId;
       }
+
+      // Include overtime overrides for employees that have OT hours set
+      const activeOT = {};
+      idsToUse.forEach(id => {
+        const hrs = parseFloat(overtimeOverrides[id]);
+        if (hrs > 0) activeOT[id] = hrs;
+      });
+      if (Object.keys(activeOT).length > 0) {
+        payload.options = { ...payload.options, overtimeOverrides: activeOT };
+      }
       
       const response = await http.post('/payslips/generate', payload);
       
@@ -315,6 +326,7 @@ const ModernPayrollManagement = () => {
         );
         setActiveTab(0); // Return to Overview after generation
         setSelectedEmployees([]);
+        setOvertimeOverrides({});
         setValidationResults(null);
         refetchPayslips();
       } else {
@@ -629,6 +641,7 @@ const ModernPayrollManagement = () => {
       const response = await http.put(`/payslips/${editData.payslipId}`, {
         earnings: editData.earnings,
         deductions: editData.deductions,
+        attendance: editData.attendance,
         reason: editData.reason
       });
 
@@ -728,9 +741,11 @@ const ModernPayrollManagement = () => {
               Export Excel
             </Button>
             <Tooltip title="Refresh">
-              <IconButton size="small" onClick={refetchPayslips} disabled={loading}>
-                <RefreshIcon fontSize="small" />
-              </IconButton>
+              <span>
+                <IconButton size="small" onClick={refetchPayslips} disabled={loading}>
+                  <RefreshIcon fontSize="small" />
+                </IconButton>
+              </span>
             </Tooltip>
           </Stack>
         </Stack>
@@ -1066,6 +1081,27 @@ const ModernPayrollManagement = () => {
                           {emp.department?.name ? ` · ${emp.department.name}` : ''}
                         </Typography>
                       </Box>
+                      {isSelected && (
+                        <TextField
+                          size="small"
+                          type="number"
+                          placeholder="OT hrs"
+                          value={overtimeOverrides[emp.id] || ''}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setOvertimeOverrides(prev => ({
+                              ...prev,
+                              [emp.id]: val === '' ? '' : Math.max(0, parseFloat(val) || 0)
+                            }));
+                          }}
+                          inputProps={{ min: 0, step: 0.5, style: { textAlign: 'center' } }}
+                          sx={{ width: 80 }}
+                          InputProps={{
+                            sx: { fontSize: '0.75rem', height: 30 }
+                          }}
+                        />
+                      )}
                       {payslip && (
                         <Chip
                           label={payslip.status}
@@ -1107,7 +1143,7 @@ const ModernPayrollManagement = () => {
           InputProps={{
             startAdornment: (
               <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
-                ðŸ”
+                🔍
               </Box>
             )
           }}
@@ -1144,6 +1180,7 @@ const ModernPayrollManagement = () => {
           </Select>
         </FormControl>
         
+        {!statusFilter && (
         <FormControl sx={{ minWidth: 150 }}>
           <InputLabel>Status</InputLabel>
           <Select
@@ -1159,6 +1196,7 @@ const ModernPayrollManagement = () => {
             <MenuItem value="cancelled">Cancelled</MenuItem>
           </Select>
         </FormControl>
+        )}
         
         <FormControl sx={{ minWidth: 200 }}>
           <InputLabel>Department</InputLabel>
@@ -1254,14 +1292,8 @@ const ModernPayrollManagement = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {payslips.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center">
-                  No payslips found
-                </TableCell>
-              </TableRow>
-            ) : (
-              payslips
+            {(() => {
+              const filteredPayslips = payslips
                 .filter(p => statusFilter ? p.status === statusFilter : true)
                 .filter(p => {
                   if (!searchQuery) return true;
@@ -1272,8 +1304,17 @@ const ModernPayrollManagement = () => {
                   const fullName = `${firstName} ${lastName}`;
                   return empId.includes(query) || fullName.includes(query) || 
                          firstName.includes(query) || lastName.includes(query);
-                })
-                .map((payslip) => (
+                });
+              if (filteredPayslips.length === 0) {
+                return (
+                  <TableRow>
+                    <TableCell colSpan={8} align="center">
+                      {payslips.length === 0 ? 'No payslips found' : `No ${statusFilter || ''} payslips found`.trim()}
+                    </TableCell>
+                  </TableRow>
+                );
+              }
+              return filteredPayslips.map((payslip) => (
                 <TableRow key={payslip.id} hover>
                   <TableCell padding="checkbox">
                     <Checkbox
@@ -1361,8 +1402,8 @@ const ModernPayrollManagement = () => {
                     )}
                   </TableCell>
                 </TableRow>
-              ))
-            )}
+              ));
+            })()}
           </TableBody>
         </Table>
       </TableContainer>
@@ -1423,13 +1464,13 @@ const ModernPayrollManagement = () => {
               {Object.entries(selectedPayslip.earnings || {}).map(([key, value]) => (
                 <Box key={key} display="flex" justifyContent="space-between">
                   <Typography variant="body2">{formatLabel(key)}</Typography>
-                  <Typography variant="body2">â‚¹{parseFloat(value).toFixed(2)}</Typography>
+                  <Typography variant="body2">₹{parseFloat(value).toFixed(2)}</Typography>
                 </Box>
               ))}
               <Box display="flex" justifyContent="space-between" mt={1}>
                 <Typography variant="body1" fontWeight="bold">Gross Earnings</Typography>
                 <Typography variant="body1" fontWeight="bold">
-                  â‚¹{parseFloat(selectedPayslip.grossEarnings).toFixed(2)}
+                  ₹{parseFloat(selectedPayslip.grossEarnings).toFixed(2)}
                 </Typography>
               </Box>
             </Grid>
@@ -1439,13 +1480,13 @@ const ModernPayrollManagement = () => {
               {Object.entries(selectedPayslip.deductions || {}).map(([key, value]) => (
                 <Box key={key} display="flex" justifyContent="space-between">
                   <Typography variant="body2">{formatLabel(key)}</Typography>
-                  <Typography variant="body2">â‚¹{parseFloat(value).toFixed(2)}</Typography>
+                  <Typography variant="body2">₹{parseFloat(value).toFixed(2)}</Typography>
                 </Box>
               ))}
               <Box display="flex" justifyContent="space-between" mt={1}>
                 <Typography variant="body1" fontWeight="bold">Total Deductions</Typography>
                 <Typography variant="body1" fontWeight="bold">
-                  â‚¹{parseFloat(selectedPayslip.totalDeductions).toFixed(2)}
+                  ₹{parseFloat(selectedPayslip.totalDeductions).toFixed(2)}
                 </Typography>
               </Box>
             </Grid>
@@ -1455,7 +1496,7 @@ const ModernPayrollManagement = () => {
               <Box display="flex" justifyContent="space-between">
                 <Typography variant="h6" color="primary">Net Pay</Typography>
                 <Typography variant="h6" color="primary">
-                  â‚¹{parseFloat(selectedPayslip.netPay).toFixed(2)}
+                  ₹{parseFloat(selectedPayslip.netPay).toFixed(2)}
                 </Typography>
               </Box>
               <Typography variant="caption" color="textSecondary">
@@ -1515,7 +1556,7 @@ const ModernPayrollManagement = () => {
                 <Grid item xs={12}>
                   <Paper sx={{ p: 2, bgcolor: 'success.light', color: 'success.contrastText' }}>
                     <Typography variant="h6" gutterBottom>
-                      âœ… Valid Employees ({validationResults.validEmployees.length})
+                      ✅ Valid Employees ({validationResults.validEmployees.length})
                     </Typography>
                     <Typography variant="body2" sx={{ mb: 2 }}>
                       These employees are ready for payslip generation
@@ -1555,7 +1596,7 @@ const ModernPayrollManagement = () => {
                 <Grid item xs={12}>
                   <Paper sx={{ p: 2, bgcolor: 'error.light', color: 'error.contrastText' }}>
                     <Typography variant="h6" gutterBottom>
-                      âŒ Invalid Employees ({validationResults.invalidEmployees.length})
+                      ❌ Invalid Employees ({validationResults.invalidEmployees.length})
                     </Typography>
                     <Typography variant="body2" sx={{ mb: 2 }}>
                       These employees have issues that prevent payslip generation
@@ -1651,8 +1692,7 @@ const ModernPayrollManagement = () => {
         {activeTab === 1 && <GenerateTab />}
         {activeTab === 2 && (
           <PayslipsTable 
-            statusFilter="finalized" 
-            title="Finalized Payslips — Ready for Payment Processing"
+            title="Payslips — Payment Processing"
           />
         )}
       </Box>

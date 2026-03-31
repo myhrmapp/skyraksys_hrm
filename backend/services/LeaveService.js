@@ -230,8 +230,12 @@ class LeaveService extends BaseService {
       return { isValid: false, message: 'End date must be after start date' };
     }
 
-    if (start < new Date()) {
-      return { isValid: false, message: 'Start date cannot be in the past' };
+    // Allow retroactive leave requests up to 14 days in the past
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setHours(0, 0, 0, 0);
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+    if (start < twoWeeksAgo) {
+      return { isValid: false, message: 'Start date cannot be more than 2 weeks in the past' };
     }
 
     // Check for overlapping leaves

@@ -8,6 +8,7 @@
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
 const db = require('../models');
+const { formatDateLocal } = require('../utils/dateUtils');
 
 class HolidayService {
   /**
@@ -70,7 +71,7 @@ class HolidayService {
    * Get the next N upcoming holidays from today
    */
   async getUpcomingHolidays(count = 5) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = formatDateLocal();
     return db.Holiday.findAll({
       where: {
         date: { [Op.gte]: today },
@@ -104,7 +105,7 @@ class HolidayService {
       const newDate = new Date(targetYear, oldDate.getMonth(), oldDate.getDate());
       return {
         name: h.name,
-        date: newDate.toISOString().split('T')[0],
+        date: formatDateLocal(newDate),
         type: h.type,
         year: targetYear,
         isRecurring: true,

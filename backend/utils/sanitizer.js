@@ -27,10 +27,25 @@ const sanitizeBasicHtml = (html) => {
   });
 };
 
-// Sanitize timesheet data
+// Fields allowed through when updating a timesheet
+const TIMESHEET_UPDATE_ALLOWED = new Set([
+  'id', 'projectId', 'taskId',
+  'weekStartDate', 'weekEndDate',
+  'mondayHours', 'tuesdayHours', 'wednesdayHours', 'thursdayHours',
+  'fridayHours', 'saturdayHours', 'sundayHours',
+  'totalHours', 'totalHoursWorked', 'description', 'approverComments'
+]);
+
+// Sanitize timesheet data — whitelist safe fields and sanitize text
 const sanitizeTimesheetData = (data) => {
-  const sanitized = { ...data };
-  
+  const sanitized = {};
+
+  for (const key of Object.keys(data)) {
+    if (TIMESHEET_UPDATE_ALLOWED.has(key)) {
+      sanitized[key] = data[key];
+    }
+  }
+
   // Sanitize text fields
   if (sanitized.description) {
     sanitized.description = sanitizeText(sanitized.description);

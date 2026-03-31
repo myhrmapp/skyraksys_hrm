@@ -6,50 +6,14 @@
 
 const Joi = require('joi');
 
-/**
- * Schema for timesheet entry
- */
-const timesheetEntrySchema = Joi.object({
-  date: Joi.date()
-    .required()
-    .max('now')
-    .messages({
-      'date.max': 'Cannot create timesheet entries for future dates'
-    }),
-
-  hours: Joi.number()
-    .required()
-    .min(0)
-    .max(24)
-    .precision(2)
-    .messages({
-      'number.min': 'Hours must be at least 0',
-      'number.max': 'Hours cannot exceed 24 per day'
-    }),
-
-  taskId: Joi.string()
-    .required()
-    .uuid()
-    .messages({
-      'string.guid': 'Task ID must be a valid UUID'
-    }),
-
-  description: Joi.string()
-    .required()
-    .min(5)
-    .max(500)
-    .messages({
-      'string.min': 'Description must be at least 5 characters',
-      'string.max': 'Description cannot exceed 500 characters'
-    })
-});
+// L-01: timesheetEntrySchema (old daily-entry format) removed — never referenced anywhere
 
 /**
  * Schema for creating a new timesheet
  */
 const createTimesheetSchema = Joi.object({
     employeeId: Joi.string()
-      .required()
+      .optional()
       .uuid(),
 
     projectId: Joi.string()
@@ -204,7 +168,7 @@ const timesheetQuerySchema = Joi.object({
   limit: Joi.number()
     .integer()
     .min(1)
-    .max(500)
+    .max(100)  // L-02: reduced from 500 to prevent accidental large data dumps
     .default(10),
 
   employeeId: Joi.string()
@@ -232,15 +196,7 @@ const timesheetQuerySchema = Joi.object({
       then: Joi.date().greater(Joi.ref('weekStartDate'))
     }),
 
-  fromDate: Joi.date()
-    .optional(),
-
-  toDate: Joi.date()
-    .optional()
-    .when('fromDate', {
-      is: Joi.exist(),
-      then: Joi.date().greater(Joi.ref('fromDate'))
-    }),
+  // L-03: fromDate / toDate removed — no backend logic consumes them; use startDate / weekStartDate instead
 
   sort: Joi.string()
     .valid('weekStartDate', 'weekEndDate', 'totalHoursWorked', 'status', 'createdAt')

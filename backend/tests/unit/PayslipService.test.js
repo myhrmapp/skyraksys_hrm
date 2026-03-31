@@ -49,10 +49,16 @@ jest.mock('../../models', () => ({
     bulkCreate: jest.fn()
   },
   Department: {},
-  Position: {}
+  Position: {},
+  LeaveType: {}
 }));
 jest.mock('../../services/payslipCalculation.service');
 jest.mock('../../services/payslipTemplate.service');
+jest.mock('../../services/holiday.service', () => ({
+  getHolidayDateSet: jest.fn().mockResolvedValue(new Set()),
+  getHolidaysBetween: jest.fn().mockResolvedValue([]),
+  countHolidaysBetween: jest.fn().mockResolvedValue(0)
+}));
 
 describe('PayslipService', () => {
   let mockTransaction;
@@ -192,8 +198,8 @@ describe('PayslipService', () => {
       ];
 
       db.Employee.findAll = jest.fn().mockResolvedValue(mockEmployees);
-      db.Timesheet.findOne = jest.fn().mockResolvedValue({ status: 'approved' });
-      db.Payslip.findOne = jest.fn().mockResolvedValue(null);
+      db.Timesheet.findAll = jest.fn().mockResolvedValue([{ employeeId: 'emp-1', status: 'approved' }]);
+      db.Payslip.findAll = jest.fn().mockResolvedValue([]);
 
       const result = await payslipService.validateEmployees(['emp-1'], 1, 2026);
 
@@ -217,8 +223,8 @@ describe('PayslipService', () => {
       ];
 
       db.Employee.findAll = jest.fn().mockResolvedValue(mockEmployees);
-      db.Timesheet.findOne = jest.fn().mockResolvedValue(null);
-      db.Payslip.findOne = jest.fn().mockResolvedValue(null);
+      db.Timesheet.findAll = jest.fn().mockResolvedValue([]);
+      db.Payslip.findAll = jest.fn().mockResolvedValue([]);
 
       const result = await payslipService.validateEmployees(['emp-1'], 1, 2026);
 
@@ -241,12 +247,12 @@ describe('PayslipService', () => {
       ];
 
       db.Employee.findAll = jest.fn().mockResolvedValue(mockEmployees);
-      db.Timesheet.findOne = jest.fn().mockResolvedValue({ status: 'approved' });
-      db.Payslip.findOne = jest.fn().mockResolvedValue({ 
-        id: 'payslip-1', 
+      db.Timesheet.findAll = jest.fn().mockResolvedValue([{ employeeId: 'emp-1', status: 'approved' }]);
+      db.Payslip.findAll = jest.fn().mockResolvedValue([{ 
+        employeeId: 'emp-1',
         payslipNumber: 'PS202601SKYT1001',
         status: 'finalized' 
-      });
+      }]);
 
       const result = await payslipService.validateEmployees(['emp-1'], 1, 2026);
 
@@ -289,7 +295,7 @@ describe('PayslipService', () => {
 
       payslipTemplateService.getDefaultTemplateFromDB = jest.fn().mockResolvedValue({ data: mockTemplate });
       db.Payslip.findOne = jest.fn().mockResolvedValue(null);
-      db.Employee.findByPk = jest.fn().mockResolvedValue(mockEmployee);
+      db.Employee.findAll = jest.fn().mockResolvedValue([mockEmployee]);
       db.Timesheet.findAll = jest.fn().mockResolvedValue([]);
       db.LeaveRequest.findAll = jest.fn().mockResolvedValue([]);
       payslipCalculationService.calculatePayslip = jest.fn().mockReturnValue(mockCalculation);
@@ -324,6 +330,7 @@ describe('PayslipService', () => {
       const mockTemplate = { id: 'template-1' };
       
       payslipTemplateService.getDefaultTemplateFromDB = jest.fn().mockResolvedValue({ data: mockTemplate });
+      db.Employee.findAll = jest.fn().mockResolvedValue([]);
       db.Payslip.findOne = jest.fn().mockResolvedValue({ id: 'existing' });
 
       const result = await payslipService.generatePayslips(

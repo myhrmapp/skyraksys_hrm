@@ -168,7 +168,7 @@ class EmployeeBusinessService extends BaseBusinessService {
         professionalTax: salaryData.deductions?.professionalTax || 0,
         otherDeductions: salaryData.deductions?.other || 0,
         currency: salaryData.currency || 'INR',
-        effectiveFrom: salaryData.effectiveFrom || new Date().toISOString().split('T')[0],
+        effectiveFrom: salaryData.effectiveFrom || require('../../utils/dateUtils').formatDateLocal(),
         isActive: true,
       };
 
@@ -231,7 +231,7 @@ class EmployeeBusinessService extends BaseBusinessService {
       professionalTax: salary.deductions?.professionalTax || 0,
       otherDeductions: salary.deductions?.other || 0,
       currency: salary.currency || 'INR',
-      effectiveFrom: salary.effectiveFrom || new Date().toISOString().split('T')[0],
+      effectiveFrom: salary.effectiveFrom || require('../../utils/dateUtils').formatDateLocal(),
       isActive: true,
     };
 
@@ -597,7 +597,7 @@ class EmployeeBusinessService extends BaseBusinessService {
     const result = {
       employeeId,
       basicSalary: salaryInput.basicSalary || 0,
-      effectiveFrom: salaryInput.effectiveFrom || new Date().toISOString().split('T')[0],
+      effectiveFrom: salaryInput.effectiveFrom || require('../../utils/dateUtils').formatDateLocal(),
       isActive: salaryInput.isActive !== undefined ? salaryInput.isActive : true
     };
 

@@ -28,6 +28,11 @@ module.exports = (sequelize, DataTypes) => {
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true
+    },
+    isPaid: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      comment: 'Whether this leave type is paid (true) or results in LOP deduction (false)'
     }
   }, {
     tableName: 'leave_types',

@@ -127,23 +127,40 @@ const ReportsModule = () => {
         leaveParams.status = filters.status === 'active' ? 'Approved' : filters.status;
       }
 
-      const timesheetParams = { limit: 500 };
+      const timesheetParams = { limit: 100 };
       if (filters.status !== 'all') {
         timesheetParams.status = filters.status === 'active' ? 'Approved' : filters.status;
       }
 
       // Load additional report-specific data with server-side filters
-      const [employeesResponse, leavesResponse, timesheetsResponse] = await Promise.all([
+      const [employeesResponse, leavesResponse, firstTimesheetPage] = await Promise.all([
         employeeService.getAll(employeeParams),
         leaveService.getAll(leaveParams),
-        timesheetService.getAll(timesheetParams)
+        timesheetService.getAll({ ...timesheetParams, page: 1 })
       ]);
+
+      // Paginate through all timesheet pages (backend max limit=100)
+      let allTimesheets = [];
+      const firstData = Array.isArray(firstTimesheetPage) ? firstTimesheetPage : (Array.isArray(firstTimesheetPage.data) ? firstTimesheetPage.data : (firstTimesheetPage.data?.data || []));
+      allTimesheets.push(...firstData);
+      const totalPages = firstTimesheetPage.message?.pagination?.totalPages || firstTimesheetPage.data?.pagination?.totalPages || firstTimesheetPage.pagination?.totalPages || 1;
+      if (totalPages > 1) {
+        const remaining = [];
+        for (let p = 2; p <= totalPages; p++) {
+          remaining.push(timesheetService.getAll({ ...timesheetParams, page: p }));
+        }
+        const pages = await Promise.all(remaining);
+        for (const pg of pages) {
+          const pgData = Array.isArray(pg) ? pg : (Array.isArray(pg.data) ? pg.data : (pg.data?.data || []));
+          allTimesheets.push(...pgData);
+        }
+      }
 
       // Apply filters to the raw data
       const { start, end } = getDateBounds();
-      const rawEmployees = Array.isArray(employeesResponse.data) ? employeesResponse.data : (employeesResponse.data?.data || []);
-      const rawLeaves = Array.isArray(leavesResponse.data) ? leavesResponse.data : (leavesResponse.data?.data || []);
-      const rawTimesheets = Array.isArray(timesheetsResponse.data) ? timesheetsResponse.data : (timesheetsResponse.data?.data || []);
+      const rawEmployees = Array.isArray(employeesResponse) ? employeesResponse : (Array.isArray(employeesResponse.data) ? employeesResponse.data : (employeesResponse.data?.data || []));
+      const rawLeaves = Array.isArray(leavesResponse) ? leavesResponse : (Array.isArray(leavesResponse.data) ? leavesResponse.data : (leavesResponse.data?.data || []));
+      const rawTimesheets = allTimesheets;
 
       // Filter employees by department and status
       let filteredEmployees = rawEmployees;
@@ -185,7 +202,7 @@ const ReportsModule = () => {
 
   const processEmployeeData = (employees) => {
     const totalEmployees = employees.length;
-    const activeEmployees = employees.filter(emp => emp.status === 'active').length;
+    const activeEmployees = employees.filter(emp => emp.status?.toLowerCase() === 'active').length;
     const byDepartment = employees.reduce((acc, emp) => {
       const dept = emp.department?.name || 'Unassigned';
       acc[dept] = (acc[dept] || 0) + 1;
@@ -250,7 +267,7 @@ const ReportsModule = () => {
     const pending = timesheets.filter(ts => ts.status === 'Submitted').length;
     const draft = timesheets.filter(ts => ts.status === 'Draft').length;
 
-    const totalHours = timesheets.reduce((acc, ts) => acc + (ts.hoursWorked || 0), 0);
+    const totalHours = timesheets.reduce((acc, ts) => acc + (ts.totalHoursWorked || 0), 0);
     const avgHoursPerEntry = totalEntries > 0 ? (totalHours / totalEntries).toFixed(1) : 0;
 
     const chartData = [

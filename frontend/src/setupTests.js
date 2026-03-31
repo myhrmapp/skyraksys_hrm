@@ -6,6 +6,12 @@ if (typeof global.TextEncoder === 'undefined') {
   global.TextDecoder = TextDecoder;
 }
 
+// Polyfill Web Crypto API for Node.js test environment (used by employeeValidation.js)
+if (typeof globalThis.crypto === 'undefined') {
+  const { webcrypto } = require('crypto');
+  globalThis.crypto = webcrypto;
+}
+
 // Increase default timeout for combined-run resource contention
 jest.setTimeout(30000);
 

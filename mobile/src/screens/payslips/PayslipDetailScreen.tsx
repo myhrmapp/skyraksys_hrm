@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { payslipsApi, Payslip } from '../../api/payslips';
+import { showSuccess, showError } from '../../utils/toast';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 
 type Route = RouteProp<RootStackParamList, 'PayslipDetail'>;
@@ -22,6 +23,8 @@ export default function PayslipDetailScreen() {
   const [payslip, setPayslip] = useState<Payslip | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [downloading, setDownloading] = useState(false);
+
   useEffect(() => {
     payslipsApi
       .getById(payslipId)
@@ -31,7 +34,7 @@ export default function PayslipDetailScreen() {
   }, [payslipId]);
 
   const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
 
   if (loading) {
     return (
@@ -61,7 +64,7 @@ export default function PayslipDetailScreen() {
       <View style={styles.headerCard}>
         <Text style={styles.monthTitle}>{monthName}</Text>
         <Text style={styles.netPayLabel}>Net Pay</Text>
-        <Text style={styles.netPayAmount}>{formatCurrency(payslip.netSalary)}</Text>
+        <Text style={styles.netPayAmount}>{formatCurrency(payslip.netPay ?? payslip.netSalary ?? 0)}</Text>
       </View>
 
       {/* Earnings */}
@@ -80,14 +83,14 @@ export default function PayslipDetailScreen() {
           <View style={styles.lineRow}>
             <Text style={styles.lineLabel}>Total Earnings</Text>
             <Text style={[styles.lineValue, { color: colors.success }]}>
-              {formatCurrency(payslip.grossSalary)}
+              {formatCurrency(payslip.grossEarnings ?? payslip.grossSalary ?? 0)}
             </Text>
           </View>
         )}
         <View style={[styles.lineRow, styles.totalRow]}>
           <Text style={styles.totalLabel}>Total Earnings</Text>
           <Text style={[styles.totalValue, { color: colors.success }]}>
-            {formatCurrency(payslip.grossSalary)}
+            {formatCurrency(payslip.grossEarnings ?? payslip.grossSalary ?? 0)}
           </Text>
         </View>
       </View>
@@ -115,7 +118,7 @@ export default function PayslipDetailScreen() {
         <View style={[styles.lineRow, styles.totalRow]}>
           <Text style={styles.totalLabel}>Total Deductions</Text>
           <Text style={[styles.totalValue, { color: colors.error }]}>
-            -{formatCurrency(payslip.totalDeductions)}
+            -{formatCurrency(payslip.totalDeductions ?? 0)}
           </Text>
         </View>
       </View>
@@ -124,26 +127,41 @@ export default function PayslipDetailScreen() {
       <View style={styles.summaryCard}>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Gross Pay</Text>
-          <Text style={styles.summaryValue}>{formatCurrency(payslip.grossSalary)}</Text>
+          <Text style={styles.summaryValue}>{formatCurrency(payslip.grossEarnings ?? payslip.grossSalary ?? 0)}</Text>
         </View>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Deductions</Text>
           <Text style={[styles.summaryValue, { color: colors.error }]}>
-            -{formatCurrency(payslip.totalDeductions)}
+            -{formatCurrency(payslip.totalDeductions ?? 0)}
           </Text>
         </View>
         <View style={[styles.summaryRow, styles.netRow]}>
           <Text style={styles.netLabel}>Net Pay</Text>
-          <Text style={styles.netValue}>{formatCurrency(payslip.netSalary)}</Text>
+          <Text style={styles.netValue}>{formatCurrency(payslip.netPay ?? payslip.netSalary ?? 0)}</Text>
         </View>
       </View>
 
       {/* Download */}
       <TouchableOpacity
-        style={styles.downloadBtn}
-        onPress={() => Alert.alert('Info', 'PDF download is available in the web portal')}
+        style={[styles.downloadBtn, downloading && { opacity: 0.6 }]}
+        onPress={async () => {
+          setDownloading(true);
+          try {
+            await payslipsApi.downloadPdf(payslipId);
+            showSuccess('PDF download started');
+          } catch {
+            showError('Failed to download PDF');
+          } finally {
+            setDownloading(false);
+          }
+        }}
+        disabled={downloading}
       >
-        <Ionicons name="download-outline" size={20} color={colors.primary} />
+        {downloading ? (
+          <ActivityIndicator size="small" color={colors.primary} />
+        ) : (
+          <Ionicons name="download-outline" size={20} color={colors.primary} />
+        )}
         <Text style={styles.downloadText}>Download PDF</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -180,7 +198,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   lineLabel: { ...typography.body, color: colors.text, textTransform: 'capitalize' },
-  lineValue: { ...typography.label },
+  lineValue: { ...typography.captionBold },
   totalRow: {
     borderBottomWidth: 0,
     borderTopWidth: 1,
@@ -188,8 +206,8 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     paddingTop: spacing.md,
   },
-  totalLabel: { ...typography.label, color: colors.text },
-  totalValue: { ...typography.label, fontSize: 16 },
+  totalLabel: { ...typography.captionBold, color: colors.text },
+  totalValue: { ...typography.captionBold, fontSize: 16 },
   summaryCard: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.md,
@@ -202,7 +220,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   summaryLabel: { ...typography.body, color: colors.textSecondary },
-  summaryValue: { ...typography.label, color: colors.text },
+  summaryValue: { ...typography.captionBold, color: colors.text },
   netRow: {
     borderTopWidth: 2,
     borderTopColor: colors.primary,
@@ -223,5 +241,5 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     marginBottom: spacing.xl,
   },
-  downloadText: { ...typography.label, color: colors.primary },
+  downloadText: { ...typography.captionBold, color: colors.primary },
 });

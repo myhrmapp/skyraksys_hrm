@@ -17,7 +17,19 @@ class EmployeeService {
   // Get current user's employee profile
   async getMyProfile() {
     const response = await http.get('/employees/me');
-    return normalizeResponse(response);
+    // Debug: log the raw Axios response
+    // eslint-disable-next-line no-console
+    console.log('[employeeService.getMyProfile] raw response:', response);
+    if (response && response.data && response.data.data) {
+      // eslint-disable-next-line no-console
+      console.log('[employeeService.getMyProfile] returning response.data.data:', response.data.data);
+      return response.data.data;
+    }
+    // Fallback to normalizeResponse if structure changes
+    const normalized = normalizeResponse(response);
+    // eslint-disable-next-line no-console
+    console.log('[employeeService.getMyProfile] returning normalized:', normalized);
+    return normalized;
   }
 
   // Get audit history for employee (placeholder)
@@ -235,9 +247,15 @@ class EmployeeService {
 
   // --- Consolidated Methods from EmployeeService.js ---
 
-  // Get team members for a manager
+  // Get team members for a manager (by explicit manager employee ID — admin/hr use)
   async getTeamMembers(managerId) {
     const response = await http.get(`/employees/manager/${managerId}/team`);
+    return response.data;
+  }
+
+  // Get current user's own team (manager self-service — no ID needed)
+  async getMyTeam() {
+    const response = await http.get('/employees/team-members');
     return response.data;
   }
 

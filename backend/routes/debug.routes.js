@@ -276,14 +276,10 @@ router.post('/sql', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Query is required' });
         }
 
-        // Safety check
-        const dangerous = ['DROP DATABASE', 'TRUNCATE', 'DROP TABLE', 'ALTER TABLE'];
-        const upperQuery = query.toUpperCase();
-        
-        for (const keyword of dangerous) {
-            if (upperQuery.includes(keyword)) {
-                return res.status(403).json({ success: false, message: `"${keyword}" not allowed` });
-            }
+        // Safety check — whitelist: only SELECT statements are permitted
+        const ALLOWED_QUERY_PATTERN = /^\s*SELECT\b/i;
+        if (!ALLOWED_QUERY_PATTERN.test(query)) {
+            return res.status(403).json({ success: false, message: 'Only SELECT statements are allowed in the SQL console.' });
         }
 
         const [results, metadata] = await db.sequelize.query(query);

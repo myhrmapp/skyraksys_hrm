@@ -12,9 +12,11 @@ const rateLimit = require('express-rate-limit');
 const bulkOperationLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
+  // M-07: key on authenticated user ID so limits are per-user, not per shared IP
+  keyGenerator: (req) => req.user?.id || req.ip,
   message: {
     success: false,
-    message: 'Too many bulk operations from this IP. Please try again after 15 minutes.',
+    message: 'Too many bulk operations. Please try again after 15 minutes.',
     retryAfter: '15 minutes'
   },
   standardHeaders: true,

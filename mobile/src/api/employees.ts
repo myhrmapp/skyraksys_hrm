@@ -1,5 +1,13 @@
 import api from './client';
 
+function extractArray<T>(raw: unknown): T[] {
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === 'object' && 'data' in raw && Array.isArray((raw as any).data)) {
+    return (raw as any).data;
+  }
+  return [];
+}
+
 export interface Employee {
   id: string;
   employeeId: string;
@@ -36,6 +44,6 @@ export const employeesApi = {
 
   getTeamMembers: async (): Promise<Employee[]> => {
     const { data } = await api.get('/employees/team-members');
-    return data.data || data;
+    return extractArray<Employee>(data.data ?? data);
   },
 };

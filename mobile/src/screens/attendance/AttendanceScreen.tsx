@@ -6,17 +6,25 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
-  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Calendar, DateData } from 'react-native-calendars';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { cardShadow } from '../../utils/shadow';
 import { attendanceApi, TodayAttendance, AttendanceRecord } from '../../api/attendance';
+import { useAuthStore } from '../../store/authStore';
+import { showError } from '../../utils/toast';
 
 export default function AttendanceScreen() {
+  const role = useAuthStore((s) => s.user?.role);
+  const isManager = role === 'manager' || role === 'admin' || role === 'hr';
+
+  const [activeTab, setActiveTab] = useState<'my' | 'team'>('my');
   const [today, setToday] = useState<TodayAttendance | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [teamSummary, setTeamSummary] = useState<any>(null);
+  const [teamLoading, setTeamLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -24,6 +32,8 @@ export default function AttendanceScreen() {
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
+
+  const todayDate = now.toISOString().split('T')[0];
 
   const load = useCallback(async () => {
     try {
@@ -38,13 +48,30 @@ export default function AttendanceScreen() {
     }
   }, [month, year]);
 
+  const loadTeam = useCallback(async () => {
+    if (!isManager) return;
+    setTeamLoading(true);
+    try {
+      const summary = await attendanceApi.getSummary({ date: todayDate });
+      setTeamSummary(summary);
+    } catch {
+      setTeamSummary(null);
+    } finally {
+      setTeamLoading(false);
+    }
+  }, [isManager, todayDate]);
+
   useEffect(() => {
     load();
   }, [load]);
 
+  useEffect(() => {
+    if (activeTab === 'team') loadTeam();
+  }, [activeTab, loadTeam]);
+
   const onRefresh = async () => {
     setRefreshing(true);
-    await load();
+    await Promise.all([load(), activeTab === 'team' ? loadTeam() : Promise.resolve()]);
     setRefreshing(false);
   };
 
@@ -58,7 +85,7 @@ export default function AttendanceScreen() {
       }
       await load();
     } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.message || 'Failed to record attendance');
+      showError(err?.response?.data?.message || 'Failed to record attendance');
     } finally {
       setCheckingIn(false);
     }
@@ -98,7 +125,111 @@ export default function AttendanceScreen() {
   const isCheckedIn = today?.checkedIn && !today?.checkOut;
   const isCheckedOut = today?.checkedIn && !!today?.checkOut;
 
+  // Team summary derived values
+  const teamRecords: any[] = teamSummary?.records || teamSummary?.employees || [];
+  const teamPresent = teamSummary?.present ?? teamRecords.filter((r: any) => r.status === 'present' || r.status === 'late').length;
+  const teamOnLeave = teamSummary?.onLeave ?? teamSummary?.on_leave ?? teamRecords.filter((r: any) => r.status === 'on-leave').length;
+  const teamAbsent = teamSummary?.absent ?? teamRecords.filter((r: any) => r.status === 'absent').length;
+  const teamTotal = teamSummary?.totalEmployees ?? teamSummary?.total ?? teamRecords.length;
+
   return (
+    <View style={styles.outerContainer}>
+      {/* Manager tab bar */}
+      {isManager && (
+        <View style={styles.tabBar}>
+          <TouchableOpacity
+            testID="attendance-my-tab"
+            style={[styles.tab, activeTab === 'my' && styles.tabActive]}
+            onPress={() => setActiveTab('my')}
+          >
+            <Text style={[styles.tabText, activeTab === 'my' && styles.tabTextActive]}>My Attendance</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            testID="attendance-team-tab"
+            style={[styles.tab, activeTab === 'team' && styles.tabActive]}
+            onPress={() => setActiveTab('team')}
+          >
+            <Text style={[styles.tabText, activeTab === 'team' && styles.tabTextActive]}>Team Today</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+    {activeTab === 'team' ? (
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
+      >
+        {teamLoading ? (
+          <View style={styles.loader}>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        ) : (
+          <>
+            {/* Team Summary Cards */}
+            <View style={styles.teamSummaryRow}>
+              <View style={[styles.teamSummaryCard, { borderLeftColor: colors.success }]}>
+                <Text style={[styles.teamSummaryValue, { color: colors.success }]}>{teamPresent}</Text>
+                <Text style={styles.teamSummaryLabel}>Present</Text>
+              </View>
+              <View style={[styles.teamSummaryCard, { borderLeftColor: colors.error }]}>
+                <Text style={[styles.teamSummaryValue, { color: colors.error }]}>{teamAbsent}</Text>
+                <Text style={styles.teamSummaryLabel}>Absent</Text>
+              </View>
+              <View style={[styles.teamSummaryCard, { borderLeftColor: colors.warning }]}>
+                <Text style={[styles.teamSummaryValue, { color: colors.warning }]}>{teamOnLeave}</Text>
+                <Text style={styles.teamSummaryLabel}>On Leave</Text>
+              </View>
+              <View style={[styles.teamSummaryCard, { borderLeftColor: colors.primary }]}>
+                <Text style={[styles.teamSummaryValue, { color: colors.primary }]}>{teamTotal}</Text>
+                <Text style={styles.teamSummaryLabel}>Total</Text>
+              </View>
+            </View>
+
+            {/* Employee list */}
+            <Text style={styles.sectionTitle}>Today — {todayDate}</Text>
+            {teamRecords.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="people-outline" size={48} color={colors.textSecondary} />
+                <Text style={styles.emptyText}>No attendance data available</Text>
+              </View>
+            ) : (
+              teamRecords.map((rec: any, idx: number) => {
+                const empName = rec.employeeName || rec.name ||
+                  `${rec.employee?.firstName || ''} ${rec.employee?.lastName || ''}`.trim() || `Employee ${idx + 1}`;
+                const st = rec.status || 'unknown';
+                const stColor = statusColors[st] || colors.textSecondary;
+                return (
+                  <View key={rec.id || idx} style={styles.teamRow}>
+                    <View style={[styles.teamAvatar, { backgroundColor: stColor + '25' }]}>
+                      <Text style={[styles.teamAvatarText, { color: stColor }]}>
+                        {empName.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={styles.teamRowInfo}>
+                      <Text style={styles.teamRowName}>{empName}</Text>
+                      {rec.checkIn && (
+                        <Text style={styles.teamRowTime}>
+                          In: {new Date(rec.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {rec.checkOut
+                            ? ` · Out: ${new Date(rec.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                            : ''}
+                        </Text>
+                      )}
+                    </View>
+                    <View style={[styles.teamBadge, { backgroundColor: stColor + '20' }]}>
+                      <Text style={[styles.teamBadgeText, { color: stColor }]}>
+                        {st.charAt(0).toUpperCase() + st.slice(1)}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })
+            )}
+          </>
+        )}
+      </ScrollView>
+    ) : (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
@@ -198,10 +329,73 @@ export default function AttendanceScreen() {
         ))}
       </View>
     </ScrollView>
+    )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  outerContainer: { flex: 1, backgroundColor: colors.background },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.lg,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: { borderBottomColor: colors.primary },
+  tabText: { ...typography.label, color: colors.textSecondary },
+  tabTextActive: { color: colors.primary },
+  sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: spacing.xl * 3 },
+  emptyState: { alignItems: 'center', paddingVertical: spacing.xl * 2 },
+  emptyText: { ...typography.body, color: colors.textSecondary, marginTop: spacing.md },
+  teamSummaryRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
+  teamSummaryCard: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    borderLeftWidth: 3,
+    padding: spacing.md,
+    alignItems: 'center',
+    ...cardShadow,
+  },
+  teamSummaryValue: { ...typography.stat, fontSize: 22 },
+  teamSummaryLabel: { ...typography.small, color: colors.textSecondary, marginTop: 2 },
+  teamRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.xs,
+    ...cardShadow,
+  },
+  teamAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  teamAvatarText: { ...typography.label, fontSize: 16 },
+  teamRowInfo: { flex: 1 },
+  teamRowName: { ...typography.captionBold, color: colors.text },
+  teamRowTime: { ...typography.small, color: colors.textSecondary, marginTop: 2 },
+  teamBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: borderRadius.sm,
+  },
+  teamBadgeText: { ...typography.small, fontWeight: '700', fontSize: 11 },
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg },
   todayCard: {

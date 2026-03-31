@@ -22,7 +22,9 @@ export function useMetadataCache(options = { includeManagers: true }) {
       // Only fetch if missing
       const needDepts = !cache.departments;
       const needPositions = !cache.positions;
-      const needManagers = options.includeManagers && !cache.managers;
+      const user = options.user || (typeof window !== 'undefined' && window.__authUser);
+      const canFetchManagers = user && (user.role === 'admin' || user.role === 'hr' || user.role === 'manager');
+      const needManagers = options.includeManagers && !cache.managers && canFetchManagers;
       if (!needDepts && !needPositions && !needManagers) return;
 
       setLoading(true);
@@ -31,7 +33,7 @@ export function useMetadataCache(options = { includeManagers: true }) {
         const [deptRes, posRes, mgrRes] = await Promise.all([
           needDepts ? employeeService.getDepartments().catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: cache.departments } }),
           needPositions ? employeeService.getPositions().catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: cache.positions } }),
-          needManagers ? employeeService.getManagers().catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: cache.managers } }),
+          needManagers ? employeeService.getManagers().catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: [] } }),
         ]);
 
         const d = deptRes.data?.data || [];
@@ -46,7 +48,8 @@ export function useMetadataCache(options = { includeManagers: true }) {
         if (mounted.current) {
           setDepartments(cache.departments);
           setPositions(cache.positions);
-          if (options.includeManagers) setManagers(cache.managers);
+          if (options.includeManagers && canFetchManagers) setManagers(cache.managers);
+          if (options.includeManagers && !canFetchManagers) setManagers([]);
         }
       } catch (e) {
         if (mounted.current) setError(e);

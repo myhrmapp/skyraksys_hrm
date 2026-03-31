@@ -49,8 +49,8 @@ const ManagerDashboard = () => {
   const loadDashboardData = useCallback(async () => {
     setLoading('manager-dashboard', true);
     try {
-      // Get team members (employees where managerId = current user's employeeId)
-      const teamResponse = await employeeService.getTeamMembers(user.employee?.id || user.id);
+      // Get team members using the /team-members endpoint (current user's team, no ID needed)
+      const teamResponse = await employeeService.getMyTeam();
       const rawTeam = teamResponse.data || [];
       const teamMembers = Array.isArray(rawTeam) ? rawTeam : (rawTeam.data || []);
 

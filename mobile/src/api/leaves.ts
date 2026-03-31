@@ -1,5 +1,12 @@
 import api from './client';
 
+/** Unwrap paginated or flat array */
+function extractArray<T>(raw: any): T[] {
+  if (Array.isArray(raw)) return raw;
+  if (raw?.data && Array.isArray(raw.data)) return raw.data;
+  return [];
+}
+
 export interface LeaveType {
   id: string;
   name: string;
@@ -38,22 +45,23 @@ export interface CreateLeavePayload {
   endDate: string;
   reason: string;
   isHalfDay?: boolean;
+  halfDayType?: 'First Half' | 'Second Half';
 }
 
 export const leavesApi = {
   getMy: async (): Promise<LeaveRequest[]> => {
     const { data } = await api.get('/leaves/me');
-    return data.data || data;
+    return extractArray<LeaveRequest>(data.data ?? data);
   },
 
   getTypes: async (): Promise<LeaveType[]> => {
     const { data } = await api.get('/leaves/meta/types');
-    return data.data || data;
+    return extractArray<LeaveType>(data.data ?? data);
   },
 
   getBalance: async (): Promise<LeaveBalance[]> => {
     const { data } = await api.get('/leaves/meta/balance');
-    return data.data || data;
+    return extractArray<LeaveBalance>(data.data ?? data);
   },
 
   create: async (payload: CreateLeavePayload): Promise<LeaveRequest> => {
@@ -64,7 +72,7 @@ export const leavesApi = {
   // Manager endpoints
   getPending: async (): Promise<LeaveRequest[]> => {
     const { data } = await api.get('/leaves/pending-for-manager');
-    return data.data || data;
+    return extractArray<LeaveRequest>(data.data ?? data);
   },
 
   approve: async (id: string, comments?: string) => {
@@ -74,6 +82,11 @@ export const leavesApi = {
 
   reject: async (id: string, reason: string) => {
     const { data } = await api.put(`/leaves/${id}/reject`, { rejectionReason: reason });
+    return data;
+  },
+
+  cancel: async (id: string) => {
+    const { data } = await api.patch(`/leaves/${id}/cancel`);
     return data;
   },
 };

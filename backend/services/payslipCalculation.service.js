@@ -38,13 +38,13 @@ class PayslipCalculationService {
     try {
       // Default attendance values
       const totalWorkingDays = attendance.totalWorkingDays || 26;
-      const presentDays = attendance.presentDays || attendance.paidDays || 26;
+      const presentDays = attendance.presentDays ?? totalWorkingDays;
+      const paidDays = attendance.paidDays ?? presentDays;
       const lopDays = attendance.lopDays || 0;
       const overtimeHours = attendance.overtimeHours || 0;
 
-      // Calculate effective days
-      const effectiveDays = Math.max(0, presentDays);
-      const payableDays = Math.min(effectiveDays, totalWorkingDays);
+      // Salary proration uses paidDays (includes paid leave, excludes only LOP)
+      const payableDays = Math.min(Math.max(0, paidDays), totalWorkingDays);
 
       // 1. Calculate Earnings
       const earnings = this.calculateEarnings(
@@ -465,6 +465,7 @@ class PayslipCalculationService {
    * Number to words conversion (Indian format)
    */
   numberToWords(amount) {
+    amount = Math.round(amount); // Strip decimals to avoid undefined array lookups
     if (amount === 0) return 'Zero Rupees Only';
 
     const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];

@@ -21,15 +21,36 @@ export interface TodayAttendance {
   status: string;
 }
 
+/** Unwrap paginated or flat array */
+function extractArray<T>(raw: any): T[] {
+  if (Array.isArray(raw)) return raw;
+  if (raw?.data && Array.isArray(raw.data)) return raw.data;
+  return [];
+}
+
 export const attendanceApi = {
   getToday: async (): Promise<TodayAttendance> => {
     const { data } = await api.get('/attendance/today');
-    return data.data || data;
+    const raw = data.data || data;
+    // Backend returns raw Attendance record (or null); derive checkedIn
+    return {
+      id: raw?.id,
+      checkedIn: !!raw?.checkIn,
+      checkIn: raw?.checkIn ?? null,
+      checkOut: raw?.checkOut ?? null,
+      status: raw?.status ?? 'absent',
+    };
   },
 
   getMy: async (params?: { month?: number; year?: number }): Promise<AttendanceRecord[]> => {
-    const { data } = await api.get('/attendance/my', { params });
-    return data.data || data;
+    // Backend /my requires startDate & endDate; compute from month/year
+    const month = params?.month ?? new Date().getMonth() + 1;
+    const year = params?.year ?? new Date().getFullYear();
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    const lastDay = new Date(year, month, 0).getDate();
+    const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    const { data } = await api.get('/attendance/my', { params: { startDate, endDate } });
+    return extractArray<AttendanceRecord>(data.data ?? data);
   },
 
   getMyReport: async (params?: { month?: number; year?: number }) => {

@@ -194,7 +194,7 @@ router.post('/email-config/send-test', authenticateToken, authorize('admin'), va
                                 <li>SMTP Host: ${smtpHost}</li>
                                 <li>SMTP Port: ${smtpPort}</li>
                                 <li>From Address: ${emailFrom}</li>
-                                <li>Test Time: ${new Date().toLocaleString()}</li>
+                                <li>Test Time: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'medium' })}</li>
                             </ul>
                             <p>You can now send welcome emails, password resets, and other notifications from your HRM system.</p>
                         </div>

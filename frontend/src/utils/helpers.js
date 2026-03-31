@@ -1,8 +1,12 @@
 // Re-export centralized formatCurrency for backward compatibility
 export { formatCurrency } from './formatCurrency';
 
+// Re-export centralized date utilities
+export { displayDate, displayDateTime, displayTime, toAPIDate, toAPIDateTime } from './dateUtils';
+
 /**
- * Format date to readable format
+ * Format date to readable format.
+ * Uses explicit timezone (Asia/Kolkata) so output is deterministic.
  * @param {string|Date} date - Date to format
  * @param {string} format - Format type ('short', 'long', 'time')
  * @returns {string} - Formatted date
@@ -13,13 +17,14 @@ export const formatDate = (date, format = 'short') => {
   const dateObj = new Date(date);
   if (isNaN(dateObj.getTime())) return 'Invalid Date';
   
+  const tz = 'Asia/Kolkata';
   const options = {
-    short: { year: 'numeric', month: 'short', day: 'numeric' },
-    long: { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' },
-    time: { hour: '2-digit', minute: '2-digit' }
+    short: { year: 'numeric', month: 'short', day: 'numeric', timeZone: tz },
+    long: { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', timeZone: tz },
+    time: { hour: '2-digit', minute: '2-digit', timeZone: tz }
   };
   
-  return dateObj.toLocaleDateString('en-US', options[format] || options.short);
+  return dateObj.toLocaleDateString('en-IN', options[format] || options.short);
 };
 
 /**

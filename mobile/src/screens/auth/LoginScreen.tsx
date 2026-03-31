@@ -14,6 +14,7 @@ import {
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { cardShadowMd } from '../../utils/shadow';
 import { useAuthStore } from '../../store/authStore';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -57,6 +58,7 @@ export default function LoginScreen() {
         <View style={styles.form}>
           <Text style={styles.label}>Email</Text>
           <TextInput
+            testID="login-email"
             style={styles.input}
             placeholder="you@company.com"
             placeholderTextColor={colors.textLight}
@@ -71,6 +73,7 @@ export default function LoginScreen() {
           <Text style={[styles.label, { marginTop: spacing.lg }]}>Password</Text>
           <View style={styles.passwordRow}>
             <TextInput
+              testID="login-password"
               style={[styles.input, { flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0 }]}
               placeholder="••••••••"
               placeholderTextColor={colors.textLight}
@@ -83,12 +86,18 @@ export default function LoginScreen() {
             <TouchableOpacity
               style={styles.eyeButton}
               onPress={() => setShowPassword(!showPassword)}
+              accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
             >
-              <Text style={styles.eyeText}>{showPassword ? '🙈' : '👁'}</Text>
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={20}
+                color={colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
+            testID="login-button"
             style={[styles.loginButton, loading && styles.loginButtonDisabled]}
             onPress={handleLogin}
             disabled={loading}
@@ -173,16 +182,13 @@ const styles = StyleSheet.create({
   eyeButton: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: spacing.md,
+    width: 44,
     backgroundColor: colors.background,
     borderWidth: 1,
     borderLeftWidth: 0,
     borderColor: colors.border,
     borderTopRightRadius: borderRadius.sm,
     borderBottomRightRadius: borderRadius.sm,
-  },
-  eyeText: {
-    fontSize: 18,
   },
   loginButton: {
     backgroundColor: colors.primary,

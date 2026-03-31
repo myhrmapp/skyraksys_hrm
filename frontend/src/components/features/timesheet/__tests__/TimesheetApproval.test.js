@@ -11,7 +11,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor, fireEvent } from '@testing-library/react';
+import { screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders as render, createMockUser } from '../../../../test-utils/testUtils';
 import TimesheetApproval from '../TimesheetApproval';
@@ -23,6 +23,8 @@ jest.mock('../../../../services/timesheet.service', () => {
   }
   return {
     timesheetService: {
+      getPendingApprovals: jest.fn(),
+      getStats: jest.fn(),
       getAll: jest.fn(),
       bulkApprove: jest.fn(),
       bulkReject: jest.fn(),
@@ -45,16 +47,14 @@ jest.mock('../../../common/ConfirmDialog', () => {
   };
 });
 
-// Mock useConfirmDialog
+// Mock useConfirmDialog — auto-executes onConfirm so we can test the confirmed path
 jest.mock('../../../../hooks/useConfirmDialog', () => {
-  const confirmFn = jest.fn();
   return {
     __esModule: true,
     default: () => ({
       dialogProps: { open: false, title: '', message: '', onConfirm: jest.fn(), onCancel: jest.fn() },
-      confirm: confirmFn,
+      confirm: jest.fn(({ onConfirm } = {}) => { if (typeof onConfirm === 'function') onConfirm(); }),
     }),
-    _getConfirmFn: () => confirmFn,
   };
 });
 
@@ -77,11 +77,11 @@ const mockTimesheets = [
     id: 1,
     employeeId: 100,
     employee: { firstName: 'John', lastName: 'Doe', employeeId: 'EMP001' },
-    weekStartDate: '2026-02-02',
-    weekEndDate: '2026-02-08',
+    weekStartDate: '2026-02-09', // Newer week, will appear first due to sorting
+    weekEndDate: '2026-02-15',
     status: 'Submitted',
     totalHoursWorked: 40,
-    submittedAt: '2026-02-08T10:00:00Z',
+    submittedAt: '2026-02-15T10:00:00Z',
     project: { id: 1, name: 'Project Alpha' },
     task: { id: 1, name: 'Development' },
     mondayHours: 8, tuesdayHours: 8, wednesdayHours: 8, thursdayHours: 8, fridayHours: 8,
@@ -91,7 +91,7 @@ const mockTimesheets = [
     id: 2,
     employeeId: 101,
     employee: { firstName: 'Jane', lastName: 'Smith', employeeId: 'EMP002' },
-    weekStartDate: '2026-02-02',
+    weekStartDate: '2026-02-02', // Older week
     weekEndDate: '2026-02-08',
     status: 'Submitted',
     totalHoursWorked: 35,
@@ -122,15 +122,15 @@ describe('TimesheetApproval Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    timesheetService.getAll.mockResolvedValue({
-      data: mockTimesheets,
-    });
+    timesheetService.getPendingApprovals.mockResolvedValue({ data: mockTimesheets });
+    timesheetService.getStats.mockResolvedValue({ data: { approved: 3, rejected: 1 } });
+    timesheetService.getAll.mockResolvedValue({ data: mockTimesheets });
     timesheetService.bulkApprove.mockResolvedValue({ success: true });
     timesheetService.bulkReject.mockResolvedValue({ success: true });
   });
 
   afterEach(() => {
-    timesheetService.getAll.mockResolvedValue({ data: mockTimesheets });
+    timesheetService.getPendingApprovals.mockResolvedValue({ data: mockTimesheets });
   });
 
   // ─── Rendering ──────────────────────────────────────────
@@ -167,7 +167,7 @@ describe('TimesheetApproval Component', () => {
     it('should fetch pending timesheets on mount', async () => {
       render(<TimesheetApproval />, { authValue: { user: adminUser } });
       await waitFor(() => {
-        expect(timesheetService.getAll).toHaveBeenCalledWith({ status: 'submitted' });
+        expect(timesheetService.getPendingApprovals).toHaveBeenCalled();
       });
     });
   });
@@ -260,7 +260,7 @@ describe('TimesheetApproval Component', () => {
 
   describe('Loading State', () => {
     it('should show loading indicator while fetching timesheets', () => {
-      timesheetService.getAll.mockReturnValue(new Promise(() => {})); // Never resolves
+      timesheetService.getPendingApprovals.mockReturnValue(new Promise(() => {})); // Never resolves
       render(<TimesheetApproval />, { authValue: { user: adminUser } });
       // Component renders Skeleton or loading indicators during fetch
       expect(screen.getByText('Timesheet Approvals')).toBeInTheDocument();
@@ -275,14 +275,178 @@ describe('TimesheetApproval Component', () => {
       await waitFor(() => {
         expect(screen.getByText(/John Doe/)).toBeInTheDocument();
       });
+      // data-testid="ts-approval-approve-btn" and "ts-approval-reject-btn" are on each row
+      const approveButtons = screen.getAllByTestId('ts-approval-approve-btn');
+      const rejectButtons  = screen.getAllByTestId('ts-approval-reject-btn');
+      expect(approveButtons.length).toBeGreaterThanOrEqual(1);
+      expect(rejectButtons.length).toBeGreaterThanOrEqual(1);
+    });
 
-      // The approve and reject icons should be rendered as icon buttons
-      // Find tooltip-wrapped approve/reject buttons
-      const approveButtons = screen.getAllByRole('button').filter(
-        btn => btn.querySelector('[data-testid="CheckCircleIcon"]') || 
-               btn.getAttribute('aria-label')?.toLowerCase().includes('approve')
-      );
-      expect(approveButtons.length).toBeGreaterThanOrEqual(0);
+    it('per-row approve: opens approval dialog, submits, and calls bulkApprove', async () => {
+      const user = userEvent.setup();
+      render(<TimesheetApproval />, { authValue: { user: adminUser } });
+      await waitFor(() => {
+        expect(screen.getByText(/John Doe/)).toBeInTheDocument();
+      });
+
+      // Click the first per-row Approve button
+      const approveBtn = screen.getAllByTestId('ts-approval-approve-btn')[0];
+      await user.click(approveBtn);
+
+      // Approval dialog opens with title "Approve Timesheet"
+      const dialog = await screen.findByRole('dialog');
+      expect(within(dialog).getByText('Approve Timesheet')).toBeInTheDocument();
+
+      // Click the Approve submit button inside the dialog (no comments required)
+      const dialogApproveBtn = within(dialog).getByRole('button', { name: /^Approve$/ });
+      expect(dialogApproveBtn).not.toBeDisabled();
+      await user.click(dialogApproveBtn);
+
+      await waitFor(() => {
+        expect(timesheetService.bulkApprove).toHaveBeenCalledWith([1], '');
+      });
+    });
+
+    it('per-row reject: opens dialog, requires rejection reason, calls bulkReject', async () => {
+      const user = userEvent.setup();
+      render(<TimesheetApproval />, { authValue: { user: adminUser } });
+      await waitFor(() => {
+        expect(screen.getByText(/John Doe/)).toBeInTheDocument();
+      });
+
+      // Click the first per-row Reject button
+      const rejectBtn = screen.getAllByTestId('ts-approval-reject-btn')[0];
+      await user.click(rejectBtn);
+
+      // Reject dialog opens with title "Reject Timesheet"
+      const dialog = await screen.findByRole('dialog');
+      expect(within(dialog).getByText('Reject Timesheet')).toBeInTheDocument();
+
+      // Reject submit button is disabled until a reason is entered
+      const dialogRejectBtn = within(dialog).getByRole('button', { name: /^Reject$/ });
+      expect(dialogRejectBtn).toBeDisabled();
+
+      // Enter rejection reason
+      const commentsField = within(dialog).getByLabelText(/Rejection Reason/i);
+      await user.type(commentsField, 'Missing project codes');
+
+      // Now the Reject button is enabled
+      expect(dialogRejectBtn).not.toBeDisabled();
+      await user.click(dialogRejectBtn);
+
+      await waitFor(() => {
+        expect(timesheetService.bulkReject).toHaveBeenCalledWith([1], 'Missing project codes');
+      });
+    });
+  });
+
+  // ─── Bulk Actions ─────────────────────────────────────
+
+  describe('Bulk Actions', () => {
+    it('bulk approve: confirm auto-executes onConfirm, calls bulkApprove', async () => {
+      const user = userEvent.setup();
+      render(<TimesheetApproval />, { authValue: { user: adminUser } });
+      await waitFor(() => {
+        expect(screen.getByText(/John Doe/)).toBeInTheDocument();
+      });
+
+      // Select one Submitted timesheet via checkbox
+      const checkboxes = screen.getAllByRole('checkbox');
+      // checkboxes[0] = select-all; checkboxes[1] = first data row
+      await user.click(checkboxes[1]);
+
+      // Bulk Approve button should appear
+      await waitFor(() => {
+        expect(screen.getByText(/Approve \(/i)).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByText(/Approve \(/i).closest('button'));
+
+      // confirm() mock auto-executes onConfirm → approveMutation.mutate is called
+      await waitFor(() => {
+        expect(timesheetService.bulkApprove).toHaveBeenCalled();
+      });
+    });
+
+    it('H-02: bulk reject opens approval dialog (not confirm dialog) to collect comments', async () => {
+      const user = userEvent.setup();
+      render(<TimesheetApproval />, { authValue: { user: adminUser } });
+      await waitFor(() => {
+        expect(screen.getByText(/John Doe/)).toBeInTheDocument();
+      });
+
+      // Select one Submitted timesheet
+      const checkboxes = screen.getAllByRole('checkbox');
+      await user.click(checkboxes[1]);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Reject \(/i)).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByText(/Reject \(/i).closest('button'));
+
+      // H-02: approval DIALOG opens directly (handleBulkAction('reject') skips confirm)
+      const dialog = await screen.findByRole('dialog');
+      expect(within(dialog).getByText('Reject Timesheet')).toBeInTheDocument();
+      // ConfirmDialog must NOT be visible (auto-confirm mock does NOT fire for this path)
+      expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument();
+
+      // Must enter comments to enable submit
+      const dialogRejectBtn = within(dialog).getByRole('button', { name: /^Reject$/ });
+      expect(dialogRejectBtn).toBeDisabled();
+
+      const commentsField = within(dialog).getByLabelText(/Rejection Reason/i);
+      await user.type(commentsField, 'Hours do not match project tracker');
+      expect(dialogRejectBtn).not.toBeDisabled();
+
+      await user.click(dialogRejectBtn);
+      await waitFor(() => {
+        expect(timesheetService.bulkReject).toHaveBeenCalledWith(
+          expect.any(Array),
+          'Hours do not match project tracker',
+        );
+      });
+    });
+  });
+
+  // ─── Search Filter ────────────────────────────────────
+
+  describe('Search Filter', () => {
+    it('typing in search box narrows results by employee name', async () => {
+      render(<TimesheetApproval />, { authValue: { user: adminUser } });
+      await waitFor(() => {
+        expect(screen.getByText(/John Doe/)).toBeInTheDocument();
+        expect(screen.getByText(/Jane Smith/)).toBeInTheDocument();
+      });
+
+      // Type "John" into the search input
+      fireEvent.change(screen.getByTestId('ts-approval-search-input'), {
+        target: { value: 'John' },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/John Doe/)).toBeInTheDocument();
+        expect(screen.queryByText(/Jane Smith/)).not.toBeInTheDocument();
+      });
+    });
+
+    it('clearing search restores all results', async () => {
+      render(<TimesheetApproval />, { authValue: { user: adminUser } });
+      await waitFor(() => {
+        expect(screen.getByText(/John Doe/)).toBeInTheDocument();
+      });
+
+      const searchInput = screen.getByTestId('ts-approval-search-input');
+      fireEvent.change(searchInput, { target: { value: 'John' } });
+      await waitFor(() => {
+        expect(screen.queryByText(/Jane Smith/)).not.toBeInTheDocument();
+      });
+
+      // Clear the search
+      fireEvent.change(searchInput, { target: { value: '' } });
+      await waitFor(() => {
+        expect(screen.getByText(/Jane Smith/)).toBeInTheDocument();
+      });
     });
   });
 
@@ -321,7 +485,7 @@ describe('TimesheetApproval Component', () => {
 
   describe('Empty State', () => {
     it('should handle empty timesheet list', async () => {
-      timesheetService.getAll.mockResolvedValueOnce({ data: [] });
+      timesheetService.getPendingApprovals.mockResolvedValueOnce({ data: [] });
       render(<TimesheetApproval />, { authValue: { user: adminUser } });
       await waitFor(() => {
         expect(screen.getByText('Timesheet Approvals')).toBeInTheDocument();
@@ -331,7 +495,7 @@ describe('TimesheetApproval Component', () => {
         expect(screen.getByText('Pending Approvals')).toBeInTheDocument();
       });
       // Restore mock for other tests
-      timesheetService.getAll.mockResolvedValue({ data: mockTimesheets });
+      timesheetService.getPendingApprovals.mockResolvedValue({ data: mockTimesheets });
     });
   });
 
@@ -339,7 +503,7 @@ describe('TimesheetApproval Component', () => {
 
   describe('Error Handling', () => {
     it('should handle API error gracefully', async () => {
-      timesheetService.getAll.mockRejectedValue(new Error('Network error'));
+      timesheetService.getPendingApprovals.mockRejectedValue(new Error('Network error'));
       render(<TimesheetApproval />, { authValue: { user: adminUser } });
       // Component should still render without crashing
       await waitFor(() => {

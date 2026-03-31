@@ -22,6 +22,10 @@ export const AuthProvider = ({ children }) => {
       try {
         // Cookie is sent automatically — just validate via /auth/me
         const userData = await authService.getProfile();
+        // /auth/me returns employee as nested object; normalise to match login shape
+        if (!userData.employeeId && userData.employee?.id) {
+          userData.employeeId = userData.employee.id;
+        }
         setUser(userData);
         setIsAuthenticated(true);
       } catch (error) {

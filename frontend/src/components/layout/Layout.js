@@ -84,6 +84,7 @@ const Layout = () => {
           id: 'dashboard',
           label: 'Dashboard',
           icon: <DashboardIcon />,
+          sectionHeader: 'Administration',
           items: [
             { label: 'Overview', path: '/admin-dashboard', icon: <DashboardIcon /> },
             { label: 'Performance', path: '/performance-dashboard', icon: <Assessment /> }
@@ -102,7 +103,7 @@ const Layout = () => {
         },
         {
           id: 'leave',
-          label: 'Leave',
+          label: 'Leave Management',
           icon: <LeaveIcon />,
           items: [
             { label: 'Leave Requests', path: '/leave-management', icon: <CheckCircleOutline /> },
@@ -133,7 +134,7 @@ const Layout = () => {
         },
         {
           id: 'settings',
-          label: 'Settings',
+          label: 'System',
           icon: <SettingsIcon />,
           items: [
             { label: 'User Management', path: '/user-management', icon: <ManagerIcon /> },
@@ -145,7 +146,7 @@ const Layout = () => {
           id: 'mystuff',
           label: 'My Work',
           icon: <PersonIcon />,
-          divider: true,
+          sectionHeader: 'Self Service',
           items: [
             { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
             { label: 'My Leave', path: '/leave-requests', icon: <LeaveIcon /> },
@@ -171,6 +172,7 @@ const Layout = () => {
           id: 'dashboard',
           label: 'Dashboard',
           icon: <DashboardIcon />,
+          sectionHeader: 'Team Management',
           items: [
             { label: 'Overview', path: '/manager-dashboard', icon: <DashboardIcon /> },
             { label: 'Team Performance', path: '/performance-dashboard', icon: <Assessment /> }
@@ -199,7 +201,7 @@ const Layout = () => {
           id: 'mystuff',
           label: 'My Work',
           icon: <PersonIcon />,
-          divider: true,
+          sectionHeader: 'Self Service',
           items: [
             { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
             { label: 'My Leave', path: '/leave-requests', icon: <LeaveIcon /> },
@@ -232,7 +234,7 @@ const Layout = () => {
       },
       {
         id: 'mystuff',
-        label: 'My Stuff',
+        label: 'My Workspace',
         icon: <PersonIcon />,
         items: [
           { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
@@ -278,8 +280,28 @@ const Layout = () => {
           <List sx={{ py: 1 }}>
             {menuStructure.map((group) => (
               <React.Fragment key={group.id}>
-                {/* Optional divider before group */}
-                {group.divider && <Divider sx={{ my: 1 }} />}
+                {/* Section Header (Administration / Self Service / etc.) */}
+                {group.sectionHeader && (
+                  <Box sx={{ mt: group.id !== 'dashboard' ? 1 : 0 }}>
+                    {group.id !== 'dashboard' && (
+                      <Divider sx={{ mb: 1.5 }} />
+                    )}
+                    <Typography
+                      variant="overline"
+                      sx={{
+                        px: 2,
+                        py: 0.5,
+                        display: 'block',
+                        color: 'primary.main',
+                        fontWeight: 700,
+                        letterSpacing: 1.5,
+                        fontSize: '0.65rem'
+                      }}
+                    >
+                      {group.sectionHeader}
+                    </Typography>
+                  </Box>
+                )}
                 
                 {/* Group Label */}
                 <Typography

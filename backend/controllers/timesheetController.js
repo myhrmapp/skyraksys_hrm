@@ -64,7 +64,7 @@ const getAll = async (req, res, next) => {
     }
     
     if (weekStartDate) {
-      filters.weekStartDate = new Date(weekStartDate);
+      filters.weekStartDate = weekStartDate;
     }
     
     // RBAC: Employee sees only own timesheets
@@ -76,25 +76,27 @@ const getAll = async (req, res, next) => {
       }
       filters.employeeId = req.employeeId;
     }
-    // RBAC: Manager sees team timesheets
+    // RBAC: Manager sees own + team timesheets
     else if (user.role === 'manager') {
       if (employeeId) {
-        // Verify employee is in manager's team
-        const isTeamMember = await isInManagerTeam(req.employeeId, employeeId);
-        if (!isTeamMember) {
-          return res.status(403).json(
-            ApiResponse.error('You can only view timesheets from your team members', 403)
-          );
+        // Allow self-access, then verify team membership for others
+        const isSelf = employeeId === req.employeeId;
+        if (!isSelf) {
+          const isTeamMember = await isInManagerTeam(req.employeeId, employeeId);
+          if (!isTeamMember) {
+            return res.status(403).json(
+              ApiResponse.error('You can only view timesheets from your team members', 403)
+            );
+          }
         }
         filters.employeeId = employeeId;
       } else {
-        // Return manager's own + team timesheets
+        // Return manager's own + team timesheets — pass plain array, let data layer build Op.in
         const subordinates = await db.Employee.findAll({
           where: { managerId: req.employeeId },
           attributes: ['id']
         });
-        const teamIds = [req.employeeId, ...subordinates.map(e => e.id)];
-        filters.employeeId = { [db.Sequelize.Op.in]: teamIds };
+        filters.teamIds = [req.employeeId, ...subordinates.map(e => e.id)];
       }
     }
     // RBAC: Admin/HR see all
@@ -104,6 +106,11 @@ const getAll = async (req, res, next) => {
       }
     }
     
+    if (filters.teamIds) {
+      filters.employeeId = { [db.Sequelize.Op.in]: filters.teamIds };
+      delete filters.teamIds;
+    }
+
     const offset = (page - 1) * limit;
     
     // Use data service for read operations
@@ -130,8 +137,13 @@ const getAll = async (req, res, next) => {
 /**
  * Get single timesheet by ID
  * 
+ * RBAC Rules:
+ * - Employee: can get own timesheet
+ * - Manager: can get own or team member's timesheet
+ * - HR/Admin: can get any timesheet
+ * 
  * @route GET /api/timesheets/:id
- * @access Private (RBAC: Own timesheet or Manager/Admin/HR)
+ * @access Private (RBAC)
  */
 const getById = async (req, res, next) => {
   try {
@@ -323,9 +335,13 @@ const getByWeek = async (req, res, next) => {
       }
       targetEmployeeId = req.employeeId;
     }
-    // Admin/HR can specify employeeId
+    // Non-employee roles: use provided employeeId or fall back to own
     else if (!targetEmployeeId) {
-      throw new BadRequestError('employeeId is required');
+      if (req.employeeId) {
+        targetEmployeeId = req.employeeId;
+      } else {
+        throw new BadRequestError('employeeId is required');
+      }
     }
     
     const timesheets = await timesheetDataService.findByWeek(new Date(weekStart), {
@@ -358,9 +374,13 @@ const getSummary = async (req, res, next) => {
       }
       targetEmployeeId = req.employeeId;
     }
-    // Admin/HR can specify employeeId
+    // Non-employee roles: use provided employeeId or fall back to own
     else if (!targetEmployeeId) {
-      throw new BadRequestError('employeeId is required');
+      if (req.employeeId) {
+        targetEmployeeId = req.employeeId;
+      } else {
+        throw new BadRequestError('employeeId is required');
+      }
     }
     
     // Provide default dates if not specified (current month)
@@ -412,6 +432,186 @@ const getMyTimesheets = async (req, res, next) => {
   }
 };
 
+// --------------------------------------------------------------------------
+// Bulk operations (moved from inline route handlers)
+// --------------------------------------------------------------------------
+
+/**
+ * Submit multiple timesheets at once (by ID array or weekStartDate).
+ *
+ * @route POST /api/timesheets/bulk-submit
+ * @access Private
+ */
+const bulkSubmit = async (req, res, next) => {
+  try {
+    let { timesheetIds, weekStartDate } = req.body;
+
+    // If only weekStartDate is provided, resolve draft IDs for that week first
+    if ((!timesheetIds || timesheetIds.length === 0) && weekStartDate) {
+      const result = await timesheetBusinessService.submitWeeklyTimesheets(weekStartDate, req.user);
+      return res.json(
+        ApiResponse.success(
+          { count: result.length },
+          { message: `${result.length} timesheets submitted successfully` },
+        ),
+      );
+    }
+
+    if (!timesheetIds || !Array.isArray(timesheetIds) || timesheetIds.length === 0) {
+      throw new BadRequestError('Invalid timesheet IDs or week start date');
+    }
+
+    const result = await timesheetBusinessService.bulkSubmitTimesheets(timesheetIds, req.user);
+    res.json(
+      ApiResponse.success(result, { message: `${result.count} timesheets submitted successfully` }),
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Approve multiple submitted timesheets.
+ *
+ * @route POST /api/timesheets/bulk-approve
+ * @access Private (Manager/Admin/HR)
+ */
+const bulkApprove = async (req, res, next) => {
+  try {
+    const { timesheetIds, comments = '' } = req.body;
+    if (!timesheetIds || !Array.isArray(timesheetIds) || timesheetIds.length === 0) {
+      throw new BadRequestError('Invalid timesheet IDs');
+    }
+    const result = await timesheetBusinessService.bulkApproveTimesheets(timesheetIds, req.user, comments);
+    res.json(
+      ApiResponse.success(result, { message: `${result.count} timesheets approved successfully` }),
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Reject multiple submitted timesheets.
+ *
+ * @route POST /api/timesheets/bulk-reject
+ * @access Private (Manager/Admin/HR)
+ */
+const bulkReject = async (req, res, next) => {
+  try {
+    const { timesheetIds, comments } = req.body;
+    if (!timesheetIds || !Array.isArray(timesheetIds) || timesheetIds.length === 0) {
+      throw new BadRequestError('Invalid timesheet IDs');
+    }
+    const result = await timesheetBusinessService.bulkRejectTimesheets(timesheetIds, req.user, comments);
+    res.json(
+      ApiResponse.success(result, { message: `${result.count} timesheets rejected` }),
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get pending timesheets for manager/admin/HR approval.
+ *
+ * @route GET /api/timesheets/approval/pending
+ * @access Private (Manager/Admin/HR)
+ */
+const getPendingApprovals = async (req, res, next) => {
+  try {
+    // C-03: Delegate to business service (was raw db.Timesheet.findAll in controller)
+    const pendingTimesheets = await timesheetBusinessService.getPendingApprovalsForUser(req.user);
+    res.json(ApiResponse.success(pendingTimesheets));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get aggregated timesheet statistics.
+ *
+ * @route GET /api/timesheets/stats/summary
+ * @access Private
+ */
+const getStats = async (req, res, next) => {
+  try {
+    const { startDate, endDate } = req.query;
+    // C-03: Delegate to business service (was raw db.Timesheet.findAll in controller)
+    const summary = await timesheetBusinessService.getTimesheetStats(req.user, { startDate, endDate });
+    res.json(ApiResponse.success(summary));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get all timesheet history (optimized for record pages)
+ * 
+ * RBAC Rules:
+ * - Employee: sees only own timesheets
+ * - Manager: sees own + team timesheets
+ * - HR/Admin: sees all timesheets
+ * 
+ * @route GET /api/timesheets/history
+ * @access Private (RBAC)
+ */
+const getTimesheetHistory = async (req, res, next) => {
+  try {
+    const { employeeId } = req.query;
+    const user = req.user;
+    
+    const filters = {};
+    
+    // RBAC: Employee sees only own timesheets
+    if (user.role === 'employee') {
+      if (!req.employeeId) {
+        return res.status(403).json(ApiResponse.error('Employee record not found for user', 403));
+      }
+      filters.employeeId = req.employeeId;
+    }
+    // RBAC: Manager sees team timesheets
+    else if (user.role === 'manager') {
+      if (employeeId) {
+        const isTeamMember = await isInManagerTeam(req.employeeId, employeeId);
+        if (!isTeamMember) {
+          return res.status(403).json(ApiResponse.error('You can only view timesheets from your team members', 403));
+        }
+        filters.employeeId = employeeId;
+      } else {
+        const subordinates = await db.Employee.findAll({
+          where: { managerId: req.employeeId },
+          attributes: ['id']
+        });
+        filters.teamIds = [req.employeeId, ...subordinates.map(e => e.id)];
+      }
+    }
+    // RBAC: Admin/HR see all
+    else if (['admin', 'hr'].includes(user.role)) {
+      if (employeeId) {
+        filters.employeeId = employeeId;
+      }
+    }
+
+    // Resolve teamIds to Op.in for Sequelize
+    if (filters.teamIds) {
+      filters.employeeId = { [db.Sequelize.Op.in]: filters.teamIds };
+      delete filters.teamIds;
+    }
+
+    const result = await timesheetDataService.findAllWithDetails({
+      where: filters,
+      limit: 1000,
+      order: [['weekStartDate', 'DESC'], ['createdAt', 'DESC']]
+    });
+
+    const data = result?.data || result?.rows || (Array.isArray(result) ? result : []);
+    res.json(ApiResponse.success(data, 'Timesheet history retrieved'));
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAll,
   getById,
@@ -420,7 +620,14 @@ module.exports = {
   submit,
   approve,
   reject,
+  submitWeek,
   getByWeek,
   getSummary,
-  getMyTimesheets
+  getMyTimesheets,
+  bulkSubmit,
+  bulkApprove,
+  bulkReject,
+  getPendingApprovals,
+  getStats,
+  getTimesheetHistory,
 };

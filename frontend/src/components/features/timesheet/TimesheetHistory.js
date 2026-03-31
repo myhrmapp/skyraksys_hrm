@@ -53,27 +53,35 @@ dayjs.extend(relativeTime);
 
 const TimesheetHistory = ({ embedded } = {}) => {
   const theme = useTheme();
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const myEmployeeId = user?.employee?.id || user?.employeeId;
+  const canViewAll = hasRole(['admin', 'hr']);
+
+  // Determine the employeeId to query for.
+  // If the user is an admin/HR, we don't filter by employeeId unless one is specified (which it isn't in this component).
+  // For other roles, it's always their own ID.
+  const queryEmployeeId = canViewAll ? undefined : myEmployeeId;
   
   // eslint-disable-next-line no-unused-vars
   const [apiPage, setApiPage] = useState(1);
-  const pageSize = 50;
+  const pageSize = 100; // Backend max limit is 100
   
   // React Query for timesheets — paginated
   const { data: timesheetsData, isLoading: loading } = useQuery({
-    queryKey: ['timesheets', 'history', myEmployeeId, apiPage],
-    queryFn: () => timesheetService.getAll({ limit: pageSize, page: apiPage, employeeId: myEmployeeId }),
-    enabled: !!myEmployeeId,
+    queryKey: ['timesheets', 'history', queryEmployeeId, apiPage],
+    queryFn: () => timesheetService.getAll({ limit: pageSize, page: apiPage, employeeId: queryEmployeeId }),
+    enabled: !!myEmployeeId || canViewAll, // Enable if user has an ID or is an admin
     select: (response) => {
       const allTimesheets = Array.isArray(response.data) ? response.data : (response.data?.data || []);
-      const myTimesheets = allTimesheets.filter(ts => ts.employeeId === myEmployeeId || ts.employee?.id === myEmployeeId);
+      // Admin/HR see all, others see only their own
+      const myTimesheets = canViewAll 
+        ? allTimesheets
+        : allTimesheets.filter(ts => ts.employeeId === myEmployeeId || ts.employee?.id === myEmployeeId);
       return myTimesheets.sort((a, b) => new Date(b.weekStartDate) - new Date(a.weekStartDate));
     }
   });
   
   const timesheets = useMemo(() => timesheetsData || [], [timesheetsData]);
-  const [filteredTimesheets, setFilteredTimesheets] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [statusFilter, setStatusFilter] = useState('');
@@ -83,78 +91,56 @@ const TimesheetHistory = ({ embedded } = {}) => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
 
-  useEffect(() => {
-    applyFilters();
-  }, [timesheets, statusFilter, dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
+  // M-05: derive filtered + grouped data with useMemo instead of state + cascading effect
+  const filteredTimesheets = useMemo(() => {
+    let filtered = timesheets.filter((ts) => {
+      if (statusFilter && ts.status !== statusFilter) return false;
+      if (dateRange.start && dayjs(ts.weekStartDate).isBefore(dayjs(dateRange.start))) return false;
+      if (dateRange.end   && dayjs(ts.weekStartDate).isAfter(dayjs(dateRange.end)))   return false;
+      return true;
+    });
 
-  const applyFilters = () => {
-    let filtered = [...timesheets];
-
-    // Status filter
-    if (statusFilter) {
-      filtered = filtered.filter(ts => ts.status === statusFilter);
-    }
-
-    // Date range filter
-    if (dateRange.start) {
-      filtered = filtered.filter(ts => 
-        dayjs(ts.weekStartDate).isAfter(dayjs(dateRange.start).subtract(1, 'day'))
-      );
-    }
-    if (dateRange.end) {
-      filtered = filtered.filter(ts => 
-        dayjs(ts.weekStartDate).isBefore(dayjs(dateRange.end).add(1, 'day'))
-      );
-    }
-
-    // Group timesheets by week for minimalistic display
     const groupedByWeek = filtered.reduce((groups, timesheet) => {
       const weekKey = timesheet.weekStartDate;
       if (!groups[weekKey]) {
         groups[weekKey] = {
           weekStartDate: timesheet.weekStartDate,
-          weekEndDate: timesheet.weekEndDate,
-          weekNumber: timesheet.weekNumber,
-          year: timesheet.year,
-          timesheets: [],
+          weekEndDate:   timesheet.weekEndDate,
+          weekNumber:    timesheet.weekNumber,
+          year:          timesheet.year,
+          timesheets:    [],
           totalWeekHours: 0,
-          overallStatus: timesheet.status,
+          overallStatus:  timesheet.status,
           latestSubmitted: timesheet.submittedAt,
-          latestResponse: timesheet.approvedAt || timesheet.rejectedAt
+          latestResponse:  timesheet.approvedAt || timesheet.rejectedAt,
         };
       }
       groups[weekKey].timesheets.push(timesheet);
       groups[weekKey].totalWeekHours += Number(timesheet.totalHoursWorked || 0);
-      
-      // Determine overall status (prioritize: Rejected > Submitted > Approved > Draft)
-      const statusPriority = { 'Rejected': 4, 'Submitted': 3, 'Approved': 2, 'Draft': 1 };
-      if (statusPriority[timesheet.status] > statusPriority[groups[weekKey].overallStatus]) {
+
+      const statusPriority = { Rejected: 4, Submitted: 3, Approved: 2, Draft: 1 };
+      if ((statusPriority[timesheet.status] ?? 0) > (statusPriority[groups[weekKey].overallStatus] ?? 0)) {
         groups[weekKey].overallStatus = timesheet.status;
       }
-      
-      // Get latest submitted date
-      if (timesheet.submittedAt && (!groups[weekKey].latestSubmitted || 
+
+      if (timesheet.submittedAt && (!groups[weekKey].latestSubmitted ||
           new Date(timesheet.submittedAt) > new Date(groups[weekKey].latestSubmitted))) {
         groups[weekKey].latestSubmitted = timesheet.submittedAt;
       }
-
-      // Get latest response date
       const responseDate = timesheet.approvedAt || timesheet.rejectedAt;
-      if (responseDate && (!groups[weekKey].latestResponse || 
+      if (responseDate && (!groups[weekKey].latestResponse ||
           new Date(responseDate) > new Date(groups[weekKey].latestResponse))) {
         groups[weekKey].latestResponse = responseDate;
       }
-      
       return groups;
     }, {});
 
-    // Convert to array and sort by week start date (most recent first)
-    const weeklyTimesheets = Object.values(groupedByWeek)
+    return Object.values(groupedByWeek)
       .sort((a, b) => new Date(b.weekStartDate).getTime() - new Date(a.weekStartDate).getTime());
+  }, [timesheets, statusFilter, dateRange]);
 
-    setFilteredTimesheets(weeklyTimesheets);
-    setPage(0);
-  };
+  // Reset to first page whenever filters change
+  useEffect(() => { setPage(0); }, [statusFilter, dateRange]);
 
   const showAlert = (type, message) => {
     setAlert({ show: true, type, message });
@@ -177,6 +163,11 @@ const TimesheetHistory = ({ embedded } = {}) => {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
+    // M-06: advance API page when all local data is displayed and more may exist server-side
+    const totalLocalPages = Math.ceil(filteredTimesheets.length / rowsPerPage);
+    if (newPage >= totalLocalPages - 1 && timesheets.length === pageSize) {
+      setApiPage((prev) => prev + 1);
+    }
   };
 
   const handleChangeRowsPerPage = (event) => {

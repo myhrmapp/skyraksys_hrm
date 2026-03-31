@@ -42,7 +42,7 @@ import {
   Cancel as CancelIcon
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
-import http from '../../../http-common';
+import leaveTypeAdminService from '../../../services/leave-type-admin.service';
 
 const INITIAL_FORM = {
   name: '',
@@ -50,7 +50,8 @@ const INITIAL_FORM = {
   maxDaysPerYear: 20,
   carryForward: false,
   maxCarryForwardDays: 0,
-  isActive: true
+  isActive: true,
+  isPaid: true
 };
 
 const LeaveTypeManagement = () => {
@@ -69,8 +70,8 @@ const LeaveTypeManagement = () => {
   const fetchLeaveTypes = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await http.get('/admin/leave-types');
-      setLeaveTypes(response.data?.data || []);
+      const response = await leaveTypeAdminService.getAll();
+      setLeaveTypes(response?.data || []);
     } catch (error) {
       enqueueSnackbar('Failed to load leave types', { variant: 'error' });
     } finally {
@@ -97,7 +98,8 @@ const LeaveTypeManagement = () => {
       maxDaysPerYear: leaveType.maxDaysPerYear ?? 20,
       carryForward: leaveType.carryForward ?? false,
       maxCarryForwardDays: leaveType.maxCarryForwardDays ?? 0,
-      isActive: leaveType.isActive ?? true
+      isActive: leaveType.isActive ?? true,
+      isPaid: leaveType.isPaid ?? true
     });
     setFormErrors({});
     setDialogOpen(true);
@@ -143,10 +145,10 @@ const LeaveTypeManagement = () => {
     setSaving(true);
     try {
       if (selectedType) {
-        await http.put(`/admin/leave-types/${selectedType.id}`, formData);
+        await leaveTypeAdminService.update(selectedType.id, formData);
         enqueueSnackbar('Leave type updated successfully', { variant: 'success' });
       } else {
-        await http.post('/admin/leave-types', formData);
+        await leaveTypeAdminService.create(formData);
         enqueueSnackbar('Leave type created successfully', { variant: 'success' });
       }
       handleCloseDialog();
@@ -163,8 +165,8 @@ const LeaveTypeManagement = () => {
     if (!selectedType) return;
     setSaving(true);
     try {
-      const response = await http.delete(`/admin/leave-types/${selectedType.id}`);
-      enqueueSnackbar(response.data?.message || 'Leave type removed', { variant: 'success' });
+      const response = await leaveTypeAdminService.remove(selectedType.id);
+      enqueueSnackbar(response?.message || 'Leave type removed', { variant: 'success' });
       setDeleteDialogOpen(false);
       setSelectedType(null);
       fetchLeaveTypes();
@@ -266,6 +268,7 @@ const LeaveTypeManagement = () => {
                   <TableCell sx={{ fontWeight: 600 }} align="center">Days/Year</TableCell>
                   <TableCell sx={{ fontWeight: 600 }} align="center">Carry Forward</TableCell>
                   <TableCell sx={{ fontWeight: 600 }} align="center">Max Carry</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }} align="center">Paid Leave</TableCell>
                   <TableCell sx={{ fontWeight: 600 }} align="center">Status</TableCell>
                   <TableCell sx={{ fontWeight: 600 }} align="center">Actions</TableCell>
                 </TableRow>
@@ -304,6 +307,14 @@ const LeaveTypeManagement = () => {
                     </TableCell>
                     <TableCell align="center">
                       {lt.carryForward ? `${lt.maxCarryForwardDays} days` : '—'}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        label={lt.isPaid === false ? 'LOP' : 'Paid'}
+                        size="small"
+                        color={lt.isPaid === false ? 'error' : 'success'}
+                        variant="outlined"
+                      />
                     </TableCell>
                     <TableCell align="center">
                       <Chip
@@ -380,7 +391,7 @@ const LeaveTypeManagement = () => {
                 inputProps={{ min: 0, max: 365 }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={3}>
               <FormControlLabel
                 control={
                   <Switch
@@ -390,6 +401,19 @@ const LeaveTypeManagement = () => {
                   />
                 }
                 label="Active"
+                sx={{ mt: 1 }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.isPaid}
+                    onChange={(e) => handleChange('isPaid', e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label={formData.isPaid ? 'Paid Leave' : 'Unpaid (LOP)'}
                 sx={{ mt: 1 }}
               />
             </Grid>

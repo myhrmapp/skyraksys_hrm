@@ -4,6 +4,7 @@ const { Timesheet, Project, Task, Employee, User } = db;
 const { Op } = require('sequelize');
 const emailService = require('./email.service');
 const logger = require('../utils/logger');
+const { formatDateLocal } = require('../utils/dateUtils');
 
 class TimesheetService extends BaseService {
   constructor() {
@@ -112,10 +113,10 @@ class TimesheetService extends BaseService {
 
   getWeekStart(date) {
     const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-    d.setDate(diff);
-    d.setHours(0, 0, 0, 0);
+    const day = d.getUTCDay();
+    const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+    d.setUTCDate(diff);
+    d.setUTCHours(0, 0, 0, 0);
     return d;
   }
 
@@ -418,7 +419,7 @@ class TimesheetService extends BaseService {
                 const hours = parseFloat(entry[dayCol] || 0);
                 if (hours > 0) {
                     summary.totalHours += hours;
-                    activeDates.add(currentDate.toISOString().split('T')[0]);
+                    activeDates.add(formatDateLocal(currentDate));
                 }
             }
         });
@@ -575,7 +576,7 @@ class TimesheetService extends BaseService {
                     report.tasks[taskName].entries++;
 
                     // Daily breakdown
-                    const dateStr = currentDayDate.toISOString().split('T')[0];
+                    const dateStr = formatDateLocal(currentDayDate);
                     if (!report.dailyBreakdown[dateStr]) {
                       report.dailyBreakdown[dateStr] = 0;
                     }

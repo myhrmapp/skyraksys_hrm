@@ -104,3 +104,11 @@ contexttmp.md
 # Archive folders
 archive/
 archive_prod_folders_*/
+
+# Demo output (videos, audio — large binaries, not for source control)
+demo-output/
+demo-output-v3/
+demo-output-mobile/
+*.mp3
+*.mp4
+*.webm

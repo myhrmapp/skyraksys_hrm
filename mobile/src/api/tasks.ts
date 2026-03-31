@@ -1,5 +1,12 @@
 import api from './client';
 
+/** Unwrap paginated or flat array from ApiResponse.success({ data: rows, pagination }) */
+function extractArray<T>(raw: any): T[] {
+  if (Array.isArray(raw)) return raw;
+  if (raw?.data && Array.isArray(raw.data)) return raw.data;
+  return [];
+}
+
 export interface Task {
   id: string;
   name: string;
@@ -17,7 +24,12 @@ export interface Task {
 export const tasksApi = {
   getAll: async (): Promise<Task[]> => {
     const { data } = await api.get('/tasks');
-    return data.data || data;
+    return extractArray<Task>(data.data ?? data);
+  },
+
+  getMyTasks: async (): Promise<Task[]> => {
+    const { data } = await api.get('/tasks/my-tasks');
+    return extractArray<Task>(data.data ?? data);
   },
 
   update: async (id: string, updates: Partial<Task>): Promise<Task> => {

@@ -21,6 +21,7 @@ const db = require('../models');
 // Don't destructure - use db.ModelName for better testability
 const { payslipCalculationService } = require('./payslipCalculation.service');
 const { payslipTemplateService } = require('./payslipTemplate.service');
+const holidayService = require('./holiday.service');
 const { ValidationError, NotFoundError, ForbiddenError } = require('../utils/errors');
 const logger = require('../utils/logger');
 
@@ -127,6 +128,26 @@ class PayslipService {
       warnings: []
     };
 
+    // Pre-fetch timesheets and existing payslips in bulk (avoids N+1 queries)
+    const periodStart = new Date(year, month - 1, 1);
+    const periodEnd = new Date(year, month, 0);
+    const employeeIdList = employees.map(e => e.id);
+    const [timesheets, existingPayslips] = await Promise.all([
+      db.Timesheet.findAll({
+        where: {
+          employeeId: { [Op.in]: employeeIdList },
+          weekStartDate: { [Op.between]: [periodStart, periodEnd] }
+        },
+        attributes: ['employeeId', 'status']
+      }),
+      db.Payslip.findAll({
+        where: { employeeId: { [Op.in]: employeeIdList }, month, year },
+        attributes: ['employeeId', 'payslipNumber', 'status']
+      })
+    ]);
+    const timesheetMap = new Map(timesheets.map(t => [t.employeeId, t]));
+    const existingPayslipMap = new Map(existingPayslips.map(p => [p.employeeId, p]));
+
     // Validate each employee
     for (const emp of employees) {
       const issues = [];
@@ -138,30 +159,17 @@ class PayslipService {
         issues.push('Salary structure is inactive');
       }
 
-      // Check 2: Timesheet data exists (Timesheet uses weekStartDate, not month/year columns)
-      const periodStart = new Date(year, month - 1, 1);
-      const periodEnd = new Date(year, month, 0); // last day of month
-      const timesheet = await db.Timesheet.findOne({
-        where: {
-          employeeId: emp.id,
-          weekStartDate: { [Op.between]: [periodStart, periodEnd] }
-        }
-      });
+      // Check 2: Timesheet data (informational only — payroll uses leave + holiday model)
+      const timesheet = timesheetMap.get(emp.id);
 
       if (!timesheet) {
-        issues.push('No timesheet data for this period');
+        validation.warnings.push(`${emp.firstName} ${emp.lastName}: No timesheet data — payroll will use default full attendance`);
       } else if (timesheet.status?.toLowerCase() !== 'approved') {
-        issues.push(`Timesheet not approved (status: ${timesheet.status})`);
+        validation.warnings.push(`${emp.firstName} ${emp.lastName}: Timesheet not approved (status: ${timesheet.status}) — payroll will use default full attendance`);
       }
 
       // Check 3: Payslip already exists
-      const existing = await db.Payslip.findOne({
-        where: { 
-          employeeId: emp.id, 
-          month, 
-          year 
-        }
-      });
+      const existing = existingPayslipMap.get(emp.id);
 
       if (existing) {
         issues.push(`Payslip already exists (${existing.payslipNumber}, status: ${existing.status})`);
@@ -241,6 +249,18 @@ class PayslipService {
       const generatedPayslips = [];
       const errors = [];
 
+      // Pre-fetch all employees with salary structures to avoid N+1 queries
+      const allEmployees = await db.Employee.findAll({
+        where: { id: { [Op.in]: employeeIds } },
+        include: [
+          { model: db.SalaryStructure, as: 'salaryStructure', where: { isActive: true }, required: false },
+          { model: db.Department, as: 'department', required: false },
+          { model: db.Position, as: 'position', required: false }
+        ],
+        transaction
+      });
+      const employeeMap = new Map(allEmployees.map(e => [e.id, e]));
+
       for (const employeeId of employeeIds) {
         try {
           // Check if payslip already exists (with row lock to prevent concurrent duplicates)
@@ -258,28 +278,8 @@ class PayslipService {
             continue;
           }
 
-          // Fetch employee with salary structure
-          const employee = await db.Employee.findByPk(employeeId, {
-            include: [
-              {
-                model: db.SalaryStructure,
-                as: 'salaryStructure',
-                where: { isActive: true },
-                required: false
-              },
-              {
-                model: db.Department,
-                as: 'department',
-                required: false
-              },
-              {
-                model: db.Position,
-                as: 'position',
-                required: false
-              }
-            ],
-            transaction
-          });
+          // Use pre-fetched employee (avoids N+1 queries)
+          const employee = employeeMap.get(employeeId);
 
           if (!employee) {
             errors.push({
@@ -301,6 +301,14 @@ class PayslipService {
           const periodStart = new Date(year, month - 1, 1);
           const periodEnd = new Date(year, month, 0); // last day of month
           const attendance = await this._getAttendanceData(employeeId, periodStart, periodEnd);
+
+          // Apply manual overtime override if provided
+          if (options.overtimeOverrides && options.overtimeOverrides[employeeId] != null) {
+            const otHours = parseFloat(options.overtimeOverrides[employeeId]);
+            if (otHours >= 0) {
+              attendance.overtimeHours = otHours;
+            }
+          }
 
           // Calculate payslip using calculation service
           const calculation = payslipCalculationService.calculatePayslip(
@@ -441,7 +449,7 @@ class PayslipService {
       throw new ForbiddenError('Only admin or HR can edit payslips');
     }
 
-    const { earnings, deductions } = updates;
+    const { earnings, deductions, attendance } = updates;
 
     // Validation
     if (!earnings || typeof earnings !== 'object' || Object.keys(earnings).length === 0) {
@@ -494,8 +502,14 @@ class PayslipService {
         deductions: payslip.deductions,
         grossEarnings: payslip.grossEarnings,
         totalDeductions: payslip.totalDeductions,
-        netPay: payslip.netPay
+        netPay: payslip.netPay,
+        attendance: payslip.attendance
       };
+
+      // Merge attendance updates (e.g. overtimeHours) with existing attendance data
+      const updatedAttendance = attendance
+        ? { ...(payslip.attendance || {}), ...attendance }
+        : payslip.attendance;
 
       // Update payslip
       await payslip.update({
@@ -504,6 +518,7 @@ class PayslipService {
         grossEarnings,
         totalDeductions,
         netPay,
+        attendance: updatedAttendance,
         manuallyEdited: true,
         lastEditedBy: currentUser.id,
         lastEditedAt: new Date()
@@ -522,7 +537,8 @@ class PayslipService {
             deductions: deductions || {},
             grossEarnings,
             totalDeductions,
-            netPay
+            netPay,
+            attendance: updatedAttendance
           }
         },
         ipAddress,
@@ -1078,82 +1094,125 @@ class PayslipService {
   // ==================== PRIVATE HELPER METHODS ====================
 
   /**
-   * Get attendance data for payslip generation
+   * Format a Date as 'YYYY-MM-DD' using **local** time components.
+   * Avoids the timezone shift caused by toISOString() (which returns UTC).
+   * @private
+   */
+  _formatDateLocal(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  /**
+   * Get attendance data for payslip generation.
+   * Uses "default full attendance" model:
+   *   Working Days = weekdays in month − public holidays on weekdays
+   *   LOP Days     = approved unpaid-leave days that fall within the period
+   *   Payable Days = Working Days − LOP Days
    * @private
    */
   async _getAttendanceData(employeeId, startDate, endDate) {
-    const timesheets = await db.Timesheet.findAll({
+    // 1. Build holiday set for fast lookup
+    const holidayDateSet = await holidayService.getHolidayDateSet(
+      this._formatDateLocal(startDate),
+      this._formatDateLocal(endDate)
+    );
+
+    // 2. Count working days (weekdays that are NOT holidays)
+    const totalWorkingDays = this._calculateWorkingDaysInMonth(
+      startDate.getFullYear(),
+      startDate.getMonth() + 1,
+      holidayDateSet
+    );
+
+    // 3. Fetch approved leave requests that overlap this period
+    const leaveRequests = await db.LeaveRequest.findAll({
       where: {
         employeeId,
         status: 'Approved',
-        [Op.or]: [
-          { weekStartDate: { [Op.between]: [startDate, endDate] } },
-          { weekEndDate: { [Op.between]: [startDate, endDate] } },
-          {
-            [Op.and]: [
-              { weekStartDate: { [Op.lte]: startDate } },
-              { weekEndDate: { [Op.gte]: endDate } }
-            ]
-          }
-        ]
+        isCancellation: { [Op.ne]: true },
+        startDate: { [Op.lte]: endDate },
+        endDate: { [Op.gte]: startDate }
       },
-      attributes: ['weekStartDate', 'weekEndDate', 'mondayHours', 'tuesdayHours', 'wednesdayHours', 'thursdayHours', 'fridayHours', 'saturdayHours', 'sundayHours'],
-      raw: true
+      include: [{
+        model: db.LeaveType,
+        as: 'leaveType',
+        attributes: ['id', 'name', 'isPaid']
+      }]
     });
 
-    let presentDays = 0;
-    const dayOffs = ['saturday', 'sunday']; // Configurable
-    
-    timesheets.forEach(ts => {
-      const weekStart = new Date(ts.weekStartDate);
-      const weekEnd = new Date(ts.weekEndDate);
-      
-      ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach((day, index) => {
-        const hours = parseFloat(ts[`${day}Hours`] || 0);
-        if (hours > 0) {
-          const currentDate = new Date(weekStart);
-          currentDate.setDate(weekStart.getDate() + index);
-          
-          if (currentDate >= startDate && currentDate <= endDate) {
-            presentDays++;
+    // 4. Count leave days per type (paid vs unpaid), only for days within the period
+    let paidLeaveDays = 0;
+    let unpaidLeaveDays = 0;
+
+    for (const lr of leaveRequests) {
+      // Clamp leave range to pay-period boundaries
+      const leaveStart = new Date(Math.max(new Date(lr.startDate), startDate));
+      const leaveEnd = new Date(Math.min(new Date(lr.endDate), endDate));
+
+      let leaveDaysInPeriod = 0;
+
+      if (lr.isHalfDay) {
+        // Half-day leave counts as 0.5 regardless of date range
+        leaveDaysInPeriod = 0.5;
+      } else {
+        // Count weekdays (non-weekend, non-holiday) in the leave range
+        const cursor = new Date(leaveStart);
+        while (cursor <= leaveEnd) {
+          const dow = cursor.getDay();
+          const dateStr = this._formatDateLocal(cursor);
+          if (dow !== 0 && dow !== 6 && !holidayDateSet.has(dateStr)) {
+            leaveDaysInPeriod++;
           }
+          cursor.setDate(cursor.getDate() + 1);
         }
-      });
-    });
+      }
 
-    // Calculate working days (Mon-Fri) instead of calendar days
-    const totalWorkingDays = this._calculateWorkingDaysInMonth(
-      startDate.getFullYear(),
-      startDate.getMonth() + 1
-    );
-    const absentDays = Math.max(0, totalWorkingDays - presentDays);
-    const lopDays = absentDays; // LOP days = absent days (can be refined with approved leave data)
+      if (lr.leaveType && lr.leaveType.isPaid === false) {
+        unpaidLeaveDays += leaveDaysInPeriod;
+      } else {
+        paidLeaveDays += leaveDaysInPeriod;
+      }
+    }
+
+    const lopDays = unpaidLeaveDays;
+    const presentDays = totalWorkingDays - paidLeaveDays - unpaidLeaveDays;
+    const paidDays = totalWorkingDays - lopDays;
 
     return {
       totalWorkingDays,
-      presentDays,
-      paidDays: presentDays,
-      absentDays,
+      presentDays: Math.max(0, presentDays),
+      paidDays: Math.max(0, paidDays),
+      absentDays: paidLeaveDays + unpaidLeaveDays,
       lopDays,
       overtimeHours: 0,
-      leaveDays: 0 // Calculate separately from leave_requests table
+      leaveDays: paidLeaveDays + unpaidLeaveDays,
+      paidLeaveDays,
+      unpaidLeaveDays
     };
   }
 
   /**
-   * Calculate working days in a month
+   * Calculate working days in a month (weekdays minus holidays on weekdays)
+   * @param {number} year
+   * @param {number} month - 1-based
+   * @param {Set<string>} [holidayDateSet] - Set of 'YYYY-MM-DD' holiday strings
    * @private
    */
-  _calculateWorkingDaysInMonth(year, month) {
+  _calculateWorkingDaysInMonth(year, month, holidayDateSet) {
     const daysInMonth = new Date(year, month, 0).getDate();
     let workingDays = 0;
 
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month - 1, day);
       const dayOfWeek = date.getDay();
-      // Count Monday-Friday as working days (0=Sunday, 6=Saturday)
       if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        workingDays++;
+        const dateStr = this._formatDateLocal(date);
+        if (!holidayDateSet || !holidayDateSet.has(dateStr)) {
+          workingDays++;
+        }
       }
     }
 

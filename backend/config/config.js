@@ -19,6 +19,7 @@ module.exports = {
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
+    timezone: process.env.DB_TIMEZONE || '+00:00',
     logging: process.env.ENABLE_QUERY_LOGGING === 'true' ? queryLogger : false,
     benchmark: process.env.ENABLE_QUERY_LOGGING === 'true',
     pool: {
@@ -36,6 +37,7 @@ module.exports = {
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
+    timezone: process.env.DB_TIMEZONE || '+00:00',
     logging: false
   },
   
@@ -46,6 +48,7 @@ module.exports = {
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
+    timezone: process.env.DB_TIMEZONE || '+00:00',
     logging: false,
     pool: {
       max: parseInt(process.env.DB_POOL_MAX) || 10,

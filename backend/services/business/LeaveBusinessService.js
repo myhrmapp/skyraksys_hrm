@@ -123,6 +123,11 @@ class LeaveBusinessService extends BaseBusinessService {
     try {
       // Get leave request
       const leaveRequest = await this.leaveDataService.findById(id);
+
+      // Prevent self-approval
+      if (leaveRequest && leaveRequest.employeeId === (currentUser.employee?.id || currentUser.employeeId)) {
+        throw new ForbiddenError('You cannot approve your own leave request');
+      }
       
       if (!leaveRequest) {
         throw new NotFoundError('Leave request');
@@ -146,11 +151,21 @@ class LeaveBusinessService extends BaseBusinessService {
         throw new NotFoundError('Leave balance record not found');
       }
 
-      // Convert to numbers for proper comparison (DB returns strings)
+      // Re-validate: ensure balance hasn't gone negative since request was created
+      // (e.g., admin manually adjusted balance downward after leave was submitted)
+      const currentBalance = Number(leaveBalance.balance);
+      const requestedDays = Number(leaveRequest.totalDays);
+      const currentPending = Number(leaveBalance.totalPending);
+      if (currentBalance + currentPending < requestedDays) {
+        throw new BadRequestError(
+          `Insufficient leave balance to approve. Available (balance + pending): ${currentBalance + currentPending}, Required: ${requestedDays}`
+        );
+      }
+
       // Balance was already deducted at request creation time
       // Now move from pending to taken
-      leaveBalance.totalPending = Number(leaveBalance.totalPending) - Number(leaveRequest.totalDays);
-      leaveBalance.totalTaken = Number(leaveBalance.totalTaken) + Number(leaveRequest.totalDays);
+      leaveBalance.totalPending = currentPending - requestedDays;
+      leaveBalance.totalTaken = Number(leaveBalance.totalTaken) + requestedDays;
       await leaveBalance.save({ transaction });
 
       // Update leave request
@@ -283,11 +298,12 @@ class LeaveBusinessService extends BaseBusinessService {
         }, { transaction });
       } else {
         // Pending leave: cancel directly and restore balance
+        const leaveYear = new Date(leaveRequest.startDate).getFullYear();
         const leaveBalance = await db.LeaveBalance.findOne({
           where: {
             employeeId: leaveRequest.employeeId,
             leaveTypeId: leaveRequest.leaveTypeId,
-            year: new Date().getFullYear()
+            year: leaveYear
           },
           transaction,
           lock: transaction.LOCK.UPDATE
@@ -397,11 +413,53 @@ class LeaveBusinessService extends BaseBusinessService {
       }
     }
 
-    // If dates are changing, recalculate total days
-    if (data.startDate || data.endDate) {
+    // If dates or half-day are changing, recalculate total days and adjust balance
+    if (data.startDate || data.endDate || data.isHalfDay !== undefined) {
       const startDate = data.startDate || leaveRequest.startDate;
       const endDate = data.endDate || leaveRequest.endDate;
-      data.totalDays = this.calculateLeaveDays(startDate, endDate);
+      const isHalfDay = data.isHalfDay !== undefined ? data.isHalfDay : leaveRequest.isHalfDay;
+      const newTotalDays = this.calculateLeaveDays(startDate, endDate, isHalfDay);
+      const oldTotalDays = Number(leaveRequest.totalDays);
+      const daysDiff = newTotalDays - oldTotalDays;
+
+      data.totalDays = newTotalDays;
+
+      if (daysDiff !== 0) {
+        const transaction = await db.sequelize.transaction();
+        try {
+          const leaveYear = new Date(startDate).getFullYear();
+          const leaveBalance = await db.LeaveBalance.findOne({
+            where: {
+              employeeId: leaveRequest.employeeId,
+              leaveTypeId: data.leaveTypeId || leaveRequest.leaveTypeId,
+              year: leaveYear
+            },
+            transaction,
+            lock: transaction.LOCK.UPDATE
+          });
+
+          if (leaveBalance) {
+            // If requesting more days, check balance
+            if (daysDiff > 0 && Number(leaveBalance.balance) < daysDiff) {
+              throw new BadRequestError(
+                `Insufficient leave balance for updated dates. Available: ${leaveBalance.balance}, Additional needed: ${daysDiff}`
+              );
+            }
+            leaveBalance.balance = Number(leaveBalance.balance) - daysDiff;
+            leaveBalance.totalPending = Number(leaveBalance.totalPending) + daysDiff;
+            await leaveBalance.save({ transaction });
+          }
+
+          await this.leaveDataService.update(id, data, { transaction });
+          await transaction.commit();
+
+          this.log('updateLeaveRequest:success', { id });
+          return this.leaveDataService.findByIdWithDetails(id);
+        } catch (error) {
+          await transaction.rollback();
+          throw error;
+        }
+      }
     }
 
     await this.leaveDataService.update(id, data);
@@ -440,14 +498,16 @@ class LeaveBusinessService extends BaseBusinessService {
     // Normalize all to UTC midnight for consistent date-only comparison
     const startDateOnly = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
     const endDateOnly = Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate());
-    const todayDateOnly = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayDateOnly = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
     
     if (startDateOnly > endDateOnly) {
       throw new ValidationError('End date must be after or equal to start date');
     }
 
-    if (startDateOnly < todayDateOnly) {
-      throw new ValidationError('Start date cannot be in the past');
+    // Allow retroactive leave requests up to 14 days in the past
+    const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+    if (startDateOnly < todayDateOnly - fourteenDaysMs) {
+      throw new ValidationError('Start date cannot be more than 2 weeks in the past');
     }
 
     // Check for overlapping leaves
@@ -483,15 +543,22 @@ class LeaveBusinessService extends BaseBusinessService {
   }
 
   /**
-   * Calculate leave days (inclusive, excludes weekends optionally)
+   * Calculate leave days (inclusive, excludes weekends)
    * @private
    */
   calculateLeaveDays(startDate, endDate, isHalfDay = false) {
+    if (isHalfDay) return 0.5;
+
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both days
-    return isHalfDay ? diffDays - 0.5 : diffDays;
+    let count = 0;
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) { // Exclude Saturday & Sunday
+        count++;
+      }
+    }
+    return count || 1; // At minimum 1 day
   }
 }
 

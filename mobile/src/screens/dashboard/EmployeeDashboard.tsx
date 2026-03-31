@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { cardShadow } from '../../utils/shadow';
 import { useAuthStore } from '../../store/authStore';
@@ -17,6 +18,7 @@ import { attendanceApi, TodayAttendance } from '../../api/attendance';
 import StatCard from '../../components/cards/StatCard';
 
 export default function EmployeeDashboard() {
+  const navigation = useNavigation<any>();
   const user = useAuthStore((s) => s.user);
   const [stats, setStats] = useState<DashboardStats>({});
   const [attendance, setAttendance] = useState<TodayAttendance | null>(null);
@@ -69,6 +71,28 @@ export default function EmployeeDashboard() {
   const isCheckedIn = attendance?.checkedIn && !attendance?.checkOut;
   const isCheckedOut = attendance?.checkedIn && !!attendance?.checkOut;
 
+  // Format days: 12.00 → "12", 1.5 → "1.5"
+  const fmtDays = (v: unknown): string => {
+    const n = Number(v) || 0;
+    return n % 1 === 0 ? String(Math.round(n)) : n.toFixed(1);
+  };
+
+  // Compute leave balance aggregate and breakdown
+  const leaveBalanceData = (() => {
+    const lb = stats.leaveBalance;
+    if (!lb || typeof lb === 'number') {
+      return { total: typeof lb === 'number' ? lb : 0, breakdown: [] as { name: string; remaining: number; total: number }[] };
+    }
+    const entries = Object.entries(lb as Record<string, { remaining: number; total: number; used: number }>);
+    const breakdown = entries.map(([key, v]) => ({
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      remaining: Number(v?.remaining) || 0,
+      total: Number(v?.total) || 0,
+    }));
+    const total = breakdown.reduce((sum, v) => sum + v.remaining, 0);
+    return { total, breakdown };
+  })();
+
   return (
     <ScrollView
       style={styles.container}
@@ -76,13 +100,13 @@ export default function EmployeeDashboard() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
     >
       {/* Greeting */}
-      <View style={styles.greetingSection}>
+      <View testID="greeting-section" style={styles.greetingSection}>
         <Text style={styles.greeting}>{greeting},</Text>
         <Text style={styles.name}>{greetingName} 👋</Text>
       </View>
 
       {/* Check In/Out Card */}
-      <View style={styles.attendanceCard}>
+      <View testID="attendance-card" style={styles.attendanceCard}>
         <View style={styles.attendanceInfo}>
           <Text style={styles.attendanceLabel}>Today's Attendance</Text>
           {attendance?.checkIn && (
@@ -96,6 +120,7 @@ export default function EmployeeDashboard() {
           )}
         </View>
         <TouchableOpacity
+          testID="check-in-out-btn"
           style={[
             styles.checkBtn,
             isCheckedIn && styles.checkOutBtn,
@@ -116,32 +141,50 @@ export default function EmployeeDashboard() {
         </TouchableOpacity>
       </View>
 
+      {/* Leave Balance Card */}
+      <View testID="leave-balance-card" style={styles.leaveBalanceCard}>
+        <View style={styles.leaveBalanceHeader}>
+          <View style={[styles.lbIconCircle, { backgroundColor: colors.success + '18' }]}>
+            <Ionicons name="calendar-outline" size={20} color={colors.success} />
+          </View>
+          <Text style={styles.lbTitle}>Leave Balance</Text>
+          <Text style={[styles.lbTotal, { color: colors.success }]}>{fmtDays(leaveBalanceData.total)} days</Text>
+        </View>
+        {leaveBalanceData.breakdown.length > 0 ? (
+          leaveBalanceData.breakdown.map((b) => {
+            const usedPct = b.total > 0 ? Math.min(((b.total - b.remaining) / b.total) * 100, 100) : 0;
+            return (
+              <View key={b.name} style={styles.lbRow}>
+                <View style={styles.lbRowTop}>
+                  <Text style={styles.lbTypeName}>{b.name}</Text>
+                  <Text style={styles.lbTypeValue}>
+                    <Text style={{ fontWeight: '700', color: colors.text }}>{fmtDays(b.remaining)}</Text>
+                    <Text style={{ color: colors.textSecondary }}> / {fmtDays(b.total)}</Text>
+                  </Text>
+                </View>
+                <View style={styles.lbBar}>
+                  <View style={[styles.lbBarFill, { width: `${usedPct}%` as any }]} />
+                </View>
+              </View>
+            );
+          })
+        ) : (
+          <Text style={styles.lbEmpty}>No leave balance data available</Text>
+        )}
+      </View>
+
       {/* Stats Row */}
       <View style={styles.statsRow}>
         <StatCard
-          label="Leave Balance"
-          value={(() => {
-            const lb = stats.leaveBalance;
-            if (!lb) return '-';
-            if (typeof lb === 'number') return lb;
-            // lb is a LeaveBalanceMap — sum all remaining days
-            const total = Object.values(lb as Record<string, { remaining: number }>)
-              .reduce((sum, v) => sum + (v?.remaining || 0), 0);
-            return total;
-          })()}
-          icon="🏖️"
-          color={colors.success}
-        />
-        <StatCard
           label="Hours This Week"
           value={stats.currentMonth?.hoursWorked ?? stats.hoursThisWeek ?? '-'}
-          icon="⏱️"
+          iconName="time-outline"
           color={colors.info}
         />
         <StatCard
-          label="Pending Tasks"
-          value={stats.pendingRequests?.timesheets ?? stats.openTasks ?? '-'}
-          icon="📋"
+          label="Open Tasks"
+          value={stats.openTasks ?? '-'}
+          iconName="checkmark-circle-outline"
           color={colors.warning}
         />
       </View>
@@ -150,12 +193,13 @@ export default function EmployeeDashboard() {
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.actionsGrid}>
         {[
-          { icon: 'calendar-outline', label: 'Apply Leave', color: colors.success },
-          { icon: 'time-outline', label: 'Log Time', color: colors.info },
-          { icon: 'document-text-outline', label: 'Payslips', color: colors.primary },
-          { icon: 'person-outline', label: 'My Profile', color: colors.warning },
+          { icon: 'calendar-outline', label: 'Apply Leave',  color: colors.success, onPress: () => navigation.navigate('LeaveRequest') },
+          { icon: 'time-outline',     label: 'Log Time',     color: colors.info,    onPress: () => navigation.navigate('Timesheet') },
+          { icon: 'list-circle-outline', label: 'My Tasks',  color: colors.warning, onPress: () => navigation.navigate('Tasks') },
+          { icon: 'document-text-outline', label: 'Payslips', color: colors.primary, onPress: () => navigation.navigate('Payslips') },
+          { icon: 'person-outline',   label: 'My Profile',   color: colors.textSecondary, onPress: () => navigation.navigate('Profile') },
         ].map((action) => (
-          <TouchableOpacity key={action.label} style={styles.actionCard} activeOpacity={0.7}>
+          <TouchableOpacity key={action.label} style={styles.actionCard} activeOpacity={0.7} onPress={action.onPress}>
             <View style={[styles.actionIcon, { backgroundColor: action.color + '18' }]}>
               <Ionicons name={action.icon as any} size={24} color={action.color} />
             </View>
@@ -198,6 +242,53 @@ const styles = StyleSheet.create({
   doneBtn: { backgroundColor: colors.textSecondary, opacity: 0.7 },
   checkBtnText: { ...typography.label, color: '#fff' },
   statsRow: { flexDirection: 'row', marginBottom: spacing.lg },
+  leaveBalanceCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    ...cardShadow,
+  },
+  leaveBalanceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  lbIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: spacing.sm,
+  },
+  lbTitle: { ...typography.captionBold, color: colors.text, flex: 1 },
+  lbTotal: { ...typography.h3, fontWeight: '700' },
+  lbRow: {
+    paddingVertical: spacing.xs,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  lbRowTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  lbTypeName: { ...typography.caption, color: colors.textSecondary, textTransform: 'capitalize' },
+  lbTypeValue: { ...typography.caption },
+  lbBar: {
+    height: 4,
+    backgroundColor: colors.border,
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginBottom: 2,
+  },
+  lbBarFill: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.error + '80',
+  },
+  lbEmpty: { ...typography.caption, color: colors.textSecondary, textAlign: 'center', paddingVertical: spacing.sm },
   sectionTitle: { ...typography.h3, color: colors.text, marginBottom: spacing.md },
   actionsGrid: {
     flexDirection: 'row',

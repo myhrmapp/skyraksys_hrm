@@ -17,6 +17,8 @@
 const BaseBusinessService = require('./BaseBusinessService');
 const { ValidationError, NotFoundError, ForbiddenError, BadRequestError } = require('../../utils/errors');
 const db = require('../../models');
+const { Op } = require('sequelize');
+const { formatDateLocal } = require('../../utils/dateUtils');
 
 class TimesheetBusinessService extends BaseBusinessService {
   constructor(timesheetDataService, employeeDataService) {
@@ -49,9 +51,13 @@ class TimesheetBusinessService extends BaseBusinessService {
       }
       data.employeeId = currentUser.employee.id;
     }
-    // Admin/HR must specify employeeId
+    // Non-employee roles: auto-fill own employeeId when not specified
     else if (!data.employeeId) {
-      throw new BadRequestError('employeeId is required');
+      if (currentUser.employee?.id) {
+        data.employeeId = currentUser.employee.id;
+      } else {
+        throw new BadRequestError('employeeId is required');
+      }
     }
 
     // Validate business rules
@@ -92,8 +98,39 @@ class TimesheetBusinessService extends BaseBusinessService {
       );
     }
 
-    // Create entry
-    const timeEntry = await this.timesheetDataService.create(data);
+    // Upsert: check if an entry already exists for this unique key
+    // (employeeId + weekStartDate + projectId + taskId)
+    const weekStartStr = typeof data.weekStartDate === 'string'
+      ? data.weekStartDate.split('T')[0]
+      : formatDateLocal(new Date(data.weekStartDate));
+
+    const existingEntry = await db.Timesheet.findOne({
+      where: {
+        employeeId: data.employeeId,
+        weekStartDate: weekStartStr,
+        ...(data.projectId ? { projectId: data.projectId } : { projectId: { [Op.is]: null } }),
+        ...(data.taskId    ? { taskId:    data.taskId }    : { taskId:    { [Op.is]: null } }),
+      }
+    });
+
+    let timeEntry;
+    if (existingEntry) {
+      // Allow updates only on Draft or Rejected timesheets; Submitted/Approved are locked
+      if (['Submitted', 'Approved'].includes(existingEntry.status)) {
+        throw new BadRequestError(
+          `Cannot modify a ${existingEntry.status} timesheet. Please contact your manager.`
+        );
+      }
+      // Update the existing draft/rejected entry
+      const updateFields = { ...data };
+      delete updateFields.employeeId; // never overwrite ownership
+      await this.timesheetDataService.update(existingEntry.id, updateFields);
+      this.log('createTimeEntry:updated', { id: existingEntry.id });
+      timeEntry = existingEntry;
+    } else {
+      // No existing entry — create a new one
+      timeEntry = await this.timesheetDataService.create(data);
+    }
 
     this.log('createTimeEntry:success', { id: timeEntry.id });
     return this.timesheetDataService.findByIdWithDetails(timeEntry.id);
@@ -168,27 +205,17 @@ class TimesheetBusinessService extends BaseBusinessService {
     // Validate if critical fields changed
     const dayColumns = ['mondayHours', 'tuesdayHours', 'wednesdayHours', 'thursdayHours', 'fridayHours', 'saturdayHours', 'sundayHours'];
     const hasDayChange = dayColumns.some(col => data[col] !== undefined);
-    if (hasDayChange || data.weekStartDate || data.weekEndDate || data.projectId || data.taskId) {
-      await this.validateTimeEntry({ ...timeEntry.dataValues, ...data });
-    }
 
-    // Recalculate totalHoursWorked when daily hours are updated
+    // Recalculate totalHoursWorked BEFORE validateTimeEntry so the validator sees
+    // the correct new total (not the stale value from the DB record)
     if (hasDayChange) {
       const merged = { ...timeEntry.dataValues, ...data };
       const dailySum = dayColumns.reduce((sum, col) => sum + parseFloat(merged[col] || 0), 0);
       data.totalHoursWorked = Number(dailySum.toFixed(2));
     }
 
-    // Validate totalHoursWorked if explicitly provided with daily hours
-    if (data.totalHoursWorked !== undefined && !hasDayChange) {
-      const merged = { ...timeEntry.dataValues, ...data };
-      const dailySum = dayColumns.reduce((sum, col) => sum + parseFloat(merged[col] || 0), 0);
-      const computedTotal = Number(dailySum.toFixed(2));
-      if (computedTotal > 0 && Math.abs(parseFloat(data.totalHoursWorked) - computedTotal) > 0.01) {
-        throw new BadRequestError(
-          `Total hours (${data.totalHoursWorked}) does not match sum of daily hours (${computedTotal})`
-        );
-      }
+    if (hasDayChange || data.weekStartDate || data.weekEndDate || data.projectId || data.taskId) {
+      await this.validateTimeEntry({ ...timeEntry.dataValues, ...data });
     }
 
     await this.timesheetDataService.update(id, data);
@@ -260,40 +287,30 @@ class TimesheetBusinessService extends BaseBusinessService {
 
     const employeeId = currentUser.employee.id;
 
-    // Find all draft timesheets for this week (date range query)
-    const result = await this.timesheetDataService.findByWeek(weekStartDate, {
+    // Find all draft timesheets for this week for the employee (exact date match)
+    const timesheets = await this.timesheetDataService.findAll({
       where: {
         employeeId,
-        status: 'Draft'
+        weekStartDate,
+        status: 'Draft',
       },
-      limit: 1000 // Get all timesheets for the week
     });
 
-    const timesheets = result.data || [];
+    const tsArray = Array.isArray(timesheets) ? timesheets : (timesheets?.data || []);
 
-    if (!timesheets || timesheets.length === 0) {
+    if (!tsArray || tsArray.length === 0) {
       throw new NotFoundError('No draft timesheets found for this week');
     }
 
-    // Submit all timesheets
-    const updatePromises = timesheets.map(timesheet =>
-      this.timesheetDataService.update(timesheet.id, {
-        status: 'Submitted',
-        submittedAt: new Date()
-      })
+    // Single bulk UPDATE — fixes N+1 (was 2 queries × N timesheets)
+    const ids = tsArray.map((t) => t.id);
+    await db.Timesheet.update(
+      { status: 'Submitted', submittedAt: new Date() },
+      { where: { id: { [db.Sequelize.Op.in]: ids } } },
     );
 
-    await Promise.all(updatePromises);
-
-    this.log('submitWeeklyTimesheets:success', { weekStartDate, count: timesheets.length });
-    
-    // Return updated timesheets (date range query)
-    const updatedResult = await this.timesheetDataService.findByWeek(weekStartDate, {
-      where: { employeeId },
-      limit: 1000
-    });
-
-    return updatedResult.data || [];
+    this.log('submitWeeklyTimesheets:success', { weekStartDate, count: ids.length });
+    return { count: ids.length };
   }
 
   /**
@@ -426,6 +443,233 @@ class TimesheetBusinessService extends BaseBusinessService {
     this.log('deleteTimeEntry:success', { id });
   }
 
+  // --------------------------------------------------------------------------
+  // Bulk Operations
+  // --------------------------------------------------------------------------
+
+  /**
+   * Submit multiple timesheets by ID array.
+   *
+   * All IDs must belong to the authenticated employee and be in Draft status.
+   *
+   * @param {string[]} timesheetIds
+   * @param {Object}   currentUser
+   * @returns {Promise<{count: number}>}
+   */
+  async bulkSubmitTimesheets(timesheetIds, currentUser) {
+    this.log('bulkSubmitTimesheets', { count: timesheetIds.length });
+
+    const employeeId = currentUser.employee?.id || currentUser.employeeId || currentUser.id;
+    if (!employeeId) {
+      throw new ForbiddenError('Employee context is missing for timesheet submission');
+    }
+
+    const timesheets = await db.Timesheet.findAll({
+      where: {
+        id:         { [db.Sequelize.Op.in]: timesheetIds },
+        employeeId,
+        status:     'Draft',
+      },
+    });
+
+    if (timesheets.length === 0) {
+      throw new NotFoundError('No draft timesheets found');
+    }
+
+    await db.Timesheet.update(
+      { status: 'Submitted', submittedAt: new Date() },
+      { where: { id: { [db.Sequelize.Op.in]: timesheets.map((t) => t.id) } } },
+    );
+
+    this.log('bulkSubmitTimesheets:success', { count: timesheets.length });
+    return { count: timesheets.length };
+  }
+
+  /**
+   * Approve multiple submitted timesheets.
+   *
+   * @param {string[]} timesheetIds
+   * @param {Object}   currentUser
+   * @param {string}   [comments]
+   * @returns {Promise<{count: number}>}
+   */
+  async bulkApproveTimesheets(timesheetIds, currentUser, comments = '') {
+    this.log('bulkApproveTimesheets', { count: timesheetIds.length });
+
+    if (!['manager', 'admin', 'hr'].includes(currentUser.role)) {
+      throw new ForbiddenError('Only managers, HR, or admins can approve timesheets');
+    }
+
+    const approverId = currentUser.employee?.id || currentUser.id;
+
+    // C-02: Build team-scoped where clause for managers
+    const where = { id: { [db.Sequelize.Op.in]: timesheetIds }, status: 'Submitted' };
+    if (currentUser.role === 'manager') {
+      const subordinates = await db.Employee.findAll({
+        where: { managerId: approverId },
+        attributes: ['id'],
+      });
+      const teamIds = subordinates.map((e) => e.id);
+      if (teamIds.length === 0) {
+        throw new ForbiddenError('You have no direct reports to approve for');
+      }
+      where.employeeId = { [db.Sequelize.Op.in]: teamIds };
+    }
+
+    const timesheets = await db.Timesheet.findAll({ where });
+
+    if (timesheets.length === 0) {
+      throw new NotFoundError('No submitted timesheets found in your team');
+    }
+
+    await db.Timesheet.update(
+      {
+        status:           'Approved',
+        approvedBy:       approverId,
+        approvedAt:       new Date(),
+        approverComments: comments,
+      },
+      { where: { id: { [db.Sequelize.Op.in]: timesheets.map((t) => t.id) } } },
+    );
+
+    this.log('bulkApproveTimesheets:success', { count: timesheets.length });
+    return { count: timesheets.length };
+  }
+
+  /**
+   * Reject multiple submitted timesheets.
+   *
+   * @param {string[]} timesheetIds
+   * @param {Object}   currentUser
+   * @param {string}   comments  - Required by business rule
+   * @returns {Promise<{count: number}>}
+   */
+  async bulkRejectTimesheets(timesheetIds, currentUser, comments) {
+    this.log('bulkRejectTimesheets', { count: timesheetIds.length });
+
+    if (!['manager', 'admin', 'hr'].includes(currentUser.role)) {
+      throw new ForbiddenError('Only managers, HR, or admins can reject timesheets');
+    }
+
+    if (!comments || !comments.trim()) {
+      throw new BadRequestError('Rejection comments are required');
+    }
+
+    const rejectorId = currentUser.employee?.id || currentUser.id;
+
+    // C-02: Build team-scoped where clause for managers
+    const where = { id: { [db.Sequelize.Op.in]: timesheetIds }, status: 'Submitted' };
+    if (currentUser.role === 'manager') {
+      const subordinates = await db.Employee.findAll({
+        where: { managerId: rejectorId },
+        attributes: ['id'],
+      });
+      const teamIds = subordinates.map((e) => e.id);
+      if (teamIds.length === 0) {
+        throw new ForbiddenError('You have no direct reports to reject for');
+      }
+      where.employeeId = { [db.Sequelize.Op.in]: teamIds };
+    }
+
+    const timesheets = await db.Timesheet.findAll({ where });
+
+    if (timesheets.length === 0) {
+      throw new NotFoundError('No submitted timesheets found in your team');
+    }
+
+    await db.Timesheet.update(
+      {
+        status:           'Rejected',
+        rejectedBy:       rejectorId,   // C-01: now writes to the correct column
+        rejectedAt:       new Date(),
+        approverComments: comments,
+      },
+      { where: { id: { [db.Sequelize.Op.in]: timesheets.map((t) => t.id) } } },
+    );
+
+    this.log('bulkRejectTimesheets:success', { count: timesheets.length });
+    return { count: timesheets.length };
+  }
+
+  // --------------------------------------------------------------------------
+  // Query / Stats helpers (C-03 — moved from inline controller handlers)
+  // --------------------------------------------------------------------------
+
+  /**
+   * Get pending timesheets for approval, scoped to the requesting user's team.
+   *
+   * @param {Object} currentUser
+   * @returns {Promise<Array>}
+   */
+  async getPendingApprovalsForUser(currentUser) {
+    this.log('getPendingApprovalsForUser', { role: currentUser.role });
+
+    const where = { status: 'Submitted' };
+
+    if (currentUser.role === 'manager') {
+      const managerId = currentUser.employee?.id || currentUser.employeeId;
+      const subordinates = await db.Employee.findAll({
+        where:      { managerId },
+        attributes: ['id'],
+      });
+      where.employeeId = { [db.Sequelize.Op.in]: subordinates.map((e) => e.id) };
+    }
+    // Admin / HR see all submitted timesheets (no additional filter)
+
+    return db.Timesheet.findAll({
+      where,
+      include: [
+        { model: db.Employee, as: 'employee', attributes: ['id', 'employeeId', 'firstName', 'lastName', 'email'] },
+        { model: db.Project,  as: 'project',  attributes: ['id', 'name'] },
+        { model: db.Task,     as: 'task',      attributes: ['id', 'name'] },
+      ],
+      order: [['weekStartDate', 'ASC']],
+    });
+  }
+
+  /**
+   * Get aggregated timesheet statistics, optionally scoped by role.
+   *
+   * @param {Object} currentUser
+   * @param {Object} [filters] - { startDate, endDate }
+   * @returns {Promise<Object>} summary
+   */
+  async getTimesheetStats(currentUser, filters = {}) {
+    this.log('getTimesheetStats', { role: currentUser.role });
+
+    const where = {};
+
+    if (currentUser.role === 'employee') {
+      where.employeeId = currentUser.employee?.id || currentUser.employeeId;
+    }
+
+    if (filters.startDate && filters.endDate) {
+      where.weekStartDate = {
+        [db.Sequelize.Op.between]: [new Date(filters.startDate), new Date(filters.endDate)],
+      };
+    }
+
+    const rows = await db.Timesheet.findAll({
+      where,
+      attributes: [
+        'status',
+        [db.sequelize.fn('COUNT', db.sequelize.col('id')),               'count'],
+        [db.sequelize.fn('SUM',   db.sequelize.col('totalHoursWorked')), 'totalHours'],
+      ],
+      group: ['status'],
+      raw:   true,
+    });
+
+    const summary = { draft: 0, submitted: 0, approved: 0, rejected: 0, totalHours: 0 };
+    rows.forEach((row) => {
+      const key = row.status.toLowerCase();
+      if (key in summary) summary[key] = parseInt(row.count, 10) || 0;
+      summary.totalHours = Number((summary.totalHours + (parseFloat(row.totalHours) || 0)).toFixed(2));
+    });
+
+    return summary;
+  }
+
   /**
    * Validate time entry data (WEEKLY format)
    * @private
@@ -444,11 +688,14 @@ class TimesheetBusinessService extends BaseBusinessService {
       throw new ValidationError('Week end date is required');
     }
 
-    // Validate at least one day has hours
+    // Validate at least one day has hours (skip for initial blank entries)
     const dayColumns = ['mondayHours', 'tuesdayHours', 'wednesdayHours', 'thursdayHours', 'fridayHours', 'saturdayHours', 'sundayHours'];
-    const hasAnyHours = dayColumns.some(day => data[day] && parseFloat(data[day]) > 0);
-    if (!hasAnyHours) {
-      throw new ValidationError('At least one day must have hours');
+    const hasAnyDayField = dayColumns.some(day => data[day] !== undefined && data[day] !== null);
+    if (hasAnyDayField) {
+      const hasAnyHours = dayColumns.some(day => data[day] && parseFloat(data[day]) > 0);
+      if (!hasAnyHours) {
+        throw new ValidationError('At least one day must have hours');
+      }
     }
 
     // Validate each day's hours
@@ -461,13 +708,18 @@ class TimesheetBusinessService extends BaseBusinessService {
       }
     }
 
-    // Date validation - week cannot be in future
-    const weekStart = new Date(data.weekStartDate);
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    
-    if (weekStart > today) {
-      throw new ValidationError('Cannot create time entries for future weeks');
+    // Date validation - week cannot be more than 1 week in the future
+    // Use date-string comparison to avoid timezone pitfalls with new Date()
+    const weekStartStr = typeof data.weekStartDate === 'string'
+      ? data.weekStartDate.split('T')[0]
+      : formatDateLocal(new Date(data.weekStartDate));
+    const todayStr = formatDateLocal(); // YYYY-MM-DD in server local timezone
+    const nextWeekDate = new Date();
+    nextWeekDate.setDate(nextWeekDate.getDate() + 7);
+    const nextWeekStr = formatDateLocal(nextWeekDate);
+
+    if (weekStartStr > nextWeekStr) {
+      throw new ValidationError('Cannot create time entries more than 1 week in advance');
     }
 
     // Employee must exist

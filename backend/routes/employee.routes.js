@@ -117,9 +117,9 @@ router.get('/positions', async (req, res, next) => {
 /**
  * @route GET /api/employees/managers
  * @desc Get all managers for dropdown/selection
- * @access Private (Admin, HR)
+ * @access Private (Admin, HR, Manager — read-only for profile dropdowns)
  */
-router.get('/managers', isAdminOrHR, async (req, res, next) => {
+router.get('/managers', authorize('admin', 'hr', 'manager'), async (req, res, next) => {
   try {
     const managers = await db.Employee.findAll({
       include: [{

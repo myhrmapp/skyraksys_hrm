@@ -103,8 +103,8 @@ describe('TimesheetService', () => {
     it('should submit draft timesheets for a given week', async () => {
       await createWeeklyTimesheet();
 
-      // Feb 2 2026 is a Monday — use local‑time constructor
-      const weekStart = new Date(2026, 1, 2);
+      // Feb 2 2026 is a Monday — use ISO string to avoid UTC offset shifting the date
+      const weekStart = new Date('2026-02-02');
       const result = await TimesheetService.submitTimesheet(testEmployee.id, weekStart);
 
       expect(result).toBeDefined();

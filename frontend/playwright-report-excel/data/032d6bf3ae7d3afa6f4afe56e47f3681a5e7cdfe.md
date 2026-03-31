@@ -1,0 +1,186 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to main content" [ref=e4] [cursor=pointer]:
+      - /url: "#main-content"
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - generic [ref=e8]: S
+          - generic [ref=e9]: SKYRAKSYS HRM
+        - generic [ref=e10]:
+          - generic [ref=e12]: EMPLOYEE
+          - button "notifications" [ref=e13] [cursor=pointer]:
+            - img [ref=e14]
+          - button "A Alice Brown employee1@skyraksys.com" [ref=e16] [cursor=pointer]:
+            - generic [ref=e18]: A
+            - generic [ref=e19]:
+              - paragraph [ref=e20]: Alice Brown
+              - text: employee1@skyraksys.com
+            - img [ref=e22]
+    - navigation [ref=e24]:
+      - generic [ref=e26]:
+        - generic [ref=e28]:
+          - img [ref=e29]
+          - heading "SKYRAKSYS HRM" [level=6] [ref=e31]
+        - list [ref=e33]:
+          - generic [ref=e34]: Dashboard
+          - link "Overview" [ref=e35] [cursor=pointer]:
+            - /url: /employee-dashboard
+            - img [ref=e37]
+            - generic [ref=e40]: Overview
+          - generic [ref=e42]: My Stuff
+          - link "My Timesheet" [ref=e43] [cursor=pointer]:
+            - /url: /timesheets
+            - img [ref=e45]
+            - generic [ref=e49]: My Timesheet
+          - link "My Leave" [ref=e50] [cursor=pointer]:
+            - /url: /leave-requests
+            - img [ref=e52]
+            - generic [ref=e55]: My Leave
+          - link "My Payslips" [ref=e56] [cursor=pointer]:
+            - /url: /employee-payslips
+            - img [ref=e58]
+            - generic [ref=e61]: My Payslips
+          - link "My Attendance" [ref=e62] [cursor=pointer]:
+            - /url: /my-attendance
+            - img [ref=e64]
+            - generic [ref=e67]: My Attendance
+          - link "My Reviews" [ref=e68] [cursor=pointer]:
+            - /url: /employee-reviews
+            - img [ref=e70]
+            - generic [ref=e73]: My Reviews
+          - link "My Tasks" [ref=e74] [cursor=pointer]:
+            - /url: /my-tasks
+            - img [ref=e76]
+            - generic [ref=e79]: My Tasks
+          - link "My Profile" [ref=e80] [cursor=pointer]:
+            - /url: /my-profile
+            - img [ref=e82]
+            - generic [ref=e85]: My Profile
+          - generic [ref=e87]: Help
+          - link "User Guide" [ref=e88] [cursor=pointer]:
+            - /url: /user-guide
+            - img [ref=e90]
+            - generic [ref=e93]: User Guide
+        - generic [ref=e95]: v2.0
+    - main [ref=e96]:
+      - generic [ref=e97]:
+        - generic [ref=e98]:
+          - generic [ref=e99]:
+            - img [ref=e101]
+            - generic [ref=e104]:
+              - heading "Timesheets" [level=5] [ref=e105]
+              - paragraph [ref=e106]: Track time, approve team timesheets, and view history
+          - tablist [ref=e109]:
+            - tab "My Timesheet" [selected] [ref=e110] [cursor=pointer]:
+              - img [ref=e111]
+              - text: My Timesheet
+            - tab "History" [ref=e114] [cursor=pointer]:
+              - img [ref=e115]
+              - text: History
+        - tabpanel "My Timesheet" [ref=e118]:
+          - generic [ref=e120]:
+            - generic [ref=e122]:
+              - generic [ref=e123]:
+                - button [ref=e124] [cursor=pointer]:
+                  - img [ref=e125]
+                - generic [ref=e127]:
+                  - heading "Week 10" [level=5] [ref=e128]
+                  - paragraph [ref=e129]: Mar 02 – Mar 08, 2026
+                - generic "Next week" [ref=e130]:
+                  - button [ref=e131] [cursor=pointer]:
+                    - img [ref=e132]
+                - button "Today" [ref=e134] [cursor=pointer]:
+                  - img [ref=e136]
+                  - text: Today
+              - generic [ref=e140]: Approved
+            - alert [ref=e141]:
+              - img [ref=e143]
+              - generic [ref=e145]:
+                - text: This timesheet is
+                - strong [ref=e146]: approved
+                - text: . No further changes are allowed.
+            - table [ref=e148]:
+              - rowgroup [ref=e149]:
+                - row "Project Task MON TUE WED THU FRI SAT SUN Total Notes" [ref=e150]:
+                  - columnheader "Project" [ref=e151]
+                  - columnheader "Task" [ref=e152]
+                  - columnheader "MON" [ref=e153]
+                  - columnheader "TUE" [ref=e154]
+                  - columnheader "WED" [ref=e155]
+                  - columnheader "THU" [ref=e156]
+                  - columnheader "FRI" [ref=e157]
+                  - columnheader "SAT" [ref=e158]
+                  - columnheader "SUN" [ref=e159]
+                  - columnheader "Total" [ref=e160]
+                  - columnheader "Notes" [ref=e161]
+                  - columnheader [ref=e162]
+              - rowgroup [ref=e163]:
+                - row "8 8 7 8 8 39.00 HRM API endpoints development" [ref=e164]:
+                  - cell [ref=e165]:
+                    - generic [ref=e167]:
+                      - combobox [disabled] [ref=e168]: HRM System
+                      - textbox [disabled]: 1e2e6c22-d954-4298-8d37-b6c1c49549c0
+                      - img
+                      - group
+                  - cell [ref=e169]:
+                    - generic [ref=e171]:
+                      - combobox [disabled] [ref=e172]: Backend Development
+                      - textbox [disabled]: d02a0b7e-65bb-4ce8-a2ae-5a10e4e87741
+                      - img
+                      - group
+                  - cell "8" [ref=e173]:
+                    - generic [ref=e175]:
+                      - spinbutton [disabled] [ref=e176]: "8"
+                      - group
+                  - cell "8" [ref=e177]:
+                    - generic [ref=e179]:
+                      - spinbutton [disabled] [ref=e180]: "8"
+                      - group
+                  - cell "7" [ref=e181]:
+                    - generic [ref=e183]:
+                      - spinbutton [disabled] [ref=e184]: "7"
+                      - group
+                  - cell "8" [ref=e185]:
+                    - generic [ref=e187]:
+                      - spinbutton [disabled] [ref=e188]: "8"
+                      - group
+                  - cell "8" [ref=e189]:
+                    - generic [ref=e191]:
+                      - spinbutton [disabled] [ref=e192]: "8"
+                      - group
+                  - cell [ref=e193]:
+                    - generic [ref=e195]:
+                      - spinbutton [disabled] [ref=e196]
+                      - group
+                  - cell [ref=e197]:
+                    - generic [ref=e199]:
+                      - spinbutton [disabled] [ref=e200]
+                      - group
+                  - cell "39.00" [ref=e201]:
+                    - paragraph [ref=e202]: "39.00"
+                  - cell "HRM API endpoints development" [ref=e203]:
+                    - generic [ref=e205]:
+                      - textbox "Add notes..." [disabled] [ref=e206]: HRM API endpoints development
+                      - group
+                  - cell [ref=e207]
+                - row "Daily Totals 8.00 8.00 7.00 8.00 8.00 0.00 0.00 39.00" [ref=e208]:
+                  - cell "Daily Totals" [ref=e209]
+                  - cell "8.00" [ref=e210]
+                  - cell "8.00" [ref=e211]
+                  - cell "7.00" [ref=e212]
+                  - cell "8.00" [ref=e213]
+                  - cell "8.00" [ref=e214]
+                  - cell "0.00" [ref=e215]
+                  - cell "0.00" [ref=e216]
+                  - cell "39.00" [ref=e217]:
+                    - heading "39.00" [level=6] [ref=e218]
+                  - cell [ref=e219]
+  - generic [ref=e220]:
+    - img [ref=e222]
+    - button "Open Tanstack query devtools" [ref=e270] [cursor=pointer]:
+      - img [ref=e271]
+```

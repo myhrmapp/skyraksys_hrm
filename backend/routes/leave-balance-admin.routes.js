@@ -1,5 +1,7 @@
 const express = require('express');
+const Joi = require('joi');
 const { authenticateToken, authorize } = require('../middleware/auth');
+const { validateQuery } = require('../middleware/validate');
 const db = require('../models');
 const auditService = require('../services/audit.service');
 const leaveBalanceValidation = require('../services/leave-balance-validation.service');
@@ -11,12 +13,24 @@ const Employee = db.Employee;
 const { Op } = require('sequelize');
 const router = express.Router();
 
+// Query schema for leave balance list
+const leaveBalanceQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(500).default(10),
+  employeeId: Joi.string().uuid().optional(),
+  leaveTypeId: Joi.string().uuid().optional(),
+  year: Joi.number().integer().min(2000).max(2100).default(new Date().getFullYear()),
+  employeeStatus: Joi.string().valid('all', 'active', 'inactive').default('all'),
+  sortBy: Joi.string().valid('createdAt', 'updatedAt', 'year').default('createdAt'),
+  sortOrder: Joi.string().valid('ASC', 'DESC', 'asc', 'desc').default('DESC')
+});
+
 // Middleware to ensure all routes are authenticated and admin/HR only
 router.use(authenticateToken);
 router.use(authorize('admin', 'hr'));
 
 // GET all leave balances with filtering and pagination
-router.get('/', async (req, res, next) => {
+router.get('/', validateQuery(leaveBalanceQuerySchema), async (req, res, next) => {
     try {
         const { 
             page = 1, 

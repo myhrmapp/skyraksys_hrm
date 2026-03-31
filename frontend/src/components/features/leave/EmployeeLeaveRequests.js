@@ -54,22 +54,22 @@ const EmployeeLeaveRequests = () => {
 
   // Normalise leave requests
   const leaveRequests = React.useMemo(() => {
-    const raw = leaveRequestsData?.data;
+    const raw = Array.isArray(leaveRequestsData) ? leaveRequestsData : (leaveRequestsData?.data ?? leaveRequestsData);
     const arr = Array.isArray(raw) ? raw : (raw?.data ?? []);
     return [...arr].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }, [leaveRequestsData]);
 
   // Normalise leave balances into { [typeName]: { total, used, remaining } }
   const leaveBalance = React.useMemo(() => {
-    const raw = leaveBalanceData?.data;
+    const raw = Array.isArray(leaveBalanceData) ? leaveBalanceData : (leaveBalanceData?.data ?? leaveBalanceData);
     const arr = Array.isArray(raw) ? raw : (raw?.data ?? []);
     const map = {};
     arr.forEach(item => {
       const typeName = (item.leaveType?.name || item.leaveTypeName || 'other')
         .toLowerCase().replace(/\s+leave$/, '');
       map[typeName] = {
-        total: item.totalEntitled || item.total || 0,
-        used: item.used || 0,
+        total: item.totalAccrued || item.totalEntitled || item.total || 0,
+        used: item.totalTaken || item.used || 0,
         remaining: item.remaining || item.balance || 0
       };
     });
@@ -252,10 +252,10 @@ const EmployeeLeaveRequests = () => {
                               </TableCell>
                               <TableCell>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                  {statusIcons[request.status]}
+                                  {statusIcons[request.status?.toLowerCase()]}
                                   <Chip
                                     label={(request.status || 'Unknown').toUpperCase()}
-                                    color={statusColors[request.status]}
+                                    color={statusColors[request.status?.toLowerCase()]}
                                     size="small"
                                     sx={{ ml: 1 }}
                                   />

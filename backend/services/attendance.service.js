@@ -9,6 +9,7 @@ const { Op } = require('sequelize');
 const logger = require('../utils/logger');
 const db = require('../models');
 const holidayService = require('./holiday.service');
+const { formatDateLocal } = require('../utils/dateUtils');
 
 // Default work hours (used as fallback when SystemConfig has no attendance entry)
 const DEFAULT_WORK_START = '09:00';
@@ -61,7 +62,7 @@ class AttendanceService {
    */
   async checkIn(employeeId, options = {}) {
     const { source = 'web', notes, ipAddress } = options;
-    const today = new Date().toISOString().split('T')[0];
+    const today = formatDateLocal();
     const now = new Date();
 
     return db.sequelize.transaction(async (transaction) => {
@@ -121,7 +122,7 @@ class AttendanceService {
    */
   async checkOut(employeeId, options = {}) {
     const { notes, ipAddress } = options;
-    const today = new Date().toISOString().split('T')[0];
+    const today = formatDateLocal();
     const now = new Date();
 
     return db.sequelize.transaction(async (transaction) => {
@@ -183,7 +184,7 @@ class AttendanceService {
    * Get today's attendance status for an employee
    */
   async getTodayStatus(employeeId) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = formatDateLocal();
     return db.Attendance.findOne({
       where: { employeeId, date: today }
     });
@@ -242,7 +243,7 @@ class AttendanceService {
    */
   async getMonthlyReport(employeeId, year, month) {
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
-    const endDate = new Date(year, month, 0).toISOString().split('T')[0]; // Last day of month
+    const endDate = formatDateLocal(new Date(year, month, 0)); // Last day of month
 
     const records = await this.getEmployeeAttendance(employeeId, startDate, endDate);
     const holidaySet = await holidayService.getHolidayDateSet(startDate, endDate);

@@ -179,10 +179,14 @@ const devOrigins = process.env.NODE_ENV === 'production' ? [] : [
   'http://localhost:3001',
   'http://localhost:5000',
   'http://localhost:8080',
+  'http://localhost:8081',
+  'http://localhost:8082',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:3001',
   'http://127.0.0.1:5000',
-  'http://127.0.0.1:8080'
+  'http://127.0.0.1:8080',
+  'http://127.0.0.1:8081',
+  'http://127.0.0.1:8082'
 ];
 
 const allowedOrigins = [
@@ -237,7 +241,7 @@ if (process.env.RATE_LIMIT_DISABLED !== 'true') {
   // Stricter limiter for auth endpoints if configured
   if (process.env.RATE_LIMIT_AUTH_ENABLED !== 'false') {
     const authWindow = parseInt(process.env.RATE_LIMIT_AUTH_WINDOW_MS || '900000', 10); // 15m
-    const authMax = parseInt(process.env.RATE_LIMIT_AUTH_MAX || '20', 10); // 20 login attempts / 15m
+    const authMax = parseInt(process.env.RATE_LIMIT_AUTH_MAX || '5', 10); // 5 login attempts / 15m
     const authLimiter = rateLimit({
       windowMs: authWindow,
       max: authMax,
@@ -544,6 +548,18 @@ const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '0.0.0.0'; // Listen on all network interfaces
 
 if (require.main === module) {
+  // Validate required secrets before accepting any connections
+  if (process.env.NODE_ENV !== 'test') {
+    if (!process.env.JWT_SECRET) {
+      logger.error('FATAL: JWT_SECRET environment variable is not set. Set it in .env and restart.');
+      process.exit(1);
+    }
+    if (!process.env.JWT_REFRESH_SECRET) {
+      logger.error('FATAL: JWT_REFRESH_SECRET environment variable is not set. Set it in .env and restart.');
+      process.exit(1);
+    }
+  }
+
   // Only start the server if this file is run directly
   initializeDatabase().then(() => {
     const dbInfo = `PostgreSQL (${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME})`;

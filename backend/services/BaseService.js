@@ -128,9 +128,9 @@ class BaseService {
     }
   }
 
-  async bulkCreate(dataArray) {
+  async bulkCreate(dataArray, options = {}) {
     try {
-      const records = await this.model.bulkCreate(dataArray);
+      const records = await this.model.bulkCreate(dataArray, options);
       return records;
     } catch (error) {
       rethrowError('bulk creating', this.model.name, error);

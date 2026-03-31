@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider } from 'notistack';
 
@@ -119,19 +119,28 @@ export function renderWithProviders(
       return tree;
     };
   } else {
-    // UI mode: mock AuthContext via global ref
+    // UI mode: mock AuthContext via global ref.
+    // Use createMemoryRouter + RouterProvider (data router) to support hooks like
+    // useBlocker that require a data router context (not available in BrowserRouter).
     AllTheProviders = ({ children }) => {
-      return (
-        <QueryClientProvider client={qc}>
-          <SnackbarProvider maxSnack={3}>
-            <AuthContext.Provider value={auth}>
-              <BrowserRouter>
-                {children}
-              </BrowserRouter>
-            </AuthContext.Provider>
-          </SnackbarProvider>
-        </QueryClientProvider>
+      const router = createMemoryRouter(
+        [
+          {
+            path: '*',
+            element: (
+              <QueryClientProvider client={qc}>
+                <SnackbarProvider maxSnack={3}>
+                  <AuthContext.Provider value={auth}>
+                    {children}
+                  </AuthContext.Provider>
+                </SnackbarProvider>
+              </QueryClientProvider>
+            ),
+          },
+        ],
+        { initialEntries: [route] },
       );
+      return <RouterProvider router={router} />;
     };
   }
 

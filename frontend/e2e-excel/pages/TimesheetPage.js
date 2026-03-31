@@ -39,8 +39,11 @@ class TimesheetPage {
   }
 
   async clickNextWeek() {
-    await this.page.locator(this.s.nextWeek).click();
+    const btn = this.page.locator(this.s.nextWeek);
+    if (await btn.isDisabled().catch(() => true)) return false;
+    await btn.click();
     await waitForPageReady(this.page);
+    return true;
   }
 
   async clickToday() {
@@ -114,6 +117,9 @@ class TimesheetPage {
 
   async fillHours(rowIndex, day, hours) {
     const input = this.page.locator(`[data-testid="timesheet-hours-${rowIndex}-${day}"]`);
+    if (!await input.isVisible({ timeout: 2000 }).catch(() => false)) return;
+    const disabled = await input.isDisabled().catch(() => true);
+    if (disabled) return; // weekend / submitted — field locked by design
     await input.fill(String(hours));
   }
 
@@ -294,6 +300,8 @@ class TimesheetPage {
     const wrapper = this.page.locator(`[data-testid="timesheet-project-select-${rowIndex}"]`).locator('..').locator('..');
     const trigger = wrapper.locator('[role="combobox"]').first();
     if (await trigger.isVisible({ timeout: 3000 }).catch(() => false)) {
+      const ariaDisabled = await trigger.getAttribute('aria-disabled').catch(() => null);
+      if (ariaDisabled === 'true') return null; // submitted week — selects are locked
       await trigger.click();
     } else {
       // fallback: click the parent select area
@@ -353,10 +361,18 @@ class TimesheetPage {
 
   // ─── Status Detection ─────────────────────
   async getTimesheetStatusText() {
-    // Status chip near the week header
-    const chip = this.page.locator('.MuiChip-root').first();
-    if (await chip.isVisible({ timeout: 3000 }).catch(() => false)) {
-      return (await chip.textContent()).trim().toLowerCase();
+    // Try a dedicated testid first
+    const statusEl = this.page.locator('[data-testid="timesheet-status"]');
+    if (await statusEl.isVisible({ timeout: 1500 }).catch(() => false)) {
+      return (await statusEl.textContent()).trim().toLowerCase();
+    }
+    // Scan all chips and return the first one matching a known timesheet status
+    const chips = this.page.locator('.MuiChip-root');
+    const count = await chips.count();
+    const known = ['draft', 'submitted', 'approved', 'rejected', 'pending'];
+    for (let i = 0; i < count; i++) {
+      const text = (await chips.nth(i).textContent()).trim().toLowerCase();
+      if (known.includes(text)) return text;
     }
     return null;
   }
@@ -723,6 +739,67 @@ class TimesheetPage {
   async getApprovalTableRowCount() {
     const rows = this.page.locator('table tbody tr');
     return rows.count();
+  }
+  async getRejectionReason() {
+    const alert = this.page.locator('[role="alert"]').filter({ hasText: /rejected/i });
+    if (await alert.isVisible({ timeout: 3000 }).catch(() => false)) {
+      const text = await alert.textContent();
+      const match = text.match(/Reason: (.*)/);
+      return match ? match[1].trim() : text;
+    }
+    return null;
+  }
+
+  async clickHistoryRow(rowIndex) {
+    const row = this.page.locator('table tbody tr').nth(rowIndex);
+    if (await row.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await row.click();
+      await waitForPageReady(this.page);
+      return true;
+    }
+    return false;
+  }
+
+  async isSubmitDisabled() {
+    const btn = this.page.locator(this.s.submitBtn);
+    if (await btn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      return btn.isDisabled();
+    }
+    return true; // Not visible = effectively disabled
+  }
+
+  async navigateToWeek(offset = 0) {
+    await this.goto();
+    if (offset > 0) {
+      for (let i = 0; i < offset; i++) {
+        const ok = await this.clickNextWeek();
+        if (!ok) break; // next-week button disabled — future nav blocked by design
+      }
+    } else if (offset < 0) {
+      for (let i = 0; i < Math.abs(offset); i++) {
+        await this.clickPrevWeek();
+      }
+    }
+    await waitForPageReady(this.page);
+  }
+
+  /**
+   * Navigate to a past week that has no submitted timesheet (editable/empty).
+   * Starts at `startOffset` weeks back and keeps going further if still locked.
+   */
+  async gotoEditableWeek(startOffset = 20) {
+    await this.goto();
+    for (let i = 0; i < startOffset; i++) {
+      await this.clickPrevWeek();
+    }
+    await waitForPageReady(this.page);
+    // If still looks locked, go further until addTask is visible
+    for (let j = 0; j < 8; j++) {
+      const addVisible = await this.isAddTaskVisible();
+      if (addVisible) return;
+      await this.clickPrevWeek();
+      await this.page.waitForTimeout(400);
+    }
   }
 }
 

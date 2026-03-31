@@ -10,6 +10,7 @@ import AttendanceScreen from '../screens/attendance/AttendanceScreen';
 import LeaveScreen from '../screens/leave/LeaveScreen';
 import TimesheetScreen from '../screens/timesheet/TimesheetScreen';
 import PayslipListScreen from '../screens/payslips/PayslipListScreen';
+import TasksScreen from '../screens/tasks/TasksScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 
 export type TabParamList = {
@@ -18,6 +19,7 @@ export type TabParamList = {
   Leave: undefined;
   Timesheet: undefined;
   Payslips: undefined;
+  Tasks: undefined;
   Profile: undefined;
 };
 
@@ -29,6 +31,7 @@ const TAB_ICONS: Record<string, { focused: keyof typeof Ionicons.glyphMap; outli
   Leave: { focused: 'calendar', outline: 'calendar-outline' },
   Timesheet: { focused: 'time', outline: 'time-outline' },
   Payslips: { focused: 'document-text', outline: 'document-text-outline' },
+  Tasks: { focused: 'list-circle', outline: 'list-circle-outline' },
   Profile: { focused: 'person', outline: 'person-outline' },
 };
 
@@ -70,13 +73,14 @@ export default function TabNavigator() {
       <Tab.Screen
         name="Home"
         component={DashboardComponent}
-        options={{ title: 'Dashboard' }}
+        options={{ title: 'Dashboard', tabBarTestID: 'tab-home' }}
       />
-      <Tab.Screen name="Attendance" component={AttendanceScreen} />
-      <Tab.Screen name="Leave" component={LeaveScreen} />
-      <Tab.Screen name="Timesheet" component={TimesheetScreen} />
-      <Tab.Screen name="Payslips" component={PayslipListScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Attendance" component={AttendanceScreen} options={{ tabBarTestID: 'tab-attendance' }} />
+      <Tab.Screen name="Leave" component={LeaveScreen} options={{ tabBarTestID: 'tab-leave' }} />
+      <Tab.Screen name="Timesheet" component={TimesheetScreen} options={{ tabBarTestID: 'tab-timesheet' }} />
+      <Tab.Screen name="Payslips" component={PayslipListScreen} options={{ tabBarTestID: 'tab-payslips' }} />
+      <Tab.Screen name="Tasks" component={TasksScreen} options={{ tabBarTestID: 'tab-tasks' }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarTestID: 'tab-profile' }} />
     </Tab.Navigator>
   );
 }

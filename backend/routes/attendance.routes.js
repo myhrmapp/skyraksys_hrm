@@ -95,8 +95,13 @@ router.get('/', async (req, res, next) => {
  */
 router.post('/', authorize('admin', 'hr'), async (req, res, next) => {
   try {
+    const { error, value } = attendanceSchema.mark.validate(req.body, { abortEarly: false, stripUnknown: true });
+    if (error) {
+      return res.status(400).json({ success: false, message: 'Validation failed', errors: error.details.map(d => d.message) });
+    }
     const db = require('../models');
-    const record = await db.Attendance.create(req.body);
+    const { employeeId, date, status, checkIn, checkOut, notes } = value;
+    const record = await db.Attendance.create({ employeeId, date, status, checkIn, checkOut, notes, source: 'manual', approvedBy: req.user.id });
     res.status(201).json({ success: true, data: record });
   } catch (error) {
     logger.error('Error creating attendance record:', { detail: error });

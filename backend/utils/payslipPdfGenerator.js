@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const LogHelper = require('./logHelper');
 const { logger } = require('../config/logger');
+const { formatDateIN } = require('./dateUtils');
 
 /**
  * Generate HTML template for payslip PDF
@@ -14,7 +15,7 @@ const generatePayslipHTML = (employee, payslipData, companyInfo) => {
     earnings = {},
     deductions = {},
     paymentMode = 'N/A',
-    disbursementDate = new Date().toLocaleDateString('en-GB')
+    disbursementDate = formatDateIN()
   } = payslipData;
 
   // Calculate totals
@@ -239,7 +240,7 @@ const generatePayslipHTML = (employee, payslipData, companyInfo) => {
       </tr>
       <tr>
         <td>Date of Joining</td>
-        <td><strong>${employee.hireDate ? new Date(employee.hireDate).toLocaleDateString('en-GB') : 'N/A'}</strong></td>
+        <td><strong>${employee.hireDate ? formatDateIN(employee.hireDate) : 'N/A'}</strong></td>
         <td>Bank A/c No</td>
         <td><strong>${employee.bankAccountNumber || 'N/A'}</strong></td>
       </tr>

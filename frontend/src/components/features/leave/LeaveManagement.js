@@ -60,7 +60,7 @@ const ModernLeaveManagement = () => {
   const { showSuccess, showError } = useNotification(); // ✅ Already destructured
   const theme = useTheme();
   const navigate = useNavigate();
-  const { isEmployee } = useAuth();
+  const { isEmployee, isAdmin, isHR } = useAuth();
   
   // Hooks must be called first, before any conditional logic
   const [activeTab, setActiveTab] = useState(0);
@@ -73,6 +73,7 @@ const ModernLeaveManagement = () => {
     queryKey: ['leave-balances-all'],
     queryFn: () => leaveService.getAllBalances(),
     staleTime: 2 * 60 * 1000,
+    enabled: isAdmin || isHR, // admin/hr only — managers use the leave-requests view
   });
   const { data: leaveTypesData } = useLeaveTypes();
   
@@ -90,17 +91,12 @@ const ModernLeaveManagement = () => {
 
   const leaveRequests = toArray(leaveRequestsData);
   const leaveBalances = toArray(leaveBalancesData);
-  const [selectedRequest, setSelectedRequest] = useState(null);
-  const [approvalDialog, setApprovalDialog] = useState(false);
-  const [approvalAction] = useState('');
-  const [approvalComments, setApprovalComments] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [, setFilterOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null); // { id, action: 'Approved'|'Rejected' }
   const [quickRejectComments, setQuickRejectComments] = useState('');
 
@@ -191,31 +187,6 @@ const ModernLeaveManagement = () => {
     id: t.id
   }));
 
-
-  // 🚀 Use React Query mutations for approval/rejection
-  const handleApprovalAction = async () => {
-    setActionLoading(true);
-    
-    const mutation = approvalAction === 'approved' ? approveMutation : rejectMutation;
-    
-    mutation.mutate(
-      { id: selectedRequest.id, comments: approvalComments },
-      {
-        onSuccess: () => {
-          showSuccess(`Leave request ${approvalAction} successfully`);
-          setApprovalDialog(false);
-          setApprovalComments('');
-          setSelectedRequest(null);
-          setActionLoading(false);
-        },
-        onError: (error) => {
-          console.error('Error updating leave request:', error);
-          showError(error.message || `Failed to ${approvalAction} leave request`);
-          setActionLoading(false);
-        }
-      }
-    );
-  };
 
 
   const getLeaveTypeInfo = (type) => {
@@ -422,7 +393,7 @@ const ModernLeaveManagement = () => {
         <Button
           variant="outlined"
           startIcon={<FilterIcon />}
-          onClick={() => setFilterOpen(true)}
+          disabled
           sx={{ borderRadius: 2 }}
           data-testid="leave-mgmt-filters-button"
         >
@@ -848,52 +819,6 @@ const ModernLeaveManagement = () => {
               {activeTab === 1 && <LeaveBalancesTab />}
             </Box>
           </Paper>
-
-          {/* Approval Dialog */}
-          <Dialog open={approvalDialog} onClose={() => setApprovalDialog(false)} maxWidth="sm" fullWidth>
-            <DialogTitle>
-              {approvalAction === 'approved' ? 'Approve' : 'Reject'} Leave Request
-            </DialogTitle>
-            <DialogContent>
-              {selectedRequest && (
-                <Box>
-                  <Typography variant="body1" sx={{ mb: 2 }}>
-                    <strong>Employee:</strong> {selectedRequest.employeeName}
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 2 }}>
-                    <strong>Leave Type:</strong> {getLeaveTypeInfo(selectedRequest.leaveType).label}
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 2 }}>
-                    <strong>Duration:</strong> {selectedRequest.startDate} to {selectedRequest.endDate} ({selectedRequest.days} days)
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 3 }}>
-                    <strong>Reason:</strong> {selectedRequest.reason}
-                  </Typography>
-
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={3}
-                    label="Comments"
-                    value={approvalComments}
-                    onChange={(e) => setApprovalComments(e.target.value)}
-                    placeholder={`Add comments for ${approvalAction === 'approved' ? 'approval' : 'rejection'}...`}
-                  />
-                </Box>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setApprovalDialog(false)} variant="outlined" disabled={actionLoading}>Cancel</Button>
-              <Button
-                variant="outlined"
-                color={approvalAction === 'approved' ? 'success' : 'error'}
-                onClick={handleApprovalAction}
-                disabled={actionLoading}
-              >
-                {actionLoading ? 'Processing...' : (approvalAction === 'approved' ? 'Approve' : 'Reject')}
-              </Button>
-            </DialogActions>
-          </Dialog>
 
           {/* Quick Action Confirmation Dialog */}
           <Dialog

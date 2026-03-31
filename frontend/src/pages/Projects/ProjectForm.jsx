@@ -168,7 +168,7 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
             <InputLabel>Status</InputLabel>
             <Select
               name="status"
-              value={formData.status}
+              value={["Planning","Active","On Hold","Completed","Cancelled"].includes(formData.status) ? formData.status : ""}
               onChange={handleChange}
               label="Status"
               inputProps={{ 'data-testid': 'project-status-select' }}
@@ -199,7 +199,7 @@ const ProjectForm = ({ project, onSave, onCancel }) => {
             <InputLabel>Project Manager</InputLabel>
             <Select
               name="managerId"
-              value={formData.managerId}
+              value={employees.some(emp => emp.id === formData.managerId) ? formData.managerId : ""}
               onChange={handleChange}
               label="Project Manager"
               inputProps={{ 'data-testid': 'project-manager-select' }}
