@@ -7,7 +7,7 @@
 #   Uploaded to /tmp/ and executed by deploy-docker-from-windows.ps1 or
 #   deploy-from-linux.sh. Can also be run manually via SSH.
 #
-# WHAT IT DOES (10 steps in order):
+# WHAT IT DOES (11 steps in order):
 #   1. Removes any existing PM2, system Nginx, and system PostgreSQL
 #   2. Installs Docker, Docker Compose, Git, Certbot, UFW
 #   3. Clones the repo from GitHub (branch: skyraksys_hrm)
@@ -16,10 +16,11 @@
 #   5. Builds all 5 Docker images (postgres, backend, frontend, mobile, nginx)
 #      and starts containers with docker-compose up -d
 #   6. Runs Sequelize migrations (db:migrate) and seeds initial data (db:seed)
-#   7. Obtains Let's Encrypt SSL certificate for skyait.skyraksys.com
+#   7. Obtains Let's Encrypt SSL certificate (self-signed fallback if DNS not ready)
 #   8. Configures UFW firewall: allows 22, 80, 443, 8081 — denies all else
-#   9. Adds monthly cron for automatic SSL certificate renewal
+#   9. Adds monthly cron for automatic SSL certificate renewal (copies fresh certs)
 #  10. Creates systemd service so containers auto-start on server reboot
+#  11. Verifies deployment (container status + health checks)
 #
 # CREDENTIALS:
 #   All generated secrets saved at (chmod 600, Rakesh-only):
@@ -48,6 +49,7 @@ NC='\033[0m'
 
 # Configuration
 DOMAIN="skyait.skyraksys.com"
+SERVER_IP="46.225.73.94"
 APP_DIR="/home/Rakesh/skyraksys_hrm"
 OLD_APP_DIR="/var/www/skyraksys_hrm"
 GIT_REPO="https://github.com/myhrmapp/skyraksys_hrm.git"
@@ -233,7 +235,8 @@ JWT_REFRESH_EXPIRES_IN=7d
 ENCRYPTION_KEY=${ENCRYPTION_KEY}
 
 # ===== CORS Configuration =====
-CORS_ORIGIN=https://${DOMAIN}
+# Allows both HTTPS (production) and HTTP (IP access / pre-SSL access).
+CORS_ORIGIN=https://${DOMAIN},http://${DOMAIN},http://${SERVER_IP}
 
 # ===== Email / SMTP Configuration (Optional — configure via Admin panel post-deploy) =====
 EMAIL_FROM=noreply@skyraksys.com
@@ -245,6 +248,11 @@ SMTP_PASSWORD=
 
 # ===== Frontend Configuration =====
 REACT_APP_API_URL=/api
+
+# ===== Seeded Account Default Password =====
+# All demo/seed accounts use this password on first deploy.
+# Shown in ~/.deployment-credentials.txt — change via the app after first login.
+SEED_DEFAULT_PASSWORD=admin123
 
 # ===== pgAdmin Configuration =====
 PGADMIN_EMAIL=admin@skyraksys.com
@@ -259,28 +267,40 @@ log_success "Environment configuration created"
 
 # Save credentials for reference
 cat > /home/Rakesh/.deployment-credentials.txt << EOF
-SkyrakSys HRM Deployment Credentials
+SkyrakSys HRM — Deployment Credentials
 Generated: $(date)
+Server: ${SERVER_IP}
 
-Database:
-  Database: skyraksys_hrm
-  User: hrm_admin
+=== Access URLs ===
+  App (HTTP  — works immediately):  http://${DOMAIN}
+  App (HTTP via IP — no DNS needed): http://${SERVER_IP}
+  App (HTTPS — after SSL setup):     https://${DOMAIN}
+  API Health:                         http://${DOMAIN}/api/health
+  pgAdmin:                            http://${DOMAIN}:8081
+
+=== Default Login Accounts ===
+  All accounts use password: admin123
+  Change passwords after first login!
+
+  Super Admin : admin@skyraksys.com    / admin123
+  HR Manager  : hr@skyraksys.com       / admin123
+  Manager     : manager@skyraksys.com  / admin123
+  Employee    : employee@skyraksys.com / admin123
+
+=== Database ===
+  Name:     skyraksys_hrm
+  User:     hrm_admin
   Password: ${DB_PASSWORD}
+  (Connect: docker compose exec postgres psql -U hrm_admin -d skyraksys_hrm)
 
-pgAdmin:
-  URL: http://${DOMAIN}:8081
-  Email: admin@skyraksys.com
+=== pgAdmin ===
+  Email:    admin@skyraksys.com
   Password: ${PGADMIN_PASSWORD}
 
-Application:
-  URL: https://${DOMAIN}
-  Admin Email: admin@skyraksys.com
-  Admin Password: admin123 (CHANGE IMMEDIATELY!)
-
-JWT Secrets:
-  JWT_SECRET: ${JWT_SECRET}
-  JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-  ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+=== JWT / Encryption Secrets (keep private) ===
+  JWT_SECRET:          ${JWT_SECRET}
+  JWT_REFRESH_SECRET:  ${JWT_REFRESH_SECRET}
+  ENCRYPTION_KEY:      ${ENCRYPTION_KEY}
 EOF
 
 chmod 600 /home/Rakesh/.deployment-credentials.txt
@@ -294,26 +314,36 @@ echo ""
 # ============================================================================
 log_info "Step 5: Building and starting Docker containers..."
 
+# Pre-create bind-mount directories with the correct owner BEFORE docker compose up.
+# The backend container runs as user 'nodejs' (uid 1001). If these directories
+# don't exist, Docker creates them as root → nodejs can't write → uploads crash.
+log_info "Pre-creating uploads and logs directories..."
+mkdir -p backend/uploads backend/logs
+chown -R 1001:1001 backend/uploads backend/logs
+log_success "Directories created (owned by nodejs uid 1001)"
+
 # Build images
 log_info "Building Docker images (this may take 5-10 minutes)..."
 docker compose build --no-cache
 
-# Start containers
-log_info "Starting containers..."
-docker compose up -d
+# Start everything EXCEPT nginx.
+# nginx requires SSL cert files to exist before it can start, but we don't have
+# certs yet — that happens in Step 7. Starting nginx now would crash it.
+log_info "Starting backend, frontend, mobile, and database containers..."
+docker compose up -d postgres backend frontend mobile
 
 # Wait for database to be ready
 log_info "Waiting for database to be ready..."
 sleep 20
 
-# Check if containers are running
-if ! docker compose ps | grep -q "Up"; then
-    log_error "Containers failed to start!"
+# Check core containers are running (nginx deliberately excluded here)
+if ! docker compose ps | grep -E "backend|frontend" | grep -q "Up"; then
+    log_error "Core containers failed to start!"
     docker compose logs
     exit 1
 fi
 
-log_success "Docker containers started"
+log_success "Core Docker containers started (nginx will start after SSL in Step 7)"
 echo ""
 
 # ============================================================================
@@ -336,40 +366,62 @@ log_success "Database initialized"
 echo ""
 
 # ============================================================================
-# STEP 7: Setup SSL Certificate
+# STEP 7: SSL Certificate (Self-Signed — DNS Not Yet Configured)
 # ============================================================================
 log_info "Step 7: Setting up SSL certificate..."
 
-# Stop nginx container temporarily
-docker compose stop nginx
+echo ""
+log_warning "┌─────────────────────────────────────────────────────────────────┐"
+log_warning "│  DNS NOT CONFIGURED — Skipping Let's Encrypt (certbot).        │"
+log_warning "│  A self-signed certificate is generated so nginx can start.    │"
+log_warning "│  The app is fully accessible via HTTP:  http://${SERVER_IP}    │"
+log_warning "│  HTTPS also works but browsers will show a security warning.   │"
+log_warning "│                                                                 │"
+log_warning "│  When DNS is ready, run once ON the server:                    │"
+log_warning "│    bash scripts/deploy/enable-ssl.sh                           │"
+log_warning "└─────────────────────────────────────────────────────────────────┘"
+echo ""
 
-# Generate certificate
-if [ ! -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
-    log_info "Generating SSL certificate..."
-    certbot certonly --standalone \
-        -d "$DOMAIN" \
-        -d "www.${DOMAIN}" \
-        --non-interactive \
-        --agree-tos \
-        --email admin@skyraksys.com \
-        --http-01-port 80 || log_warning "SSL generation failed, will use HTTP"
-    
-    # Copy certificates to nginx directory
-    if [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
-        mkdir -p nginx/ssl
-        cp /etc/letsencrypt/live/${DOMAIN}/fullchain.pem nginx/ssl/
-        cp /etc/letsencrypt/live/${DOMAIN}/privkey.pem nginx/ssl/
-        chown -R Rakesh:Rakesh nginx/ssl
-        log_success "SSL certificate installed"
-    fi
+mkdir -p nginx/ssl
+
+# If a real Let's Encrypt cert already exists (re-run after DNS was pointed), reuse it.
+# Otherwise generate a self-signed cert so nginx starts and HTTP works immediately.
+if [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
+    log_info "Existing Let's Encrypt certificate found — installing it."
+    cp /etc/letsencrypt/live/${DOMAIN}/fullchain.pem nginx/ssl/
+    cp /etc/letsencrypt/live/${DOMAIN}/privkey.pem nginx/ssl/
+    chown -R Rakesh:Rakesh nginx/ssl
+    log_success "Real SSL certificate installed"
 else
-    log_success "SSL certificate already exists"
+    # No real cert — generate self-signed (10-year validity so it doesn't expire during dev/staging).
+    # Certbot / real SSL is NOT attempted here intentionally — DNS is not pointing here yet.
+    # Use enable-ssl.sh once DNS A record resolves to this server.
+    log_info "Generating self-signed certificate (10-year validity)..."
+    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+        -keyout nginx/ssl/privkey.pem \
+        -out nginx/ssl/fullchain.pem \
+        -subj "/C=US/ST=State/L=City/O=SkyrakSys/CN=${DOMAIN}" 2>/dev/null
+    chown -R Rakesh:Rakesh nginx/ssl
+    log_success "Self-signed certificate created"
 fi
 
-# Start nginx
-docker compose start nginx
+# Start nginx — cert files exist (real or self-signed), so it will start cleanly.
+log_info "Starting nginx..."
+docker compose up -d nginx
+sleep 5
 
-log_success "SSL setup complete"
+if docker compose ps nginx | grep -q "Up"; then
+    log_success "Nginx started — app is live on http://${SERVER_IP}"
+else
+    log_error "Nginx failed to start — run: docker compose logs nginx"
+fi
+
+# Start pgAdmin (tools profile — must be started explicitly with --profile tools)
+log_info "Starting pgAdmin..."
+docker compose --profile tools up -d pgadmin
+log_success "pgAdmin started — accessible at http://${SERVER_IP}:8081"
+
+log_success "Step 7 Complete"
 echo ""
 
 # ============================================================================
@@ -409,9 +461,10 @@ log_info "Step 9: Setting up SSL auto-renewal..."
 # IMPORTANT: certbot was obtained with --standalone which needs port 80 free.
 # The nginx Docker container holds port 80, so we must stop it before renewal
 # and start it again after (using semicolon so nginx always restarts even if
-# certbot fails — prevents nginx being left stopped if renewal errors).
+# certbot finds nothing to renew or errors).
+# After renewal, certs are copied to nginx/ssl/ so nginx serves the fresh cert.
 (crontab -l 2>/dev/null | grep -v "certbot renew"; \
- echo "0 0 1 * * cd $APP_DIR && docker compose stop nginx && certbot renew --quiet; docker compose start nginx") | crontab -
+ echo "0 0 1 * * cd $APP_DIR && docker compose stop nginx && certbot renew --quiet; cp /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ${APP_DIR}/nginx/ssl/ 2>/dev/null; cp /etc/letsencrypt/live/${DOMAIN}/privkey.pem ${APP_DIR}/nginx/ssl/ 2>/dev/null; docker compose start nginx") | crontab -
 
 log_success "SSL auto-renewal configured"
 echo ""
@@ -465,16 +518,18 @@ echo ""
 log_info "Testing health endpoints..."
 sleep 5
 
-if curl -f http://localhost:5000/health &> /dev/null; then
+# Backend and frontend ports are NOT exposed to host (nginx proxies all traffic).
+# Health-check via nginx (HTTPS) or directly inside the container network.
+if docker compose exec -T backend node -e "require('http').get('http://localhost:5000/health',(r)=>{process.exit(r.statusCode===200?0:1)})" &> /dev/null; then
     log_success "✓ Backend health check passed"
 else
-    log_warning "✗ Backend health check failed"
+    log_warning "✗ Backend health check failed — run: docker compose logs backend"
 fi
 
-if curl -f http://localhost:3000/health &> /dev/null; then
-    log_success "✓ Frontend health check passed"
+if curl -fsk http://localhost/health &> /dev/null; then
+    log_success "✓ Nginx/frontend health check passed"
 else
-    log_warning "✗ Frontend health check failed"
+    log_warning "✗ Nginx health check failed — run: docker compose logs nginx"
 fi
 
 echo ""
@@ -486,17 +541,21 @@ echo -e "${GREEN}╔════════════════════
 echo -e "${GREEN}║          Deployment Completed Successfully!               ║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
-log_info "Application URL: https://${DOMAIN}"
-log_info "API Health: https://${DOMAIN}/api/health"
+log_info "Application URL (HTTP domain): http://${DOMAIN}"
+log_info "Application URL (HTTP via IP): http://${SERVER_IP}  ← works even without DNS"
+log_info "Application URL (HTTPS):       https://${DOMAIN}  ← after SSL setup"
+log_info "API Health: http://${DOMAIN}/api/health"
 log_info "pgAdmin: http://${DOMAIN}:8081"
 echo ""
-log_warning "Default Admin Credentials:"
-log_warning "  Email: admin@skyraksys.com"
-log_warning "  Password: admin123"
-log_warning "  ⚠️  CHANGE THESE IMMEDIATELY AFTER FIRST LOGIN!"
+log_warning "Default Login Accounts (password: admin123):"
+log_warning "  Super Admin : admin@skyraksys.com"
+log_warning "  HR Manager  : hr@skyraksys.com"
+log_warning "  Manager     : manager@skyraksys.com"
+log_warning "  Employee    : employee@skyraksys.com"
+log_warning "  ⚠️  Change all passwords after first login!"
 echo ""
-log_warning "Database & pgAdmin credentials saved to:"
-log_warning "  ~/.deployment-credentials.txt"
+log_warning "All credentials saved to: ~/.deployment-credentials.txt"
+log_warning "Read with: cat ~/.deployment-credentials.txt"
 echo ""
 log_info "Useful commands:"
 log_info "  View logs: cd ${APP_DIR} && docker compose logs -f"

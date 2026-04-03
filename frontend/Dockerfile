@@ -25,14 +25,15 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy built app from build stage
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Create non-root user
-RUN addgroup -g 1001 -S nginx && \
-    adduser -S nginx -u 1001 && \
-    chown -R nginx:nginx /usr/share/nginx/html && \
+# nginx:alpine already ships with a non-root 'nginx' user (uid 101, gid 101).
+# Do NOT call addgroup/adduser — 'nginx' already exists and re-creating it
+# exits with error code 1, breaking the build.
+# Just set ownership on the paths the nginx worker process writes to.
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chown -R nginx:nginx /var/cache/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
     touch /var/run/nginx.pid && \
-    chown -R nginx:nginx /var/run/nginx.pid
+    chown nginx:nginx /var/run/nginx.pid
 
 # Switch to non-root user
 USER nginx

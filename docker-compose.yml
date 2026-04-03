@@ -8,11 +8,15 @@ services:
       POSTGRES_USER: ${DB_USER:-hrm_admin}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_HOST_AUTH_METHOD: md5
-    ports:
-      - "${DB_PORT:-5432}:5432"
+    # DB port intentionally NOT exposed to host — access via Docker network only.
+    # To connect from host for debugging: docker compose exec postgres psql ...
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init:/docker-entrypoint-initdb.d
+      # Only run the extensions init script on first container start.
+      # schema_dump.sql lives in the same folder but must NOT be auto-run:
+      # it creates all tables, which would conflict with Sequelize migrations.
+      # Migrations are run explicitly by the deploy script after the DB is up.
+      - ./database/init/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     restart: unless-stopped
     networks:
       - hrm_network
@@ -46,15 +50,16 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
-      CORS_ORIGIN: ${CORS_ORIGIN:-https://skyait.skyraksys.com}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://skyait.skyraksys.com,http://skyait.skyraksys.com,http://46.225.73.94}
+      TRUST_PROXY: "true"
+      SEED_DEFAULT_PASSWORD: ${SEED_DEFAULT_PASSWORD:-admin123}
       EMAIL_FROM: ${EMAIL_FROM:-noreply@skyraksys.com}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_SECURE: ${SMTP_SECURE:-false}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-    ports:
-      - "5000:5000"
+    # Backend port intentionally NOT exposed to host — nginx proxies all traffic.
     volumes:
       - ./backend/uploads:/app/uploads
       - ./backend/logs:/app/logs
@@ -84,8 +89,7 @@ services:
       args:
         REACT_APP_API_URL: ${REACT_APP_API_URL:-/api}
     container_name: skyraksys_hrm_frontend
-    ports:
-      - "3000:3000"
+    # Frontend port intentionally NOT exposed to host — nginx proxies all traffic.
     depends_on:
       backend:
         condition: service_healthy
@@ -110,8 +114,7 @@ services:
       context: ./mobile
       dockerfile: Dockerfile
     container_name: skyraksys_hrm_mobile
-    ports:
-      - "3001:3001"
+    # Mobile port intentionally NOT exposed to host — nginx proxies all traffic.
     depends_on:
       backend:
         condition: service_healthy

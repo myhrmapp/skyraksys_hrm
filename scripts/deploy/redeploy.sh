@@ -40,7 +40,7 @@ echo "=========================================="
 cd "$APP_DIR"
 
 # --- Pull latest code ---
-echo "[1/4] Pulling latest code..."
+echo "[1/5] Pulling latest code..."
 git pull origin skyraksys_hrm
 echo "Code updated."
 
@@ -65,7 +65,8 @@ $COMPOSE ps
 echo ""
 echo "================================================"
 echo "  Redeploy complete!"
-echo "  Web:    https://skyait.skyraksys.com"
-echo "  API:    https://skyait.skyraksys.com/api"
-echo "  Health: https://skyait.skyraksys.com/health"
+echo "  Web (HTTP via IP):  http://46.225.73.94"
+echo "  Web (HTTP domain):  http://skyait.skyraksys.com"
+echo "  Web (HTTPS):        https://skyait.skyraksys.com"
+echo "  API health:         http://46.225.73.94/api/health"
 echo "================================================"

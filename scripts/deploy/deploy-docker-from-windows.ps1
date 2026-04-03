@@ -28,8 +28,20 @@ $ErrorActionPreference = "Stop"
 # Configuration
 $SERVER_IP = "46.225.73.94"
 $SERVER_USER = "Rakesh"
-$SERVER_PASSWORD = 't]%eCt!49!0>'
 $DOMAIN = "skyait.skyraksys.com"
+
+# SERVER_PASSWORD is read from the environment variable SKYRAKSYS_SSH_PASSWORD.
+# Set it before running this script:
+#   $env:SKYRAKSYS_SSH_PASSWORD = "your_password"
+#   .\scripts\deploy\deploy-docker-from-windows.ps1
+# Never commit a real password into source code.
+if (-not $env:SKYRAKSYS_SSH_PASSWORD) {
+    Write-Host "[ERROR] Environment variable SKYRAKSYS_SSH_PASSWORD is not set." -ForegroundColor Red
+    Write-Host "  Set it first:  `$env:SKYRAKSYS_SSH_PASSWORD = 'your_server_password'" -ForegroundColor Yellow
+    Write-Host "  Then re-run this script." -ForegroundColor Yellow
+    exit 1
+}
+$SERVER_PASSWORD = $env:SKYRAKSYS_SSH_PASSWORD
 
 # Colors
 function Write-Info { Write-Host "[INFO] $args" -ForegroundColor Cyan }
@@ -110,12 +122,21 @@ Write-Info "Step 4: Verifying deployment..."
 Start-Sleep -Seconds 10
 
 try {
-    $response = Invoke-WebRequest -Uri "https://$DOMAIN/api/health" -UseBasicParsing -TimeoutSec 10
+    $response = Invoke-WebRequest -Uri "http://$SERVER_IP/api/health" -UseBasicParsing -TimeoutSec 10
     if ($response.StatusCode -eq 200) {
-        Write-Success "✓ API health check passed"
+        Write-Success "✓ API health check passed (HTTP via IP)"
     }
 } catch {
-    Write-Warning "✗ API health check failed (SSL may still be configuring)"
+    # Also try HTTPS domain in case SSL finished
+    try {
+        $response2 = Invoke-WebRequest -Uri "https://$DOMAIN/api/health" -UseBasicParsing -TimeoutSec 10
+        if ($response2.StatusCode -eq 200) {
+            Write-Success "✓ API health check passed (HTTPS)"
+        }
+    } catch {
+        Write-Warning "✗ API health check failed — the app may still be starting up."
+        Write-Warning "  Try manually: http://$SERVER_IP  or  http://$DOMAIN"
+    }
 }
 
 # Final output
@@ -124,17 +145,23 @@ Write-Host "╔═════════════════════�
 Write-Host "║          Deployment Completed Successfully!               ║" -ForegroundColor Green
 Write-Host "╚═══════════════════════════════════════════════════════════╝" -ForegroundColor Green
 Write-Host ""
-Write-Info "Application URL: https://$DOMAIN"
-Write-Info "API Health: https://$DOMAIN/api/health"
+Write-Info "Application URL (HTTP via IP — works immediately): http://$SERVER_IP"
+Write-Info "Application URL (HTTP domain):                      http://$DOMAIN"
+Write-Info "Application URL (HTTPS — after SSL):               https://$DOMAIN"
+Write-Info "API Health: http://$SERVER_IP/api/health"
 Write-Info "pgAdmin: http://$DOMAIN:8081"
 Write-Host ""
-Write-Warning "Default Admin Credentials:"
-Write-Warning "  Email: admin@skyraksys.com"
-Write-Warning "  Password: admin123"
-Write-Warning "  WARNING: CHANGE THESE IMMEDIATELY AFTER FIRST LOGIN!"
+Write-Warning "Default Login Accounts (password: admin123):"
+Write-Warning "  Super Admin : admin@skyraksys.com"
+Write-Warning "  HR Manager  : hr@skyraksys.com"
+Write-Warning "  Manager     : manager@skyraksys.com"
+Write-Warning "  Employee    : employee@skyraksys.com"
+Write-Warning "  WARNING: Change all passwords after first login!"
+Write-Host ""
+Write-Info "All credentials saved on server: cat ~/.deployment-credentials.txt"
 Write-Host ""
 Write-Info "To view server logs:"
-Write-Info "  plink -ssh -batch -pw $SERVER_PASSWORD ${SERVER_USER}@${SERVER_IP} 'cd /home/Rakesh/skyraksys_hrm && sudo docker-compose logs -f'"
+Write-Info "  plink -ssh -batch -pw `$SERVER_PASSWORD ${SERVER_USER}@${SERVER_IP} 'cd /home/Rakesh/skyraksys_hrm && docker compose logs -f'"
 Write-Host ""
 Write-Success "Deployment script completed!"
 Write-Host ""
