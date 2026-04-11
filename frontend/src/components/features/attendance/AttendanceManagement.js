@@ -127,7 +127,14 @@ export default function AttendanceManagement() {
       return;
     }
     try {
-      await attendanceService.markAttendance(markForm);
+      // Convert datetime-local strings to ISO format so the backend receives
+      // timezone-aware timestamps regardless of server locale
+      const payload = {
+        ...markForm,
+        checkIn: markForm.checkIn ? new Date(markForm.checkIn).toISOString() : markForm.checkIn,
+        checkOut: markForm.checkOut ? new Date(markForm.checkOut).toISOString() : markForm.checkOut,
+      };
+      await attendanceService.markAttendance(payload);
       enqueueSnackbar('Attendance marked successfully', { variant: 'success' });
       setMarkDialogOpen(false);
       fetchDailyAttendance();

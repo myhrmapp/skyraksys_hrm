@@ -4,7 +4,7 @@
  * Workflow-driven payslip generation, approval, and payment processing
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -97,6 +97,11 @@ const ModernPayrollManagement = () => {
 
   // Search — payslips table
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
   // Search/filter — employee picker (Generate tab)
   const [empSearch, setEmpSearch] = useState('');
   const [empDept, setEmpDept] = useState('');
@@ -1296,8 +1301,8 @@ const ModernPayrollManagement = () => {
               const filteredPayslips = payslips
                 .filter(p => statusFilter ? p.status === statusFilter : true)
                 .filter(p => {
-                  if (!searchQuery) return true;
-                  const query = searchQuery.toLowerCase();
+                  if (!debouncedSearchQuery) return true;
+                  const query = debouncedSearchQuery.toLowerCase();
                   const empId = (p.employee?.employeeId || '').toLowerCase();
                   const firstName = (p.employee?.firstName || '').toLowerCase();
                   const lastName = (p.employee?.lastName || '').toLowerCase();

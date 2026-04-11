@@ -229,7 +229,7 @@ const EmployeeDashboard = () => {
             icon={<PersonIcon sx={{ fontSize: 28, color: 'info.main' }} />}
             title="Profile"
             description="My details"
-            onClick={() => navigate('/employee-profile')}
+            onClick={() => navigate('/my-profile')}
             color="info"
           />
         </Grid>

@@ -344,7 +344,7 @@ const ManagerDashboard = () => {
             fullWidth
             variant="outlined"
             startIcon={<PersonIcon />}
-            onClick={() => navigate('/employee-profile')}
+            onClick={() => navigate('/my-profile')}
             size="small"
             sx={{ py: 1.5 }}
           >

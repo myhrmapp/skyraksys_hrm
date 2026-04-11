@@ -304,6 +304,7 @@ const Dashboard = () => {
             subtitle="today"
             icon={<LeaveIcon />}
             color="warning"
+            onClick={() => navigate('/leave-requests')}
           />
         </Grid>
         <Grid item xs={6} sm={3} data-testid="stat-card-new-hires">
@@ -313,6 +314,7 @@ const Dashboard = () => {
             subtitle="this month"
             icon={<TrendingUpIcon />}
             color="success"
+            onClick={() => navigate('/employees')}
           />
         </Grid>
         <Grid item xs={6} sm={3} data-testid="stat-card-pending-leaves">
@@ -349,6 +351,7 @@ const Dashboard = () => {
             subtitle="timesheets"
             icon={<TimesheetIcon />}
             color="warning"
+            onClick={() => navigate('/timesheets')}
           />
         </Grid>
         <Grid item xs={6} sm={3} data-testid="stat-card-approved-timesheets">
@@ -358,6 +361,7 @@ const Dashboard = () => {
             subtitle="this month"
             icon={<CheckCircleIcon />}
             color="success"
+            onClick={() => navigate('/timesheets')}
           />
         </Grid>
         <Grid item xs={6} sm={3} data-testid="stat-card-payroll">

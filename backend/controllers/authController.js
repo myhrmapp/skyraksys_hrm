@@ -60,7 +60,9 @@ const AuthController = {
         });
       }
 
-      // Set httpOnly cookies
+      // Set httpOnly cookies (clear any stale tokens first to prevent race conditions)
+      res.clearCookie('accessToken', { httpOnly: true, secure: secureCookie, sameSite: 'Lax', path: '/' });
+      res.clearCookie('refreshToken', { httpOnly: true, secure: secureCookie, sameSite: 'Lax', path: '/' });
       res.cookie('accessToken', result.accessToken, {
         httpOnly: true,
         secure: secureCookie,
@@ -252,6 +254,7 @@ const AuthController = {
 
       if (storedToken.isRevoked) {
         // SECURITY: Token reuse detected - revoke all tokens for this user (token family invalidation)
+        logger.warn('Token reuse detected — revoking all sessions for user', { userId: storedToken.userId, tokenId: storedToken.id });
         await RefreshToken.update(
           { isRevoked: true, revokedAt: new Date() },
           { where: { userId: storedToken.userId, isRevoked: false } }

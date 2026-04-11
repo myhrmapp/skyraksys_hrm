@@ -569,11 +569,13 @@ router.post('/users/:userId/send-welcome-email',
       }
 
       // Send welcome email
-      await emailService.sendWelcomeEmail(
-        user.email,
-        temporaryPassword,
-        user.employee?.firstName || 'User'
-      );
+      const welcomeUserData = {
+        email: user.email,
+        firstName: user.employee?.firstName || 'User',
+        lastName: user.employee?.lastName || '',
+        role: user.role
+      };
+      await emailService.sendWelcomeEmail(welcomeUserData, temporaryPassword);
 
       res.json({
         success: true,

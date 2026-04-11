@@ -586,6 +586,16 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
         {
           onSuccess: async (employeeData) => {
             setSubmitSuccess('Employee updated successfully!');
+
+            // Upload photo if one was selected during edit
+            if (selectedPhoto && employeeData?.id) {
+              try {
+                await employeeService.uploadPhoto(employeeData.id, selectedPhoto);
+                setSelectedPhoto(null);
+              } catch (photoError) {
+                console.warn('Photo upload failed:', photoError);
+              }
+            }
             
             // Handle user account creation if needed
             if (formData.userAccount.enableLogin && employeeData?.id) {

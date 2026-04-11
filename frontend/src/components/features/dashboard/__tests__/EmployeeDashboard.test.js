@@ -211,12 +211,12 @@ describe('EmployeeDashboard', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/employee-payslips');
     });
 
-    it('navigates to /employee-profile when Profile card is clicked', async () => {
+    it('navigates to /my-profile when Profile card is clicked', async () => {
       const user = userEvent.setup();
       renderDashboard();
       const card = await screen.findByText('Profile');
       await user.click(card);
-      expect(mockNavigate).toHaveBeenCalledWith('/employee-profile');
+      expect(mockNavigate).toHaveBeenCalledWith('/my-profile');
     });
   });
 

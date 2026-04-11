@@ -644,15 +644,7 @@ const Layout = () => {
           Account Settings
         </MenuItem>
         
-        <MenuItem onClick={() => {
-            handleProfileMenuClose();
-            navigate('/my-profile');
-          }}>
-          <ListItemIcon>
-            <Notifications fontSize="small" />
-          </ListItemIcon>
-          Notifications
-        </MenuItem>
+
         
         <MenuItem onClick={() => {
             handleProfileMenuClose();

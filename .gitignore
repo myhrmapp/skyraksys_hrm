@@ -112,3 +112,12 @@ demo-output-mobile/
 *.mp3
 *.mp4
 *.webm
+
+# Temp test result files
+frontend/matrix-*.json
+frontend/e2e-matrix-results.json
+frontend/e2e/matrix-*.json
+frontend/test_result.json
+frontend/.test-complete
+frontend/run-matrix-tests.js
+frontend/run-tests-reliable.js

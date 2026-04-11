@@ -26,9 +26,10 @@ import {
   Cancel as RejectedIcon,
   Pending as PendingIcon,
   Add as AddIcon,
+  Block as CancelIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useLeaveRequests, useLeaveBalances } from '../../../hooks/queries/useLeaveQueries';
+import { useLeaveRequests, useLeaveBalances, useCancelLeaveRequest } from '../../../hooks/queries/useLeaveQueries';
 
 const EmployeeLeaveRequests = () => {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ const EmployeeLeaveRequests = () => {
 
   const { data: leaveRequestsData, isLoading: loadingRequests } = useLeaveRequests({});
   const { data: leaveBalanceData, isLoading: loadingBalance } = useLeaveBalances(user?.employeeId);
+  const { mutate: cancelLeave, isPending: isCancelling } = useCancelLeaveRequest();
 
   const loading = loadingRequests || loadingBalance;
 
@@ -220,6 +222,7 @@ const EmployeeLeaveRequests = () => {
                             <TableCell>Applied Date</TableCell>
                             <TableCell>Status</TableCell>
                             <TableCell>Comments</TableCell>
+                            <TableCell>Actions</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
@@ -265,6 +268,21 @@ const EmployeeLeaveRequests = () => {
                                 <Typography variant="body2" color="text.secondary">
                                   {request.approverComments || '-'}
                                 </Typography>
+                              </TableCell>
+                              <TableCell>
+                                {request.status?.toLowerCase() === 'pending' && (
+                                  <Button
+                                    size="small"
+                                    color="error"
+                                    variant="outlined"
+                                    startIcon={<CancelIcon />}
+                                    disabled={isCancelling}
+                                    onClick={() => cancelLeave(request.id)}
+                                    data-testid={`cancel-leave-${request.id}`}
+                                  >
+                                    Cancel
+                                  </Button>
+                                )}
                               </TableCell>
                             </TableRow>
                           ))}
