@@ -4,7 +4,7 @@
  * Workflow-driven payslip generation, approval, and payment processing
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Box,
   Container,
@@ -98,10 +98,13 @@ const ModernPayrollManagement = () => {
   // Search — payslips table
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  const searchTimerRef = useRef(null);
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => setDebouncedSearchQuery(val), 300);
+  };
   // Search/filter — employee picker (Generate tab)
   const [empSearch, setEmpSearch] = useState('');
   const [empDept, setEmpDept] = useState('');
@@ -1142,7 +1145,7 @@ const ModernPayrollManagement = () => {
           data-testid="payroll-search"
           placeholder="Search employee name or ID..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchChange}
           size="small"
           sx={{ minWidth: 250 }}
           InputProps={{

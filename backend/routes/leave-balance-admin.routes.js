@@ -157,7 +157,7 @@ router.post('/', async (req, res, next) => {
         });
 
         if (existingBalance) {
-            return res.status(400).json({
+            return res.status(409).json({
                 success: false,
                 message: 'Leave balance already exists for this employee, leave type, and year'
             });

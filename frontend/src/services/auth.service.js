@@ -252,7 +252,7 @@ class AuthService {
     try {
       const response = await http.post(`/auth/users/${userId}/send-welcome-email`, {
         includePassword,
-        tempPassword
+        temporaryPassword: tempPassword
       });
       return response.data;
     } catch (error) {

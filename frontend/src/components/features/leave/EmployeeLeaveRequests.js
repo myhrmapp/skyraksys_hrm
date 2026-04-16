@@ -270,7 +270,7 @@ const EmployeeLeaveRequests = () => {
                                 </Typography>
                               </TableCell>
                               <TableCell>
-                                {request.status?.toLowerCase() === 'pending' && (
+                                {(['pending', 'approved'].includes(request.status?.toLowerCase())) && (
                                   <Button
                                     size="small"
                                     color="error"
@@ -280,7 +280,7 @@ const EmployeeLeaveRequests = () => {
                                     onClick={() => cancelLeave(request.id)}
                                     data-testid={`cancel-leave-${request.id}`}
                                   >
-                                    Cancel
+                                    {request.status?.toLowerCase() === 'approved' ? 'Request Cancellation' : 'Cancel'}
                                   </Button>
                                 )}
                               </TableCell>

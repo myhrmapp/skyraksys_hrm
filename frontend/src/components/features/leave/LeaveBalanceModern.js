@@ -180,10 +180,15 @@ const LeaveBalanceModern = () => {
   };
 
   const handleCreate = async () => {
-    setLoading(true);
     setError('');
     setSuccess('');
 
+    if (!createData.employeeId || !createData.leaveTypeId) {
+      setError('Please select both an employee and a leave type before creating a balance.');
+      return;
+    }
+
+    setLoading(true);
     try {
       await leaveBalanceAdminService.create(createData);
 

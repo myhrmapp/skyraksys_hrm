@@ -20,7 +20,7 @@ const attendanceSchema = {
   mark: Joi.object({
     employeeId: Joi.string().uuid().required(),
     date: Joi.date().iso().required(),
-    status: Joi.string().valid('present', 'absent', 'late', 'half_day', 'on_leave', 'holiday', 'weekend').required(),
+    status: Joi.string().valid('present', 'absent', 'late', 'half-day', 'on-leave', 'holiday', 'weekend').required(),
     checkIn: Joi.date().iso().optional().allow(null),
     checkOut: Joi.date().iso().optional().allow(null),
     notes: Joi.string().max(500).optional().allow('', null)
@@ -36,7 +36,7 @@ const attendanceSchema = {
 
   update: Joi.object({
     date: Joi.date().iso().optional(),
-    status: Joi.string().valid('present', 'absent', 'late', 'half_day', 'on_leave', 'holiday', 'weekend').optional(),
+    status: Joi.string().valid('present', 'absent', 'late', 'half-day', 'on-leave', 'holiday', 'weekend').optional(),
     checkIn: Joi.date().iso().optional().allow(null),
     checkOut: Joi.date().iso().optional().allow(null),
     notes: Joi.string().max(500).optional().allow('', null)

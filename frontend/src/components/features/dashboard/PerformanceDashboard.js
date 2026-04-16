@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Card,
@@ -57,7 +57,7 @@ const PerformanceDashboard = () => {
   const isAdmin = user?.role === 'admin';
 
   // Fetch server metrics (admin only)
-  const fetchServerMetrics = async () => {
+  const fetchServerMetrics = useCallback(async () => {
     if (!isAdmin) return;
     
     try {
@@ -74,10 +74,10 @@ const PerformanceDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAdmin]);
 
   // Fetch client metrics (all users)
-  const fetchClientMetrics = async () => {
+  const fetchClientMetrics = useCallback(async () => {
     try {
       setLoading(true);
       const [clientRes, healthRes] = await Promise.all([
@@ -92,7 +92,7 @@ const PerformanceDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Initial data fetch
   useEffect(() => {
@@ -101,7 +101,7 @@ const PerformanceDashboard = () => {
     } else if (activeTab === 1 && isAdmin) {
       fetchServerMetrics();
     }
-  }, [activeTab, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeTab, isAdmin, fetchClientMetrics, fetchServerMetrics]);
 
   // Auto refresh
   useEffect(() => {
@@ -116,7 +116,7 @@ const PerformanceDashboard = () => {
     }, 30000); // Refresh every 30 seconds
 
     return () => clearInterval(interval);
-  }, [activeTab, autoRefresh, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeTab, autoRefresh, isAdmin, fetchClientMetrics, fetchServerMetrics]);
 
   const getServerPerformanceScore = () => {
     if (!serverMetrics || !apiMetrics) return 0;

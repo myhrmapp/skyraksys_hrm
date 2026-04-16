@@ -254,7 +254,7 @@ test.describe('A#20: Leave balance creation', () => {
     
     if (Array.isArray(leaveTypes) && leaveTypes.length > 0 && Array.isArray(employees) && employees.length > 0) {
       // Try creating a balance — may fail with 400 if duplicate exists (expected behavior)
-      const createRes = await page.request.post(`${API_URL}/leave/balance`, {
+      const createRes = await page.request.post(`${API_URL}/admin/leave-balances`, {
         data: {
           employeeId: employees[0].id,
           leaveTypeId: leaveTypes[0].id,
