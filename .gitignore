@@ -121,3 +121,24 @@ frontend/test_result.json
 frontend/.test-complete
 frontend/run-matrix-tests.js
 frontend/run-tests-reliable.js
+
+# QA, Data Analysis, and Script Artifacts
+*.csv
+*.xlsx
+*.zip
+*.ps1
+*.py
+PRODResults/
+zip_extract_v1.1/
+zip_extracted_v1.1/
+package_updates/
+docs/checklists/
+.git_diffs/
+*REPORT*.md
+*SUMMARY*.md
+*RESULTS*.md
+*BUGS*.md
+*BUG*.md
+*PLAN*.md
+*GUIDE*.md
+*INDEX*.md

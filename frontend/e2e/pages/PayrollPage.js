@@ -66,8 +66,22 @@ class PayrollPage {
   // Search & Filters
   async searchPayslip(query) {
     const input = this.page.locator(`${this.s.search} input`);
-    await input.fill(query);
-    await this.page.waitForTimeout(300);
+    if (await input.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await input.fill(query);
+      await this.page.waitForTimeout(300);
+      return;
+    }
+
+    const paymentTab = this.page.locator(`${this.s.tabs} button`).nth(2);
+    if (await paymentTab.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await paymentTab.click();
+      await waitForPageReady(this.page);
+      const fallbackInput = this.page.locator(`${this.s.search} input`);
+      if (await fallbackInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await fallbackInput.fill(query);
+        await this.page.waitForTimeout(300);
+      }
+    }
   }
 
   async filterByMUISelect(label, value) {

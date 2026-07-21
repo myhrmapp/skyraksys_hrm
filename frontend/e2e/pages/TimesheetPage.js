@@ -15,6 +15,21 @@ class TimesheetPage {
   async goto() {
     await this.page.goto('/timesheets');
     await waitForPageReady(this.page);
+    await this.page.waitForTimeout(500);
+
+    // Some seeded weeks may already be approved/submitted, which makes the
+    // entry controls read-only. The UI contract for these tests expects a
+    // writable week, so move to the nearest editable one before assertions.
+    if (!(await this.isAddTaskVisible())) {
+      for (let i = 0; i < 3; i++) {
+        await this.clickPrevWeek();
+        await this.page.waitForTimeout(400);
+        if (await this.isAddTaskVisible()) {
+          return;
+        }
+      }
+      await this.clickToday();
+    }
   }
 
   async isHubVisible() {

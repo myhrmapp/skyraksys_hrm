@@ -112,6 +112,27 @@
 			"command": "cd frontend && npx playwright test > ../e2e_output.txt 2>&1 && echo E2E_PASS || echo E2E_FAIL",
 			"isBackground": false,
 			"group": "test"
+		},
+		{
+			"label": "verify-targeted-frontend-regressions",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/features/employees/__tests__/UserAccountManagementPage.test.js src/components/features/leave/__tests__/LeaveBalanceModern.test.js src/components/features/payroll/__tests__/ModernPayrollManagement.test.js > verify_targeted_jest.txt 2>&1 && echo PASS || (echo FAIL && exit 1)",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "verify-targeted-frontend-regressions",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/features/employees/__tests__/UserAccountManagementPage.test.js src/components/features/leave/__tests__/LeaveBalanceModern.test.js src/components/features/payroll/__tests__/ModernPayrollManagement.test.js > verify_targeted_jest.txt 2>&1 && echo PASS || (echo FAIL && exit 1)",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "verify-targeted-frontend-regressions-direct",
+			"type": "shell",
+			"command": "cd frontend && node node_modules/react-scripts/bin/react-scripts.js test --watchAll=false --runInBand --runTestsByPath src/components/features/employees/__tests__/UserAccountManagementPage.test.js src/components/features/leave/__tests__/LeaveBalanceModern.test.js src/components/features/payroll/__tests__/ModernPayrollManagement.test.js > verify_targeted_jest.txt 2>&1; echo EXIT:$?",
+			"isBackground": false,
+			"group": "test"
 		}
 	]
 }

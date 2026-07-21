@@ -139,6 +139,7 @@ class EmployeePage {
     const editBtn = this.page.locator(this.s.tableEditBtn || '[data-testid="employee-table-edit-btn"]').nth(index);
     await editBtn.click();
     await waitForPageReady(this.page);
+    await this.clickEditFromProfile();
   }
 
   /** Click delete action for an employee card by index (card view has delete, table view does not) */
@@ -182,8 +183,12 @@ class EmployeePage {
   }
 
   async gotoEdit(employeeId) {
-    await this.page.goto(`/employees/${employeeId}/edit`);
+    await this.page.goto(`/employees/${employeeId}`);
     await waitForPageReady(this.page);
+    // In modern UI, edit is done inline on the profile page
+    if (await this.isEditButtonVisibleOnProfile()) {
+      await this.clickEditFromProfile();
+    }
   }
 
   async fillPersonalInfo(data) {
@@ -325,15 +330,23 @@ class EmployeePage {
   }
 
   async clickNextTab() {
-    await this.page.locator(this.s.formNextBtn).click();
+    if (this.page.url().includes('/add') || this.page.url().includes('/create')) {
+      await this.page.locator(this.s.formNextBtn).click();
+    }
   }
 
   async clickPrevTab() {
-    await this.page.locator(this.s.formPrevBtn).click();
+    if (this.page.url().includes('/add') || this.page.url().includes('/create')) {
+      await this.page.locator(this.s.formPrevBtn).click();
+    }
   }
 
   async clickSubmit() {
-    await this.page.locator(this.s.formSubmitBtn).click();
+    if (this.page.url().includes('/add') || this.page.url().includes('/create')) {
+      await this.page.locator(this.s.formSubmitBtn).click();
+    } else {
+      await this.saveProfileEdit();
+    }
   }
 
   async clickCancel() {
@@ -341,15 +354,17 @@ class EmployeePage {
   }
 
   async selectTab(tabName) {
-    const tabMap = {
-      personal:   this.s.tabPersonal,
-      employment: this.s.tabEmployment,
-      emergency:  this.s.tabEmergency,
-      statutory:  this.s.tabStatutory,
-    };
-    const locator = this.page.locator(tabMap[tabName]);
-    if (await locator.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await locator.click();
+    if (this.page.url().includes('/add') || this.page.url().includes('/create')) {
+      const tabMap = {
+        personal:   this.s.tabPersonal,
+        employment: this.s.tabEmployment,
+        emergency:  this.s.tabEmergency,
+        statutory:  this.s.tabStatutory,
+      };
+      const locator = this.page.locator(tabMap[tabName]);
+      if (await locator.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await locator.click();
+      }
     }
   }
 
@@ -640,7 +655,7 @@ class EmployeePage {
     }
     // Basic salary (id-based since no data-testid on the TextField)
     if (data.basicSalary) {
-      const input = this.page.locator('#salary\\.basicSalary, [name="salary.basicSalary"]').first();
+      const input = this.page.locator('#salary\\.basicSalary, [name="salary.basicSalary"], [data-testid="salary-basicSalary"]').first();
       if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
         await input.clear();
         await input.fill(String(data.basicSalary));

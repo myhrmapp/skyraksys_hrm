@@ -60,7 +60,7 @@ console.log(`\nRunning: npx ${pwArgs.join(' ')}`);
 console.log(`Progress: ${LOG_FILE}`);
 console.log(`Status:   ${STATUS_FILE}\n`);
 
-const child = spawn('npx', pwArgs, {
+const child = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', pwArgs, {
   cwd: __dirname,
   shell: true,
   stdio: ['ignore', 'pipe', 'pipe'],
