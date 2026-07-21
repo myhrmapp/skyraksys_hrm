@@ -74,13 +74,10 @@ export const validateEmployeeForm = (formData, options = {}) => {
   
   // Employee ID - Optional on create (auto-generated if missing),
   // validated if provided in either create or edit mode
+  // Format: SK### (e.g. SK001, SK010, SK100, SK1000...)
   if (formData.employeeId?.trim()) {
-    if (formData.employeeId.trim().length < 3) {
-      errors.employeeId = 'Employee ID must be at least 3 characters';
-    } else if (formData.employeeId.trim().length > 20) {
-      errors.employeeId = 'Employee ID must not exceed 20 characters';
-    } else if (!/^SKYT\d{4}$/.test(formData.employeeId.trim())) {
-      errors.employeeId = 'Employee ID must be in SKYT#### format (SKYT + exactly 4 digits)';
+    if (!/^SK\d{3,}$/.test(formData.employeeId.trim())) {
+      errors.employeeId = 'Employee ID must be in SK### format (SK + at least 3 digits, e.g. SK001)';
     }
   }
   
