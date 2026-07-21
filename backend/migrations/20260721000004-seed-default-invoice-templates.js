@@ -22,7 +22,7 @@ module.exports = {
         description: 'Default template for standard B2B services.',
         isDefault: true,
         isActive: true,
-        currency: 'USD',
+        currency: 'INR',
         templateData: JSON.stringify({
           title: 'TAX INVOICE',
           companySection: { showGstin: true, showAddress: true },
@@ -40,7 +40,7 @@ module.exports = {
         description: 'Streamlined invoice for consulting services billed by the hour.',
         isDefault: false,
         isActive: true,
-        currency: 'USD',
+        currency: 'INR',
         templateData: JSON.stringify({
           title: 'CONSULTING INVOICE',
           companySection: { showGstin: false, showAddress: true },
@@ -58,7 +58,7 @@ module.exports = {
         description: 'Invoice for monthly fixed-fee retainers.',
         isDefault: false,
         isActive: true,
-        currency: 'USD',
+        currency: 'INR',
         templateData: JSON.stringify({
           title: 'RETAINER INVOICE',
           companySection: { showGstin: true, showAddress: true },

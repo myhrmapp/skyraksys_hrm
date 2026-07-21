@@ -62,28 +62,32 @@ module.exports = function invoiceModel(sequelize, DataTypes) {
     },
     lineItems: {
       type: DataTypes.JSON,
-      allowNull: false,
+      allowNull: true,      // nullable when vault encryption is active
       defaultValue: []
     },
     subtotal: {
       type: DataTypes.DECIMAL(12, 2),
-      allowNull: false,
+      allowNull: true,      // nullable when vault encryption is active
       defaultValue: 0
     },
     taxPercent: {
       type: DataTypes.DECIMAL(5, 2),
-      allowNull: false,
+      allowNull: true,      // nullable when vault encryption is active
       defaultValue: 18
     },
     taxAmount: {
       type: DataTypes.DECIMAL(12, 2),
-      allowNull: false,
+      allowNull: true,      // nullable when vault encryption is active
       defaultValue: 0
     },
     totalAmount: {
       type: DataTypes.DECIMAL(12, 2),
-      allowNull: false,
+      allowNull: true,      // nullable when vault encryption is active
       defaultValue: 0
+    },
+    encryptedFinancials: {
+      type: DataTypes.TEXT,
+      allowNull: true       // populated when vault encryption is enabled
     },
     notes: {
       type: DataTypes.TEXT,
