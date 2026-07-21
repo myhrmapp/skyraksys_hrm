@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardHeader,
   FormControl,
   FormControlLabel,
   Grid,
@@ -43,6 +42,12 @@ const LeaveRequest = () => {
   // Derive data from queries
   const leaveTypes = leaveTypesData?.data || leaveTypesData || [];
   const balances = balancesData?.data || balancesData || [];
+  const retroactiveMinDate = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - 14);
+    return d;
+  }, []);
   
   // 🚀 Mutation for creating leave request
   const createMutation = useCreateLeaveRequest();
@@ -182,16 +187,32 @@ const LeaveRequest = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box maxWidth={800} mx="auto" mt={4}>
-        <Card>
-          <CardHeader
-            title="New Leave Request"
-            subheader="Submit a new leave request for approval"
-          />
-          <CardContent>
+      <Box maxWidth={900} mx="auto" mt={4} mb={6}>
+        <Card sx={{
+          borderRadius: 4,
+          boxShadow: '0 12px 40px rgba(0,0,0,0.08)',
+          border: '1px solid',
+          borderColor: 'divider',
+          overflow: 'hidden',
+          bgcolor: 'background.paper'
+        }}>
+          <Box sx={{
+            p: 4,
+            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+            borderBottom: '1px solid',
+            borderColor: 'divider'
+          }}>
+            <Typography variant="h4" fontWeight="800" color="text.primary" gutterBottom>
+              New Leave Request
+            </Typography>
+            <Typography variant="subtitle1" color="text.secondary">
+              Submit a new time-off request for manager approval
+            </Typography>
+          </Box>
+          <CardContent sx={{ p: 4 }}>
             <Box component="form" onSubmit={handleSubmit} noValidate>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+              <Grid container spacing={4}>
+                <Grid item xs={12} md={6}>
                   <FormControl fullWidth error={!!errors.leaveTypeId}>
                     <InputLabel id="leave-type-label">Leave Type</InputLabel>
                     <Select
@@ -202,6 +223,7 @@ const LeaveRequest = () => {
                       value={form.leaveTypeId}
                       onChange={handleChange('leaveTypeId')}
                       inputProps={{ 'data-testid': 'leave-type-select' }}
+                      sx={{ borderRadius: 2 }}
                     >
                       {leaveTypes.map((type) => (
                         <MenuItem key={type.id} value={type.id}>
@@ -216,32 +238,37 @@ const LeaveRequest = () => {
                     )}
                   </FormControl>
                   {selectedBalance != null && (
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      Available balance: {selectedBalance} day(s)
-                    </Typography>
+                    <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(99, 102, 241, 0.05)', borderRadius: 2, display: 'flex', alignItems: 'center' }}>
+                      <Typography variant="body2" fontWeight="600" color="primary.main">
+                        Available balance: {selectedBalance} day(s)
+                      </Typography>
+                    </Box>
                   )}
                 </Grid>
 
-                <Grid item xs={12} sm={3}>
+                <Grid item xs={12} md={3}>
                   <DatePicker
                     label="Start Date"
                     value={form.startDate}
+                    minDate={retroactiveMinDate}
                     onChange={handleDateChange('startDate')}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         fullWidth
                         error={!!errors.startDate}
-                        helperText={errors.startDate}
+                        helperText={errors.startDate || 'Up to 14 days in past'}
                         inputProps={{ ...params.inputProps, 'data-testid': 'leave-start-date' }}
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     )}
                   />
                 </Grid>
-                <Grid item xs={12} sm={3}>
+                <Grid item xs={12} md={3}>
                   <DatePicker
                     label="End Date"
                     value={form.endDate}
+                    minDate={form.startDate || retroactiveMinDate}
                     onChange={handleDateChange('endDate')}
                     renderInput={(params) => (
                       <TextField
@@ -250,38 +277,41 @@ const LeaveRequest = () => {
                         error={!!errors.endDate}
                         helperText={errors.endDate}
                         inputProps={{ ...params.inputProps, 'data-testid': 'leave-end-date' }}
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     )}
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={form.isHalfDay}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setForm((prev) => ({
-                            ...prev,
-                            isHalfDay: checked,
-                            halfDayType: checked ? prev.halfDayType : '',
-                          }));
-                          setErrors((prev) => ({ ...prev, isHalfDay: undefined, halfDayType: undefined }));
-                        }}
-                        color="primary"
-                        disabled={halfDayDisabled}
-                      />
-                    }
-                    label={halfDayDisabled ? 'Half day (select same start & end date)' : 'Half day' }
-                  />
-                  <Typography variant="caption" color="textSecondary">
-                    Half-day leave counts as 0.5 day and only applies when start and end dates are the same.
-                  </Typography>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={form.isHalfDay}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setForm((prev) => ({
+                              ...prev,
+                              isHalfDay: checked,
+                              halfDayType: checked ? prev.halfDayType : '',
+                            }));
+                            setErrors((prev) => ({ ...prev, isHalfDay: undefined, halfDayType: undefined }));
+                          }}
+                          color="primary"
+                          disabled={halfDayDisabled}
+                        />
+                      }
+                      label={<Typography fontWeight="600">{halfDayDisabled ? 'Half Day (N/A)' : 'Half Day' }</Typography>}
+                    />
+                    <Typography variant="caption" color="text.secondary" display="block" mt={1}>
+                      Only applies when start and end dates are the same.
+                    </Typography>
+                  </Box>
                 </Grid>
 
                 {form.isHalfDay && (
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} md={4}>
                     <FormControl fullWidth error={!!errors.halfDayType}>
                       <InputLabel id="half-day-type-label">Half Day Type</InputLabel>
                       <Select
@@ -291,6 +321,7 @@ const LeaveRequest = () => {
                         label="Half Day Type"
                         value={form.halfDayType}
                         onChange={handleChange('halfDayType')}
+                        sx={{ borderRadius: 2 }}
                       >
                         <MenuItem value="First Half">First Half</MenuItem>
                         <MenuItem value="Second Half">Second Half</MenuItem>
@@ -304,26 +335,47 @@ const LeaveRequest = () => {
                   </Grid>
                 )}
 
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12}>
                   <TextField
                     label="Reason"
                     multiline
-                    minRows={3}
+                    minRows={4}
                     fullWidth
                     value={form.reason}
                     onChange={handleChange('reason')}
                     error={!!errors.reason}
                     helperText={errors.reason}
                     inputProps={{ 'data-testid': 'leave-reason-input' }}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                 </Grid>
 
                 <Grid item xs={12}>
-                  <Box display="flex" justifyContent="flex-end" gap={2}>
-                    <Button variant="outlined" onClick={() => navigate(-1)} data-testid="leave-cancel-btn">
+                  <Box display="flex" justifyContent="flex-end" gap={2} mt={2}>
+                    <Button 
+                      variant="outlined" 
+                      onClick={() => navigate(-1)} 
+                      data-testid="leave-cancel-btn"
+                      sx={{ borderRadius: 2, px: 4, fontWeight: 600 }}
+                    >
                       Cancel
                     </Button>
-                    <Button type="submit" variant="contained" color="primary" data-testid="leave-submit-btn">
+                    <Button 
+                      type="submit" 
+                      variant="contained" 
+                      data-testid="leave-submit-btn"
+                      sx={{ 
+                        borderRadius: 2, 
+                        px: 4, 
+                        fontWeight: 600,
+                        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                        boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                          boxShadow: '0 6px 20px 0 rgba(99, 102, 241, 0.39)',
+                        }
+                      }}
+                    >
                       Submit Request
                     </Button>
                   </Box>

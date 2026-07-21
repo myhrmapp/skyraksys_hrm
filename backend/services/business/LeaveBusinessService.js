@@ -33,7 +33,7 @@ class LeaveBusinessService extends BaseBusinessService {
    * Create leave request
    * 
    * Business Rules:
-   * - Start date must be in future
+   * - Start date cannot be more than 2 weeks in the past
    * - End date must be after start date
    * - No overlapping leaves (Approved/Pending)
    * - Employee must exist
@@ -67,34 +67,46 @@ class LeaveBusinessService extends BaseBusinessService {
     await this.validateLeaveRequest(data);
 
     // Calculate total days
+    // Calculate total days
     const totalDays = this.calculateLeaveDays(data.startDate, data.endDate, data.isHalfDay);
 
-    // Create leave request
-    const leave = await this.leaveDataService.create({
-      ...data,
-      totalDays,
-      status: 'Pending',
-      appliedAt: new Date()
-    });
+    const transaction = await this.startTransaction();
+    try {
+      // Create leave request
+      const leave = await this.leaveDataService.create({
+        ...data,
+        totalDays,
+        status: 'Pending',
+        appliedAt: new Date()
+      }, { transaction });
 
-    // Update leave balance: deduct from balance, add to pending
-    const leaveYear = new Date(data.startDate).getFullYear();
-    const leaveBalance = await db.LeaveBalance.findOne({
-      where: {
-        employeeId: data.employeeId,
-        leaveTypeId: data.leaveTypeId,
-        year: leaveYear
+      // Update leave balance: deduct from balance, add to pending
+      const leaveYear = new Date(data.startDate).getFullYear();
+      const leaveBalance = await db.LeaveBalance.findOne({
+        where: {
+          employeeId: data.employeeId,
+          leaveTypeId: data.leaveTypeId,
+          year: leaveYear
+        },
+        transaction,
+        lock: transaction.LOCK.UPDATE
+      });
+
+      if (leaveBalance) {
+        leaveBalance.balance = Number(leaveBalance.balance) - totalDays;
+        leaveBalance.totalPending = Number(leaveBalance.totalPending) + totalDays;
+        await leaveBalance.save({ transaction });
       }
-    });
 
-    if (leaveBalance) {
-      leaveBalance.balance = Number(leaveBalance.balance) - totalDays;
-      leaveBalance.totalPending = Number(leaveBalance.totalPending) + totalDays;
-      await leaveBalance.save();
+      await transaction.commit();
+      
+      this.log('createLeaveRequest:success', { id: leave.id });
+      return this.leaveDataService.findByIdWithDetails(leave.id);
+    } catch (error) {
+      await transaction.rollback();
+      this.log('createLeaveRequest:error', { error: error.message });
+      throw error;
     }
-
-    this.log('createLeaveRequest:success', { id: leave.id });
-    return this.leaveDataService.findByIdWithDetails(leave.id);
   }
 
   /**
@@ -124,13 +136,14 @@ class LeaveBusinessService extends BaseBusinessService {
       // Get leave request
       const leaveRequest = await this.leaveDataService.findById(id);
 
-      // Prevent self-approval
-      if (leaveRequest && leaveRequest.employeeId === (currentUser.employee?.id || currentUser.employeeId)) {
-        throw new ForbiddenError('You cannot approve your own leave request');
-      }
-      
+      // Null check must come BEFORE self-approval check to avoid dereferencing null
       if (!leaveRequest) {
         throw new NotFoundError('Leave request');
+      }
+
+      // Prevent self-approval
+      if (leaveRequest.employeeId === (currentUser.employee?.id || currentUser.employeeId)) {
+        throw new ForbiddenError('You cannot approve your own leave request');
       }
 
       if (leaveRequest.status !== 'Pending') {
@@ -138,10 +151,14 @@ class LeaveBusinessService extends BaseBusinessService {
       }
 
       // Check leave balance (with lock for consistency)
+      // Include year filter to prevent wrong-year balance being selected when
+      // an employee has balances across multiple years.
+      const leaveYear = new Date(leaveRequest.startDate).getFullYear();
       const leaveBalance = await db.LeaveBalance.findOne({
         where: { 
           employeeId: leaveRequest.employeeId, 
-          leaveTypeId: leaveRequest.leaveTypeId 
+          leaveTypeId: leaveRequest.leaveTypeId,
+          year: leaveYear
         },
         transaction,
         lock: transaction.LOCK.UPDATE
@@ -169,7 +186,13 @@ class LeaveBusinessService extends BaseBusinessService {
       await leaveBalance.save({ transaction });
 
       // Update leave request
-      const approverId = currentUser.employee?.id || currentUser.id;
+      // approvedBy references the employees table — must be an employee UUID.
+      // If the approver has no employee record (rare admin-only account), throw rather
+      // than silently storing a user UUID in an employee FK column.
+      if (!currentUser.employee?.id) {
+        throw new ForbiddenError('Approver must have an associated employee profile to approve leaves');
+      }
+      const approverId = currentUser.employee.id;
       await this.leaveDataService.update(id, {
         status: 'Approved',
         approvedBy: approverId,
@@ -219,7 +242,11 @@ class LeaveBusinessService extends BaseBusinessService {
       throw new BadRequestError('Leave request is not in pending status');
     }
 
-    const approverId = currentUser.employee?.id || currentUser.id;
+    // approvedBy references the employees table — must be an employee UUID.
+    if (!currentUser.employee?.id) {
+      throw new ForbiddenError('Rejector must have an associated employee profile to reject leaves');
+    }
+    const approverId = currentUser.employee.id;
 
     // Wrap balance restore + status update in a transaction to prevent phantom balance credits
     const transaction = await db.sequelize.transaction();
@@ -244,7 +271,8 @@ class LeaveBusinessService extends BaseBusinessService {
         status: 'Rejected',
         approvedBy: approverId,
         rejectedAt: new Date(),
-        approverComments: comments
+        approverComments: comments,
+        rejectionReason: comments
       }, { transaction });
 
       await transaction.commit();
@@ -384,6 +412,37 @@ class LeaveBusinessService extends BaseBusinessService {
       await transaction.rollback();
       throw error;
     }
+  }
+
+  async rejectCancellation(id, currentUser, comments) {
+    this.log('rejectCancellation', { id });
+
+    if (!['manager', 'admin', 'hr'].includes(currentUser.role)) {
+      throw new ForbiddenError('Only managers, HR, or admins can reject cancellations');
+    }
+
+    if (!comments) {
+      throw new BadRequestError('Rejection comments are required');
+    }
+
+    const leaveRequest = await this.leaveDataService.findById(id);
+    if (!leaveRequest) {
+      throw new NotFoundError('Leave request');
+    }
+
+    if (leaveRequest.status !== 'Cancellation Requested') {
+      throw new BadRequestError('Can only reject cancellation for leaves with status "Cancellation Requested"');
+    }
+
+    // Rejecting a cancellation means the leave remains Approved.
+    // No balance changes are needed because it was already taken.
+    await this.leaveDataService.update(id, {
+      status: 'Approved',
+      approverComments: comments
+    });
+
+    this.log('rejectCancellation:success', { id });
+    return this.leaveDataService.findByIdWithDetails(id);
   }
 
   /**

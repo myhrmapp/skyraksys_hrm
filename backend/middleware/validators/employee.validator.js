@@ -234,10 +234,6 @@ const createEmployeeSchema = Joi.object({
     .max(100)
     .optional(),
 
-  accountNumber: Joi.string()
-    .max(20)
-    .optional(),
-    
   bankAccountNumber: Joi.string()
     .max(20)
     .optional()
@@ -496,11 +492,6 @@ const updateEmployeeSchema = Joi.object({
     .optional()
     .allow('', null),
 
-  accountNumber: Joi.string()
-    .max(20)
-    .optional()
-    .allow('', null),
-    
   bankAccountNumber: Joi.string()
     .max(20)
     .optional()

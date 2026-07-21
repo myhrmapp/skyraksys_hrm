@@ -166,7 +166,7 @@ class DashboardService extends BaseService {
                 // Calculate working hours
                 const totalHours = parseFloat(currentMonthTimesheets[0]?.totalHours || 0);
                 const daysWorked = parseInt(currentMonthTimesheets[0]?.totalDays || 0);
-                const expectedHours = daysWorked * 8;
+                const expectedHours = daysWorked * 9;
 
                 // Format recent activity
                 const recentActivity = [

@@ -1,10 +1,10 @@
-﻿/* eslint-disable unicode-bom */
+/* eslint-disable unicode-bom */
 /**
  * Modern Payroll Management System - Admin/HR Interface
  * Workflow-driven payslip generation, approval, and payment processing
  */
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   Box,
   Container,
@@ -750,7 +750,12 @@ const ModernPayrollManagement = () => {
             </Button>
             <Tooltip title="Refresh">
               <span>
-                <IconButton size="small" onClick={refetchPayslips} disabled={loading}>
+                <IconButton
+                  size="small"
+                  aria-label="Refresh"
+                  onClick={refetchPayslips}
+                  disabled={loading}
+                >
                   <RefreshIcon fontSize="small" />
                 </IconButton>
               </span>
@@ -835,7 +840,7 @@ const ModernPayrollManagement = () => {
           <Grid item xs={6} sm={3}>
             <Card variant="outlined">
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <Typography variant="caption" color="textSecondary">Gross Payout</Typography>
+                <Typography variant="caption" color="textSecondary">Total Payout Amount</Typography>
                 <Typography variant="h5" fontWeight={600} color="primary.main">
                   {formatCurrency(stats.totalAmount)}
                 </Typography>
@@ -843,18 +848,36 @@ const ModernPayrollManagement = () => {
             </Card>
           </Grid>
           <Grid item xs={6} sm={3}>
-            <Card variant="outlined">
-              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <Typography variant="caption" color="textSecondary">Ready to Pay</Typography>
-                <Typography variant="h5" fontWeight={600} color="info.dark">{stats.finalized}</Typography>
+            <Card sx={{ 
+              background: 'rgba(255, 255, 255, 0.7)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 4,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s ease',
+              '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }
+            }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="body2" color="textSecondary" fontWeight={600} textTransform="uppercase">Ready to Pay</Typography>
+                <Typography variant="h4" fontWeight={800} color="info.main" sx={{ mt: 1 }}>{stats.finalized}</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={6} sm={3}>
-            <Card variant="outlined">
-              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <Typography variant="caption" color="textSecondary">Completed (Paid)</Typography>
-                <Typography variant="h5" fontWeight={600} color="success.dark">{stats.paid}</Typography>
+            <Card sx={{ 
+              background: 'rgba(255, 255, 255, 0.7)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 4,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s ease',
+              '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 12px 40px rgba(0,0,0,0.08)' }
+            }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="body2" color="textSecondary" fontWeight={600} textTransform="uppercase">Completed (Paid)</Typography>
+                <Typography variant="h4" fontWeight={800} color="success.main" sx={{ mt: 1 }}>{stats.paid}</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -889,14 +912,20 @@ const ModernPayrollManagement = () => {
     };
 
     return (
-      <Grid container spacing={3} alignItems="flex-start">
+      <Grid container spacing={4} alignItems="flex-start">
         {/* LEFT — Config panel */}
         <Grid item xs={12} md={4}>
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+          <Card sx={{ 
+            p: 3, 
+            borderRadius: 4, 
+            border: '1px solid', 
+            borderColor: 'divider',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.04)'
+          }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 3, color: 'primary.main' }}>
               1 · Pay Period &amp; Template
             </Typography>
-            <Stack spacing={2} sx={{ mb: 3 }}>
+            <Stack spacing={3} sx={{ mb: 4 }}>
               <PeriodSelector size="medium" />
               <FormControl fullWidth>
                 <InputLabel>Template (Optional)</InputLabel>
@@ -904,6 +933,7 @@ const ModernPayrollManagement = () => {
                   value={filters.templateId}
                   onChange={(e) => setFilters(f => ({ ...f, templateId: e.target.value }))}
                   label="Template (Optional)"
+                  sx={{ borderRadius: 2 }}
                 >
                   <MenuItem value=""><em>Default Template</em></MenuItem>
                   {templates.map(t => (
@@ -915,24 +945,26 @@ const ModernPayrollManagement = () => {
               </FormControl>
             </Stack>
 
-            <Divider sx={{ mb: 2 }} />
+            <Divider sx={{ mb: 3 }} />
 
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2, color: 'primary.main' }}>
               2 · Selection Summary
             </Typography>
             <Box sx={{
-              p: 2,
+              p: 3,
               bgcolor: selectedEmployees.length > 0
-                ? alpha(theme.palette.primary.main, 0.06)
-                : alpha(theme.palette.grey[500], 0.06),
-              borderRadius: 2,
-              mb: 2,
+                ? alpha(theme.palette.primary.main, 0.08)
+                : alpha(theme.palette.grey[500], 0.04),
+              borderRadius: 3,
+              mb: 3,
               textAlign: 'center',
+              border: '1px solid',
+              borderColor: selectedEmployees.length > 0 ? alpha(theme.palette.primary.main, 0.2) : 'divider'
             }}>
-              <Typography variant="h3" fontWeight={700} color={selectedEmployees.length > 0 ? 'primary.main' : 'text.disabled'}>
+              <Typography variant="h2" fontWeight={800} color={selectedEmployees.length > 0 ? 'primary.main' : 'text.disabled'}>
                 {selectedEmployees.length}
               </Typography>
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="body1" color="textSecondary" fontWeight={500}>
                 of {employees.length} employees selected
               </Typography>
             </Box>
@@ -945,6 +977,20 @@ const ModernPayrollManagement = () => {
               startIcon={operationLoading ? <CircularProgress size={18} color="inherit" /> : <GenerateIcon />}
               onClick={handleValidateAndGenerate}
               disabled={operationLoading || selectedEmployees.length === 0}
+              sx={{ 
+                borderRadius: 2, 
+                py: 1.5, 
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                  boxShadow: '0 6px 20px 0 rgba(99, 102, 241, 0.39)'
+                },
+                '&.Mui-disabled': {
+                  background: 'rgba(0, 0, 0, 0.12)'
+                }
+              }}
             >
               Validate &amp; Generate
             </Button>
@@ -953,21 +999,27 @@ const ModernPayrollManagement = () => {
                 size="small"
                 color="inherit"
                 fullWidth
-                sx={{ mt: 1 }}
+                sx={{ mt: 2, fontWeight: 500 }}
                 onClick={() => setSelectedEmployees([])}
               >
                 Clear selection
               </Button>
             )}
-          </Paper>
+          </Card>
         </Grid>
 
         {/* RIGHT — Employee picker */}
         <Grid item xs={12} md={8}>
-          <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
+          <Card sx={{ 
+            overflow: 'hidden', 
+            borderRadius: 4, 
+            border: '1px solid', 
+            borderColor: 'divider',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.04)' 
+          }}>
             {/* Header + search */}
-            <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
+            <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider', background: 'linear-gradient(to right, rgba(248,250,252,0.8), rgba(241,245,249,0.8))' }}>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2, color: 'text.secondary' }}>
                 3 · Select Employees
               </Typography>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
@@ -1123,7 +1175,7 @@ const ModernPayrollManagement = () => {
                 })
               )}
             </Box>
-          </Paper>
+          </Card>
         </Grid>
       </Grid>
     );
@@ -1279,26 +1331,33 @@ const ModernPayrollManagement = () => {
           onRetry={refetchPayslips}
         />
       ) : (
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={payslips.length > 0 && selectedPayslipIds.length === payslips.length}
-                  indeterminate={selectedPayslipIds.length > 0 && selectedPayslipIds.length < payslips.length}
-                  onChange={(e) => handleSelectAll(e.target.checked)}
-                />
-              </TableCell>
-              <TableCell>Employee</TableCell>
-              <TableCell>Pay Period</TableCell>
-              <TableCell align="right">Gross Earnings</TableCell>
-              <TableCell align="right">Deductions</TableCell>
-              <TableCell align="right">Net Pay</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
+      <Card sx={{ 
+        borderRadius: 4, 
+        border: '1px solid', 
+        borderColor: 'divider',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.04)',
+        overflow: 'hidden'
+      }}>
+        <TableContainer sx={{ bgcolor: 'background.paper' }}>
+          <Table sx={{ minWidth: 800, '& .MuiTableCell-root': { borderBottom: '1px solid rgba(224, 224, 224, 0.4)' } }}>
+            <TableHead>
+              <TableRow sx={{ background: 'linear-gradient(to right, rgba(248,250,252,0.8), rgba(241,245,249,0.8))' }}>
+                <TableCell padding="checkbox" sx={{ py: 2 }}>
+                  <Checkbox
+                    checked={payslips.length > 0 && selectedPayslipIds.length === payslips.length}
+                    indeterminate={selectedPayslipIds.length > 0 && selectedPayslipIds.length < payslips.length}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                  />
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Employee</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Pay Period</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Gross Earnings</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Deductions</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Net Pay</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Status</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
           <TableBody>
             {(() => {
               const filteredPayslips = payslips
@@ -1415,6 +1474,7 @@ const ModernPayrollManagement = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      </Card>
       )}
 
       {!isErrorPayslips && <TablePagination
@@ -1692,6 +1752,7 @@ const ModernPayrollManagement = () => {
           <Tab label="Overview" icon={<AssessmentIcon />} iconPosition="start" />
           <Tab label="Generate" icon={<GenerateIcon />} iconPosition="start" />
           <Tab label="Process Payments" icon={<PaymentIcon />} iconPosition="start" />
+          <Tab label="Reports" icon={<AssessmentIcon />} iconPosition="start" />
         </Tabs>
       </Paper>
       
@@ -1701,6 +1762,11 @@ const ModernPayrollManagement = () => {
         {activeTab === 2 && (
           <PayslipsTable 
             title="Payslips — Payment Processing"
+          />
+        )}
+        {activeTab === 3 && (
+          <PayslipsTable 
+            title="Payslips — Reports"
           />
         )}
       </Box>

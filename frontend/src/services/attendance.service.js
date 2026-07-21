@@ -44,6 +44,12 @@ class AttendanceService {
     const response = await http.post('/attendance/mark', data);
     return response.data;
   }
+
+  // Update existing attendance record (admin/manager)
+  async updateAttendance(id, data) {
+    const response = await http.put(`/attendance/${id}`, data);
+    return response.data;
+  }
 }
 
 export const attendanceService = new AttendanceService();

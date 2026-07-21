@@ -64,4 +64,59 @@ router.put('/payslip-template', isAdminOrHR, uploadCompanyLogo, handleUploadErro
     }
 });
 
+// GET the ID Card settings (accessible by authenticated users so they can view their own card)
+router.get('/idcard-template', async (req, res, next) => {
+    try {
+        const config = await db.SystemConfig.findOne({
+            where: { category: 'idcard', key: 'settings' }
+        });
+        const defaultSettings = {
+            primaryColor:   '#1A4B8C',
+            accentColor:    '#0099D4',
+            tagline:        'GROW TOGETHER',
+            websiteUrl:     'WWW.SKYRAKSYS.COM',
+            showQrCode:     true,
+            showDepartment: true,
+            showDesignation:true,
+            showWebsite:    true,
+        };
+        const settings = config && config.value ? JSON.parse(config.value) : defaultSettings;
+        res.json({ success: true, data: settings });
+    } catch (error) {
+        logger.error('Get ID Card Template Error:', { detail: error });
+        next(error);
+    }
+});
+
+// PUT to update the ID Card settings (Admin or HR only)
+router.put('/idcard-template', isAdminOrHR, async (req, res, next) => {
+    try {
+        const settings = req.body;
+        let config = await db.SystemConfig.findOne({
+            where: { category: 'idcard', key: 'settings' }
+        });
+
+        if (config) {
+            await config.update({
+                value: JSON.stringify(settings),
+                changedBy: req.user.id,
+                version: config.version + 1
+            });
+        } else {
+            await db.SystemConfig.create({
+                category: 'idcard',
+                key: 'settings',
+                value: JSON.stringify(settings),
+                changedBy: req.user.id,
+                version: 1
+            });
+        }
+
+        res.json({ success: true, message: 'ID Card settings updated successfully.', data: settings });
+    } catch (error) {
+        logger.error('Update ID Card Template Error:', { detail: error });
+        next(error);
+    }
+});
+
 module.exports = router;

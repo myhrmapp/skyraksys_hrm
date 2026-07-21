@@ -1,4 +1,5 @@
 const { validate, validateQuery } = require('../../../middleware/validate');
+const { createEmployeeSchema } = require('../../../middleware/validators/employee.validator');
 const Joi = require('joi');
 
 describe('Validate Middleware', () => {
@@ -131,6 +132,31 @@ describe('Validate Middleware', () => {
       expect(nextFunction).toHaveBeenCalled();
       expect(mockReq.validatedData.age).toBe(25);
       expect(mockReq.validatedData.active).toBe(true);
+    });
+  });
+
+  describe('employee schema regression guard', () => {
+    it('should strip the legacy accountNumber alias and keep bankAccountNumber', () => {
+      const payload = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        departmentId: '123e4567-e89b-12d3-a456-426614174000',
+        positionId: '123e4567-e89b-12d3-a456-426614174001',
+        hireDate: '2025-01-15',
+        accountNumber: '1234567890',
+        bankAccountNumber: '12345678901234'
+      };
+
+      const { error, value } = createEmployeeSchema.validate(payload, {
+        abortEarly: false,
+        stripUnknown: true,
+        convert: true
+      });
+
+      expect(error).toBeUndefined();
+      expect(value.bankAccountNumber).toBe('12345678901234');
+      expect(value.accountNumber).toBeUndefined();
     });
   });
 

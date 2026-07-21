@@ -498,10 +498,18 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
 
   // ---- Week navigation ----------------------------------------------------
 
+  const minAllowedWeek = dayjs().startOf('isoWeek').subtract(2, 'week');
   const maxAllowedWeek = dayjs().startOf('isoWeek').add(1, 'week');
+  const isAtMinWeek    = !currentWeek.isAfter(minAllowedWeek);
   const isAtMaxWeek    = !currentWeek.isBefore(maxAllowedWeek);
 
-  const goToPreviousWeek = () => setCurrentWeek((prev) => prev.subtract(1, 'week'));
+  const goToPreviousWeek = () => {
+    if (isAtMinWeek) {
+      showWarning('You can only enter timesheets up to 2 weeks in the past.');
+      return;
+    }
+    setCurrentWeek((prev) => prev.subtract(1, 'week'));
+  };
   const goToNextWeek = () => {
     if (isAtMaxWeek) {
       showWarning('You can only enter timesheets up to one week ahead.');
@@ -547,23 +555,36 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
         </Dialog>
       )}
       {/* Week navigator */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ 
+        mb: 3, 
+        p: 2, 
+        borderRadius: 4,
+        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+        border: '1px solid',
+        borderColor: 'divider',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
+      }}>
         <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
           <Stack direction="row" spacing={1} alignItems="center">
-            <IconButton
-              size="small"
-              onClick={goToPreviousWeek}
-              disabled={loading}
-              data-testid="timesheet-prev-week"
-            >
-              <PrevIcon />
-            </IconButton>
+            <Tooltip title={isAtMinWeek ? 'Cannot navigate beyond 2 weeks in the past' : 'Previous week'}>
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={goToPreviousWeek}
+                  disabled={loading || isAtMinWeek}
+                  data-testid="timesheet-prev-week"
+                  sx={{ bgcolor: 'background.paper', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
+                >
+                  <PrevIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
 
             <Box sx={{ minWidth: 200, textAlign: 'center' }}>
-              <Typography variant="h5" fontWeight={500}>
+              <Typography variant="h5" fontWeight={800} color="primary.main">
                 Week {currentWeek.isoWeek()}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" fontWeight={500}>
                 {currentWeek.format('MMM DD')} &ndash;{' '}
                 {currentWeek.endOf('isoWeek').format('MMM DD, YYYY')}
               </Typography>
@@ -576,6 +597,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                   onClick={goToNextWeek}
                   disabled={loading || isAtMaxWeek}
                   data-testid="timesheet-next-week"
+                  sx={{ bgcolor: 'background.paper', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
                 >
                   <NextIcon />
                 </IconButton>
@@ -587,8 +609,9 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
               startIcon={<TodayIcon />}
               onClick={goToCurrentWeek}
               disabled={loading}
-              variant="text"
-              sx={{ ml: 2 }}
+              variant="contained"
+              color="inherit"
+              sx={{ ml: 2, bgcolor: 'background.paper', color: 'text.primary', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', '&:hover': { bgcolor: 'grey.50' } }}
               data-testid="timesheet-today-button"
             >
               Today
@@ -600,11 +623,11 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
               label={statusConfig.label}
               color={statusConfig.color}
               size="small"
-              variant="outlined"
-              sx={{ fontWeight: 500 }}
+              variant="filled"
+              sx={{ fontWeight: 600, px: 1 }}
             />
             {lastSaveTime && (
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" fontWeight={500}>
                 Last saved: {dayjs(lastSaveTime).format('HH:mm')}
               </Typography>
             )}
@@ -615,13 +638,13 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
       {(isReadOnly || timesheetStatus === 'rejected') && (
         <Alert
           severity={timesheetStatus === 'rejected' ? 'error' : 'info'}
-          sx={{ mb: 2 }}
+          sx={{ mb: 3, borderRadius: 2 }}
         >
           This timesheet is <strong>{timesheetStatus}</strong>.
           {timesheetStatus === 'submitted' && ' It is awaiting approval.'}
           {timesheetStatus === 'approved'  && ' No further changes are allowed.'}
           {approverComments && (
-            <Box sx={{ mt: 0.5 }}>
+            <Box sx={{ mt: 1, p: 1.5, bgcolor: 'error.50', borderRadius: 1, color: 'error.900' }}>
               <strong>Manager comment:</strong> {approverComments}
             </Box>
           )}
@@ -629,35 +652,41 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
       )}
 
       {loading ? (
-        <LinearProgress />
+        <LinearProgress sx={{ borderRadius: 2 }} />
       ) : (
         <>
           {/* Entry grid */}
           <TableContainer
             component={Paper}
             elevation={0}
-            sx={{ borderRadius: 1, border: '1px solid', borderColor: 'divider', overflowX: 'auto' }}
+            sx={{ 
+              borderRadius: 4, 
+              border: '1px solid', 
+              borderColor: 'divider', 
+              overflowX: 'auto',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.04)'
+            }}
             data-testid="timesheet-entry-table"
           >
-            <Table size="medium" sx={{ minWidth: 1000 }}>
+            <Table size="medium" sx={{ minWidth: 1000, '& .MuiTableCell-root': { borderBottom: '1px solid rgba(224, 224, 224, 0.4)' } }}>
               <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.25' }}>
-                  <TableCell width="200px" sx={{ fontWeight: 500, color: 'text.secondary' }}>Project</TableCell>
-                  <TableCell width="200px" sx={{ fontWeight: 500, color: 'text.secondary' }}>Task</TableCell>
+                <TableRow sx={{ background: 'linear-gradient(to right, rgba(248,250,252,0.8), rgba(241,245,249,0.8))' }}>
+                  <TableCell width="200px" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Project</TableCell>
+                  <TableCell width="200px" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Task</TableCell>
                   {weekDates.map(({ day, shortLabel }) => (
-                    <TableCell key={day} align="center" width="100px" sx={{ fontWeight: 500, color: 'text.secondary' }}>
+                    <TableCell key={day} align="center" width="100px" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>
                       {shortLabel}
                     </TableCell>
                   ))}
-                  <TableCell align="center" width="100px" sx={{ fontWeight: 500, color: 'text.secondary' }}>Total</TableCell>
-                  <TableCell width="200px" sx={{ fontWeight: 500, color: 'text.secondary' }}>Notes</TableCell>
-                  <TableCell width="50px" />
+                  <TableCell align="center" width="100px" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Total</TableCell>
+                  <TableCell width="200px" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Notes</TableCell>
+                  <TableCell width="50px" sx={{ py: 2 }} />
                 </TableRow>
               </TableHead>
 
               <TableBody>
                 {tasks.map((task, index) => (
-                  <TableRow key={task.id} hover>
+                  <TableRow key={task.id} sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' } }}>
                     {/* Project select */}
                     <TableCell>
                       <FormControl fullWidth size="small" error={!!fieldErrors[`${task.id}_project`]}>
@@ -667,6 +696,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                           disabled={isReadOnly}
                           displayEmpty
                           inputProps={{ 'data-testid': `timesheet-project-select-${index}` }}
+                          sx={{ borderRadius: 2, bgcolor: isReadOnly ? 'grey.50' : 'background.paper' }}
                         >
                           <MenuItem value=""><em>Select Project</em></MenuItem>
                           {projects.map((p) => (
@@ -689,6 +719,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                           disabled={isReadOnly || !task.projectId}
                           displayEmpty
                           inputProps={{ 'data-testid': `timesheet-task-select-${index}` }}
+                          sx={{ borderRadius: 2, bgcolor: (isReadOnly || !task.projectId) ? 'grey.50' : 'background.paper' }}
                         >
                           <MenuItem value=""><em>Select Task</em></MenuItem>
                           {getTasksForProject(task.projectId).map((t) => (
@@ -720,11 +751,12 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                           sx={{
                             width: '80px',
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: 1,
+                              borderRadius: 2,
                               backgroundColor: isReadOnly ? 'grey.50' : 'white',
-                              '& fieldset': { borderColor: 'grey.300', borderWidth: '1px' },
-                              '&:hover fieldset': { borderColor: 'primary.main' },
-                              '&.Mui-focused fieldset': { borderColor: 'primary.main', borderWidth: '2px' },
+                              transition: 'all 0.2s',
+                              '& fieldset': { borderColor: 'divider', borderWidth: '1px' },
+                              '&:hover fieldset': { borderColor: 'primary.main', boxShadow: '0 2px 8px rgba(99,102,241,0.1)' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main', borderWidth: '2px', boxShadow: '0 4px 12px rgba(99,102,241,0.15)' },
                             },
                             '& .MuiOutlinedInput-input': { padding: '10px 8px' },
                           }}
@@ -734,7 +766,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
 
                     {/* Row total */}
                     <TableCell align="center">
-                      <Typography fontWeight={600} color="primary.main">
+                      <Typography fontWeight={700} color="primary.main">
                         {calcTaskTotal(task).toFixed(2)}
                       </Typography>
                     </TableCell>
@@ -750,6 +782,12 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                         placeholder="Add notes..."
                         id={`timesheet-notes-${index}`}
                         inputProps={{ 'data-testid': `timesheet-notes-${index}` }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: isReadOnly ? 'grey.50' : 'white',
+                          }
+                        }}
                       />
                     </TableCell>
 
@@ -761,6 +799,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                           onClick={() => deleteTask(task.id)}
                           color="error"
                           data-testid={`timesheet-delete-task-${index}`}
+                          sx={{ '&:hover': { bgcolor: 'error.50' } }}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -770,15 +809,15 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                 ))}
 
                 {/* Daily totals row */}
-                <TableRow sx={{ bgcolor: 'primary.50' }}>
-                  <TableCell colSpan={2} sx={{ fontWeight: 600 }}>Daily Totals</TableCell>
+                <TableRow sx={{ bgcolor: 'rgba(99, 102, 241, 0.05)' }}>
+                  <TableCell colSpan={2} sx={{ fontWeight: 700, color: 'primary.main' }}>Daily Totals</TableCell>
                   {weekDates.map(({ day }) => (
-                    <TableCell key={day} align="center" sx={{ fontWeight: 600 }}>
+                    <TableCell key={day} align="center" sx={{ fontWeight: 700, color: 'primary.main' }}>
                       {calcDayTotal(day).toFixed(2)}
                     </TableCell>
                   ))}
                   <TableCell align="center">
-                    <Typography fontWeight={700} color="primary.main" variant="h6">
+                    <Typography fontWeight={800} color="primary.main" variant="h6">
                       {calcWeekTotal().toFixed(2)}
                     </Typography>
                   </TableCell>
@@ -793,7 +832,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
             <Button
               startIcon={<AddIcon />}
               onClick={addTask}
-              sx={{ mt: 2, color: 'primary.main' }}
+              sx={{ mt: 2, color: 'primary.main', fontWeight: 600, borderRadius: 2 }}
               variant="text"
               data-testid="timesheet-add-task"
             >
@@ -803,13 +842,13 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
 
           {/* Save / Submit actions */}
           {!isReadOnly && (
-            <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3 }}>
+            <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 4 }}>
               <Button
-                variant="text"
+                variant="outlined"
                 startIcon={<SaveIcon />}
                 onClick={saveDraft}
                 disabled={saving || submitting || !hasUnsavedChanges}
-                sx={{ color: 'text.secondary' }}
+                sx={{ color: 'text.secondary', borderRadius: 2, fontWeight: 600, px: 3, borderColor: 'divider' }}
                 data-testid="timesheet-save-draft"
               >
                 {saving ? 'Saving...' : 'Save Draft'}
@@ -819,10 +858,16 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                 startIcon={<SendIcon />}
                 onClick={submitTimesheet}
                 disabled={saving || submitting}
-                sx={{
-                  bgcolor: 'primary.main',
-                  boxShadow: 'none',
-                  '&:hover': { bgcolor: 'primary.dark', boxShadow: 1 },
+                sx={{ 
+                  borderRadius: 2, 
+                  fontWeight: 600, 
+                  px: 4,
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                    boxShadow: '0 6px 20px 0 rgba(99, 102, 241, 0.39)',
+                  }
                 }}
                 data-testid="timesheet-submit"
               >

@@ -23,6 +23,20 @@ describe('Timesheet Validator Fixes - Task 3.7', () => {
   let testDepartment;
   let testPosition;
   let testEmployee;
+
+  // Compute a Monday relative to today (offset in weeks; 0 = this week, -1 = last week)
+  const getRelativeMonday = (weeksOffset = 0) => {
+    const d = new Date();
+    const day = d.getDay(); // 0=Sun, 1=Mon
+    const daysToMonday = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + daysToMonday + weeksOffset * 7);
+    return d;
+  };
+  const getRelativeSunday = (weeksOffset = 0) => {
+    const start = getRelativeMonday(weeksOffset);
+    start.setDate(start.getDate() + 6);
+    return start;
+  };
   let testProject;
   let testTask;
   let testTimesheet;
@@ -164,8 +178,8 @@ describe('Timesheet Validator Fixes - Task 3.7', () => {
     });
 
     test('Should accept timesheet with 0.01 hours (minimum)', async () => {
-      const weekStart = new Date('2026-01-26'); // Monday
-      const weekEnd = new Date('2026-02-01'); // Sunday
+      const weekStart = getRelativeMonday(-1); // Last Monday (within 2-week past window)
+      const weekEnd = getRelativeSunday(-1);   // Last Sunday
 
       const res = await request(app)
         .post('/api/timesheets')
@@ -174,8 +188,8 @@ describe('Timesheet Validator Fixes - Task 3.7', () => {
           employeeId: testEmployee.id,
           projectId: testProject.id,
           taskId: testTask.id,
-          weekStartDate: weekStart.toISOString(),
-          weekEndDate: weekEnd.toISOString(),
+          weekStartDate: weekStart.toISOString().split('T')[0],
+          weekEndDate: weekEnd.toISOString().split('T')[0],
           mondayHours: 0.01,
           tuesdayHours: 0,
           wednesdayHours: 0,
@@ -203,8 +217,8 @@ describe('Timesheet Validator Fixes - Task 3.7', () => {
     });
 
     test('Should accept timesheet with partial day hours', async () => {
-      const weekStart = new Date('2026-01-19'); // Monday
-      const weekEnd = new Date('2026-01-25'); // Sunday
+      const weekStart = getRelativeMonday(0); // This week Monday (current window)
+      const weekEnd = getRelativeSunday(0);   // This week Sunday
 
       const res = await request(app)
         .post('/api/timesheets')
@@ -213,8 +227,8 @@ describe('Timesheet Validator Fixes - Task 3.7', () => {
           employeeId: testEmployee.id,
           projectId: testProject.id,
           taskId: testTask.id,
-          weekStartDate: weekStart.toISOString(),
-          weekEndDate: weekEnd.toISOString(),
+          weekStartDate: weekStart.toISOString().split('T')[0],
+          weekEndDate: weekEnd.toISOString().split('T')[0],
           mondayHours: 4.5,
           tuesdayHours: 6.25,
           wednesdayHours: 3.75,
@@ -336,8 +350,8 @@ describe('Timesheet Validator Fixes - Task 3.7', () => {
     test('Should require totalHours to be consistent (if validators check this)', async () => {
       // Note: The current implementation may not validate day sum consistency
       // This test documents expected behavior
-      const weekStart = new Date('2026-01-12'); // Monday
-      const weekEnd = new Date('2026-01-18'); // Sunday
+      const weekStart = getRelativeMonday(1); // Next week Monday (within 1-week future window)
+      const weekEnd = getRelativeSunday(1);   // Next week Sunday
 
       const res = await request(app)
         .post('/api/timesheets')
@@ -346,8 +360,8 @@ describe('Timesheet Validator Fixes - Task 3.7', () => {
           employeeId: testEmployee.id,
           projectId: testProject.id,
           taskId: testTask.id,
-          weekStartDate: weekStart.toISOString(),
-          weekEndDate: weekEnd.toISOString(),
+          weekStartDate: weekStart.toISOString().split('T')[0],
+          weekEndDate: weekEnd.toISOString().split('T')[0],
           mondayHours: 8,
           tuesdayHours: 8,
           wednesdayHours: 8,

@@ -41,6 +41,7 @@ const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
                 editing={editing}
                 onChange={(val) => onChange('firstName', val)}
                 required
+                testId="field-firstName"
               />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
@@ -50,6 +51,7 @@ const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
                 editing={editing}
                 onChange={(val) => onChange('lastName', val)}
                 required
+                testId="field-lastName"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -59,6 +61,7 @@ const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
                 editing={editing}
                 type="date"
                 onChange={(val) => onChange('dateOfBirth', val)}
+                testId="field-dateOfBirth"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -95,6 +98,7 @@ const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
                 onChange={(val) => onChange('email', val)}
                 type="email"
                 required
+                testId="field-email"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -103,6 +107,7 @@ const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
                 value={employee.phone}
                 editing={editing}
                 onChange={(val) => onChange('phone', val)}
+                testId="field-phone"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -138,6 +143,7 @@ const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
                 value={employee.nationality}
                 editing={editing}
                 onChange={(val) => onChange('nationality', val)}
+                testId="field-nationality"
               />
             </Grid>
             <Grid item xs={12}>
@@ -147,6 +153,7 @@ const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
                 editing={editing}
                 onChange={(val) => onChange('address', val)}
                 multiline
+                testId="field-address"
               />
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
@@ -155,6 +162,7 @@ const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
                 value={employee.city}
                 editing={editing}
                 onChange={(val) => onChange('city', val)}
+                testId="field-city"
               />
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
@@ -163,6 +171,7 @@ const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
                 value={employee.state}
                 editing={editing}
                 onChange={(val) => onChange('state', val)}
+                testId="field-state"
               />
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
@@ -171,6 +180,7 @@ const PersonalInfoSection = ({ employee, editing, onChange, formatDate }) => {
                 value={employee.pinCode}
                 editing={editing}
                 onChange={(val) => onChange('pinCode', val)}
+                testId="field-pinCode"
               />
             </Grid>
           </Grid>

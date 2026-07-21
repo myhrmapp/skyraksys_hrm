@@ -547,6 +547,44 @@ router.put('/users/:userId/lock',
 );
 
 /**
+ * @route POST /api/auth/users/:userId/force-logout
+ * @desc Force logout user by destroying all their refresh tokens (Admin)
+ * @access Admin
+ */
+router.post('/users/:userId/force-logout',
+  authenticateToken,
+  authorize('admin'),
+  validateParams(validators.userIdParamSchema),
+  async (req, res, next) => {
+    try {
+      const { userId } = req.params;
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        throw new NotFoundError('User not found');
+      }
+
+      // Destroy all refresh tokens for this user
+      const RefreshToken = db.RefreshToken;
+      const deletedCount = await RefreshToken.destroy({
+        where: { userId }
+      });
+
+      res.json({
+        success: true,
+        message: 'User forced to logout successfully. All sessions terminated.',
+        data: { 
+          userId: user.id, 
+          tokensDestroyed: deletedCount 
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
  * @route POST /api/auth/users/:userId/send-welcome-email
  * @desc Send welcome email to user (Admin)
  * @access Admin

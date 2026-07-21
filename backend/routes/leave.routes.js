@@ -375,6 +375,17 @@ router.post('/:id/approve-cancellation',
 );
 
 /**
+ * @route POST /api/leaves/:id/reject-cancellation
+ * @desc Reject cancellation of a leave request
+ * @access Private (Manager/Admin/HR)
+ */
+router.post('/:id/reject-cancellation',
+  authorize(['manager', 'admin', 'hr']),
+  validateParams(validators.uuidParamSchema),
+  leaveController.rejectCancellation
+);
+
+/**
  * Helper: Restore leave balance when deleting a leave request
  * Handles Pending (restore pending→balance) and Approved (restore taken→balance) leaves
  */

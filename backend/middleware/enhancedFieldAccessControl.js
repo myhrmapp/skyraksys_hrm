@@ -189,7 +189,7 @@ function canAccessSensitiveData(userRole) {
 /**
  * Filter employee data based on user permissions
  */
-function filterEmployeeData(employeeData, userRole, userId, isOwnRecord = false) {
+function filterEmployeeData(employeeData, userRole, userId, isOwnRecord = false, req = null) {
   if (!employeeData) return null;
   
   const filteredData = {};
@@ -221,7 +221,17 @@ function filterEmployeeData(employeeData, userRole, userId, isOwnRecord = false)
     if (canViewField(userRole, field, isOwnRecord)) {
       // Additional check for sensitive fields
       if (SENSITIVE_FIELDS.includes(field)) {
-        if (canAccessSensitiveData(userRole) || isOwnRecord) {
+        let isAllowed = canAccessSensitiveData(userRole) || isOwnRecord;
+
+        // VAULT SECURITY CHECK: If the field is Salary or Salary Structure,
+        // and the vault is enabled, ONLY the Designated HR can view it (unless it's their own record).
+        if ((field === 'salary' || field === 'salaryStructure') && req && req.vaultConfig && req.vaultConfig.isEnabled) {
+          if (!isOwnRecord && req.user && req.user.id !== req.vaultConfig.designatedHrUserId) {
+            isAllowed = false; // Block access to vault data for non-designated HRs/Admins
+          }
+        }
+
+        if (isAllowed) {
           filteredData[field] = employeeData[field];
         } else {
           filteredData[field] = '***RESTRICTED***';
@@ -299,7 +309,7 @@ function enhancedFieldAccessControl(options = {}) {
       canAccessSensitiveData(req.userRole);
     
     req.filterEmployeeData = (employeeData, isOwnRecord = false) => 
-      filterEmployeeData(employeeData, req.userRole, req.userId, isOwnRecord);
+      filterEmployeeData(employeeData, req.userRole, req.userId, isOwnRecord, req);
     
     req.validateEditPermissions = (updateData, isOwnRecord = false) => 
       validateEditPermissions(updateData, req.userRole, isOwnRecord);

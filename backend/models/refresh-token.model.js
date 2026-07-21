@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     ipAddress: {
       type: DataTypes.STRING
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false
     }
   }, {
     tableName: 'refresh_tokens',

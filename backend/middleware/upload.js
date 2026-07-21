@@ -3,41 +3,26 @@ const path = require('path');
 const fs = require('fs');
 const logger = require('../utils/logger');
 
-// Create uploads directories if they don't exist
-const uploadDir = path.join(__dirname, '../uploads/employee-photos');
+// Company logos still served as static files — keep their directory
 const logoUploadDir = path.join(__dirname, '../uploads/company-logos');
-
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
 if (!fs.existsSync(logoUploadDir)) {
   fs.mkdirSync(logoUploadDir, { recursive: true });
 }
 
-// Configure multer for employee photo uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    // Create unique filename: employeeId-timestamp.extension
-    const employeeId = req.body.employeeId || 'temp';
-    const timestamp = Date.now();
-    const extension = path.extname(file.originalname);
-    cb(null, `${employeeId}-${timestamp}${extension}`);
-  }
-});
+// Employee photos: use memoryStorage — file goes into req.file.buffer
+// and is converted to base64 in the controller, then saved directly in DB.
+// No files are ever written to disk for employee photos.
+const memoryStorage = multer.memoryStorage();
 
 // File filter for images only
 const fileFilter = (req, file, cb) => {
   const allowedMimeTypes = [
     'image/jpeg',
-    'image/jpg', 
+    'image/jpg',
     'image/png',
     'image/webp'
   ];
-  
+
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
@@ -45,15 +30,15 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Configure upload limits
+// Upload limits
 const uploadLimits = {
-  fileSize: 5 * 1024 * 1024, // 5MB limit
-  files: 1 // Only one file at a time
+  fileSize: 5 * 1024 * 1024, // 5 MB
+  files: 1
 };
 
-// Create multer upload instances
+// Multer instance for employee photos (memory — no disk write)
 const upload = multer({
-  storage: storage,
+  storage: memoryStorage,
   fileFilter: fileFilter,
   limits: uploadLimits
 });
@@ -149,56 +134,39 @@ const uploadCompanyLogo = (req, res, next) => {
 };
 
 // Magic-byte file signature validation
-// Validates actual file content matches expected image types (prevents MIME spoofing)
-const IMAGE_SIGNATURES = {
-  'image/jpeg': [Buffer.from([0xFF, 0xD8, 0xFF])],
-  'image/jpg': [Buffer.from([0xFF, 0xD8, 0xFF])],
-  'image/png': [Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])],
-  'image/webp': [Buffer.from('RIFF'), Buffer.from('WEBP')] // bytes 0-3 = RIFF, bytes 8-11 = WEBP
-};
-
+// Now reads from req.file.buffer (memory storage) — no disk I/O needed
 const validateMagicBytes = (req, res, next) => {
   if (!req.file) return next();
 
-  const filePath = req.file.path;
-  try {
-    const fd = fs.openSync(filePath, 'r');
-    const header = Buffer.alloc(12);
-    fs.readSync(fd, header, 0, 12, 0);
-    fs.closeSync(fd);
+  // For memory storage, data is in req.file.buffer
+  const header = req.file.buffer ? req.file.buffer.slice(0, 12) : null;
 
-    const mimetype = req.file.mimetype;
-    let isValid = false;
+  if (!header) return next(); // No buffer means disk storage (logo) — skip
 
-    if (mimetype === 'image/jpeg' || mimetype === 'image/jpg') {
-      isValid = header[0] === 0xFF && header[1] === 0xD8 && header[2] === 0xFF;
-    } else if (mimetype === 'image/png') {
-      isValid = header.slice(0, 8).equals(Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]));
-    } else if (mimetype === 'image/webp') {
-      isValid = header.slice(0, 4).toString() === 'RIFF' && header.slice(8, 12).toString() === 'WEBP';
-    }
+  const mimetype = req.file.mimetype;
+  let isValid = false;
 
-    if (!isValid) {
-      // Delete the suspicious file
-      fs.unlinkSync(filePath);
-      logger.warn('Upload rejected: magic bytes mismatch', { 
-        mimetype, 
-        filename: req.file.originalname,
-        header: header.slice(0, 8).toString('hex')
-      });
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid file: file content does not match the declared image type.'
-      });
-    }
-
-    next();
-  } catch (err) {
-    // If we can't validate, reject the file
-    try { fs.unlinkSync(filePath); } catch (_) {}
-    logger.error('Magic byte validation error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'File validation failed' });
+  if (mimetype === 'image/jpeg' || mimetype === 'image/jpg') {
+    isValid = header[0] === 0xFF && header[1] === 0xD8 && header[2] === 0xFF;
+  } else if (mimetype === 'image/png') {
+    isValid = header.slice(0, 8).equals(Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]));
+  } else if (mimetype === 'image/webp') {
+    isValid = header.slice(0, 4).toString() === 'RIFF' && header.slice(8, 12).toString() === 'WEBP';
   }
+
+  if (!isValid) {
+    logger.warn('Upload rejected: magic bytes mismatch', {
+      mimetype,
+      filename: req.file.originalname,
+      header: header.slice(0, 8).toString('hex')
+    });
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid file: file content does not match the declared image type.'
+    });
+  }
+
+  next();
 };
 
 // Error handling middleware
@@ -208,7 +176,7 @@ const handleUploadError = (error, req, res, next) => {
   if (contentType.includes('application/json')) {
     return next();
   }
-  
+
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({
@@ -223,14 +191,14 @@ const handleUploadError = (error, req, res, next) => {
       });
     }
   }
-  
+
   if (error.message.includes('Only JPEG, PNG, and WebP images are allowed')) {
     return res.status(400).json({
       success: false,
       message: 'Invalid file type. Only JPEG, PNG, and WebP images are allowed.'
     });
   }
-  
+
   return res.status(500).json({
     success: false,
     message: 'File upload error: ' + error.message
@@ -242,6 +210,5 @@ module.exports = {
   uploadCompanyLogo,
   handleUploadError,
   validateMagicBytes,
-  uploadDir,
   logoUploadDir
 };

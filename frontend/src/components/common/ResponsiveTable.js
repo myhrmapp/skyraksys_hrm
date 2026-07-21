@@ -26,6 +26,7 @@ import {
   ExpandLess as ExpandLessIcon,
   Inbox as InboxIcon
 } from '@mui/icons-material';
+import EmptyState from '../shared/EmptyState';
 
 /**
  * Enhanced Responsive Table Component
@@ -56,11 +57,12 @@ const ResponsiveTable = ({
   if (!data || data.length === 0) {
     return (
       <Card>
-        <CardContent sx={{ py: 6, textAlign: 'center' }}>
-          <InboxIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-          <Typography variant="body1" color="text.secondary">
-            No records found
-          </Typography>
+        <CardContent>
+          <EmptyState
+            icon={<InboxIcon sx={{ fontSize: 48 }} />}
+            title="No records found"
+            description="There are no items available for this view yet."
+          />
         </CardContent>
       </Card>
     );

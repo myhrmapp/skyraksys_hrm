@@ -80,6 +80,18 @@ class LeaveService {
     return normalizeResponse(response);
   }
 
+  // Approve leave cancellation request
+  async approveCancellation(id, comments = '') {
+    const response = await http.post(`/leaves/${id}/approve-cancellation`, { comments });
+    return normalizeResponse(response);
+  }
+
+  // Reject leave cancellation request
+  async rejectCancellation(id, comments = '') {
+    const response = await http.post(`/leaves/${id}/reject-cancellation`, { comments });
+    return normalizeResponse(response);
+  }
+
   // --- Admin Methods ---
 
   // Create a new leave balance

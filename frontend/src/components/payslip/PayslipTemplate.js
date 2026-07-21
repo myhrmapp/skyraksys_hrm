@@ -169,7 +169,7 @@ const PayslipTemplate = ({
             </TableRow>
             <TableRow>
               <TableCell>Designation</TableCell>
-              <TableCell><strong>{employee?.position?.title || 'N/A'}</strong></TableCell>
+              <TableCell><strong>{employee?.position?.title || employee?.position?.name || employee?.designation || 'N/A'}</strong></TableCell>
               <TableCell>Paid Days</TableCell>
               <TableCell><strong>{mergedData.paidDays}</strong></TableCell>
             </TableRow>
@@ -193,9 +193,9 @@ const PayslipTemplate = ({
             </TableRow>
             <TableRow>
               <TableCell>UAN</TableCell>
-              <TableCell><strong>{employee?.universalAccountNumber || 'N/A'}</strong></TableCell>
+              <TableCell><strong>{employee?.uanNumber || 'N/A'}</strong></TableCell>
               <TableCell>PF No</TableCell>
-              <TableCell><strong>{employee?.providentFundNumber || 'N/A'}</strong></TableCell>
+              <TableCell><strong>{employee?.pfNumber || 'N/A'}</strong></TableCell>
             </TableRow>
           </TableBody>
         </Table>

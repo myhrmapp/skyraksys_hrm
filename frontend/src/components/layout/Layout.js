@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Drawer,
@@ -18,7 +18,10 @@ import {
   useTheme,
   Stack,
   Chip,
-  Button
+  Button,
+  Badge,
+  Collapse,
+  alpha
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -31,6 +34,8 @@ import {
   Assessment as ReportsIcon,
   SupervisorAccount as ManagerIcon,
   ExpandMore,
+  ExpandLess,
+  ChevronRight,
   Menu as MenuIcon,
   Folder,
   Person as PersonIcon,
@@ -43,20 +48,35 @@ import {
   Notifications,
   Help,
   Logout as LogoutIcon,
-  Assessment
+  Assessment,
+  Campaign as CampaignIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNotifications } from '../../contexts/NotificationContext';
+import BroadcastPopup from '../features/notifications/BroadcastPopup';
+import { buildPhotoUrl } from '../../utils/photoUrl';
 
-const drawerWidth = 280;
+const drawerWidth = 260;
 
 const Layout = () => {
   const { user, logout, isAdmin, isHR, isManager } = useAuth();
+  const { notifications } = useNotifications();
   const theme = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
+  const unreadCount = notifications.filter((notification) => !notification.read).length;
   
   // State management
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [expandedGroups, setExpandedGroups] = useState({});
+
+  const toggleGroup = (groupId) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
+    }));
+  };
 
   // Handler functions
   const handleDrawerToggle = () => {
@@ -81,87 +101,71 @@ const Layout = () => {
     if (isAdmin || isHR) {
       return [
         {
-          id: 'dashboard',
-          label: 'Dashboard',
-          icon: <DashboardIcon />,
+          id: 'self-service',
+          label: 'My Workspace',
+          icon: <PersonIcon />,
+          sectionHeader: 'Self Service',
+          items: [
+            { label: 'My Dashboard', path: '/dashboard?view=self', icon: <DashboardIcon /> },
+            { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> },
+            { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
+            { label: 'My Leave', path: '/leave', icon: <LeaveIcon /> },
+            { label: 'My Attendance', path: '/attendance', icon: <CalendarToday /> },
+            { label: 'My Payslips', path: '/employee-payslips', icon: <Receipt /> },
+            { label: 'My Goals', path: '/goals', icon: <Assessment /> }
+          ]
+        },
+        {
+          id: 'core-hr',
+          label: 'Core HR',
+          icon: <PeopleIcon />,
           sectionHeader: 'Administration',
           items: [
-            { label: 'Overview', path: '/admin-dashboard', icon: <DashboardIcon /> },
-            { label: 'Performance', path: '/performance-dashboard', icon: <Assessment /> }
-          ]
-        },
-        {
-          id: 'people',
-          label: 'People',
-          icon: <PeopleIcon />,
-          items: [
-            { label: 'All Employees', path: '/employees', icon: <PeopleIcon /> },
+            { label: 'Admin Overview', path: '/dashboard', icon: <DashboardIcon /> },
+            { label: 'Employee Directory', path: '/employees', icon: <PeopleIcon /> },
             { label: 'Employee Records', path: '/employee-records', icon: <Folder /> },
-            { label: 'Employee Reviews', path: '/employee-reviews', icon: <Assessment /> },
-            { label: 'Organization', path: '/organization', icon: <BusinessIcon /> }
+            { label: 'Performance & Reviews', path: '/employee-reviews', icon: <Assessment /> },
+            { label: 'Goals & OKRs', path: '/goals', icon: <Assessment /> },
+            { label: 'Organization', path: '/organization', icon: <BusinessIcon /> },
+            { label: 'Company Broadcasts', path: '/admin/broadcasts', icon: <CampaignIcon /> }
           ]
         },
         {
-          id: 'leave',
-          label: 'Leave Management',
-          icon: <LeaveIcon />,
+          id: 'time-ops',
+          label: 'Time & Attendance',
+          icon: <TimesheetIcon />,
           items: [
-            { label: 'Leave Requests', path: '/leave-management', icon: <CheckCircleOutline /> },
+            { label: 'Timesheet Approvals', path: '/timesheets?view=approvals', icon: <TimesheetIcon /> },
+            { label: 'Leave Management', path: '/leave?view=management', icon: <CheckCircleOutline /> },
+            { label: 'Attendance Management', path: '/attendance?view=management', icon: <CalendarToday /> },
             { label: 'Leave Balances', path: '/admin/leave-balances', icon: <AccountBalanceWallet /> },
             { label: 'Leave Accrual', path: '/admin/leave-accrual', icon: <AccountBalanceWallet /> },
             { label: 'Leave Types', path: '/admin/leave-types', icon: <CheckCircleOutline /> }
           ]
         },
         {
-          id: 'time',
-          label: 'Time & Attendance',
-          icon: <TimesheetIcon />,
-          items: [
-            { label: 'Timesheet Approvals', path: '/timesheets?view=approvals', icon: <TimesheetIcon /> },
-            { label: 'Attendance', path: '/attendance-management', icon: <CalendarToday /> },
-            { label: 'Projects', path: '/project-task-config', icon: <ProjectIcon /> }
-          ]
-        },
-        {
-          id: 'payroll',
-          label: 'Payroll & Reports',
+          id: 'finance-ops',
+          label: 'Finance & Operations',
           icon: <PayrollIcon />,
           items: [
             { label: 'Payroll Management', path: '/payroll-management', icon: <PayrollIcon /> },
-            { label: 'Payslip Templates', path: '/admin/payslip-templates', icon: <FileCopy /> },
-            { label: 'Reports', path: '/reports', icon: <ReportsIcon /> }
+            { label: 'Template Hub', path: '/admin/payslip-templates', icon: <FileCopy /> },
+            { label: 'Client Management', path: '/clients', icon: <BusinessIcon /> },
+            { label: 'Client Invoices', path: '/billing-invoices', icon: <Receipt /> },
+            { label: 'Projects & Tasks', path: '/project-task-config', icon: <ProjectIcon /> }
           ]
         },
         {
-          id: 'settings',
-          label: 'System',
+          id: 'analytics-system',
+          label: 'Analytics & System',
           icon: <SettingsIcon />,
           items: [
+            { label: 'Reports & Analytics', path: '/reports', icon: <ReportsIcon /> },
             { label: 'User Management', path: '/user-management', icon: <ManagerIcon /> },
             { label: 'System Settings', path: '/admin/settings-hub', icon: <SettingsIcon /> },
-            { label: 'Restore Records', path: '/admin/restore', icon: <SettingsIcon /> }
-          ]
-        },
-        {
-          id: 'mystuff',
-          label: 'My Work',
-          icon: <PersonIcon />,
-          sectionHeader: 'Self Service',
-          items: [
-            { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
-            { label: 'My Leave', path: '/leave-requests', icon: <LeaveIcon /> },
-            { label: 'My Payslips', path: '/employee-payslips', icon: <Receipt /> },
-            { label: 'My Attendance', path: '/my-attendance', icon: <CalendarToday /> },
-            { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> }
-          ]
-        },
-        {
-          id: 'help',
-          label: 'Help',
-          icon: <Help />,
-          items: [
-            { label: 'User Guide', path: '/user-guide', icon: <Help /> },
-            { label: 'System Showcase', path: '/system-showcase', icon: <DashboardIcon /> }
+            { label: 'Security Vault', path: '/admin/vault', icon: <SettingsIcon /> },
+            { label: 'Restore Records', path: '/admin/restore', icon: <SettingsIcon /> },
+            { label: 'User Guide', path: '/user-guide', icon: <Help /> }
           ]
         }
       ];
@@ -170,46 +174,41 @@ const Layout = () => {
     if (isManager) {
       return [
         {
-          id: 'dashboard',
-          label: 'Dashboard',
-          icon: <DashboardIcon />,
-          sectionHeader: 'Team Management',
+          id: 'self-service',
+          label: 'My Workspace',
+          icon: <PersonIcon />,
+          sectionHeader: 'Self Service',
           items: [
-            { label: 'Overview', path: '/manager-dashboard', icon: <DashboardIcon /> },
-            { label: 'Team Performance', path: '/performance-dashboard', icon: <Assessment /> }
+            { label: 'My Dashboard', path: '/dashboard?view=self', icon: <DashboardIcon /> },
+            { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> },
+            { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
+            { label: 'My Leave', path: '/leave', icon: <LeaveIcon /> },
+            { label: 'My Attendance', path: '/attendance', icon: <CalendarToday /> },
+            { label: 'My Tasks', path: '/my-tasks', icon: <ProjectIcon /> },
+            { label: 'My Payslips', path: '/employee-payslips', icon: <Receipt /> },
+            { label: 'My Goals', path: '/goals', icon: <Assessment /> }
           ]
         },
         {
-          id: 'people',
-          label: 'My Team',
+          id: 'team-mgmt',
+          label: 'Team Management',
           icon: <PeopleIcon />,
+          sectionHeader: 'Manager Work',
           items: [
+            { label: 'Overview', path: '/dashboard', icon: <DashboardIcon /> },
+            { label: 'Team Performance', path: '/performance-dashboard', icon: <Assessment /> },
             { label: 'Team Members', path: '/employees', icon: <PeopleIcon /> },
             { label: 'Employee Reviews', path: '/employee-reviews', icon: <Assessment /> }
           ]
         },
         {
-          id: 'work',
-          label: 'Approvals',
+          id: 'approvals',
+          label: 'Approvals & Work',
           icon: <CheckCircleOutline />,
           items: [
-            { label: 'Leave Requests', path: '/leave-management', icon: <LeaveIcon /> },
+            { label: 'Leave Requests', path: '/leave?view=management', icon: <LeaveIcon /> },
             { label: 'Timesheet Approvals', path: '/timesheets?view=approvals', icon: <TimesheetIcon /> },
             { label: 'Projects', path: '/project-task-config', icon: <ProjectIcon /> }
-          ]
-        },
-        {
-          id: 'mystuff',
-          label: 'My Work',
-          icon: <PersonIcon />,
-          sectionHeader: 'Self Service',
-          items: [
-            { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
-            { label: 'My Leave', path: '/leave-requests', icon: <LeaveIcon /> },
-            { label: 'My Payslips', path: '/employee-payslips', icon: <Receipt /> },
-            { label: 'My Attendance', path: '/my-attendance', icon: <CalendarToday /> },
-            { label: 'My Tasks', path: '/my-tasks', icon: <ProjectIcon /> },
-            { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> }
           ]
         },
         {
@@ -217,8 +216,7 @@ const Layout = () => {
           label: 'Help',
           icon: <Help />,
           items: [
-            { label: 'User Guide', path: '/user-guide', icon: <Help /> },
-            { label: 'System Showcase', path: '/system-showcase', icon: <DashboardIcon /> }
+            { label: 'User Guide', path: '/user-guide', icon: <Help /> }
           ]
         }
       ];
@@ -227,25 +225,18 @@ const Layout = () => {
     // Employee menu
     return [
       {
-        id: 'dashboard',
-        label: 'Dashboard',
-        icon: <DashboardIcon />,
-        items: [
-          { label: 'Overview', path: '/employee-dashboard', icon: <DashboardIcon /> }
-        ]
-      },
-      {
-        id: 'mystuff',
+        id: 'self-service',
         label: 'My Workspace',
         icon: <PersonIcon />,
         items: [
+          { label: 'Overview', path: '/dashboard', icon: <DashboardIcon /> },
+          { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> },
           { label: 'My Timesheet', path: '/timesheets', icon: <TimesheetIcon /> },
-          { label: 'My Leave', path: '/leave-requests', icon: <LeaveIcon /> },
-          { label: 'My Payslips', path: '/employee-payslips', icon: <PayrollIcon /> },
-          { label: 'My Attendance', path: '/my-attendance', icon: <CalendarToday /> },
-          { label: 'My Reviews', path: '/employee-reviews', icon: <Assessment /> },
+          { label: 'My Leave', path: '/leave', icon: <LeaveIcon /> },
+          { label: 'My Attendance', path: '/attendance', icon: <CalendarToday /> },
           { label: 'My Tasks', path: '/my-tasks', icon: <ProjectIcon /> },
-          { label: 'My Profile', path: '/my-profile', icon: <PersonIcon /> }
+          { label: 'My Goals', path: '/goals', icon: <Assessment /> },
+          { label: 'My Payslips', path: '/employee-payslips', icon: <PayrollIcon /> }
         ]
       },
       {
@@ -253,41 +244,48 @@ const Layout = () => {
         label: 'Help',
         icon: <Help />,
         items: [
-          { label: 'User Guide', path: '/user-guide', icon: <Help /> },
-          { label: 'System Showcase', path: '/system-showcase', icon: <DashboardIcon /> }
+          { label: 'User Guide', path: '/user-guide', icon: <Help /> }
         ]
       }
     ];
   }, [isAdmin, isHR, isManager]);
 
+  // Auto-expand group based on active route
+  React.useEffect(() => {
+    const activeGroup = menuStructure.find(g => 
+      g.items.some(item => location.pathname.startsWith(item.path.split('?')[0]))
+    );
+    if (activeGroup && !expandedGroups[activeGroup.id]) {
+      setExpandedGroups(prev => ({ ...prev, [activeGroup.id]: true }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, menuStructure]);
+
     const modernDrawerContent = (
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        {/* Minimal Header */}
-        <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Stack direction="row" alignItems="center" spacing={1.5}>
-            <BusinessIcon sx={{ color: 'primary.main', fontSize: 24 }} />
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
-                fontWeight: 500,
-                color: 'text.primary'
-              }}
-            >
-              SKYRAKSYS HRM
-            </Typography>
-          </Stack>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg, #0A2540 0%, #0D3361 55%, #0A2540 100%)' }}>
+        {/* Brand Header */}
+        <Box sx={{ px: 2, py: 2, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          {/* White pill background so the logo renders cleanly on dark sidebar */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'white', borderRadius: 2, px: 2, py: 1.5 }}>
+            <img
+              src="/logo-full.png"
+              alt="SKYRAKSYS Technologies"
+              style={{ maxWidth: '160px', width: '100%', height: 'auto' }}
+            />
+          </Box>
+          <Box sx={{ height: '2px', background: 'linear-gradient(90deg, transparent, #FF8C00, #FF3399, #9B30FF, transparent)', borderRadius: 2, mt: 1.5 }} />
         </Box>
 
-        {/* Minimal Navigation */}
-        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+        {/* Premium Navigation */}
+        <Box sx={{ flexGrow: 1, overflow: 'auto', '&::-webkit-scrollbar': { width: '4px' }, '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '4px' } }}>
           <List sx={{ py: 1 }}>
             {menuStructure.map((group) => (
               <React.Fragment key={group.id}>
-                {/* Section Header (Administration / Self Service / etc.) */}
+                {/* Section Header */}
                 {group.sectionHeader && (
-                  <Box sx={{ mt: group.id !== 'dashboard' ? 1 : 0 }}>
-                    {group.id !== 'dashboard' && (
-                      <Divider sx={{ mb: 1.5 }} />
+                  <Box sx={{ mt: group.id !== 'dashboard' && group.id !== 'self-service' ? 1 : 0 }}>
+                    {group.id !== 'dashboard' && group.id !== 'self-service' && (
+                      <Divider sx={{ mb: 1.5, borderColor: 'rgba(255,255,255,0.08)' }} />
                     )}
                     <Typography
                       variant="overline"
@@ -295,7 +293,7 @@ const Layout = () => {
                         px: 2,
                         py: 0.5,
                         display: 'block',
-                        color: 'primary.main',
+                        color: '#33B8E8',
                         fontWeight: 700,
                         letterSpacing: 1.5,
                         fontSize: '0.65rem'
@@ -306,82 +304,93 @@ const Layout = () => {
                   </Box>
                 )}
                 
-                {/* Group Label */}
-                <Typography
-                  variant="caption"
+                {/* Accordion Header */}
+                <ListItemButton
+                  onClick={() => toggleGroup(group.id)}
                   sx={{
                     px: 2,
                     py: 1,
-                    display: 'block',
-                    color: 'text.secondary',
-                    fontWeight: 500,
-                    textTransform: 'uppercase',
-                    letterSpacing: 1
+                    mx: 1,
+                    mb: 0.5,
+                    borderRadius: 2,
+                    color: expandedGroups[group.id] ? '#0099D4' : 'rgba(255,255,255,0.75)',
+                    bgcolor: expandedGroups[group.id] ? 'rgba(0,153,212,0.12)' : 'transparent',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.07)'
+                    }
                   }}
                 >
-                  {group.label}
-                </Typography>
+                  <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
+                    {group.icon}
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={group.label} 
+                    primaryTypographyProps={{ fontWeight: expandedGroups[group.id] ? 600 : 500, fontSize: '0.875rem' }} 
+                  />
+                  {expandedGroups[group.id] ? <ExpandLess sx={{ fontSize: 18 }} /> : <ChevronRight sx={{ fontSize: 18 }} />}
+                </ListItemButton>
                 
                 {/* Group Items */}
-                {group.items.map((item) => (
-                  <ListItemButton
-                    key={item.path}
-                    component={NavLink}
-                    to={item.path}
-                    data-testid={`nav-${item.path.replace(/\//g, '-').replace(/^-/, '')}`}
-                    sx={{
-                      py: 1,
-                      px: 2,
-                      mx: 1,
-                      mb: 0.5,
-                      borderRadius: 1,
-                      color: 'text.secondary',
-                      '&.active': {
-                        backgroundColor: 'action.selected',
-                        borderLeft: '3px solid',
-                        borderLeftColor: 'primary.main',
-                        color: 'primary.main',
-                        '& .MuiListItemIcon-root': {
-                          color: 'primary.main'
-                        }
-                      },
-                      '&:hover': {
-                        backgroundColor: 'action.hover'
-                      }
-                    }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
-                      {item.icon}
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary={item.label}
-                      primaryTypographyProps={{
-                        fontSize: '0.875rem',
-                        fontWeight: 400
-                      }}
-                    />
-                    {item.badge && (
-                      <Chip
-                        label={item.badge}
-                        size="small"
-                        color={item.badgeColor || 'default'}
-                        sx={{ height: 20, fontSize: '0.65rem' }}
-                      />
-                    )}
-                  </ListItemButton>
-                ))}
+                <Collapse in={expandedGroups[group.id]} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    {group.items.map((item) => (
+                      <ListItemButton
+                        key={item.path}
+                        component={NavLink}
+                        to={item.path}
+                        data-testid={`nav-${item.path.replaceAll('/', '-').replace(/^-/, '')}`}
+                        sx={{
+                          py: 0.75,
+                          pl: 6,
+                          pr: 2,
+                          mx: 1,
+                          mb: 0.5,
+                          borderRadius: 2,
+                          color: 'rgba(255,255,255,0.55)',
+                          '&.active': {
+                            backgroundColor: 'rgba(0,153,212,0.15)',
+                            color: '#33B8E8',
+                            boxShadow: 'inset 3px 0 0 #0099D4',
+                            '& .MuiListItemIcon-root': { color: '#0099D4' },
+                            '& .MuiListItemText-primary': { fontWeight: 700 }
+                          },
+                          '&:hover': {
+                            backgroundColor: 'rgba(255,255,255,0.07)',
+                            color: 'rgba(255,255,255,0.9)'
+                          }
+                        }}
+                      >
+                        <ListItemText 
+                          primary={item.label}
+                          primaryTypographyProps={{
+                            fontSize: '0.85rem',
+                            fontWeight: 400
+                          }}
+                        />
+                        {item.badge && (
+                          <Chip
+                            label={item.badge}
+                            size="small"
+                            color={item.badgeColor || 'default'}
+                            sx={{ height: 20, fontSize: '0.65rem' }}
+                          />
+                        )}
+                      </ListItemButton>
+                    ))}
+                  </List>
+                </Collapse>
                 
                 {/* Subtle divider between groups */}
-                <Box sx={{ height: 8 }} />
+                <Box sx={{ height: 4 }} />
               </React.Fragment>
             ))}
           </List>
         </Box>
 
-        {/* Minimal Footer */}
-        <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            v2.0
+        {/* Footer */}
+        <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem' }}>
+            SKYRAKSYS HRM v2.0
           </Typography>
         </Box>
       </Box>
@@ -425,9 +434,11 @@ const Layout = () => {
         sx={{
           width: { md: `calc(100% - ${drawerWidth}px)` },
           ml: { md: `${drawerWidth}px` },
-          bgcolor: 'background.paper',
+          bgcolor: alpha(theme.palette.background.paper, 0.75),
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
           color: 'text.primary',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           borderBottom: `1px solid ${theme.palette.divider}`
         }}
       >
@@ -445,31 +456,11 @@ const Layout = () => {
           
           {/* Logo and Title */}
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <Avatar 
-              sx={{ 
-                bgcolor: 'primary.main', 
-                mr: 2,
-                width: 32,
-                height: 32,
-                fontSize: '1rem'
-              }}
-            >
-              S
-            </Avatar>
-            <Typography 
-              variant="h6" 
-              noWrap 
-              component="div" 
-              sx={{ 
-                fontWeight: 'bold',
-                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}
-            >
-              SKYRAKSYS HRM
-            </Typography>
+            <img
+              src="/logo-full.png"
+              alt="SKYRAKSYS Technologies"
+              style={{ height: '30px', width: 'auto', marginRight: '8px' }}
+            />
           </Box>
 
           {/* User Profile Section */}
@@ -493,8 +484,11 @@ const Layout = () => {
               color="inherit"
               data-testid="layout-notifications-button"
               sx={{ mr: 1 }}
+              onClick={() => navigate('/notifications')}
             >
-              <Notifications />
+              <Badge badgeContent={unreadCount} color="error" overlap="circular">
+                <Notifications />
+              </Badge>
             </IconButton>
 
             <Button
@@ -509,13 +503,15 @@ const Layout = () => {
               }}
               startIcon={
                 <Avatar 
+                  src={(user?.photoUrl || user?.employee?.photoUrl) ? buildPhotoUrl(user?.photoUrl || user?.employee?.photoUrl) : undefined}
                   sx={{ 
                     width: 32, 
                     height: 32,
-                    bgcolor: 'primary.main'
+                    bgcolor: 'primary.main',
+                    border: '2px solid rgba(255,255,255,0.8)'
                   }}
                 >
-                  {user?.firstName?.charAt(0) || 'U'}
+                  {user?.firstName?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || 'U'}
                 </Avatar>
               }
               endIcon={<ExpandMore />}
@@ -549,9 +545,8 @@ const Layout = () => {
             '& .MuiDrawer-paper': { 
               boxSizing: 'border-box', 
               width: drawerWidth,
-              backgroundColor: 'background.paper',
-              borderRight: '1px solid',
-              borderRightColor: 'divider'
+              background: 'transparent',
+              borderRight: 'none'
             }
           }}
         >
@@ -566,9 +561,9 @@ const Layout = () => {
             '& .MuiDrawer-paper': { 
               boxSizing: 'border-box', 
               width: drawerWidth,
-              backgroundColor: 'background.paper',
-              borderRight: '1px solid',
-              borderRightColor: 'divider'
+              background: 'transparent',
+              borderRight: 'none',
+              boxShadow: '4px 0 24px rgba(0,0,0,0.25)'
             }
           }}
           open
@@ -617,8 +612,11 @@ const Layout = () => {
           data-testid="layout-menu-view-profile"
           sx={{ py: 1.5 }}
         >
-          <Avatar sx={{ width: 32, height: 32, mr: 2, bgcolor: 'primary.main' }}>
-            {user?.firstName?.charAt(0) || 'U'}
+          <Avatar 
+            src={(user?.photoUrl || user?.employee?.photoUrl) ? buildPhotoUrl(user?.photoUrl || user?.employee?.photoUrl) : undefined}
+            sx={{ width: 32, height: 32, mr: 2, bgcolor: 'primary.main' }}
+          >
+            {user?.firstName?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || 'U'}
           </Avatar>
           <Box>
             <Typography variant="body2" fontWeight="medium">
@@ -631,6 +629,18 @@ const Layout = () => {
         </MenuItem>
         
         <Divider />
+        
+        <MenuItem onClick={() => {
+            handleProfileMenuClose();
+            navigate('/notifications');
+          }}
+          data-testid="layout-menu-notifications"
+        >
+          <ListItemIcon>
+            <Notifications fontSize="small" />
+          </ListItemIcon>
+          Notifications
+        </MenuItem>
         
         <MenuItem onClick={() => {
             handleProfileMenuClose();
@@ -685,7 +695,7 @@ const Layout = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 2, sm: 3, md: 4 },
           width: { md: `calc(100% - ${drawerWidth}px)` },
           mt: { xs: 7, md: 8 },
           minHeight: 'calc(100vh - 64px)',
@@ -694,6 +704,7 @@ const Layout = () => {
       >
         <Outlet />
       </Box>
+      <BroadcastPopup />
     </Box>
   );
 };

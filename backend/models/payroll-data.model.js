@@ -203,5 +203,60 @@ module.exports = (sequelize) => {
     });
   };
 
+  const VaultCrypto = require('../utils/vaultCrypto');
+
+  PayrollData.beforeSave(async (payrollData, options) => {
+    try {
+      const config = await sequelize.models.PayrollVaultConfig.findOne();
+      if (config && config.isEnabled) {
+        const payload = {
+          grossSalary: payrollData.getDataValue('grossSalary'),
+          netSalary: payrollData.getDataValue('netSalary'),
+          variableEarnings: payrollData.getDataValue('variableEarnings'),
+          variableDeductions: payrollData.getDataValue('variableDeductions'),
+          leaveAdjustments: payrollData.getDataValue('leaveAdjustments')
+        };
+        const encrypted = VaultCrypto.encryptPayload(payload);
+        payrollData.setDataValue('encryptedFinancials', JSON.stringify(encrypted));
+        
+        payrollData.setDataValue('grossSalary', null);
+        payrollData.setDataValue('netSalary', null);
+        payrollData.setDataValue('variableEarnings', null);
+        payrollData.setDataValue('variableDeductions', null);
+        payrollData.setDataValue('leaveAdjustments', null);
+      }
+    } catch (e) {
+      console.error('Error encrypting payrollData before save:', e);
+    }
+  });
+
+  const decryptPayrollData = async (payrollData) => {
+    const encryptedDataStr = payrollData.getDataValue('encryptedFinancials');
+    if (payrollData && encryptedDataStr) {
+      try {
+        const enc = JSON.parse(encryptedDataStr);
+        const payload = VaultCrypto.decryptPayload(enc.encryptedData, enc.iv, enc.authTag);
+        payrollData.setDataValue('grossSalary', payload.grossSalary);
+        payrollData.setDataValue('netSalary', payload.netSalary);
+        payrollData.setDataValue('variableEarnings', payload.variableEarnings);
+        payrollData.setDataValue('variableDeductions', payload.variableDeductions);
+        payrollData.setDataValue('leaveAdjustments', payload.leaveAdjustments);
+      } catch (e) {
+        console.error('Failed to decrypt payrollData:', e);
+      }
+    }
+  };
+
+  PayrollData.afterFind(async (result, options) => {
+    if (!result) return;
+    if (Array.isArray(result)) {
+      for (const p of result) {
+        await decryptPayrollData(p);
+      }
+    } else {
+      await decryptPayrollData(result);
+    }
+  });
+
   return PayrollData;
 };

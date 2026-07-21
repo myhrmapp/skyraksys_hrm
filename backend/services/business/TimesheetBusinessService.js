@@ -228,7 +228,7 @@ class TimesheetBusinessService extends BaseBusinessService {
    * Submit timesheet for approval
    * 
    * Business Rules:
-   * - Only Draft timesheets can be submitted
+  * - Only Draft or Rejected timesheets can be submitted
    * - Employees submit own, admins can submit any
    * 
    * @param {string} id - Time entry ID
@@ -254,8 +254,8 @@ class TimesheetBusinessService extends BaseBusinessService {
       }
     }
 
-    if (timeEntry.status !== 'Draft') {
-      throw new BadRequestError('Can only submit draft timesheets');
+    if (!['Draft', 'Rejected'].includes(timeEntry.status)) {
+      throw new BadRequestError('Can only submit draft or rejected timesheets');
     }
 
     await this.timesheetDataService.update(id, { 
@@ -271,7 +271,7 @@ class TimesheetBusinessService extends BaseBusinessService {
    * Submit all timesheets for a week
    * 
    * Business Rules:
-   * - Only Draft timesheets can be submitted
+  * - Only Draft or Rejected timesheets can be submitted
    * - All timesheets for the week must belong to the employee
    * 
    * @param {string} weekStartDate - Week start date (YYYY-MM-DD)
@@ -287,19 +287,19 @@ class TimesheetBusinessService extends BaseBusinessService {
 
     const employeeId = currentUser.employee.id;
 
-    // Find all draft timesheets for this week for the employee (exact date match)
+    // Find all draft/rejected timesheets for this week for the employee (exact date match)
     const timesheets = await this.timesheetDataService.findAll({
       where: {
         employeeId,
         weekStartDate,
-        status: 'Draft',
+        status: { [db.Sequelize.Op.in]: ['Draft', 'Rejected'] },
       },
     });
 
     const tsArray = Array.isArray(timesheets) ? timesheets : (timesheets?.data || []);
 
     if (!tsArray || tsArray.length === 0) {
-      throw new NotFoundError('No draft timesheets found for this week');
+      throw new NotFoundError('No draft or rejected timesheets found for this week');
     }
 
     // Single bulk UPDATE — fixes N+1 (was 2 queries × N timesheets)
@@ -450,7 +450,7 @@ class TimesheetBusinessService extends BaseBusinessService {
   /**
    * Submit multiple timesheets by ID array.
    *
-   * All IDs must belong to the authenticated employee and be in Draft status.
+  * All IDs must belong to the authenticated employee and be in Draft/Rejected status.
    *
    * @param {string[]} timesheetIds
    * @param {Object}   currentUser
@@ -468,12 +468,12 @@ class TimesheetBusinessService extends BaseBusinessService {
       where: {
         id:         { [db.Sequelize.Op.in]: timesheetIds },
         employeeId,
-        status:     'Draft',
+        status:     { [db.Sequelize.Op.in]: ['Draft', 'Rejected'] },
       },
     });
 
     if (timesheets.length === 0) {
-      throw new NotFoundError('No draft timesheets found');
+      throw new NotFoundError('No draft or rejected timesheets found');
     }
 
     await db.Timesheet.update(
@@ -720,6 +720,15 @@ class TimesheetBusinessService extends BaseBusinessService {
 
     if (weekStartStr > nextWeekStr) {
       throw new ValidationError('Cannot create time entries more than 1 week in advance');
+    }
+
+    // Date validation - week cannot be more than 2 weeks in the past
+    const twoWeeksAgoDate = new Date();
+    twoWeeksAgoDate.setDate(twoWeeksAgoDate.getDate() - 14);
+    const twoWeeksAgoStr = formatDateLocal(twoWeeksAgoDate);
+
+    if (weekStartStr < twoWeeksAgoStr) {
+      throw new ValidationError('Cannot create time entries more than 2 weeks in the past');
     }
 
     // Employee must exist

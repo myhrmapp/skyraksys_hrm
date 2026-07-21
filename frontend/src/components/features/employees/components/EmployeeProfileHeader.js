@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, IconButton, Button, Stack, CircularProgress, Tooltip, Divider } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -6,8 +6,10 @@ import {
   Save as SaveIcon,
   Cancel as CancelIcon,
   Receipt as ReceiptIcon,
-  ManageAccounts as ManageAccountsIcon
+  ManageAccounts as ManageAccountsIcon,
+  Badge as BadgeIcon
 } from '@mui/icons-material';
+import IDCardModal from './IDCardModal';
 
 const EmployeeProfileHeader = ({
   id,
@@ -20,9 +22,13 @@ const EmployeeProfileHeader = ({
   onCancel,
   onSave,
   onViewPayslip,
-  onManageUser
+  onManageUser,
+  employee,
+  mode
 }) => {
+  const [idCardOpen, setIdCardOpen] = useState(false);
   return (
+    <>
     <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }} data-testid="employee-profile-header">
       <Tooltip title="Back to Employee List">
         <IconButton onClick={onBack} data-testid="employee-profile-back-btn" sx={{ bgcolor: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
@@ -73,6 +79,24 @@ const EmployeeProfileHeader = ({
                 <Divider orientation="vertical" flexItem sx={{ mx: 1, height: 24, alignSelf: 'center' }} />
               </>
             )}
+
+            {/* View ID Card — available in all modes */}
+            <Tooltip title="View & Print Employee ID Card">
+              <Button
+                variant="outlined"
+                startIcon={<BadgeIcon />}
+                onClick={() => setIdCardOpen(true)}
+                sx={{
+                  textTransform: 'none',
+                  borderColor: '#0099D4',
+                  color: '#0099D4',
+                  fontWeight: 600,
+                  '&:hover': { bgcolor: 'rgba(0,153,212,0.06)', borderColor: '#006FA3' }
+                }}
+              >
+                ID Card
+              </Button>
+            </Tooltip>
             
             {canEdit && (
               <Button
@@ -140,6 +164,14 @@ const EmployeeProfileHeader = ({
         )}
       </Stack>
     </Box>
+
+      {/* ID Card Modal */}
+      <IDCardModal
+        open={idCardOpen}
+        onClose={() => setIdCardOpen(false)}
+        employee={employee}
+      />
+    </>
   );
 };
 

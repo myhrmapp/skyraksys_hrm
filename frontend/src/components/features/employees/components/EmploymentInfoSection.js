@@ -44,6 +44,7 @@ const EmploymentInfoSection = ({
               editing={editing}
               onChange={(val) => onChange('employeeId', val)}
               required
+              testId="field-employeeId"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -53,6 +54,7 @@ const EmploymentInfoSection = ({
               editing={editing}
               type="date"
               onChange={(val) => onChange('hireDate', val)}
+              testId="field-hireDate"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -60,6 +62,7 @@ const EmploymentInfoSection = ({
               <FormControl fullWidth size="small">
                 <InputLabel>Department</InputLabel>
                 <Select
+                  id="departmentId"
                   value={employee.departmentId || ''}
                   label="Department"
                   onChange={(e) => onChange('departmentId', e.target.value)}
@@ -91,6 +94,7 @@ const EmploymentInfoSection = ({
               <FormControl fullWidth size="small">
                 <InputLabel>Position</InputLabel>
                 <Select
+                  id="positionId"
                   value={employee.positionId || ''}
                   label="Position"
                   onChange={(e) => onChange('positionId', e.target.value)}
@@ -122,6 +126,7 @@ const EmploymentInfoSection = ({
               <FormControl fullWidth size="small">
                 <InputLabel>Employment Type</InputLabel>
                 <Select
+                  id="employmentType"
                   value={employee.employmentType || ''}
                   label="Employment Type"
                   onChange={(e) => onChange('employmentType', e.target.value)}
@@ -150,6 +155,7 @@ const EmploymentInfoSection = ({
               value={employee.workLocation}
               editing={editing}
               onChange={(val) => onChange('workLocation', val)}
+              testId="field-workLocation"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -157,6 +163,7 @@ const EmploymentInfoSection = ({
               <FormControl fullWidth size="small">
                 <InputLabel>Status</InputLabel>
                 <Select
+                  id="status"
                   value={employee.status || 'Active'}
                   label="Status"
                   onChange={(e) => onChange('status', e.target.value)}
@@ -186,6 +193,7 @@ const EmploymentInfoSection = ({
               editing={editing}
               type="date"
               onChange={(val) => onChange('joiningDate', val)}
+              testId="field-joiningDate"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -195,6 +203,7 @@ const EmploymentInfoSection = ({
               editing={editing}
               type="date"
               onChange={(val) => onChange('confirmationDate', val)}
+              testId="field-confirmationDate"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -204,6 +213,7 @@ const EmploymentInfoSection = ({
               editing={editing}
               type="number"
               onChange={(val) => onChange('probationPeriod', val)}
+              testId="field-probationPeriod"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -213,6 +223,7 @@ const EmploymentInfoSection = ({
               editing={editing}
               type="number"
               onChange={(val) => onChange('noticePeriod', val)}
+              testId="field-noticePeriod"
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -238,6 +249,7 @@ const EmploymentInfoSection = ({
               <FormControl fullWidth size="small">
                 <InputLabel>Manager</InputLabel>
                 <Select
+                  id="managerId"
                   value={employee.managerId || ''}
                   label="Manager"
                   onChange={(e) => onChange('managerId', e.target.value)}

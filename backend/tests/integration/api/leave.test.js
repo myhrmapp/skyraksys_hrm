@@ -151,8 +151,8 @@ describe('Leave Management API', () => {
       const leaveData = {
         employeeId: employee.id,
         leaveTypeId: testLeaveType.id,
-        startDate: '2026-04-01',
-        endDate: '2026-04-05',
+        startDate: '2026-08-01',
+        endDate: '2026-08-05',
         totalDays: 5,
         reason: 'Family vacation'
       };
@@ -222,8 +222,8 @@ describe('Leave Management API', () => {
       const leaveData = {
         employeeId: employee.id,
         leaveTypeId: testLeaveType.id,
-        startDate: '2026-04-01',
-        endDate: '2026-04-05',
+        startDate: '2026-08-01',
+        endDate: '2026-08-05',
         totalDays: 5,
         reason: 'Admin created leave'
       };

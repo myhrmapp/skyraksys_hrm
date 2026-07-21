@@ -150,13 +150,61 @@ const EmployeeListFilters = ({
           flexWrap: 'wrap',
           gap: 1
         }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             <FilterIcon fontSize="small" color="action" />
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
               Active Filters: 
-              {statusFilter && <Chip label={`Status: ${statusFilter}`} size="small" sx={{ ml: 1 }} onDelete={() => setStatusFilter('')} />}
-              {departmentFilter !== 'all' && <Chip label="Department" size="small" sx={{ ml: 1 }} onDelete={() => setDepartmentFilter('all')} />}
             </Typography>
+            {searchTerm && (
+              <Chip 
+                label={`Search: "${searchTerm}"`} 
+                size="small" 
+                onDelete={() => setSearchTerm('')}
+                color="primary"
+                variant="outlined"
+              />
+            )}
+            {statusFilter && (
+              <Chip 
+                label={`Status: ${statusFilter}`} 
+                size="small" 
+                onDelete={() => setStatusFilter('')}
+                color="primary"
+                variant="outlined"
+              />
+            )}
+            {departmentFilter && departmentFilter !== 'all' && (
+              <Chip 
+                label={`Department: ${departments?.find(d => d.id === departmentFilter)?.name || 'Selected'}`}
+                size="small" 
+                onDelete={() => setDepartmentFilter('all')}
+                color="primary"
+                variant="outlined"
+              />
+            )}
+            {employmentTypeFilter && (
+              <Chip 
+                label={`Type: ${employmentTypeFilter}`}
+                size="small" 
+                onDelete={() => setEmploymentTypeFilter('')}
+                color="primary"
+                variant="outlined"
+              />
+            )}
+            {locationFilter && (
+              <Chip 
+                label={`Location: ${locationFilter}`}
+                size="small" 
+                onDelete={() => setLocationFilter('')}
+                color="primary"
+                variant="outlined"
+              />
+            )}
+            {!searchTerm && !statusFilter && departmentFilter === 'all' && !employmentTypeFilter && !locationFilter && (
+              <Typography variant="body2" color="text.disabled" sx={{ fontStyle: 'italic' }}>
+                None
+              </Typography>
+            )}
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

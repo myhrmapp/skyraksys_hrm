@@ -31,35 +31,35 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
-        id="salary.basicSalary"
-        name="salary.basicSalary"
+        id="salaryStructure.basicSalary"
+        name="salaryStructure.basicSalary"
         label="Basic Salary"
         type="text"
-        value={formData.salary?.basicSalary || ''}
+        value={formData.salaryStructure?.basicSalary || ''}
         onChange={(e) => {
           const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.basicSalary', value);
+          onChange('salaryStructure.basicSalary', value);
         }}
-        onBlur={() => onBlur && onBlur('salary.basicSalary')}
-        error={touchedFields['salary.basicSalary'] && !!errors['salary.basicSalary']}
-        helperText={touchedFields['salary.basicSalary'] && errors['salary.basicSalary'] ? errors['salary.basicSalary'] : 'Optional: Enter basic salary amount'}
+        onBlur={() => onBlur && onBlur('salaryStructure.basicSalary')}
+        error={touchedFields['salaryStructure.basicSalary'] && !!errors['salaryStructure.basicSalary']}
+        helperText={touchedFields['salaryStructure.basicSalary'] && errors['salaryStructure.basicSalary'] ? errors['salaryStructure.basicSalary'] : 'Required: Enter basic salary amount'}
         InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
         }}
         placeholder="50000"
       />
     </Grid>
     
     <Grid item xs={12} sm={6}>
-      <FormControl fullWidth error={touchedFields['salary.currency'] && !!errors['salary.currency']}>
+      <FormControl fullWidth error={touchedFields['salaryStructure.currency'] && !!errors['salaryStructure.currency']}>
         <InputLabel>Currency</InputLabel>
         <Select
-          id="salary.currency"
-          name="salary.currency"
+          id="salaryStructure.currency"
+          name="salaryStructure.currency"
           inputProps={{ 'data-testid': 'salary-currency-select' }}
-          value={formData.salary?.currency || 'INR'}
-          onChange={(e) => onChange('salary.currency', e.target.value)}
-          onBlur={() => onBlur && onBlur('salary.currency')}
+          value={formData.salaryStructure?.currency || 'INR'}
+          onChange={(e) => onChange('salaryStructure.currency', e.target.value)}
+          onBlur={() => onBlur && onBlur('salaryStructure.currency')}
           label="Currency"
         >
           <MenuItem value="INR">INR</MenuItem>
@@ -67,20 +67,20 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
           <MenuItem value="EUR">EUR</MenuItem>
           <MenuItem value="GBP">GBP</MenuItem>
         </Select>
-        {touchedFields['salary.currency'] && errors['salary.currency'] && <FormHelperText>{errors['salary.currency']}</FormHelperText>}
+        {touchedFields['salaryStructure.currency'] && errors['salaryStructure.currency'] && <FormHelperText>{errors['salaryStructure.currency']}</FormHelperText>}
       </FormControl>
     </Grid>
     
     <Grid item xs={12} sm={6}>
-      <FormControl fullWidth error={touchedFields['salary.payFrequency'] && !!errors['salary.payFrequency']}>
+      <FormControl fullWidth error={touchedFields['salaryStructure.payFrequency'] && !!errors['salaryStructure.payFrequency']}>
         <InputLabel>Pay Frequency</InputLabel>
         <Select
-          id="salary.payFrequency"
-          name="salary.payFrequency"
+          id="salaryStructure.payFrequency"
+          name="salaryStructure.payFrequency"
           inputProps={{ 'data-testid': 'salary-payfrequency-select' }}
-          value={formData.salary?.payFrequency || 'monthly'}
-          onChange={(e) => onChange('salary.payFrequency', e.target.value)}
-          onBlur={() => onBlur && onBlur('salary.payFrequency')}
+          value={formData.salaryStructure?.payFrequency || 'monthly'}
+          onChange={(e) => onChange('salaryStructure.payFrequency', e.target.value)}
+          onBlur={() => onBlur && onBlur('salaryStructure.payFrequency')}
           label="Pay Frequency"
         >
           <MenuItem value="weekly">Weekly</MenuItem>
@@ -88,22 +88,22 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
           <MenuItem value="monthly">Monthly</MenuItem>
           <MenuItem value="annually">Annually</MenuItem>
         </Select>
-        {touchedFields['salary.payFrequency'] && errors['salary.payFrequency'] && <FormHelperText>{errors['salary.payFrequency']}</FormHelperText>}
+        {touchedFields['salaryStructure.payFrequency'] && errors['salaryStructure.payFrequency'] && <FormHelperText>{errors['salaryStructure.payFrequency']}</FormHelperText>}
       </FormControl>
     </Grid>
     
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
-        id="salary.effectiveFrom"
-        name="salary.effectiveFrom"
+        id="salaryStructure.effectiveFrom"
+        name="salaryStructure.effectiveFrom"
         label="Effective From"
         type="date"
-        value={formData.salary?.effectiveFrom || ''}
-        onChange={(e) => onChange('salary.effectiveFrom', e.target.value)}
-        onBlur={() => onBlur && onBlur('salary.effectiveFrom')}
-        error={touchedFields['salary.effectiveFrom'] && !!errors['salary.effectiveFrom']}
-        helperText={touchedFields['salary.effectiveFrom'] && errors['salary.effectiveFrom'] ? errors['salary.effectiveFrom'] : ''}
+        value={formData.salaryStructure?.effectiveFrom || ''}
+        onChange={(e) => onChange('salaryStructure.effectiveFrom', e.target.value)}
+        onBlur={() => onBlur && onBlur('salaryStructure.effectiveFrom')}
+        error={touchedFields['salaryStructure.effectiveFrom'] && !!errors['salaryStructure.effectiveFrom']}
+        helperText={touchedFields['salaryStructure.effectiveFrom'] && errors['salaryStructure.effectiveFrom'] ? errors['salaryStructure.effectiveFrom'] : 'Date when this salary structure takes effect'}
         InputLabelProps={{ shrink: true }}
       />
     </Grid>
@@ -119,20 +119,20 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
-        id="salary.allowances.hra"
-        name="salary.allowances.hra"
+        id="salaryStructure.hra"
+        name="salaryStructure.hra"
         label="House Rent Allowance (HRA)"
         type="text"
-        value={formData.salary?.allowances?.hra || ''}
+        value={formData.salaryStructure?.hra || ''}
         onChange={(e) => {
           const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.allowances.hra', value);
+          onChange('salaryStructure.hra', value);
         }}
-        onBlur={() => onBlur && onBlur('salary.allowances.hra')}
-        error={touchedFields['salary.allowances.hra'] && !!errors['salary.allowances.hra']}
-        helperText={touchedFields['salary.allowances.hra'] && errors['salary.allowances.hra'] ? errors['salary.allowances.hra'] : ''}
+        onBlur={() => onBlur && onBlur('salaryStructure.hra')}
+        error={touchedFields['salaryStructure.hra'] && !!errors['salaryStructure.hra']}
+        helperText={touchedFields['salaryStructure.hra'] && errors['salaryStructure.hra'] ? errors['salaryStructure.hra'] : ''}
         InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
         }}
       />
     </Grid>
@@ -140,119 +140,24 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
-        id="salary.allowances.transport"
-        name="salary.allowances.transport"
-        label="Transport Allowance"
+        id="salaryStructure.allowances"
+        name="salaryStructure.allowances"
+        label="Other Allowances"
         type="text"
-        value={formData.salary?.allowances?.transport || ''}
+        value={formData.salaryStructure?.allowances || ''}
         onChange={(e) => {
           const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.allowances.transport', value);
+          onChange('salaryStructure.allowances', value);
         }}
-        onBlur={() => onBlur && onBlur('salary.allowances.transport')}
-        error={touchedFields['salary.allowances.transport'] && !!errors['salary.allowances.transport']}
-        helperText={touchedFields['salary.allowances.transport'] && errors['salary.allowances.transport'] ? errors['salary.allowances.transport'] : ''}
+        onBlur={() => onBlur && onBlur('salaryStructure.allowances')}
+        error={touchedFields['salaryStructure.allowances'] && !!errors['salaryStructure.allowances']}
+        helperText={touchedFields['salaryStructure.allowances'] && errors['salaryStructure.allowances'] ? errors['salaryStructure.allowances'] : 'Total sum of all other allowances'}
         InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
         }}
       />
     </Grid>
     
-    <Grid item xs={12} sm={6}>
-      <TextField
-        fullWidth
-        id="salary.allowances.medical"
-        label="Medical Allowance"
-        type="text"
-        value={formData.salary?.allowances?.medical || ''}
-        onChange={(e) => {
-          const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.allowances.medical', value);
-        }}
-        error={!!errors['salary.allowances.medical']}
-        helperText={errors['salary.allowances.medical']}
-        InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-        }}
-      />
-    </Grid>
-    
-    <Grid item xs={12} sm={6}>
-      <TextField
-        fullWidth
-        id="salary.allowances.food"
-        label="Food Allowance"
-        type="text"
-        value={formData.salary?.allowances?.food || ''}
-        onChange={(e) => {
-          const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.allowances.food', value);
-        }}
-        error={!!errors['salary.allowances.food']}
-        helperText={errors['salary.allowances.food']}
-        InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-        }}
-      />
-    </Grid>
-    
-    <Grid item xs={12} sm={6}>
-      <TextField
-        fullWidth
-        id="salary.allowances.communication"
-        label="Communication Allowance"
-        type="text"
-        value={formData.salary?.allowances?.communication || ''}
-        onChange={(e) => {
-          const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.allowances.communication', value);
-        }}
-        error={!!errors['salary.allowances.communication']}
-        helperText={errors['salary.allowances.communication']}
-        InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-        }}
-      />
-    </Grid>
-    
-    <Grid item xs={12} sm={6}>
-      <TextField
-        fullWidth
-        id="salary.allowances.special"
-        label="Special Allowance"
-        type="text"
-        value={formData.salary?.allowances?.special || ''}
-        onChange={(e) => {
-          const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.allowances.special', value);
-        }}
-        error={!!errors['salary.allowances.special']}
-        helperText={errors['salary.allowances.special']}
-        InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-        }}
-      />
-    </Grid>
-    
-    <Grid item xs={12} sm={6}>
-      <TextField
-        fullWidth
-        id="salary.allowances.other"
-        label="Other Allowance"
-        type="text"
-        value={formData.salary?.allowances?.other || ''}
-        onChange={(e) => {
-          const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.allowances.other', value);
-        }}
-        error={!!errors['salary.allowances.other']}
-        helperText={errors['salary.allowances.other']}
-        InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-        }}
-      />
-    </Grid>
-
     {/* Deductions Section */}
     <Grid item xs={12}>
       <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
@@ -264,18 +169,18 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
-        id="salary.deductions.pf"
-        label="Provident Fund (PF)"
+        id="salaryStructure.pfContribution"
+        label="Provident Fund (PF) Contribution"
         type="text"
-        value={formData.salary?.deductions?.pf || ''}
+        value={formData.salaryStructure?.pfContribution || ''}
         onChange={(e) => {
           const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.deductions.pf', value);
+          onChange('salaryStructure.pfContribution', value);
         }}
-        error={!!errors['salary.deductions.pf']}
-        helperText={errors['salary.deductions.pf']}
+        error={!!errors['salaryStructure.pfContribution']}
+        helperText={errors['salaryStructure.pfContribution']}
         InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
         }}
       />
     </Grid>
@@ -283,18 +188,37 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
-        id="salary.deductions.professionalTax"
+        id="salaryStructure.tds"
+        label="TDS (Tax Deducted at Source)"
+        type="text"
+        value={formData.salaryStructure?.tds || ''}
+        onChange={(e) => {
+          const value = sanitizeSalaryInput(e.target.value);
+          onChange('salaryStructure.tds', value);
+        }}
+        error={!!errors['salaryStructure.tds']}
+        helperText={errors['salaryStructure.tds']}
+        InputProps={{
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
+        }}
+      />
+    </Grid>
+    
+    <Grid item xs={12} sm={6}>
+      <TextField
+        fullWidth
+        id="salaryStructure.professionalTax"
         label="Professional Tax"
         type="text"
-        value={formData.salary?.deductions?.professionalTax || ''}
+        value={formData.salaryStructure?.professionalTax || ''}
         onChange={(e) => {
           const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.deductions.professionalTax', value);
+          onChange('salaryStructure.professionalTax', value);
         }}
-        error={!!errors['salary.deductions.professionalTax']}
-        helperText={errors['salary.deductions.professionalTax']}
+        error={!!errors['salaryStructure.professionalTax']}
+        helperText={errors['salaryStructure.professionalTax']}
         InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
         }}
       />
     </Grid>
@@ -302,37 +226,18 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
-        id="salary.deductions.incomeTax"
-        label="Income Tax"
-        type="text"
-        value={formData.salary?.deductions?.incomeTax || ''}
-        onChange={(e) => {
-          const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.deductions.incomeTax', value);
-        }}
-        error={!!errors['salary.deductions.incomeTax']}
-        helperText={errors['salary.deductions.incomeTax']}
-        InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-        }}
-      />
-    </Grid>
-    
-    <Grid item xs={12} sm={6}>
-      <TextField
-        fullWidth
-        id="salary.deductions.esi"
+        id="salaryStructure.esi"
         label="ESI (Employee State Insurance)"
         type="text"
-        value={formData.salary?.deductions?.esi || ''}
+        value={formData.salaryStructure?.esi || ''}
         onChange={(e) => {
           const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.deductions.esi', value);
+          onChange('salaryStructure.esi', value);
         }}
-        error={!!errors['salary.deductions.esi']}
-        helperText={errors['salary.deductions.esi']}
+        error={!!errors['salaryStructure.esi']}
+        helperText={errors['salaryStructure.esi']}
         InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
         }}
       />
     </Grid>
@@ -340,151 +245,19 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
-        id="salary.deductions.other"
+        id="salaryStructure.otherDeductions"
         label="Other Deductions"
         type="text"
-        value={formData.salary?.deductions?.other || ''}
+        value={formData.salaryStructure?.otherDeductions || ''}
         onChange={(e) => {
           const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.deductions.other', value);
+          onChange('salaryStructure.otherDeductions', value);
         }}
-        error={!!errors['salary.deductions.other']}
-        helperText={errors['salary.deductions.other']}
+        error={!!errors['salaryStructure.otherDeductions']}
+        helperText={errors['salaryStructure.otherDeductions']}
         InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
         }}
-      />
-    </Grid>
-
-    {/* Benefits Section */}
-    <Grid item xs={12}>
-      <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-        Benefits & Incentives
-      </Typography>
-      <Divider sx={{ mb: 3 }} />
-    </Grid>
-    
-    <Grid item xs={12} sm={6}>
-      <TextField
-        fullWidth
-        id="salary.benefits.bonus"
-        label="Bonus"
-        type="text"
-        value={formData.salary?.benefits?.bonus || ''}
-        onChange={(e) => {
-          const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.benefits.bonus', value);
-        }}
-        error={!!errors['salary.benefits.bonus']}
-        helperText={errors['salary.benefits.bonus']}
-        InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-        }}
-      />
-    </Grid>
-    
-    <Grid item xs={12} sm={6}>
-      <TextField
-        fullWidth
-        id="salary.benefits.incentive"
-        label="Incentive"
-        type="text"
-        value={formData.salary?.benefits?.incentive || ''}
-        onChange={(e) => {
-          const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.benefits.incentive', value);
-        }}
-        error={!!errors['salary.benefits.incentive']}
-        helperText={errors['salary.benefits.incentive']}
-        InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-        }}
-      />
-    </Grid>
-    
-    <Grid item xs={12} sm={6}>
-      <TextField
-        fullWidth
-        id="salary.benefits.overtime"
-        label="Overtime"
-        type="text"
-        value={formData.salary?.benefits?.overtime || ''}
-        onChange={(e) => {
-          const value = sanitizeSalaryInput(e.target.value);
-          onChange('salary.benefits.overtime', value);
-        }}
-        error={!!errors['salary.benefits.overtime']}
-        helperText={errors['salary.benefits.overtime']}
-        InputProps={{
-          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-        }}
-      />
-    </Grid>
-
-    {/* Tax Information Section */}
-    <Grid item xs={12}>
-      <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-        Tax Information
-      </Typography>
-      <Divider sx={{ mb: 3 }} />
-    </Grid>
-    
-    <Grid item xs={12} sm={6}>
-      <FormControl fullWidth error={!!errors['salary.taxInformation.taxRegime']}>
-        <InputLabel>Tax Regime</InputLabel>
-        <Select
-          id="salary.taxInformation.taxRegime"
-          value={formData.salary?.taxInformation?.taxRegime || 'old'}
-          onChange={(e) => onChange('salary.taxInformation.taxRegime', e.target.value)}
-          label="Tax Regime"
-        >
-          <MenuItem value="old">Old Tax Regime</MenuItem>
-          <MenuItem value="new">New Tax Regime</MenuItem>
-        </Select>
-        {errors['salary.taxInformation.taxRegime'] && <FormHelperText>{errors['salary.taxInformation.taxRegime']}</FormHelperText>}
-      </FormControl>
-    </Grid>
-    
-    <Grid item xs={12} sm={6}>
-      <TextField
-        fullWidth
-        id="salary.taxInformation.ctc"
-        label="CTC (Cost to Company)"
-        type="number"
-        value={formData.salary?.taxInformation?.ctc || ''}
-        onChange={(e) => onChange('salary.taxInformation.ctc', parseFloat(e.target.value) || 0)}
-        error={!!errors['salary.taxInformation.ctc']}
-        helperText={errors['salary.taxInformation.ctc']}
-        inputProps={{ min: 0, step: 0.01 }}
-      />
-    </Grid>
-    
-    <Grid item xs={12} sm={6}>
-      <TextField
-        fullWidth
-        id="salary.taxInformation.takeHome"
-        label="Take Home Salary"
-        type="number"
-        value={formData.salary?.taxInformation?.takeHome || ''}
-        onChange={(e) => onChange('salary.taxInformation.takeHome', parseFloat(e.target.value) || 0)}
-        error={!!errors['salary.taxInformation.takeHome']}
-        helperText={errors['salary.taxInformation.takeHome']}
-        inputProps={{ min: 0, step: 0.01 }}
-      />
-    </Grid>
-
-    {/* Additional Notes */}
-    <Grid item xs={12}>
-      <TextField
-        fullWidth
-        id="salary.salaryNotes"
-        label="Salary Notes"
-        multiline
-        rows={3}
-        value={formData.salary?.salaryNotes || ''}
-        onChange={(e) => onChange('salary.salaryNotes', e.target.value)}
-        error={!!errors['salary.salaryNotes']}
-        helperText={errors['salary.salaryNotes'] || 'Additional notes about salary structure, benefits, or special conditions'}
       />
     </Grid>
   </Grid>

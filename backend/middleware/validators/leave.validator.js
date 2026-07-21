@@ -6,6 +6,16 @@
 
 const Joi = require('joi');
 
+// Business rule: allow retroactive leave requests up to 14 days in the past.
+// Must stay in sync with LeaveBusinessService.validateLeaveRequest().
+const RETROACTIVE_DAYS = 14;
+const getRetroactiveMinDate = () => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - RETROACTIVE_DAYS);
+  return d;
+};
+
 /**
  * Schema for creating a leave request
  */
@@ -22,9 +32,15 @@ const createLeaveRequestSchema = Joi.object({
     .required(),
 
   startDate: Joi.date()
-    .required(),
+    .iso()
+    .required()
+    .min(getRetroactiveMinDate())
+    .messages({
+      'date.min': `Start date cannot be more than ${RETROACTIVE_DAYS} days in the past`
+    }),
 
   endDate: Joi.date()
+    .iso()
     .required()
     .min(Joi.ref('startDate'))
     .messages({

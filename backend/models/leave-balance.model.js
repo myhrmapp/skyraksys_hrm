@@ -28,6 +28,14 @@ module.exports = (sequelize, DataTypes) => {
     carryForward: {
       type: DataTypes.DECIMAL(5, 2),
       defaultValue: 0
+    },
+    employeeId: {
+      type: DataTypes.UUID,
+      allowNull: false
+    },
+    leaveTypeId: {
+      type: DataTypes.UUID,
+      allowNull: false
     }
   }, {
     tableName: 'leave_balances',

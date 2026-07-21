@@ -146,24 +146,20 @@ module.exports = (sequelize, DataTypes) => {
     gender: {
       type: DataTypes.ENUM('Male', 'Female', 'Other'),
     },
-    // Photo Upload
+    // Photo — stored as base64 data URI in DB (no filesystem dependency)
     photoUrl: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       validate: {
-        isEmptyOrValidUrl(value) {
-          if (value === '' || value === null || value === undefined) {
-            return; // Allow empty values
-          }
-          
-          // Allow relative paths starting with /
-          if (value.startsWith('/')) {
-            return; // Valid relative path
-          }
-          
-          // Basic full URL validation for absolute URLs
-          const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+        isEmptyOrValid(value) {
+          if (value === '' || value === null || value === undefined) return;
+          // Accept base64 data URIs (e.g. data:image/jpeg;base64,...)
+          if (value.startsWith('data:image/')) return;
+          // Accept relative paths starting with /
+          if (value.startsWith('/')) return;
+          // Accept absolute URLs
+          const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
           if (!urlPattern.test(value)) {
-            throw new Error('Photo URL must be a valid URL or relative path');
+            throw new Error('Photo must be a valid data URI, URL, or relative path');
           }
         }
       }
@@ -206,82 +202,11 @@ module.exports = (sequelize, DataTypes) => {
     noticePeriod: {
       type: DataTypes.INTEGER, // in days
       defaultValue: 30
-    },
-    // Comprehensive salary structure (JSON field)
-    // DEPRECATED: Use the SalaryStructure association instead.
-    // This field is auto-synced from SalaryStructure via afterFind hook below.
-    salary: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      validate: {
-        isValidSalaryStructure(value) {
-          if (value && typeof value === 'object') {
-            // Basic validation for salary structure
-            if (value.basicSalary !== undefined && (typeof value.basicSalary !== 'number' || value.basicSalary < 0)) {
-              throw new Error('Basic salary must be a positive number');
-            }
-            if (value.currency && !['INR', 'USD', 'EUR', 'GBP'].includes(value.currency)) {
-              throw new Error('Invalid currency');
-            }
-            if (value.payFrequency && !['weekly', 'biweekly', 'monthly', 'annually'].includes(value.payFrequency)) {
-              throw new Error('Invalid pay frequency');
-            }
-          }
-        }
-      }
     }
   }, {
     tableName: 'employees',
     timestamps: true,
-    paranoid: true,
-    hooks: {
-      // Auto-populate salary JSON from SalaryStructure association
-      // so the frontend always sees current data regardless of which field it reads
-      afterFind: (result) => {
-        const syncSalary = (employee) => {
-          if (employee && employee.salaryStructure) {
-            const ss = employee.salaryStructure;
-            employee.setDataValue('salary', {
-              basicSalary: parseFloat(ss.basicSalary) || 0,
-              allowances: {
-                hra: parseFloat(ss.hra) || 0,
-                transport: 0,
-                medical: 0,
-                food: 0,
-                communication: 0,
-                special: 0,
-                other: parseFloat(ss.allowances) || 0
-              },
-              deductions: {
-                pf: parseFloat(ss.pfContribution) || 0,
-                incomeTax: parseFloat(ss.tds) || 0,
-                professionalTax: parseFloat(ss.professionalTax) || 0,
-                esi: parseFloat(ss.esi) || 0,
-                other: parseFloat(ss.otherDeductions) || 0
-              },
-              benefits: {
-                bonus: 0,
-                incentive: 0,
-                overtime: 0
-              },
-              taxInformation: {
-                taxRegime: 'old',
-                ctc: 0,
-                takeHome: 0
-              },
-              currency: ss.currency || 'INR',
-              effectiveFrom: ss.effectiveFrom,
-              isActive: ss.isActive
-            });
-          }
-        };
-        if (Array.isArray(result)) {
-          result.forEach(syncSalary);
-        } else {
-          syncSalary(result);
-        }
-      }
-    }
+    paranoid: true
   });
 
   Employee.associate = function(models) {

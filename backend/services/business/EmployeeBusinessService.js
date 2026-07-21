@@ -135,12 +135,17 @@ class EmployeeBusinessService extends BaseBusinessService {
       throw new NotFoundError('Employee');
     }
 
-    // Extract salary data before updating employee (salary lives in SalaryStructure table)
-    const salaryData = data.salary;
+    // Ensure we don't accidentally try to update salary structure via this endpoint
+    // Salary updates MUST go through the dedicated updateCompensation endpoint
     const employeeData = { ...data };
-    delete employeeData.salary;
+    if (employeeData.salary) {
+      delete employeeData.salary;
+    }
+    if (employeeData.salaryStructure) {
+      delete employeeData.salaryStructure;
+    }
 
-    // Update employee fields (excluding salary)
+    // Update employee fields
     if (Object.keys(employeeData).length > 0) {
       await this.employeeDataService.update(id, employeeData);
     }
@@ -148,36 +153,6 @@ class EmployeeBusinessService extends BaseBusinessService {
     // If email changed, update user account
     if (data.email && data.email !== employee.email) {
       await this.userDataService.update(employee.userId, { email: data.email });
-    }
-
-    // If salary data provided, update salary structure
-    if (salaryData && typeof salaryData === 'object') {
-      const mappedSalary = {
-        basicSalary: salaryData.basicSalary,
-        hra: salaryData.allowances?.hra || 0,
-        allowances: (
-          parseFloat(salaryData.allowances?.transport || 0) +
-          parseFloat(salaryData.allowances?.medical || 0) +
-          parseFloat(salaryData.allowances?.food || 0) +
-          parseFloat(salaryData.allowances?.communication || 0) +
-          parseFloat(salaryData.allowances?.special || 0) +
-          parseFloat(salaryData.allowances?.other || 0)
-        ),
-        pfContribution: salaryData.deductions?.pf || 0,
-        tds: salaryData.deductions?.incomeTax || 0,
-        professionalTax: salaryData.deductions?.professionalTax || 0,
-        otherDeductions: salaryData.deductions?.other || 0,
-        currency: salaryData.currency || 'INR',
-        effectiveFrom: salaryData.effectiveFrom || require('../../utils/dateUtils').formatDateLocal(),
-        isActive: true,
-      };
-
-      const existingSalary = await this.salaryDataService.findByEmployeeId(id);
-      if (existingSalary) {
-        await this.salaryDataService.update(existingSalary.id, mappedSalary);
-      } else {
-        await this.salaryDataService.create({ employeeId: id, ...mappedSalary });
-      }
     }
 
     this.log('updateEmployee:success', { id });
@@ -535,7 +510,10 @@ class EmployeeBusinessService extends BaseBusinessService {
       noticePeriod: data.noticePeriod !== undefined ? data.noticePeriod : 30,
       status: 'Active',
       isActive: true,
-      photoUrl: photo?.filename ? `/uploads/employee-photos/${photo.filename}` : data.photoUrl || null,
+      // Convert uploaded photo buffer to base64 data URI (stored in DB, no filesystem)
+      photoUrl: photo?.buffer
+        ? `data:${photo.mimetype || 'image/jpeg'};base64,${photo.buffer.toString('base64')}`
+        : (data.photoUrl || null),
       
       // Indian statutory fields
       panNumber: data.panNumber,
@@ -566,8 +544,9 @@ class EmployeeBusinessService extends BaseBusinessService {
   async generateEmployeeId(transaction = null) {
     const { Op } = db.Sequelize;
     const queryOptions = {
-      order: [['employeeId', 'DESC']],
-      where: { employeeId: { [Op.like]: 'SKYT%' } },
+      // Numeric cast so SK100 correctly sorts after SK99
+      order: [[db.Sequelize.literal("CAST(SUBSTRING(\"employeeId\" FROM 3) AS INTEGER)"), 'DESC']],
+      where: { employeeId: { [Op.like]: 'SK%' } },
       paranoid: false, // Include soft-deleted employees to avoid unique constraint violations
     };
     if (transaction) {
@@ -579,13 +558,14 @@ class EmployeeBusinessService extends BaseBusinessService {
 
     let nextNumber = 1;
     if (lastEmployee?.employeeId) {
-      const match = lastEmployee.employeeId.match(/^SKYT(\d+)$/);
+      const match = lastEmployee.employeeId.match(/^SK(\d+)$/);
       if (match) {
         nextNumber = Number.parseInt(match[1], 10) + 1;
       }
     }
 
-    return `SKYT${nextNumber.toString().padStart(4, '0')}`;
+    // SK001, SK002, ..., SK999, SK1000 (grows beyond 3 digits automatically)
+    return `SK${nextNumber.toString().padStart(3, '0')}`;
   }
 
   /**

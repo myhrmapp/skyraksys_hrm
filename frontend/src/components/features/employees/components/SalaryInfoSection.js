@@ -27,12 +27,12 @@ const SalaryInfoSection = ({
   setShowSalary,
   formatCurrency
 }) => {
+  // Map from the new flat salaryStructure
+  const salary = employee.salaryStructure || {};
+  
   // Calculate totals for display
-  const totalAllowances = employee.salary?.allowances ? 
-    Object.values(employee.salary.allowances).reduce((a, b) => a + (Number(b) || 0), 0) : 0;
-    
-  const totalDeductions = employee.salary?.deductions ? 
-    Object.values(employee.salary.deductions).reduce((a, b) => a + (Number(b) || 0), 0) : 0;
+  const totalAllowances = (Number(salary.hra) || 0) + (Number(salary.allowances) || 0);
+  const totalDeductions = (Number(salary.pfContribution) || 0) + (Number(salary.tds) || 0) + (Number(salary.professionalTax) || 0) + (Number(salary.esi) || 0) + (Number(salary.otherDeductions) || 0);
 
   return (
     <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
@@ -55,77 +55,51 @@ const SalaryInfoSection = ({
             <Grid item xs={12} sm={6}>
               <InfoField
                 label="Basic Salary"
-                value={employee.salary?.basicSalary}
+                value={salary.basicSalary}
                 editing={editing}
                 type="number"
-                onChange={(val) => onChange('salary.basicSalary', val)}
+                testId="salary-basicSalary"
+                onChange={(val) => onChange('salaryStructure.basicSalary', val)}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{employee.salary?.currency || CURRENCY_SYMBOL}</InputAdornment>,
+                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>,
                 }}
-                displayValue={formatCurrency(employee.salary?.basicSalary)}
+                displayValue={formatCurrency(salary.basicSalary, salary.currency)}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <InfoField
-                label="Total Allowances"
+                label="Total Allowances (HRA + Other)"
                 value={totalAllowances}
-                editing={false} // Calculated field, not directly editable here
+                editing={false} // Calculated field
                 type="number"
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{employee.salary?.currency || CURRENCY_SYMBOL}</InputAdornment>,
+                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>,
                 }}
-                displayValue={formatCurrency(totalAllowances)}
+                displayValue={formatCurrency(totalAllowances, salary.currency)}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <InfoField
-                label="Overtime"
-                value={employee.salary?.benefits?.overtime}
-                editing={editing}
-                type="number"
-                onChange={(val) => onChange('salary.benefits.overtime', val)}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">{employee.salary?.currency || CURRENCY_SYMBOL}</InputAdornment>,
-                }}
-                displayValue={formatCurrency(employee.salary?.benefits?.overtime)}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <InfoField
-                label="Bonus"
-                value={employee.salary?.benefits?.bonus}
-                editing={editing}
-                type="number"
-                onChange={(val) => onChange('salary.benefits.bonus', val)}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">{employee.salary?.currency || CURRENCY_SYMBOL}</InputAdornment>,
-                }}
-                displayValue={formatCurrency(employee.salary?.benefits?.bonus)}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <InfoField
-                label="Incentive/Commission"
-                value={employee.salary?.benefits?.incentive}
-                editing={editing}
-                type="number"
-                onChange={(val) => onChange('salary.benefits.incentive', val)}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">{employee.salary?.currency || CURRENCY_SYMBOL}</InputAdornment>,
-                }}
-                displayValue={formatCurrency(employee.salary?.benefits?.incentive)}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <InfoField
-                label="Total Deductions"
+                label="Total Deductions (PF, TDS, etc.)"
                 value={totalDeductions}
                 editing={false} // Calculated field
                 type="number"
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{employee.salary?.currency || CURRENCY_SYMBOL}</InputAdornment>,
+                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>,
                 }}
-                displayValue={formatCurrency(totalDeductions)}
+                displayValue={formatCurrency(totalDeductions, salary.currency)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <InfoField
+                label="Net Take Home (Est)"
+                value={(Number(salary.basicSalary) || 0) + totalAllowances - totalDeductions}
+                editing={false}
+                type="number"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>,
+                }}
+                displayValue={formatCurrency((Number(salary.basicSalary) || 0) + totalAllowances - totalDeductions, salary.currency)}
               />
             </Grid>
           </Grid>

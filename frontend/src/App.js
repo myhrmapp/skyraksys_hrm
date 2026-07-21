@@ -8,6 +8,7 @@ import { SnackbarProvider } from 'notistack';
 // Context Providers
 import { AuthProvider } from './contexts/AuthContext';
 import { LoadingProvider } from './contexts/LoadingContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 
 // Error Boundary (enhanced)
 import SmartErrorBoundary from './components/common/SmartErrorBoundary';
@@ -47,8 +48,9 @@ function App() {
               }}
             >
               <AuthProvider>
-                <SmartErrorBoundary level="routing">
-                  <Routes>
+                <NotificationProvider>
+                  <SmartErrorBoundary level="routing">
+                    <Routes>
                     {/* Admin Debug Panel — outside Layout, dev only */}
                     {process.env.NODE_ENV !== 'production' && (
                     <Route path="/admin/debug" element={
@@ -88,8 +90,9 @@ function App() {
                         </Typography>
                       </Box>
                     } />
-                  </Routes>
-                </SmartErrorBoundary>
+                    </Routes>
+                  </SmartErrorBoundary>
+                </NotificationProvider>
               </AuthProvider>
             </SnackbarProvider>
         </LoadingProvider>

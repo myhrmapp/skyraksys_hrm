@@ -253,74 +253,46 @@ export const validateEmployeeForm = (formData, options = {}) => {
     errors.emergencyContactRelation = 'Please select a valid emergency contact relation';
   }
   
-  // ========== SALARY VALIDATION ==========
+  // ========== SALARY STRUCTURE VALIDATION ==========
   
-  // Salary is completely optional - only validate if basic salary is provided
-  const basicSalaryVal = formData.salary?.basicSalary;
+  // Salary is optional - only validate if basic salary is provided
+  const basicSalaryVal = formData.salaryStructure?.basicSalary;
   if (basicSalaryVal !== undefined && basicSalaryVal !== null && basicSalaryVal !== '') {
     // If basic salary is provided, validate it's a positive number (or zero)
     const basicSalary = Number(basicSalaryVal);
     if (isNaN(basicSalary) || basicSalary < 0) {
-      errors['salary.basicSalary'] = 'Basic salary must be a positive number';
+      errors['salaryStructure.basicSalary'] = 'Basic salary must be a positive number';
     }
     
-    // Currency - Required only if salary is provided
-    if (!formData.salary.currency) {
-      errors['salary.currency'] = 'Currency is required when salary is provided';
+    // Currency
+    if (!formData.salaryStructure.currency) {
+      errors['salaryStructure.currency'] = 'Currency is required';
     }
     
-    // Pay Frequency - Required only if salary is provided
-    if (!formData.salary.payFrequency) {
-      errors['salary.payFrequency'] = 'Pay frequency is required when salary is provided';
+    // Pay Frequency
+    if (!formData.salaryStructure.payFrequency) {
+      errors['salaryStructure.payFrequency'] = 'Pay frequency is required';
     }
-    
-    // Effective From - Validate format if provided
-    if (formData.salary.effectiveFrom) {
-      const effectiveDate = new Date(formData.salary.effectiveFrom);
+
+    // Effective From
+    if (formData.salaryStructure.effectiveFrom) {
+      const effectiveDate = new Date(formData.salaryStructure.effectiveFrom);
       if (isNaN(effectiveDate.getTime())) {
-        errors['salary.effectiveFrom'] = 'Please enter a valid date';
+        errors['salaryStructure.effectiveFrom'] = 'Please enter a valid date';
       }
     }
     
-    // Validate allowances (all optional but must be positive if provided)
-    const allowanceFields = ['hra', 'transport', 'medical', 'food', 'communication', 'special', 'other'];
-    allowanceFields.forEach(field => {
-      const value = formData.salary.allowances?.[field];
-      if (value !== undefined && value !== null && value !== '' && (isNaN(value) || value < 0)) {
-        errors[`salary.allowances.${field}`] = `${field.toUpperCase()} allowance must be a positive number`;
+    // Validate other numeric fields
+    const numericFields = ['hra', 'allowances', 'pfContribution', 'tds', 'professionalTax', 'esi', 'otherDeductions'];
+    numericFields.forEach(field => {
+      const value = formData.salaryStructure?.[field];
+      if (value !== undefined && value !== null && value !== '') {
+        const numVal = Number(value);
+        if (isNaN(numVal) || numVal < 0) {
+          errors[`salaryStructure.${field}`] = `${field} must be a positive number`;
+        }
       }
     });
-    
-    // Validate deductions (all optional but must be positive if provided)
-    const deductionFields = ['pf', 'professionalTax', 'incomeTax', 'esi', 'other'];
-    deductionFields.forEach(field => {
-      const value = formData.salary.deductions?.[field];
-      if (value !== undefined && value !== null && value !== '' && (isNaN(value) || value < 0)) {
-        errors[`salary.deductions.${field}`] = `${field} deduction must be a positive number`;
-      }
-    });
-    
-    // Validate benefits (all optional but must be positive if provided)
-    const benefitFields = ['bonus', 'incentive', 'overtime'];
-    benefitFields.forEach(field => {
-      const value = formData.salary.benefits?.[field];
-      if (value !== undefined && value !== null && value !== '' && (isNaN(value) || value < 0)) {
-        errors[`salary.benefits.${field}`] = `${field} must be a positive number`;
-      }
-    });
-    
-    // Validate tax information (all optional but must be positive if provided)
-    if (formData.salary.taxInformation?.ctc !== undefined && formData.salary.taxInformation?.ctc !== null && formData.salary.taxInformation?.ctc !== '') {
-      if (isNaN(formData.salary.taxInformation.ctc) || formData.salary.taxInformation.ctc < 0) {
-        errors['salary.taxInformation.ctc'] = 'CTC must be a positive number';
-      }
-    }
-    
-    if (formData.salary.taxInformation?.takeHome !== undefined && formData.salary.taxInformation?.takeHome !== null && formData.salary.taxInformation?.takeHome !== '') {
-      if (isNaN(formData.salary.taxInformation.takeHome) || formData.salary.taxInformation.takeHome < 0) {
-        errors['salary.taxInformation.takeHome'] = 'Take home salary must be a positive number';
-      }
-    }
   }
   
   // ========== USER ACCOUNT VALIDATION ==========
@@ -455,45 +427,24 @@ export const transformEmployeeDataForAPI = (formData) => {
   addIfNotEmpty(transformedData, 'photoUrl', formData.photoUrl);
   
   // Comprehensive salary structure - only include if basicSalary is provided and valid
-  // Convert empty string to number, only include if >= 0
-  const basicSalaryVal = formData.salary?.basicSalary;
+  const basicSalaryVal = formData.salaryStructure?.basicSalary;
   if (basicSalaryVal !== undefined && basicSalaryVal !== null && basicSalaryVal !== '') {
     const basicSalary = Number(basicSalaryVal);
     if (!isNaN(basicSalary) && basicSalary >= 0) {
-    transformedData.salary = {
-      basicSalary: basicSalary,
-      currency: formData.salary.currency || DEFAULT_CURRENCY_CODE,
-      payFrequency: (formData.salary.payFrequency || 'monthly').toLowerCase(),
-      effectiveFrom: formData.salary.effectiveFrom || null,
-      allowances: {
-        hra: Number(formData.salary.allowances?.hra || formData.salary.houseRentAllowance) || 0,
-        transport: Number(formData.salary.allowances?.transport || formData.salary.transportAllowance) || 0,
-        medical: Number(formData.salary.allowances?.medical || formData.salary.medicalAllowance) || 0,
-        food: Number(formData.salary.allowances?.food || formData.salary.foodAllowance) || 0,
-        communication: Number(formData.salary.allowances?.communication || formData.salary.communicationAllowance) || 0,
-        special: Number(formData.salary.allowances?.special || formData.salary.specialAllowance) || 0,
-        other: Number(formData.salary.allowances?.other || formData.salary.otherAllowances) || 0
-      },
-      deductions: {
-        pf: Number(formData.salary.deductions?.pf || formData.salary.providentFund) || 0,
-        professionalTax: Number(formData.salary.deductions?.professionalTax || formData.salary.professionalTax) || 0,
-        incomeTax: Number(formData.salary.deductions?.incomeTax || formData.salary.incomeTax) || 0,
-        esi: Number(formData.salary.deductions?.esi || formData.salary.esi) || 0,
-        other: Number(formData.salary.deductions?.other || formData.salary.otherDeductions) || 0
-      },
-      benefits: {
-        bonus: Number(formData.salary.benefits?.bonus || formData.salary.bonus) || 0,
-        incentive: Number(formData.salary.benefits?.incentive || formData.salary.incentive) || 0,
-        overtime: Number(formData.salary.benefits?.overtime || formData.salary.overtime) || 0
-      },
-      taxInformation: {
-        taxRegime: (formData.salary.taxInformation?.taxRegime || formData.salary.taxRegime || 'old').toLowerCase(),
-        ctc: Number(formData.salary.taxInformation?.ctc || formData.salary.ctc) || 0,
-        takeHome: Number(formData.salary.taxInformation?.takeHome || formData.salary.takeHome) || 0
-      },
-      salaryNotes: formData.salary.salaryNotes || ''
-    };
-  }
+      transformedData.salaryStructure = {
+        basicSalary: basicSalary,
+        currency: formData.salaryStructure.currency || DEFAULT_CURRENCY_CODE,
+        payFrequency: (formData.salaryStructure.payFrequency || 'monthly').toLowerCase(),
+        effectiveFrom: formData.salaryStructure.effectiveFrom || null,
+        hra: Number(formData.salaryStructure.hra) || 0,
+        allowances: Number(formData.salaryStructure.allowances) || 0,
+        pfContribution: Number(formData.salaryStructure.pfContribution) || 0,
+        tds: Number(formData.salaryStructure.tds) || 0,
+        professionalTax: Number(formData.salaryStructure.professionalTax) || 0,
+        esi: Number(formData.salaryStructure.esi) || 0,
+        otherDeductions: Number(formData.salaryStructure.otherDeductions) || 0
+      };
+    }
   }
 
   // User account data - backend requires password and role for user creation

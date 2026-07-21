@@ -90,7 +90,7 @@ class PayrollService {
   }
 
   async approvePayslip(id) {
-    return http.put(`/payslips/${id}`, { status: 'Approved' });
+    return http.post(`/payslips/${id}/approve`);
   }
 
   async downloadPayslip(id) {

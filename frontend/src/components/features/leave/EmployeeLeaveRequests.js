@@ -167,24 +167,55 @@ const EmployeeLeaveRequests = () => {
                     const displayName = typeName.charAt(0).toUpperCase() + typeName.slice(1) + ' Leave';
                     return (
                       <Grid item xs={12} sm={6} md={4} lg={3} key={typeName}>
-                        <Card>
-                          <CardContent sx={{ textAlign: 'center' }}>
-                            <Typography variant="h3" color={color} fontWeight="bold">
+                        <Card sx={{
+                          borderRadius: 4,
+                          boxShadow: '0 8px 32px rgba(0,0,0,0.06)',
+                          background: 'linear-gradient(145deg, #ffffff, #f8fafc)',
+                          border: '1px solid rgba(255, 255, 255, 0.8)',
+                          backdropFilter: 'blur(20px)',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: '0 12px 40px rgba(0,0,0,0.12)',
+                            '& .progress-bar': {
+                              filter: 'brightness(1.1)'
+                            }
+                          }
+                        }}>
+                          {/* Decorative blur blob */}
+                          <Box sx={{
+                            position: 'absolute',
+                            top: -30,
+                            right: -30,
+                            width: 100,
+                            height: 100,
+                            bgcolor: color,
+                            opacity: 0.08,
+                            borderRadius: '50%',
+                            filter: 'blur(30px)',
+                            pointerEvents: 'none'
+                          }} />
+                          <CardContent sx={{ textAlign: 'center', position: 'relative', zIndex: 1, p: 3 }}>
+                            <Typography variant="h2" color={color} fontWeight="800" sx={{ mb: 1 }}>
                               {balance.remaining || 0}
                             </Typography>
-                            <Typography variant="h6" gutterBottom>
+                            <Typography variant="subtitle1" fontWeight="700" color="text.primary" gutterBottom>
                               {displayName}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="body2" color="text.secondary" fontWeight="500">
                               {balance.used || 0} used of {balance.total || 0} days
                             </Typography>
-                            <Box sx={{ mt: 2, bgcolor: 'grey.200', borderRadius: 1, height: 8 }}>
+                            <Box sx={{ mt: 3, bgcolor: 'rgba(0,0,0,0.04)', borderRadius: 2, height: 8, overflow: 'hidden' }}>
                               <Box
+                                className="progress-bar"
                                 sx={{
                                   bgcolor: color,
                                   height: '100%',
-                                  borderRadius: 1,
-                                  width: `${Math.min(((balance.remaining || 0) / (balance.total || 1)) * 100, 100)}%`
+                                  borderRadius: 2,
+                                  width: `${Math.min(((balance.remaining || 0) / (balance.total || 1)) * 100, 100)}%`,
+                                  transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease',
                                 }}
                               />
                             </Box>
@@ -199,77 +230,89 @@ const EmployeeLeaveRequests = () => {
 
             {/* Leave Requests Table */}
             <Grid item xs={12}>
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Card sx={{
+                borderRadius: 4,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.04)',
+                border: '1px solid',
+                borderColor: 'divider',
+                overflow: 'hidden'
+              }}>
+                <CardContent sx={{ p: 0 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(0,0,0,0.01)' }}>
                     <Typography variant="h6" fontWeight="bold">
                       Recent Leave Requests
                     </Typography>
                   </Box>
                   
                   {leaveRequests.length === 0 ? (
-                    <Alert severity="info">
-                      You haven't submitted any leave requests yet. Click "New Request" to apply for leave.
-                    </Alert>
+                    <Box sx={{ p: 4 }}>
+                      <Alert severity="info" sx={{ borderRadius: 2 }}>
+                        You haven't submitted any leave requests yet. Click "New Request" to apply for leave.
+                      </Alert>
+                    </Box>
                   ) : (
                     <TableContainer data-testid="employee-leave-requests-table">
-                      <Table>
+                      <Table sx={{ minWidth: 700, '& .MuiTableCell-root': { borderBottom: '1px solid rgba(224, 224, 224, 0.4)' } }}>
                         <TableHead>
-                          <TableRow>
-                            <TableCell>Leave Type</TableCell>
-                            <TableCell>Duration</TableCell>
-                            <TableCell>Days</TableCell>
-                            <TableCell>Applied Date</TableCell>
-                            <TableCell>Status</TableCell>
-                            <TableCell>Comments</TableCell>
-                            <TableCell>Actions</TableCell>
+                          <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                            <TableCell sx={{ fontWeight: 600, py: 2 }}>Leave Type</TableCell>
+                            <TableCell sx={{ fontWeight: 600, py: 2 }}>Duration</TableCell>
+                            <TableCell sx={{ fontWeight: 600, py: 2 }}>Days</TableCell>
+                            <TableCell sx={{ fontWeight: 600, py: 2 }}>Applied Date</TableCell>
+                            <TableCell sx={{ fontWeight: 600, py: 2 }}>Status</TableCell>
+                            <TableCell sx={{ fontWeight: 600, py: 2 }}>Comments</TableCell>
+                            <TableCell sx={{ fontWeight: 600, py: 2, textAlign: 'right' }}>Actions</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {leaveRequests.map((request) => (
-                            <TableRow key={request.id} hover>
-                              <TableCell>
+                            <TableRow key={request.id} sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' } }}>
+                              <TableCell sx={{ py: 2 }}>
                                 <Chip
                                   label={getLeaveTypeLabel(request.leaveType)}
                                   color={getLeaveTypeColor(request.leaveType)}
                                   size="small"
+                                  sx={{ fontWeight: 600, borderRadius: 1.5 }}
                                 />
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ py: 2 }}>
                                 <Box>
-                                  <Typography variant="body2">
+                                  <Typography variant="body2" fontWeight="500">
                                     {new Date(request.startDate).toLocaleDateString()} - {new Date(request.endDate).toLocaleDateString()}
                                   </Typography>
-                                  <Typography variant="caption" color="text.secondary">
+                                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {request.reason}
                                   </Typography>
                                 </Box>
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ py: 2 }}>
                                 <Typography variant="body2" fontWeight="bold">
                                   {request.totalDays || request.days} days
                                 </Typography>
                               </TableCell>
-                              <TableCell>
-                                {new Date(request.createdAt || request.appliedDate).toLocaleDateString()}
+                              <TableCell sx={{ py: 2 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                  {new Date(request.createdAt || request.appliedDate).toLocaleDateString()}
+                                </Typography>
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ py: 2 }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                   {statusIcons[request.status?.toLowerCase()]}
                                   <Chip
                                     label={(request.status || 'Unknown').toUpperCase()}
                                     color={statusColors[request.status?.toLowerCase()]}
                                     size="small"
-                                    sx={{ ml: 1 }}
+                                    variant="outlined"
+                                    sx={{ ml: 1, fontWeight: 600, borderWidth: 2 }}
                                   />
                                 </Box>
                               </TableCell>
-                              <TableCell>
-                                <Typography variant="body2" color="text.secondary">
+                              <TableCell sx={{ py: 2 }}>
+                                <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 150, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                   {request.approverComments || '-'}
                                 </Typography>
                               </TableCell>
-                              <TableCell>
+                              <TableCell sx={{ py: 2, textAlign: 'right' }}>
                                 {(['pending', 'approved'].includes(request.status?.toLowerCase())) && (
                                   <Button
                                     size="small"
@@ -279,8 +322,9 @@ const EmployeeLeaveRequests = () => {
                                     disabled={isCancelling}
                                     onClick={() => cancelLeave(request.id)}
                                     data-testid={`cancel-leave-${request.id}`}
+                                    sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
                                   >
-                                    {request.status?.toLowerCase() === 'approved' ? 'Request Cancellation' : 'Cancel'}
+                                    {request.status?.toLowerCase() === 'approved' ? 'Request Cancel' : 'Cancel'}
                                   </Button>
                                 )}
                               </TableCell>

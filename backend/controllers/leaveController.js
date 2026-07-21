@@ -425,6 +425,28 @@ const approveCancellation = async (req, res, next) => {
   }
 };
 
+/**
+ * Reject cancellation of a leave request
+ * 
+ * @route POST /api/leaves/:id/reject-cancellation
+ * @access Private (Manager/Admin/HR)
+ */
+const rejectCancellation = async (req, res, next) => {
+  try {
+    const leave = await leaveBusinessService.rejectCancellation(
+      req.params.id,
+      req.user,
+      req.body.approverComments || req.body.comments || ''
+    );
+    
+    res.json(
+      ApiResponse.success(leave, { message: 'Leave cancellation rejected successfully' })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAll,
   getById,
@@ -434,6 +456,7 @@ module.exports = {
   reject,
   cancel,
   approveCancellation,
+  rejectCancellation,
   getBalance,
   getMyLeaves,
   getStatistics

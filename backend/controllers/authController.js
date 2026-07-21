@@ -60,9 +60,7 @@ const AuthController = {
         });
       }
 
-      // Set httpOnly cookies (clear any stale tokens first to prevent race conditions)
-      res.clearCookie('accessToken', { httpOnly: true, secure: secureCookie, sameSite: 'Lax', path: '/' });
-      res.clearCookie('refreshToken', { httpOnly: true, secure: secureCookie, sameSite: 'Lax', path: '/' });
+      // Set httpOnly cookies (new cookies overwrite any existing cookies with same name)
       res.cookie('accessToken', result.accessToken, {
         httpOnly: true,
         secure: secureCookie,
@@ -78,10 +76,23 @@ const AuthController = {
         path: '/'
       });
 
+      if (result.unlockedDek && result.unlockedDek.dek) {
+        // Encode DEK as base64 string for the cookie
+        const dekBase64 = result.unlockedDek.dek;
+        res.cookie('vaultDek', dekBase64, {
+          httpOnly: true,
+          secure: secureCookie,
+          sameSite: 'Lax',
+          maxAge: 15 * 60 * 1000, // Tied to access token lifetime
+          path: '/'
+        });
+      }
+
       return res.json(ApiResponse.success({ 
         user: result.user,
         accessToken: result.accessToken,
-        refreshToken: result.refreshToken
+        refreshToken: result.refreshToken,
+        vaultUnlocked: !!result.unlockedDek
       }, 'Login successful'));
     } catch (error) {
       // Handle service-level errors with proper HTTP responses

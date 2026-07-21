@@ -25,7 +25,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Alert
+  Alert,
+  Avatar,
+  alpha
 } from '@mui/material';
 import {
   Receipt as ReceiptIcon,
@@ -120,49 +122,81 @@ const EmployeePayslips = () => {
 
           {/* Summary Cards */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <ReceiptIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-                  <Typography variant="h4" color="primary.main" fontWeight="bold">
-                    {payslips.length}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Total Payslips
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <TrendingUpIcon sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
-                  <Typography variant="h4" color="success.main" fontWeight="bold">
-                    {formatCurrency(yearlyEarnings)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Total Earnings (YTD)
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <CalendarIcon sx={{ fontSize: 48, color: 'info.main', mb: 2 }} />
-                  <Typography variant="h4" color="info.main" fontWeight="bold">
-                    {formatCurrency(averageMonthlyPay)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Average Monthly Pay
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+            {[
+              {
+                title: 'Total Payslips',
+                value: payslips.length,
+                icon: <ReceiptIcon sx={{ fontSize: 32 }} />,
+                color: '#6366f1' // Indigo
+              },
+              {
+                title: 'Total Earnings (YTD)',
+                value: formatCurrency(yearlyEarnings),
+                icon: <TrendingUpIcon sx={{ fontSize: 32 }} />,
+                color: '#10b981' // Emerald
+              },
+              {
+                title: 'Average Monthly Pay',
+                value: formatCurrency(averageMonthlyPay),
+                icon: <CalendarIcon sx={{ fontSize: 32 }} />,
+                color: '#8b5cf6' // Violet
+              }
+            ].map((stat, index) => (
+              <Grid item xs={12} md={4} key={index}>
+                <Card sx={{ 
+                  height: '100%',
+                  background: 'rgba(255, 255, 255, 0.7)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 4,
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.04)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 12px 40px rgba(0,0,0,0.08)',
+                  }
+                }}>
+                  <Box sx={{
+                    position: 'absolute',
+                    top: -30,
+                    right: -30,
+                    width: 100,
+                    height: 100,
+                    bgcolor: stat.color,
+                    opacity: 0.08,
+                    borderRadius: '50%',
+                    filter: 'blur(30px)',
+                    pointerEvents: 'none'
+                  }} />
+                  <CardContent sx={{ position: 'relative', zIndex: 1, p: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Avatar sx={{ bgcolor: alpha(stat.color, 0.1), color: stat.color, width: 56, height: 56, borderRadius: 3 }}>
+                        {stat.icon}
+                      </Avatar>
+                      <Typography variant="h4" sx={{ color: stat.color, fontWeight: '800' }}>
+                        {stat.value}
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="textSecondary" fontWeight={600} letterSpacing={0.5} textTransform="uppercase">
+                      {stat.title}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
 
           {/* Filters */}
-          <Card sx={{ mb: 3 }}>
+          <Card sx={{ 
+            mb: 4, 
+            borderRadius: 4, 
+            border: '1px solid', 
+            borderColor: 'divider',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+          }}>
             <CardContent>
               <Grid container spacing={3} alignItems="center">
                 <Grid item xs={12} md={3}>
@@ -191,17 +225,23 @@ const EmployeePayslips = () => {
           </Card>
 
           {/* Payslips Table */}
-          <Card>
-            <TableContainer>
-              <Table>
+          <Card sx={{ 
+            borderRadius: 4, 
+            border: '1px solid', 
+            borderColor: 'divider',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.04)',
+            overflow: 'hidden'
+          }}>
+            <TableContainer sx={{ bgcolor: 'background.paper' }}>
+              <Table sx={{ '& .MuiTableCell-root': { borderBottom: '1px solid rgba(224, 224, 224, 0.4)' } }}>
                 <TableHead>
-                  <TableRow>
-                    <TableCell>Pay Period</TableCell>
-                    <TableCell align="right">Gross Pay</TableCell>
-                    <TableCell align="right">Deductions</TableCell>
-                    <TableCell align="right">Net Pay</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell align="center">Actions</TableCell>
+                  <TableRow sx={{ background: 'linear-gradient(to right, rgba(248,250,252,0.8), rgba(241,245,249,0.8))' }}>
+                    <TableCell sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Pay Period</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Gross Pay</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Deductions</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Net Pay</TableCell>
+                    <TableCell sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Status</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

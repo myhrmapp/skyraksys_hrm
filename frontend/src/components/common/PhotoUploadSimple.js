@@ -122,11 +122,22 @@ const PhotoUploadSimple = ({
 
       {/* Upload Button */}
       <Button
-        variant="outlined"
+        variant="contained"
         startIcon={<PhotoCameraIcon />}
         onClick={triggerFileInput}
         size="small"
         data-testid="photo-upload-btn"
+        sx={{
+          borderRadius: 8,
+          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+          textTransform: 'none',
+          boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
+          transition: 'all 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0 6px 20px rgba(99, 102, 241, 0.23)'
+          }
+        }}
       >
         {photo ? 'Change Photo' : label}
       </Button>

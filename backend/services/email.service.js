@@ -210,7 +210,7 @@ class EmailService {
             </div>
             <div class="credential-row">
               <span class="credential-label">Role:</span>
-              <span class="credential-value">${(user.role || 'USER').toUpperCase()}</span>
+              <span class="credential-value">${String(user.role || 'USER').toUpperCase()}</span>
             </div>
           </div>
 

@@ -81,8 +81,8 @@ const ProjectTaskConfiguration = () => {
   const [statsDialogOpen, setStatsDialogOpen] = useState(false);
   const [projectStats, setProjectStats] = useState(null);
   
-  // ✅ ADD VIEW STATE
-  const [projectView, setProjectView] = useState('cards'); // 'cards' or 'table'
+  // ✅ VIEW STATE
+  const [projectView, setProjectView] = useState('table'); // 'cards' or 'table'
   const [taskView, setTaskView] = useState('table'); // 'cards' or 'table'
   const [searchTerm, setSearchTerm] = useState(''); // Search state
 

@@ -25,6 +25,15 @@ module.exports = (sequelize, DataTypes) => {
     clientName: {
       type: DataTypes.STRING
     },
+    managerId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'employees',
+        key: 'id'
+      },
+      comment: 'Project manager (employee FK)'
+    },
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true

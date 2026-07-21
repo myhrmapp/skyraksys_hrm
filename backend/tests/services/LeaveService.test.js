@@ -81,17 +81,17 @@ describe('LeaveService', () => {
         .rejects.toThrow('Leave request overlaps with existing leave');
     });
 
-    it('should reject past date leave requests', async () => {
+    it('should reject leave requests more than 2 weeks in the past', async () => {
       const leaveData = {
         employeeId: testEmployee.id,
         leaveTypeId: testLeaveType.id,
-        startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-        endDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+        startDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000), // 20 days ago
+        endDate: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000),   // 18 days ago
         reason: 'Past leave'
       };
 
       await expect(LeaveService.createLeaveRequest(leaveData))
-        .rejects.toThrow('Start date cannot be in the past');
+        .rejects.toThrow('Start date cannot be more than 2 weeks in the past');
     });
   });
 

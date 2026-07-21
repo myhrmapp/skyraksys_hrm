@@ -4,6 +4,7 @@ import { useAuth } from '../../../../contexts/AuthContext';
 import { useNotifications } from '../../../../contexts/NotificationContext';
 import { employeeService } from '../../../../services/employee.service';
 import { useEmployee, useUpdateEmployee } from '../../../../hooks/queries';
+import { buildPhotoUrl } from '../../../../utils/photoUrl';
 
 export const useEmployeeProfile = (mode = 'admin') => {
   const { id } = useParams();
@@ -55,8 +56,8 @@ export const useEmployeeProfile = (mode = 'admin') => {
   
   const canEditSensitive = isAdmin || isHR;
   const canEdit = isAdmin || isHR || user?.role === 'manager';
-  // Self-service: employees can edit their own phone, address, and emergency contact
-  const canSelfEdit = mode === 'self';
+  // Self-service: Employees cannot edit their own profile in this system (per EMP-090)
+  const canSelfEdit = false;
 
   // 🚀 Load reference data (departments, positions, managers)
   useEffect(() => {
@@ -106,7 +107,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
             setEmployee(empData);
             setOriginalEmployee({ ...empData });
             if (empData.photoUrl) {
-              setPhotoPreview(`${process.env.REACT_APP_BACKEND_URL || ''}${empData.photoUrl}`);
+              setPhotoPreview(buildPhotoUrl(empData.photoUrl));
             }
           }
         } catch (error) {
@@ -128,7 +129,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
       setEmployee(employeeData);
       setOriginalEmployee({ ...employeeData });
       if (employeeData.photoUrl) {
-        setPhotoPreview(`${process.env.REACT_APP_BACKEND_URL || ''}${employeeData.photoUrl}`);
+        setPhotoPreview(buildPhotoUrl(employeeData.photoUrl));
       }
     }
   }, [employeeData, mode, employee?.id]);
@@ -174,7 +175,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
               const photoResponse = await employeeService.uploadPhoto(employeeId, selectedPhoto);
               if (photoResponse.success && photoResponse.data?.photoUrl) {
                 updated.photoUrl = photoResponse.data.photoUrl;
-                setPhotoPreview(`${process.env.REACT_APP_BACKEND_URL || ''}${updated.photoUrl}`);
+                setPhotoPreview(buildPhotoUrl(updated.photoUrl));
               }
             } catch (photoError) {
               console.error('Error uploading photo:', photoError);
@@ -203,7 +204,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
     setSelectedPhoto(null);
     // Reset preview to original photo
     if (originalEmployee.photoUrl) {
-      setPhotoPreview(`${process.env.REACT_APP_BACKEND_URL || ''}${originalEmployee.photoUrl}`);
+      setPhotoPreview(buildPhotoUrl(originalEmployee.photoUrl));
     } else {
       setPhotoPreview('');
     }

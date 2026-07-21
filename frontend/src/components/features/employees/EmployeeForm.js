@@ -256,6 +256,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
               photoPreview={photoPreview}
               onPhotoSelect={handlePhotoSelect}
               onPhotoRemove={handlePhotoRemove}
+              isEditMode={isEditMode}
             />
           </TabPanel>
           
@@ -392,7 +393,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
 
       {/* Draft Restore Dialog (replaces window.confirm) */}
       <Dialog
-        open={draftRestoreDialog.open}
+        open={Boolean(draftRestoreDialog?.open)}
         onClose={handleDismissDraft}
         PaperProps={{
           sx: {
@@ -410,7 +411,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Found a draft saved {draftRestoreDialog.minutesAgo} minutes ago. Would you like to restore it?
+            Found a draft saved {draftRestoreDialog?.minutesAgo ?? 0} minutes ago. Would you like to restore it?
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>

@@ -13,9 +13,10 @@ const { formatDateLocal } = require('../utils/dateUtils');
 
 // Default work hours (used as fallback when SystemConfig has no attendance entry)
 const DEFAULT_WORK_START = '09:00';
-const DEFAULT_WORK_END = '18:00';
-const DEFAULT_STANDARD_HOURS = 8;
+const DEFAULT_WORK_END = '19:00';
 const DEFAULT_BREAK_MINUTES = 60;
+// Company policy: 10-hour shift including a 1-hour lunch break => 9 net working hours.
+const DEFAULT_STANDARD_HOURS = 9;
 
 /**
  * Load attendance work-schedule config from SystemConfig table.

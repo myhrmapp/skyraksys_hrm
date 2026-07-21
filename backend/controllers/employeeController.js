@@ -332,16 +332,19 @@ exports.getTeamMembers = async (req, res, next) => {
 exports.uploadPhoto = async (req, res, next) => {
   try {
     const { id } = req.params;
-    
+
     if (!req.file) {
       return res.status(400).json(ApiResponse.error('No photo file provided', 400));
     }
 
-    const photoUrl = `/uploads/employee-photos/${req.file.filename}`;
+    // Convert buffer to base64 data URI — stored directly in DB, no filesystem needed
+    const mimeType = req.file.mimetype || 'image/jpeg';
+    const photoUrl = `data:${mimeType};base64,${req.file.buffer.toString('base64')}`;
 
-    // Update employee with photo URL
+    // Save base64 data URI into the employees.photoUrl column
     await employeeDataService.update(id, { photoUrl });
 
+    // Return only a success flag + a short preview URL (not the full base64 to keep response small)
     res.json(ApiResponse.success(
       { photoUrl },
       'Photo uploaded successfully'

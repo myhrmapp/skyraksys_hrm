@@ -92,6 +92,7 @@ const LeaveBalanceModern = () => {
   // Load initial data on mount
   useEffect(() => {
     loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load data when server-side filters change (including employeeStatus)
@@ -108,6 +109,7 @@ const LeaveBalanceModern = () => {
 
       setEmployees(employeesRes.data || []);
       setLeaveTypes(leaveTypesRes.data || []);
+      await loadData(1);
     } catch (err) {
       setError('Failed to load initial data: ' + err.message);
     }
@@ -279,6 +281,7 @@ const LeaveBalanceModern = () => {
   };
 
   const handleExportCSV = () => {
+    const formatVal = (v) => parseFloat(Number(v || 0).toFixed(2));
     const csvContent = [
       ['Employee ID', 'Employee Name', 'Leave Type', 'Year', 'Total Allocated', 'Carry Forward', 'Taken', 'Pending', 'Balance'],
       ...filteredBalances.map(b => [
@@ -286,11 +289,11 @@ const LeaveBalanceModern = () => {
         `${b.employee?.firstName || ''} ${b.employee?.lastName || ''}`,
         b.leaveType?.name || 'Unknown',
         selectedYear,
-        b.totalAccrued || 0,
-        b.carryForward || 0,
-        b.totalTaken || 0,
-        b.totalPending || 0,
-        b.balance || 0
+        formatVal(b.totalAccrued),
+        formatVal(b.carryForward),
+        formatVal(b.totalTaken),
+        formatVal(b.totalPending),
+        formatVal(b.balance)
       ])
     ].map(row => row.join(',')).join('\n');
 
@@ -694,10 +697,10 @@ const LeaveBalanceModern = () => {
                           ) : (
                             <Box>
                               <Typography variant="body2" fontWeight="bold">
-                                {(Number(balance.totalAccrued || 0) + Number(balance.carryForward || 0)).toFixed(1)} days
+                                {parseFloat((Number(balance.totalAccrued || 0) + Number(balance.carryForward || 0)).toFixed(2))} days
                               </Typography>
                               <Typography variant="caption" color="text.secondary">
-                                ({balance.totalAccrued || 0} + {balance.carryForward || 0} CF)
+                                ({parseFloat(Number(balance.totalAccrued || 0).toFixed(2))} + {parseFloat(Number(balance.carryForward || 0).toFixed(2))} CF)
                               </Typography>
                             </Box>
                           )}
@@ -717,7 +720,7 @@ const LeaveBalanceModern = () => {
                             />
                           ) : (
                             <Typography variant="body2" color="warning.main" fontWeight="500">
-                              {balance.totalTaken} days
+                              {parseFloat(Number(balance.totalTaken || 0).toFixed(2))} days
                             </Typography>
                           )}
                         </TableCell>
@@ -736,13 +739,13 @@ const LeaveBalanceModern = () => {
                             />
                           ) : (
                             <Typography variant="body2" color="info.main" fontWeight="500">
-                              {balance.totalPending} days
+                              {parseFloat(Number(balance.totalPending || 0).toFixed(2))} days
                             </Typography>
                           )}
                         </TableCell>
                         <TableCell>
                           <Chip
-                            label={`${balance.balance} days`}
+                            label={`${parseFloat(Number(balance.balance || 0).toFixed(2))} days`}
                             variant="outlined"
                             color={getBalanceColor(balance.balance)}
                             size="small"

@@ -22,6 +22,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import http from '../../http-common';
+import { buildPhotoUrl } from '../../utils/photoUrl';
 
 const PhotoUpload = ({ 
   employeeId, 
@@ -45,14 +46,7 @@ const PhotoUpload = ({
   // Update previewUrl when currentPhotoUrl changes
   useEffect(() => {
     if (currentPhotoUrl) {
-      // If currentPhotoUrl is a relative path, convert to full URL
-      const isRelativePath = currentPhotoUrl.startsWith('/');
-      if (isRelativePath) {
-        const serverBaseUrl = process.env.REACT_APP_BACKEND_URL || '';
-        setPreviewUrl(`${serverBaseUrl}${currentPhotoUrl}`);
-      } else {
-        setPreviewUrl(currentPhotoUrl);
-      }
+      setPreviewUrl(buildPhotoUrl(currentPhotoUrl));
     }
   }, [currentPhotoUrl]);
 
@@ -109,11 +103,8 @@ const PhotoUpload = ({
       setSuccess('Photo uploaded successfully!');
       setSelectedFile(null);
       
-      // Update the preview URL with the server URL
-      // Note: Uploads are served from /uploads (not /api/uploads)
-      const serverBaseUrl = process.env.REACT_APP_BACKEND_URL || '';
-      const serverPhotoUrl = `${serverBaseUrl}${data.data.photoUrl}`;
-      setPreviewUrl(serverPhotoUrl);
+      // Update the preview URL with the resolved backend URL
+      setPreviewUrl(buildPhotoUrl(data.data.photoUrl));
 
       if (onUploadSuccess) {
         onUploadSuccess(data.data);
@@ -201,18 +192,21 @@ const PhotoUpload = ({
           }
         }}
       >
-        <Avatar
-          src={previewUrl}
+        <Box
+          component="img"
+          src={previewUrl || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150"><rect width="150" height="150" fill="#e0e0e0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="32" fill="#666">HR</text></svg>'}
+          alt="Employee photo"
+          role="img"
           sx={{
             width: size,
             height: size,
-            fontSize: size * 0.4,
+            objectFit: 'cover',
+            borderRadius: '50%',
+            display: 'block',
             cursor: canUpload ? 'pointer' : 'default'
           }}
           onClick={canUpload ? triggerFileInput : undefined}
-        >
-          {!previewUrl && <PersonIcon sx={{ fontSize: size * 0.5 }} />}
-        </Avatar>
+        />
 
         {/* Overlay for upload hint */}
         {canUpload && (

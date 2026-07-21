@@ -23,6 +23,13 @@ import { authService } from '../../../../services/auth.service';
 // 🚀 NEW: Import React Query hooks
 import { useEmployees, useDeleteEmployee } from '../../../../hooks/queries';
 
+const extractListResponse = (response) => {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  return [];
+};
+
 export const useEmployeeList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -41,7 +48,7 @@ export const useEmployeeList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(50);
   
   // View state
-  const [viewMode, setViewMode] = useState('cards');
+  const [viewMode, setViewMode] = useState('list');
   
   // Dialog states
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -132,12 +139,17 @@ export const useEmployeeList = () => {
 
   const loadDepartments = async () => {
     try {
+      console.log('🔍 Loading departments...');
       const response = await employeeService.getDepartments();
-      if (response.data && response.data.success) {
-        setDepartments(response.data.data);
-      }
+      console.log('📦 Departments response:', response);
+
+      const departmentsData = extractListResponse(response);
+      console.log('✅ Setting departments:', departmentsData);
+      setDepartments(departmentsData);
     } catch (error) {
-      console.error('Error loading departments:', error);
+      console.error('❌ Error loading departments:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      setDepartments([]);
     }
   };
 

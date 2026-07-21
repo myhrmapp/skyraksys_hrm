@@ -451,8 +451,8 @@ const bulkSubmit = async (req, res, next) => {
       const result = await timesheetBusinessService.submitWeeklyTimesheets(weekStartDate, req.user);
       return res.json(
         ApiResponse.success(
-          { count: result.length },
-          { message: `${result.length} timesheets submitted successfully` },
+          { count: result.count },
+          { message: `${result.count} timesheets submitted successfully` },
         ),
       );
     }

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -53,15 +52,20 @@ import {
 import EmptyState from '../../shared/EmptyState';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNotification } from '../../../contexts/NotificationContext';
-import { leaveService } from '../../../services';
-import { useLeaveRequests, useLeaveTypes, useApproveLeaveRequest, useRejectLeaveRequest } from '../../../hooks/queries';
+import { useLeaveRequests, useLeaveTypes, useApproveLeaveRequest, useRejectLeaveRequest, useApproveLeaveCancellation, useRejectLeaveCancellation, useLeaveBalances } from '../../../hooks/queries';
 
 const ModernLeaveManagement = () => {
-  const { showSuccess, showError } = useNotification(); // ✅ Already destructured
+  const { showSuccess, showError } = useNotification();
   const theme = useTheme();
   const navigate = useNavigate();
   const { isEmployee, isAdmin, isHR } = useAuth();
-  
+
+  React.useEffect(() => {
+    if (isEmployee) {
+      navigate('/leave-requests');
+    }
+  }, [isEmployee, navigate]);
+
   // Hooks must be called first, before any conditional logic
   const [activeTab, setActiveTab] = useState(0);
   const [innerTab, setInnerTab] = useState(0);
@@ -69,35 +73,34 @@ const ModernLeaveManagement = () => {
   
   // 🚀 React Query hooks for data fetching
   const { data: leaveRequestsData } = useLeaveRequests({ limit: 500 });
-  const { data: leaveBalancesData } = useQuery({
-    queryKey: ['leave-balances-all'],
-    queryFn: () => leaveService.getAllBalances(),
-    staleTime: 2 * 60 * 1000,
-    enabled: isAdmin || isHR, // admin/hr only — managers use the leave-requests view
+  const { data: leaveBalancesData } = useLeaveBalances(undefined, {
+    enabled: isAdmin || isHR,
   });
   const { data: leaveTypesData } = useLeaveTypes();
   
   // 🚀 Mutations for approve/reject
   const approveMutation = useApproveLeaveRequest();
   const rejectMutation = useRejectLeaveRequest();
+  const approveCancellationMutation = useApproveLeaveCancellation();
+  const rejectCancellationMutation = useRejectLeaveCancellation();
   
   // Derive data from queries — normaliseResponse can return an array directly,
   // { data: [] }, or { data: { data: [], pagination: {} } } depending on endpoint.
-  const toArray = (v) =>
-    Array.isArray(v) ? v
-    : Array.isArray(v?.data) ? v.data
-    : Array.isArray(v?.data?.data) ? v.data.data
-    : [];
+  const toArray = (v) => {
+    if (Array.isArray(v)) return v;
+    if (Array.isArray(v?.data)) return v.data;
+    if (Array.isArray(v?.data?.data)) return v.data.data;
+    return [];
+  };
 
   const leaveRequests = toArray(leaveRequestsData);
   const leaveBalances = toArray(leaveBalancesData);
-  const [actionLoading, setActionLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [confirmAction, setConfirmAction] = useState(null); // { id, action: 'Approved'|'Rejected' }
+  const [confirmAction, setConfirmAction] = useState(null); // { id, action: 'Approved'|'Rejected'|'ApproveCancellation'|'RejectCancellation' }
   const [quickRejectComments, setQuickRejectComments] = useState('');
 
   // Balance tab filters
@@ -169,9 +172,8 @@ const ModernLeaveManagement = () => {
     showSuccess('Leave balances exported');
   };
   
-  // Redirect employees to their personal leave page
   if (isEmployee) {
-    return <Navigate to="/leave-requests" replace />;
+    return null;
   }
 
   // Derive leave types from API (with color mapping fallback)
@@ -245,22 +247,33 @@ const ModernLeaveManagement = () => {
   };
 
   // 🚀 Handle status update using mutations
-  const handleStatusUpdate = async (leaveId, newStatus, comments = '') => {
-    setActionLoading(true);
-    
-    const mutation = newStatus === 'Approved' ? approveMutation : rejectMutation;
-    
+  const handleStatusUpdate = async (leaveId, action, comments = '') => {
+    let mutation;
+    let successMessage;
+
+    if (action === 'Approved') {
+      mutation = approveMutation;
+      successMessage = 'Leave request approved successfully';
+    } else if (action === 'Rejected') {
+      mutation = rejectMutation;
+      successMessage = 'Leave request rejected successfully';
+    } else if (action === 'RejectCancellation') {
+      mutation = rejectCancellationMutation;
+      successMessage = 'Leave cancellation rejected successfully';
+    } else if (action === 'ApproveCancellation') {
+      mutation = approveCancellationMutation;
+      successMessage = 'Leave cancellation approved successfully';
+    }
+
     mutation.mutate(
       { id: leaveId, comments },
       {
         onSuccess: () => {
-          showSuccess(`Leave request ${newStatus.toLowerCase()} successfully`);
-          setActionLoading(false);
+          showSuccess(successMessage);
         },
         onError: (error) => {
           console.error(`Error updating leave status:`, error);
-          showError(error.response?.data?.message || `Failed to ${newStatus.toLowerCase()} leave request`);
-          setActionLoading(false);
+          showError(error.response?.data?.message || `Failed to process request`);
         }
       }
     );
@@ -269,11 +282,11 @@ const ModernLeaveManagement = () => {
   const LeaveRequestsTab = () => (
     <Box>
       {/* Header with Actions */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 3 }}>
         <Typography variant="h5" fontWeight="bold">
           Leave Requests Management
         </Typography>
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }}>
           <Button
             variant="outlined"
             startIcon={<DownloadIcon />}
@@ -359,15 +372,42 @@ const ModernLeaveManagement = () => {
       </Card>
 
       {/* Tabs and Quick Actions */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mb: 3,
+        p: 1,
+        bgcolor: 'background.paper',
+        borderRadius: 3,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+        border: '1px solid',
+        borderColor: 'divider'
+      }}>
         <Tabs
           value={innerTab}
           onChange={(e, newValue) => { setInnerTab(newValue); setPage(0); }}
           sx={{
+            minHeight: 48,
+            '& .MuiTabs-indicator': {
+              height: 3,
+              borderRadius: '3px 3px 0 0',
+              background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)',
+            },
             '& .MuiTab-root': {
               textTransform: 'none',
               fontWeight: 600,
-              minWidth: 100
+              minWidth: 100,
+              minHeight: 48,
+              borderRadius: 2,
+              mx: 0.5,
+              transition: 'all 0.2s',
+              '&:hover': {
+                bgcolor: 'rgba(99, 102, 241, 0.04)',
+              },
+              '&.Mui-selected': {
+                color: 'primary.main',
+              }
             }
           }}
         >
@@ -380,9 +420,9 @@ const ModernLeaveManagement = () => {
                   <Chip
                     label={getCountByStatus(tab)}
                     size="small"
-                    variant="outlined"
-                    color={tab === 'Pending' ? 'warning' : 'default'}
-                    sx={{ height: 28, fontSize: '0.75rem' }}
+                    variant={innerTab === index ? "filled" : "outlined"}
+                    color={innerTab === index ? "primary" : "default"}
+                    sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600 }}
                   />
                 </Box>
               }
@@ -390,30 +430,38 @@ const ModernLeaveManagement = () => {
           ))}
         </Tabs>
         
-        <Button
-          variant="outlined"
-          startIcon={<FilterIcon />}
-          disabled
-          sx={{ borderRadius: 2 }}
-          data-testid="leave-mgmt-filters-button"
-        >
-          Filters
-        </Button>
+        <Box sx={{ pr: 1 }}>
+          <Button
+            variant="outlined"
+            startIcon={<FilterIcon />}
+            disabled
+            sx={{ borderRadius: 2, fontWeight: 600 }}
+            data-testid="leave-mgmt-filters-button"
+          >
+            Filters
+          </Button>
+        </Box>
       </Box>
 
       {/* Requests Table */}
-      <Card sx={{ border: '1px solid', borderColor: 'divider' }}>
-        <TableContainer component={Paper} sx={{ borderRadius: 2 }} data-testid="leave-mgmt-requests-table">
-          <Table>
-            <TableHead sx={{ bgcolor: 'grey.50' }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Employee</TableCell>
-                <TableCell sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Leave Type</TableCell>
-                <TableCell sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Duration</TableCell>
-                <TableCell sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Days</TableCell>
-                <TableCell sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Reason</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700, borderBottom: '2px solid', borderColor: 'divider' }}>Actions</TableCell>
+      <Card sx={{ 
+        borderRadius: 4, 
+        border: '1px solid', 
+        borderColor: 'divider',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.04)',
+        overflow: 'hidden'
+      }}>
+        <TableContainer sx={{ bgcolor: 'background.paper' }} data-testid="leave-mgmt-requests-table">
+          <Table sx={{ minWidth: 800, '& .MuiTableCell-root': { borderBottom: '1px solid rgba(224, 224, 224, 0.4)' } }}>
+            <TableHead>
+              <TableRow sx={{ background: 'linear-gradient(to right, rgba(248,250,252,0.8), rgba(241,245,249,0.8))' }}>
+                <TableCell sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Employee</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Leave Type</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Duration</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Days</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Reason</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, py: 2, color: 'text.secondary' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -545,14 +593,14 @@ const ModernLeaveManagement = () => {
                         </TableCell>
                         
                         <TableCell align="right">
-                          {leave.status === 'Pending' && (
+                          {(leave.status === 'Pending' || leave.status === 'Cancellation Requested') && (
                             <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
-                              <Tooltip title="Approve">
+                              <Tooltip title={leave.status === 'Cancellation Requested' ? "Approve Cancellation" : "Approve"}>
                                 <IconButton
                                   size="small"
                                   aria-label="Approve leave request"
                                   data-testid="leave-approve-btn"
-                                  onClick={() => setConfirmAction({ id: leave.id, action: 'Approved' })}
+                                  onClick={() => setConfirmAction({ id: leave.id, action: leave.status === 'Cancellation Requested' ? 'ApproveCancellation' : 'Approved' })}
                                   sx={{
                                     bgcolor: alpha(theme.palette.success.main, 0.1),
                                     '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.2) }
@@ -562,12 +610,12 @@ const ModernLeaveManagement = () => {
                                 </IconButton>
                               </Tooltip>
                               
-                              <Tooltip title="Reject">
+                              <Tooltip title={leave.status === 'Cancellation Requested' ? "Reject Cancellation" : "Reject"}>
                                 <IconButton
                                   size="small"
                                   aria-label="Reject leave request"
                                   data-testid="leave-reject-btn"
-                                  onClick={() => setConfirmAction({ id: leave.id, action: 'Rejected' })}
+                                  onClick={() => setConfirmAction({ id: leave.id, action: leave.status === 'Cancellation Requested' ? 'RejectCancellation' : 'Rejected' })}
                                   sx={{
                                     bgcolor: alpha(theme.palette.error.main, 0.1),
                                     '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.2) }
@@ -619,7 +667,7 @@ const ModernLeaveManagement = () => {
 
     return (
       <Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 3 }}>
           <Typography variant="h5" fontWeight="bold">
             Leave Balances Overview
           </Typography>
@@ -739,7 +787,7 @@ const ModernLeaveManagement = () => {
                             </TableCell>
                             <TableCell align="right">
                               <Chip
-                                label={`${available} days`}
+                                label={`${available} days left`}
                                 size="small"
                                 color={available >= 10 ? 'success' : available >= 5 ? 'warning' : 'error'}
                                 variant="outlined"
@@ -828,13 +876,13 @@ const ModernLeaveManagement = () => {
             fullWidth
           >
             <DialogTitle>
-              Confirm {confirmAction?.action === 'Approved' ? 'Approval' : 'Rejection'}
+              Confirm {confirmAction?.action?.includes('Approve') ? 'Approval' : 'Rejection'}
             </DialogTitle>
             <DialogContent>
               <Typography>
-                Are you sure you want to {confirmAction?.action === 'Approved' ? 'approve' : 'reject'} this leave request?
+                Are you sure you want to {confirmAction?.action?.includes('Approve') ? 'approve' : 'reject'} this {confirmAction?.action?.includes('Cancellation') ? 'leave cancellation' : 'leave request'}?
               </Typography>
-              {confirmAction?.action === 'Rejected' && (
+              {confirmAction?.action?.includes('Reject') && (
                 <TextField
                   fullWidth
                   multiline
@@ -853,15 +901,15 @@ const ModernLeaveManagement = () => {
               <Button onClick={() => { setConfirmAction(null); setQuickRejectComments(''); }} variant="outlined">Cancel</Button>
               <Button
                 variant="contained"
-                color={confirmAction?.action === 'Approved' ? 'success' : 'error'}
-                disabled={confirmAction?.action === 'Rejected' && !quickRejectComments.trim()}
+                color={confirmAction?.action?.includes('Approve') ? 'success' : 'error'}
+                disabled={confirmAction?.action?.includes('Reject') && !quickRejectComments.trim()}
                 onClick={() => {
                   handleStatusUpdate(confirmAction.id, confirmAction.action, quickRejectComments);
                   setConfirmAction(null);
                   setQuickRejectComments('');
                 }}
               >
-                {confirmAction?.action === 'Approved' ? 'Approve' : 'Reject'}
+                {confirmAction?.action?.includes('Approve') ? 'Approve' : 'Reject'}
               </Button>
             </DialogActions>
           </Dialog>

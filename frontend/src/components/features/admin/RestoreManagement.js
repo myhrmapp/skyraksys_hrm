@@ -255,7 +255,7 @@ const RestoreManagement = () => {
                       </TableCell>
                       <TableCell align="center">{bal.year}</TableCell>
                       <TableCell align="center">
-                        <Chip label={bal.balance ?? 0} size="small" color="primary" />
+                        <Chip label={parseFloat(Number(bal.balance ?? 0).toFixed(2))} size="small" color="primary" />
                       </TableCell>
                       <TableCell>
                         <Typography variant="caption">{formatDate(bal.deletedAt)}</Typography>

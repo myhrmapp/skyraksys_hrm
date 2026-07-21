@@ -169,15 +169,21 @@ class PayrollBusinessService {
       throw new BadRequestError('Can only update draft payroll records');
     }
 
-    // If critical fields change, recalculate
-    if (data.basicSalary || data.allowances || data.deductions) {
-      // Recalculate totals
-      const basicSalary = Number(data.basicSalary || payroll.basicSalary);
-      const totalAllowances = this.calculateTotalAllowances(data.allowances || payroll.allowances);
-      const totalDeductions = this.calculateTotalDeductions(data.deductions || payroll.deductions);
-      
-      data.grossPay = basicSalary + totalAllowances;
-      data.netPay = data.grossPay - totalDeductions;
+    // If variable components change, recalculate gross/net from the payroll record's own fields.
+    // Note: basicSalary lives in SalaryStructure, NOT in PayrollData.
+    // Recalculation here only adjusts variableEarnings/variableDeductions totals.
+    if (data.variableEarnings || data.variableDeductions || data.leaveAdjustments) {
+      const existing = await this.payrollDataService.findByIdWithDetails(id);
+      if (existing) {
+        const varEarnings = { ...(existing.variableEarnings || {}), ...(data.variableEarnings || {}) };
+        const varDeductions = { ...(existing.variableDeductions || {}), ...(data.variableDeductions || {}) };
+        const varEarningsTotal = Object.values(varEarnings).reduce((s, v) => s + (Number(v) || 0), 0);
+        const varDeductionsTotal = Object.values(varDeductions).reduce((s, v) => s + (Number(v) || 0), 0);
+        // Adjust gross/net by the delta in variable components only
+        data.grossSalary = Number(existing.grossSalary || 0) + varEarningsTotal - Object.values(existing.variableEarnings || {}).reduce((s, v) => s + (Number(v) || 0), 0);
+        data.totalDeductions = Number(existing.totalDeductions || 0) + varDeductionsTotal - Object.values(existing.variableDeductions || {}).reduce((s, v) => s + (Number(v) || 0), 0);
+        data.netSalary = Math.max(0, data.grossSalary - data.totalDeductions);
+      }
     }
 
     await this.payrollDataService.update(id, data);
@@ -302,7 +308,7 @@ class PayrollBusinessService {
     }
 
     if (!['calculated', 'approved'].includes(payroll.status)) {
-      throw new BadRequestError('Can only reject Processed or Pending payroll');
+      throw new BadRequestError('Can only reject payroll in calculated or approved status');
     }
 
     // Return to Draft

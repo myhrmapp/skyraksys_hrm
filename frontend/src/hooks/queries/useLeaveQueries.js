@@ -44,12 +44,17 @@ export const useLeaveRequest = (id, options = {}) => {
  * Fetch leave balances for an employee
  */
 export const useLeaveBalances = (employeeId, options = {}) => {
-  return useQuery({
-    queryKey: leaveKeys.balances(employeeId),
-    queryFn: () => leaveService.getBalances(employeeId),
-    enabled: !!employeeId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+  const isAllBalancesMode = !employeeId;
+  const resolvedOptions = {
     ...options,
+    enabled: options.enabled ?? (isAllBalancesMode ? true : !!employeeId),
+    staleTime: options.staleTime ?? 2 * 60 * 1000, // 2 minutes
+  };
+
+  return useQuery({
+    queryKey: isAllBalancesMode ? leaveKeys.balances('all') : leaveKeys.balances(employeeId),
+    queryFn: () => (isAllBalancesMode ? leaveService.getAllBalances() : leaveService.getBalances(employeeId)),
+    ...resolvedOptions,
   });
 };
 
@@ -120,6 +125,38 @@ export const useRejectLeaveRequest = () => {
 
   return useMutation({
     mutationFn: ({ id, comments }) => leaveService.reject(id, comments),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: leaveKeys.pendingApprovals() });
+    },
+  });
+};
+
+/**
+ * Approve leave cancellation request mutation
+ */
+export const useApproveLeaveCancellation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, comments }) => leaveService.approveCancellation(id, comments),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: leaveKeys.pendingApprovals() });
+    },
+  });
+};
+
+/**
+ * Reject leave cancellation request mutation
+ */
+export const useRejectLeaveCancellation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, comments }) => leaveService.rejectCancellation(id, comments),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
       queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });

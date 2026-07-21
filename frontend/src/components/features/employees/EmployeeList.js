@@ -5,14 +5,8 @@ import {
   Card,
   CardContent,
   Typography,
-  ToggleButtonGroup,
-  ToggleButton,
   Pagination
 } from '@mui/material';
-import {
-  ViewModule as CardViewIcon,
-  ViewList as TableViewIcon
-} from '@mui/icons-material';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 
@@ -23,9 +17,11 @@ import { useEmployeeList } from './hooks/useEmployeeList';
 import EmployeeListHeader from './components/EmployeeListHeader';
 import EmployeeListFilters from './components/EmployeeListFilters';
 import EmployeeTableView from './components/EmployeeTableView';
-import EmployeeCardView from './components/EmployeeCardView';
 import DeleteEmployeeDialog from './components/DeleteEmployeeDialog';
 import CreateUserAccountDialog from './components/CreateUserAccountDialog';
+import OrganizationChart from './components/OrganizationChart';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { ViewList as ListIcon, AccountTree as OrgIcon } from '@mui/icons-material';
 
 const EmployeeList = () => {
   const {
@@ -41,7 +37,6 @@ const EmployeeList = () => {
     locationFilter,
     page,
     rowsPerPage,
-    viewMode,
     deleteDialogOpen,
     employeeToDelete,
     userAccountDialogOpen,
@@ -56,7 +51,6 @@ const EmployeeList = () => {
     setDepartmentFilter,
     setEmploymentTypeFilter,
     setLocationFilter,
-    setViewMode,
     setDeleteDialogOpen,
     
     // Actions
@@ -72,6 +66,14 @@ const EmployeeList = () => {
     handleCreateUserSubmit,
     handleChangePage,
   } = useEmployeeList();
+
+  const [displayMode, setDisplayMode] = React.useState('list');
+
+  const handleDisplayModeChange = (event, newMode) => {
+    if (newMode !== null) {
+      setDisplayMode(newMode);
+    }
+  };
 
   // Filters are now fully server-side via useEmployeeList hook
 
@@ -100,11 +102,27 @@ const EmployeeList = () => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
-      <EmployeeListHeader 
-        canEdit={canEdit} 
-        onAddEmployee={handleAddEmployee}
-        onExport={handleExport}
-      />
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <EmployeeListHeader 
+          canEdit={canEdit} 
+          onAddEmployee={handleAddEmployee}
+          onExport={handleExport}
+        />
+        <ToggleButtonGroup
+          value={displayMode}
+          exclusive
+          onChange={handleDisplayModeChange}
+          aria-label="display mode"
+          size="small"
+        >
+          <ToggleButton value="list" aria-label="list view" data-testid="employee-list-view-toggle-list">
+            <ListIcon />
+          </ToggleButton>
+          <ToggleButton value="org" aria-label="org chart view" data-testid="employee-list-view-toggle-org">
+            <OrgIcon />
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
 
       {/* Error Display */}
       {error && (
@@ -143,45 +161,27 @@ const EmployeeList = () => {
         totalRecords={totalRecords}
       />
 
-      {/* View Toggle & Pagination */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <ToggleButtonGroup
-          value={viewMode}
-          exclusive
-          onChange={(e, newView) => newView && setViewMode(newView)}
-          size="small"
-          sx={{ bgcolor: 'white', boxShadow: 1 }}
-        >
-          <ToggleButton value="list" aria-label="list view" data-testid="employee-list-view-toggle-list">
-            <TableViewIcon />
-          </ToggleButton>
-          <ToggleButton value="cards" aria-label="card view" data-testid="employee-list-view-toggle-cards">
-            <CardViewIcon />
-          </ToggleButton>
-        </ToggleButtonGroup>
-
-        <Pagination 
-          count={Math.ceil(totalRecords / rowsPerPage)} 
-          page={page + 1} 
-          onChange={(e, p) => handleChangePage(e, p - 1)} 
-          color="primary"
-          shape="rounded"
-          data-testid="employee-list-pagination"
-        />
+      {/* Pagination */}
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+        {displayMode === 'list' && (
+          <Pagination 
+            count={Math.ceil(totalRecords / rowsPerPage)} 
+            page={page + 1} 
+            onChange={(e, p) => handleChangePage(e, p - 1)} 
+            color="primary"
+            shape="rounded"
+            data-testid="employee-list-pagination"
+          />
+        )}
       </Box>
 
       {/* Content */}
-      {viewMode === 'list' ? (
-        <EmployeeTableView 
-          employees={employees}
-          onView={handleViewEmployee}
-          onEdit={handleEditEmployee}
-          onDelete={handleDeleteClick}
-          onCreateUserAccount={handleCreateUserAccount}
-          onManageUserAccount={handleCreateUserAccount} // Reusing same handler for now as per original code
-        />
+      {displayMode === 'org' ? (
+        <Card sx={{ p: 2, minHeight: 600, overflow: 'auto' }}>
+           <OrganizationChart employees={employees} />
+        </Card>
       ) : (
-        <EmployeeCardView 
+        <EmployeeTableView 
           employees={employees}
           onView={handleViewEmployee}
           onEdit={handleEditEmployee}

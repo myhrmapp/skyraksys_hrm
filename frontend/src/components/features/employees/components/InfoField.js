@@ -12,6 +12,7 @@ const InfoField = ({
   required = false, 
   multiline = false, 
   sensitive = false,
+  testId,
   InputProps // Optional: props for the input element in edit mode
 }) => {
   const [copied, setCopied] = useState(false);
@@ -42,6 +43,7 @@ const InfoField = ({
         variant="outlined"
         size="small"
         InputProps={InputProps}
+        inputProps={{ 'data-testid': testId }}
         InputLabelProps={type === 'date' ? { shrink: true } : undefined}
         sx={{
           '& .MuiOutlinedInput-root': {

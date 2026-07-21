@@ -111,9 +111,16 @@ router.post('/', authorize('admin', 'hr'), async (req, res, next) => {
 
 /**
  * PUT /:id — Update attendance record
+ * Admin/HR: can update any record.
+ * Employee: can only update their own record (e.g., add notes).
+ * Managers: treated as employees for their own record; use /mark for team corrections.
+ * 
+ * Early role-check avoids leaking record existence to unauthorized callers.
  */
 router.put('/:id', authenticateToken, async (req, res, next) => {
   try {
+    const isAdminOrHR = ['admin', 'hr'].includes(req.user.role);
+
     const { error, value } = attendanceSchema.update.validate(req.body, { abortEarly: false, stripUnknown: true });
     if (error) {
       return res.status(400).json({ success: false, message: 'Validation failed', errors: error.details.map(d => d.message) });
@@ -136,14 +143,21 @@ router.put('/:id', authenticateToken, async (req, res, next) => {
       });
     }
     
-    // Authorization: Only admin/hr can update any record, employees can only update their own
-    const isAdmin = ['admin', 'hr'].includes(req.user.role);
+    // Authorization: admin/HR can update any; others only their own record
     const isOwnRecord = record.employee && record.employee.userId === req.user.id;
     
-    if (!isAdmin && !isOwnRecord) {
+    if (!isAdminOrHR && !isOwnRecord) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this attendance record'
+      });
+    }
+
+    // Employees may only update non-critical fields (notes); block status changes
+    if (!isAdminOrHR && value.status !== undefined) {
+      return res.status(403).json({
+        success: false,
+        message: 'Employees cannot change attendance status. Contact your manager.'
       });
     }
     

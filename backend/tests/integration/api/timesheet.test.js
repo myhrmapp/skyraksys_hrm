@@ -33,6 +33,13 @@ describe('Timesheet API', () => {
     return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
   };
 
+  // Helper to format a local date as YYYY-MM-DD without timezone drift
+  const formatDateLocal = (date) => {
+    const localDate = new Date(date);
+    localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+    return localDate.toISOString().split('T')[0];
+  };
+
   beforeAll(async () => {
     helper = new TestHelper(app);
     
@@ -165,15 +172,17 @@ describe('Timesheet API', () => {
   describe('POST /api/timesheets', () => {
     it('should create timesheet entry as employee', async () => {
       const employee = await Employee.findOne({ where: { userId: employeeUser.id } });
-      
+      const currentWeekStart = getWeekStart(new Date());
+      const currentWeekEnd = getWeekEnd(currentWeekStart);
+
       const timesheetData = {
         employeeId: employee.id,
         projectId: testProject.id,
         taskId: testTask.id,
-        weekStartDate: '2026-01-19',
-        weekEndDate: '2026-01-25',
-        weekNumber: 4,
-        year: 2026,
+        weekStartDate: formatDateLocal(currentWeekStart),
+        weekEndDate: formatDateLocal(currentWeekEnd),
+        weekNumber: getWeekNumber(currentWeekStart),
+        year: currentWeekStart.getFullYear(),
         mondayHours: 8,
         tuesdayHours: 0,
         wednesdayHours: 0,
@@ -225,15 +234,19 @@ describe('Timesheet API', () => {
 
     it('should accept decimal hours', async () => {
       const employee = await Employee.findOne({ where: { userId: employeeUser.id } });
+      const thisMonday = getWeekStart(new Date());
+      const decimalWeekStart = thisMonday.toISOString().split('T')[0];
+      const decimalWeekEnd = getWeekEnd(thisMonday).toISOString().split('T')[0];
+      const decimalWeekNum = getWeekNumber(thisMonday);
       
       const timesheetData = {
         employeeId: employee.id,
         projectId: testProject.id,
         taskId: testTask.id,
-        weekStartDate: '2026-01-19',
-        weekEndDate: '2026-01-25',
-        weekNumber: 4,
-        year: 2026,
+        weekStartDate: decimalWeekStart,
+        weekEndDate: decimalWeekEnd,
+        weekNumber: decimalWeekNum,
+        year: thisMonday.getFullYear(),
         mondayHours: 7.5,
         tuesdayHours: 0,
         wednesdayHours: 0,

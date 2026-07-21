@@ -349,10 +349,10 @@ class TimesheetCalculationService {
    * Calculate expected working hours for a week (excluding leave days)
    * @param {string} employeeId - Employee UUID
    * @param {Date|string} weekStartDate - Monday of the week
-   * @param {number} hoursPerDay - Expected hours per day (default 8)
+  * @param {number} hoursPerDay - Expected hours per day (default 9)
    * @returns {Promise<Object>} { expectedHours, leaveDays, workingDays }
    */
-  async calculateExpectedWorkingHours(employeeId, weekStartDate, hoursPerDay = 8) {
+  async calculateExpectedWorkingHours(employeeId, weekStartDate, hoursPerDay = 9) {
     const leaveDates = await this.getApprovedLeaveDaysForWeek(employeeId, weekStartDate);
     const leaveDays = leaveDates.length;
     const workingDays = 7 - leaveDays; // Assuming 7-day week (adjust if needed)

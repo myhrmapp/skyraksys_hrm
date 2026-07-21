@@ -5,10 +5,13 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const fs = require('fs');
 const responseTime = require('response-time');
 const path = require('path');
 const swaggerUi = require('swagger-ui-express');
+const { specs, swaggerOptions } = require('./config/swagger');
 const { logger, accessLogStream } = require('./config/logger');
+const socket = require('./socket');
 
 const app = express();
 
@@ -372,6 +375,11 @@ app.get('/api/health', async (req, res) => {
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const employeeRoutes = require('./routes/employee.routes');
+const goalRoutes = require('./routes/goal.routes');
+const invoiceRoutes = require('./routes/invoice.routes');
+const invoiceTemplateRoutes = require('./routes/invoice-template.routes');
+const clientRoutes = require('./routes/client.routes');
+const notificationRoutes = require('./routes/notification.routes');
 const departmentRoutes = require('./routes/department.routes');
 const projectRoutes = require('./routes/project.routes');
 const taskRoutes = require('./routes/task.routes');
@@ -395,11 +403,11 @@ const employeeReviewRoutes = require('./routes/employee-review.routes'); // Empl
 const holidayRoutes = require('./routes/holiday.routes'); // Holiday calendar (GAP 12.5)
 const attendanceRoutes = require('./routes/attendance.routes'); // Attendance tracking (GAP 12.1)
 const leaveAccrualRoutes = require('./routes/leave-accrual.routes'); // Leave accrual automation (GAP 12.2)
-
-// Swagger configuration
-const { specs, swaggerOptions } = require('./config/swagger');
+const adminConfigRoutes = require('./routes/admin-config.routes');
+const vaultRoutes = require('./routes/vault.routes');
 
 // API Routes
+app.use('/api/vault', vaultRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/employees', employeeRoutes);
@@ -427,6 +435,11 @@ app.use('/api/employee-reviews', employeeReviewRoutes); // Employee performance 
 app.use('/api/holidays', holidayRoutes); // Holiday calendar (GAP 12.5)
 app.use('/api/attendance', attendanceRoutes); // Attendance tracking (GAP 12.1)
 app.use('/api/leave-accrual', leaveAccrualRoutes); // Leave accrual automation (GAP 12.2)
+app.use('/api/goals', goalRoutes); // OKR Goal Tracking
+app.use('/api/invoices', invoiceRoutes); // Client invoice management
+app.use('/api/invoice-templates', invoiceTemplateRoutes); // Client invoice templates
+app.use('/api/clients', clientRoutes); // Client management
+app.use('/api/notifications', notificationRoutes); // Notifications and broadcasts
 
 // System Config Routes (requires admin role + password re-authentication)
 const systemConfigRoutes = require('./routes/system-config.routes');
@@ -441,9 +454,6 @@ if (debugEnvs.includes(process.env.NODE_ENV)) {
   logger.info('🔒 Debug routes disabled in production/staging');
 }
 
-// Admin Config Routes (protected)
-const adminConfigRoutes = require('./routes/admin-config.routes');
-app.use('/api/admin/config', adminConfigRoutes);
 
 // Swagger Documentation
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, swaggerOptions));
@@ -540,7 +550,7 @@ app.use((error, req, res, next) => {
   }
   
   // Default error response
-  res.status(error.status || 500).json({
+  res.status(error.status || error.statusCode || 500).json({
     success: false,
     message: error.message || 'Internal server error',
     ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
@@ -582,6 +592,7 @@ if (require.main === module) {
       : `http://localhost:${PORT}`;
     
     const server = app.listen(PORT, HOST, () => {
+      socket.init(server);
       const logMessage = `🚀 HRM System server running on ${HOST}:${PORT}`;
       logger.info(logMessage);
       logger.info(`🌐 API Base URL: ${baseUrl}/api`);

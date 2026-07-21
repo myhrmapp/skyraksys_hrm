@@ -10,11 +10,11 @@ const app = require('../../../server');
 const db = require('../../../models');
 const bcrypt = require('bcryptjs');
 
-const { User, Employee, EmployeeReview, LeaveBalance } = db;
+const { User, Employee, EmployeeReview, LeaveBalance, LeaveType } = db;
 
 describe('Soft Delete Implementation', () => {
   let adminToken, adminUser;
-  let testEmployee, testReview, testLeaveBalance, testUser;
+  let testEmployee, testReview, testLeaveBalance, testUser, testLeaveType;
 
   beforeAll(async () => {
     // Create admin user for authentication
@@ -57,12 +57,18 @@ describe('Soft Delete Implementation', () => {
       positionId: null,
       managerId: null
     });
+
+    // Create a test leave type for use in leave balance tests
+    testLeaveType = await LeaveType.create({
+      name: 'Test Leave SD'
+    });
   });
 
   afterAll(async () => {
     // Clean up test data (force delete)
     if (testReview) await testReview.destroy({ force: true });
     if (testLeaveBalance) await testLeaveBalance.destroy({ force: true });
+    if (testLeaveType) await testLeaveType.destroy({ force: true });
     if (testEmployee) await testEmployee.destroy({ force: true });
     if (testUser) await testUser.destroy({ force: true });
     await adminUser.destroy({ force: true });
@@ -153,11 +159,11 @@ describe('Soft Delete Implementation', () => {
       // Create test leave balance before each test (no leaveTypeId needed for testing)
       testLeaveBalance = await LeaveBalance.create({
         employeeId: testEmployee.id,
-        leaveTypeId: null, // Can be null for testing
+        leaveTypeId: testLeaveType.id,
         year: 2024,
-        totalDays: 15,
-        usedDays: 5,
-        remainingDays: 10
+        totalAccrued: 15,
+        totalTaken: 5,
+        balance: 10
       });
     });
 

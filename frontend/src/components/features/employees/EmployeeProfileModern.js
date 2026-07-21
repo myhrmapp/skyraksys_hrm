@@ -59,6 +59,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
     canSelfEdit,
     formatDate,
     formatCurrency,
+    setEditing,
     navigate,
     id
   } = useEmployeeProfile(mode);
@@ -103,7 +104,13 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
         <EmployeeProfileHeader 
           onBack={() => mode === 'self' ? navigate('/') : navigate('/employees')}
           editing={editing}
-          onEdit={() => mode === 'self' ? navigate(`/my-profile/edit/${employee?.id}`) : navigate(`/employees/${id || employee?.id}/edit`)}
+          onEdit={() => {
+            if (mode === 'self') {
+              navigate(`/my-profile/edit/${employee?.id}`);
+              return;
+            }
+            setEditing(true);
+          }}
           saving={saving}
           onSave={handleSave}
           onCancel={handleCancel}
@@ -113,6 +120,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
           onViewPayslip={() => setShowPayslipViewer(true)}
           onManageUser={() => navigate(`/employees/${id || employee.id}/user-account`)}
           mode={mode}
+          employee={employee}
         />
 
         {/* Profile Card (Avatar & Basic Info) */}

@@ -86,20 +86,17 @@ const Login = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: `linear-gradient(135deg, 
-          ${theme.palette.primary.main} 0%, 
-          ${theme.palette.primary.dark} 50%, 
-          ${theme.palette.secondary.main} 100%)`,
+        background: 'linear-gradient(145deg, #0A2540 0%, #0D3D6E 40%, #006FA3 75%, #0099D4 100%)',
         position: 'relative',
         overflow: 'hidden',
         '&::before': {
           content: '""',
           position: 'absolute',
-          top: '-50%',
-          right: '-20%',
-          width: '600px',
-          height: '600px',
-          background: `radial-gradient(circle, ${alpha(theme.palette.primary.light, 0.3)} 0%, transparent 70%)`,
+          top: '-30%',
+          right: '-15%',
+          width: '550px',
+          height: '550px',
+          background: 'radial-gradient(circle, rgba(0,153,212,0.25) 0%, transparent 70%)',
           borderRadius: '50%',
           animation: 'float 20s ease-in-out infinite',
           '@media (prefers-reduced-motion: reduce)': { animation: 'none' }
@@ -107,25 +104,19 @@ const Login = () => {
         '&::after': {
           content: '""',
           position: 'absolute',
-          bottom: '-30%',
+          bottom: '-25%',
           left: '-10%',
-          width: '500px',
-          height: '500px',
-          background: `radial-gradient(circle, ${alpha(theme.palette.secondary.light, 0.2)} 0%, transparent 70%)`,
+          width: '480px',
+          height: '480px',
+          background: 'radial-gradient(circle, rgba(155,48,255,0.18) 0%, transparent 70%)',
           borderRadius: '50%',
           animation: 'float 15s ease-in-out infinite reverse',
           '@media (prefers-reduced-motion: reduce)': { animation: 'none' }
         },
         '@keyframes float': {
-          '0%, 100%': {
-            transform: 'translate(0, 0) rotate(0deg)'
-          },
-          '33%': {
-            transform: 'translate(30px, -50px) rotate(120deg)'
-          },
-          '66%': {
-            transform: 'translate(-20px, 20px) rotate(240deg)'
-          }
+          '0%, 100%': { transform: 'translate(0, 0) rotate(0deg)' },
+          '33%':      { transform: 'translate(30px, -50px) rotate(120deg)' },
+          '66%':      { transform: 'translate(-20px, 20px) rotate(240deg)' }
         }
       }}
     >
@@ -149,100 +140,63 @@ const Login = () => {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: '4px',
-                background: `linear-gradient(90deg, 
-                  ${theme.palette.primary.main}, 
-                  ${theme.palette.secondary.main}, 
-                  ${theme.palette.primary.light})`,
-                backgroundSize: '200% 100%',
-                animation: 'shimmer 3s linear infinite',
+                height: '5px',
+                background: 'linear-gradient(90deg, #FF8C00, #FF3399, #9B30FF, #0099D4, #FF8C00)',
+                backgroundSize: '300% 100%',
+                animation: 'shimmer 4s linear infinite',
                 '@media (prefers-reduced-motion: reduce)': { animation: 'none' }
               },
               '@keyframes shimmer': {
-                '0%': {
-                  backgroundPosition: '-200% 0'
-                },
-                '100%': {
-                  backgroundPosition: '200% 0'
-                }
+                '0%':   { backgroundPosition: '0% 0' },
+                '100%': { backgroundPosition: '300% 0' }
               }
             }}
           >
             {/* Logo & Title */}
             <Box sx={{ textAlign: 'center', mb: 4 }}>
               <Slide direction="down" in timeout={600}>
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 80,
-                    height: 80,
-                    borderRadius: '50%',
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-                    boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`,
-                    mb: 2,
-                    animation: 'pulse 2s ease-in-out infinite',
-                    '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
-                    '@keyframes pulse': {
-                      '0%, 100%': {
-                        transform: 'scale(1)',
-                        boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`
-                      },
-                      '50%': {
-                        transform: 'scale(1.05)',
-                        boxShadow: `0 12px 32px ${alpha(theme.palette.primary.main, 0.6)}`
-                      }
-                    }
-                  }}
-                >
-                  <BusinessIcon sx={{ fontSize: 42, color: 'white' }} />
+                <Box sx={{ mb: 3 }}>
+                  <img
+                    src="/logo-full.png"
+                    alt="SKYRAKSYS Technologies"
+                    style={{
+                      maxWidth: '240px',
+                      width: '100%',
+                      height: 'auto',
+                      filter: 'drop-shadow(0 4px 12px rgba(0,153,212,0.3))'
+                    }}
+                  />
                 </Box>
               </Slide>
 
-              <Typography
-                variant="h3"
-                gutterBottom
-                sx={{
-                  fontWeight: 800,
-                  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  letterSpacing: '-0.02em',
-                  mb: 1
-                }}
-              >
-                SKYRAKSYS
-              </Typography>
-
-              <Typography
-                variant="h6"
-                color="text.secondary"
-                sx={{
-                  fontWeight: 500,
-                  letterSpacing: '0.05em',
-                  fontSize: '0.9rem',
-                  textTransform: 'uppercase'
-                }}
-              >
-                Human Resource Management
-              </Typography>
-
               <Box
                 sx={{
-                  width: 60,
-                  height: 3,
-                  background: `linear-gradient(90deg, transparent, ${theme.palette.primary.main}, transparent)`,
-                  margin: '16px auto',
+                  width: '80%',
+                  height: '3px',
+                  background: 'linear-gradient(90deg, transparent, #FF8C00, #FF3399, #9B30FF, transparent)',
+                  margin: '0 auto 16px',
                   borderRadius: 2
                 }}
               />
 
               <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  color: '#0A2540',
+                  letterSpacing: '0.08em',
+                  fontSize: '0.85rem',
+                  textTransform: 'uppercase',
+                  mb: 0.5
+                }}
+              >
+                Human Resource Management
+              </Typography>
+
+              <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ fontWeight: 500 }}
+                sx={{ fontWeight: 500, mt: 1 }}
               >
                 Welcome back! Please sign in to continue
               </Typography>
@@ -411,7 +365,7 @@ const Login = () => {
             {/* Footer */}
             <Box sx={{ mt: 4, textAlign: 'center' }}>
               <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                © {new Date().getFullYear()} SKYRAKSYS HRM • All Rights Reserved
+                © {new Date().getFullYear()} SKYRAKSYS Technologies • All Rights Reserved
               </Typography>
             </Box>
           </Paper>

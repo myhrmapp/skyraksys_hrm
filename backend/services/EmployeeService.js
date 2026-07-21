@@ -206,13 +206,13 @@ class EmployeeService extends BaseService {
   }
 
   async generateEmployeeId(transaction = null) {
-    // Find last SKYT employee ID with lock to prevent race condition
-    // Use CAST to numeric ordering so SKYT10000 sorts after SKYT9999
+    // Find last SK### employee ID with lock to prevent race condition
+    // Use CAST to numeric ordering so SK100 sorts after SK99
     const queryOptions = {
-      order: [[db.Sequelize.literal("CAST(SUBSTRING(\"employeeId\" FROM 5) AS INTEGER)"), 'DESC']],
+      order: [[db.Sequelize.literal("CAST(SUBSTRING(\"employeeId\" FROM 3) AS INTEGER)"), 'DESC']],
       where: {
         employeeId: {
-          [db.Sequelize.Op.like]: 'SKYT%'
+          [db.Sequelize.Op.like]: 'SK%'
         }
       },
       paranoid: false, // Include soft-deleted employees to avoid unique constraint violations
@@ -226,15 +226,15 @@ class EmployeeService extends BaseService {
 
     let nextNumber = 1;
     if (lastEmployee && lastEmployee.employeeId) {
-      // Extract numeric part from SKYT#### format
-      const match = lastEmployee.employeeId.match(/^SKYT(\d+)$/);
+      // Extract numeric part from SK### format
+      const match = lastEmployee.employeeId.match(/^SK(\d+)$/);
       if (match) {
         nextNumber = parseInt(match[1]) + 1;
       }
     }
 
-    // Always generate with exactly 4 digits (SKYT0001, SKYT0002, etc.)
-    return `SKYT${nextNumber.toString().padStart(4, '0')}`;
+    // Generate SK### format (SK001, SK002, ..., SK999, SK1000...)
+    return `SK${nextNumber.toString().padStart(3, '0')}`;
   }
 
   async getEmployeeStats() {
@@ -406,9 +406,10 @@ class EmployeeService extends BaseService {
         employeeId = await this.generateEmployeeId(transaction);
       }
 
-      // Add photo URL if file uploaded
+      // Add photo as base64 data URI if file uploaded
       if (photoFilename) {
-        employeeData.photoUrl = `/uploads/employee-photos/${photoFilename}`;
+        // photoFilename is now a base64 data URI passed from the controller
+        employeeData.photoUrl = photoFilename;
       }
 
       // Create Employee

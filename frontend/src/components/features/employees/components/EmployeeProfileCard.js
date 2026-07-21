@@ -21,6 +21,7 @@ import {
   CalendarToday as CalendarIcon
 } from '@mui/icons-material';
 import PhotoUploadSimple from '../../../common/PhotoUploadSimple';
+import { buildPhotoUrl } from '../../../../utils/photoUrl';
 
 const EmployeeProfileCard = ({
   employee,
@@ -45,8 +46,30 @@ const EmployeeProfileCard = ({
 
   return (
     <Fade in={true}>
-      <Card sx={{ mb: 3, borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', overflow: 'visible' }}>
-        <CardContent sx={{ p: 4 }}>
+      <Card sx={{ 
+        mb: 4, 
+        borderRadius: 4, 
+        boxShadow: '0 12px 40px rgba(99, 102, 241, 0.08)', 
+        overflow: 'visible',
+        background: 'linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.9) 100%)',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        position: 'relative'
+      }}>
+        {/* Subtle decorative background blur */}
+        <Box sx={{
+          position: 'absolute',
+          top: -50,
+          right: -50,
+          width: 150,
+          height: 150,
+          bgcolor: 'primary.main',
+          opacity: 0.05,
+          borderRadius: '50%',
+          filter: 'blur(40px)',
+          pointerEvents: 'none'
+        }} />
+        <CardContent sx={{ p: { xs: 3, sm: 4, md: 5 }, position: 'relative', zIndex: 1 }}>
           <Grid container spacing={4} alignItems="center">
             {/* Avatar or Photo Upload */}
             <Grid item xs={12} sm="auto" sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -57,13 +80,13 @@ const EmployeeProfileCard = ({
                     photoPreview={photoPreview}
                     onPhotoSelect={onPhotoSelect}
                     onPhotoRemove={onPhotoRemove}
-                    size={140}
+                    size={150}
                   />
                 </Box>
               ) : (
                 <Box sx={{ position: 'relative' }}>
                   <Avatar
-                    src={employee.photoUrl ? `${process.env.REACT_APP_BACKEND_URL || ''}${employee.photoUrl}` : undefined}
+                    src={employee.photoUrl ? buildPhotoUrl(employee.photoUrl) : undefined}
                     sx={{
                       width: 140,
                       height: 140,

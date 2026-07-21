@@ -2,6 +2,13 @@ import { useEffect, useState, useRef } from 'react';
 import { employeeService } from '../services/employee.service';
 import { useAuth } from '../contexts/AuthContext';
 
+const extractListData = (response) => {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  return [];
+};
+
 // Lightweight in-memory cache for metadata to avoid repeat fetches
 const cache = {
   departments: null,
@@ -33,13 +40,13 @@ export function useMetadataCache(options = { includeManagers: true }) {
       setError(null);
       try {
         const [deptRes, posRes, mgrRes] = await Promise.all([
-          needDepts ? employeeService.getDepartments().catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: cache.departments } }),
-          needPositions ? employeeService.getPositions().catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: cache.positions } }),
+          needDepts ? employeeService.getDepartments().catch(() => []) : Promise.resolve(cache.departments || []),
+          needPositions ? employeeService.getPositions().catch(() => []) : Promise.resolve(cache.positions || []),
           needManagers ? employeeService.getManagers().catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: [] } }),
         ]);
 
-        const d = deptRes.data?.data || [];
-        const p = posRes.data?.data || [];
+        const d = extractListData(deptRes);
+        const p = extractListData(posRes);
         const m = mgrRes?.data?.data || [];
 
         // Update cache

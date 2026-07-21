@@ -67,6 +67,39 @@ const EmployeeDashboard = () => {
     }
   };
 
+  const formatLeaveValue = (val) => {
+    const num = Number(val);
+    return isNaN(num) ? val : parseFloat(num.toFixed(2));
+  };
+
+  // Calculate total leave balance and create summary
+  const getLeaveBalanceSummary = () => {
+    const balances = employeeStats.leaveBalance;
+    if (!balances || Object.keys(balances).length === 0) {
+      return { total: 0, subtitle: 'No leave types' };
+    }
+    
+    const leaveTypes = Object.entries(balances).map(([type, data]) => ({
+      type: type.charAt(0).toUpperCase() + type.slice(1),
+      remaining: Number(data.remaining || 0),
+      total: Number(data.total || 0)
+    }));
+    
+    const totalRemaining = leaveTypes.reduce((sum, lt) => sum + lt.remaining, 0);
+    const totalAccrued = leaveTypes.reduce((sum, lt) => sum + lt.total, 0);
+    
+    // Create compact subtitle showing all leave types
+    const subtitle = leaveTypes.map(lt => `${lt.type}: ${formatLeaveValue(lt.remaining)}/${formatLeaveValue(lt.total)}`).join(' • ');
+    
+    return { 
+      total: formatLeaveValue(totalRemaining), 
+      totalAccrued: formatLeaveValue(totalAccrued), 
+      subtitle 
+    };
+  };
+
+  const leaveBalanceSummary = getLeaveBalanceSummary();
+
   const QuickActionCard = ({ icon, title, description, onClick, color = 'primary' }) => (
     <Card 
       sx={{ 
@@ -178,8 +211,8 @@ const EmployeeDashboard = () => {
         <Grid item xs={6} sm={3} data-testid="stat-card-leave-balance">
           <StatCard
             title="Leave Balance"
-            value={employeeStats.leaveBalance?.annual?.remaining || 0}
-            subtitle={`of ${employeeStats.leaveBalance?.annual?.total || 0}`}
+            value={leaveBalanceSummary.total}
+            subtitle={leaveBalanceSummary.subtitle}
             icon={<CalendarIcon sx={{ fontSize: 24 }} />}
             color="success"
           />

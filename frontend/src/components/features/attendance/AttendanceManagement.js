@@ -64,6 +64,7 @@ export default function AttendanceManagement() {
 
   // Manual mark dialog
   const [markDialogOpen, setMarkDialogOpen] = useState(false);
+  const [editRecordId, setEditRecordId] = useState(null);
   const [markForm, setMarkForm] = useState({
     employeeId: '',
     date: dayjs().format('YYYY-MM-DD'),
@@ -134,17 +135,27 @@ export default function AttendanceManagement() {
         checkIn: markForm.checkIn ? new Date(markForm.checkIn).toISOString() : markForm.checkIn,
         checkOut: markForm.checkOut ? new Date(markForm.checkOut).toISOString() : markForm.checkOut,
       };
-      await attendanceService.markAttendance(payload);
-      enqueueSnackbar('Attendance marked successfully', { variant: 'success' });
+      
+      // Use PUT for editing existing record, POST for creating new
+      if (editRecordId) {
+        await attendanceService.updateAttendance(editRecordId, payload);
+        enqueueSnackbar('Attendance updated successfully', { variant: 'success' });
+      } else {
+        await attendanceService.markAttendance(payload);
+        enqueueSnackbar('Attendance marked successfully', { variant: 'success' });
+      }
+      
       setMarkDialogOpen(false);
+      setEditRecordId(null);
       fetchDailyAttendance();
       fetchSummary();
     } catch (err) {
-      enqueueSnackbar(err.response?.data?.message || 'Failed to mark attendance', { variant: 'error' });
+      enqueueSnackbar(err.response?.data?.message || 'Failed to save attendance', { variant: 'error' });
     }
   };
 
   const handleEditRow = (row) => {
+    setEditRecordId(row.id);
     setMarkForm({
       employeeId: row.employeeId,
       date: row.date,
@@ -258,6 +269,7 @@ export default function AttendanceManagement() {
           variant="contained"
           startIcon={<EditIcon />}
           onClick={() => {
+            setEditRecordId(null);
             setMarkForm({
               employeeId: '',
               date: date,
@@ -328,7 +340,7 @@ export default function AttendanceManagement() {
       </Paper>
 
       {/* Mark Attendance Dialog */}
-      <Dialog open={markDialogOpen} onClose={() => setMarkDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={markDialogOpen} onClose={() => { setMarkDialogOpen(false); setEditRecordId(null); }} maxWidth="sm" fullWidth>
         <DialogTitle>Mark / Correct Attendance</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
@@ -404,7 +416,7 @@ export default function AttendanceManagement() {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setMarkDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => { setMarkDialogOpen(false); setEditRecordId(null); }}>Cancel</Button>
           <Button data-testid="attendance-mark-save-btn" variant="contained" onClick={handleMarkAttendance}>Save</Button>
         </DialogActions>
       </Dialog>

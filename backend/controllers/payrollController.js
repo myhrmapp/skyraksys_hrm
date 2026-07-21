@@ -426,7 +426,7 @@ const PayrollController = {
           try {
             // Bulk insert valid records
             if (results.length > 0) {
-              await db.PayrollData.bulkCreate(results, { validate: true });
+              await db.PayrollData.bulkCreate(results, { validate: true, individualHooks: true });
             }
 
             // Cleanup uploaded file

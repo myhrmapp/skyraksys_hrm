@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -9,21 +9,60 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Avatar
+  Avatar,
+  Chip,
+  Tooltip,
+  IconButton,
+  InputAdornment,
+  CircularProgress,
 } from '@mui/material';
+import {
+  AutoAwesome as AutoIcon,
+  Edit as EditIcon,
+  Lock as LockIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
 import PhotoUploadSimple from '../../../common/PhotoUploadSimple';
+import { employeeService } from '../../../../services/employee.service';
 
-const PersonalInformationTab = ({ 
-  formData, 
-  errors, 
+const PersonalInformationTab = ({
+  formData,
+  errors,
   touchedFields = {},
-  onChange, 
+  onChange,
   onBlur,
-  selectedPhoto, 
-  photoPreview, 
-  onPhotoSelect, 
-  onPhotoRemove 
-}) => (
+  selectedPhoto,
+  photoPreview,
+  onPhotoSelect,
+  onPhotoRemove,
+  isEditMode = false,
+}) => {
+  const [overrideId, setOverrideId] = useState(false);
+  const [loadingNextId, setLoadingNextId] = useState(false);
+
+  // On create mode: auto-fetch and pre-fill the next SK### ID
+  useEffect(() => {
+    if (!isEditMode && !formData.employeeId) {
+      fetchNextId();
+    }
+  }, [isEditMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchNextId = async () => {
+    try {
+      setLoadingNextId(true);
+      const res = await employeeService.getNextEmployeeId();
+      const nextId = res?.data?.nextId || res?.nextId;
+      if (nextId && !overrideId) {
+        onChange('employeeId', nextId);
+      }
+    } catch (e) {
+      console.warn('Could not fetch next employee ID:', e.message);
+    } finally {
+      setLoadingNextId(false);
+    }
+  };
+
+  return (
   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
     {/* Profile Photo Section */}
     <Card 
@@ -116,25 +155,77 @@ const PersonalInformationTab = ({
           />
         </Grid>
         <Grid item xs={12} sm={6}>
+          {/* Smart Employee ID field: auto-fills next SK### in create mode, allows override */}
           <TextField
             fullWidth
             id="employeeId"
             name="employeeId"
-            label="Employee ID (Required)"
+            label={isEditMode ? 'Employee ID' : 'Employee ID (Auto-generated)'}
             data-testid="field-employeeId"
             value={formData.employeeId}
-            onChange={(e) => onChange('employeeId', e.target.value)}
+            onChange={(e) => onChange('employeeId', e.target.value.toUpperCase())}
             onBlur={() => onBlur && onBlur('employeeId')}
             error={touchedFields.employeeId && !!errors.employeeId}
-            helperText={touchedFields.employeeId && errors.employeeId ? errors.employeeId : "Format: SKYT#### (e.g., SKYT1001)"}
-            placeholder="SKYT1001"
+            helperText={
+              touchedFields.employeeId && errors.employeeId
+                ? errors.employeeId
+                : isEditMode
+                  ? 'Employee ID cannot be changed after creation'
+                  : overrideId
+                    ? 'Enter any custom ID (e.g. SK200, EXEC01)'
+                    : 'Auto-generated — click ✏️ to override'
+            }
+            placeholder="SK170"
             required
+            disabled={isEditMode || (!overrideId && !loadingNextId)}
+            InputProps={{
+              readOnly: isEditMode,
+              endAdornment: (
+                <InputAdornment position="end">
+                  {loadingNextId ? (
+                    <CircularProgress size={18} />
+                  ) : isEditMode ? (
+                    <Tooltip title="Employee ID is locked after creation">
+                      <LockIcon fontSize="small" sx={{ color: 'text.disabled' }} />
+                    </Tooltip>
+                  ) : overrideId ? (
+                    <Tooltip title="Revert to auto-generated ID">
+                      <IconButton size="small" onClick={() => { setOverrideId(false); fetchNextId(); }}>
+                        <RefreshIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip title="Override: type a custom Employee ID">
+                      <IconButton size="small" onClick={() => setOverrideId(true)}>
+                        <EditIcon fontSize="small" sx={{ color: 'warning.main' }} />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </InputAdornment>
+              ),
+            }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                borderRadius: 2
-              }
+                borderRadius: 2,
+                bgcolor: isEditMode
+                  ? 'action.hover'
+                  : overrideId
+                    ? 'warning.50'
+                    : 'success.50',
+              },
+              '& .MuiInputLabel-root': { fontWeight: 600 },
             }}
           />
+          {/* Status chip below field */}
+          {!isEditMode && (
+            <Box sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+              {overrideId ? (
+                <Chip label="Custom ID" size="small" color="warning" variant="outlined" icon={<EditIcon />} />
+              ) : (
+                <Chip label="Auto-increment" size="small" color="success" variant="outlined" icon={<AutoIcon />} />
+              )}
+            </Box>
+          )}
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
@@ -336,6 +427,7 @@ const PersonalInformationTab = ({
       </Grid>
     </Box>
   </Box>
-);
+  );
+};
 
 export default PersonalInformationTab;

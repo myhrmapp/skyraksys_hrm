@@ -30,8 +30,11 @@ const logger = require('../utils/logger');
 const searchService = new EmployeeSearchService(db);
 const bulkService = new EmployeeBulkService(db);
 
+const { attachVaultStatus } = require('../middleware/vault.middleware');
+
 // Apply global middleware
 router.use(authenticateToken);
+router.use(attachVaultStatus);
 router.use(enhancedFieldAccessControl());
 
 /**
@@ -57,6 +60,35 @@ router.get('/me', employeeController.getMe);
  * @access Private (Admin, HR)
  */
 router.get('/statistics', isAdminOrHR, employeeController.getStatistics);
+
+/**
+ * @route GET /api/employees/next-id
+ * @desc Preview the next auto-generated employee ID (SK###) without reserving it
+ * @access Private (Admin, HR)
+ */
+router.get('/next-id', isAdminOrHR, async (req, res, next) => {
+  try {
+    const { Op } = db.Sequelize;
+    const lastEmployee = await db.Employee.findOne({
+      order: [[db.Sequelize.literal('CAST(SUBSTRING("employeeId" FROM 3) AS INTEGER)'), 'DESC']],
+      where: { employeeId: { [Op.like]: 'SK%' } },
+      paranoid: false,
+      attributes: ['employeeId'],
+    });
+
+    let nextNumber = 1;
+    if (lastEmployee?.employeeId) {
+      const match = lastEmployee.employeeId.match(/^SK(\d+)$/);
+      if (match) nextNumber = parseInt(match[1], 10) + 1;
+    }
+
+    const nextId = `SK${nextNumber.toString().padStart(3, '0')}`;
+    res.json({ success: true, data: { nextId } });
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 /**
  * @route GET /api/employees/meta/departments

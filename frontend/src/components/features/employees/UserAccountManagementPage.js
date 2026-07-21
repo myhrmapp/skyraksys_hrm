@@ -878,9 +878,10 @@ const UserAccountManagementPage = () => {
                         startIcon={<RefreshIcon />}
                         onClick={handleQuickPasswordReset}
                         disabled={actionLoading}
+                        aria-label="Reset password to default"
                         data-testid="user-acct-reset-password-btn"
                       >
-                        Reset Password
+                        Reset Password to Default
                       </Button>
                     </Tooltip>
                   </Grid>

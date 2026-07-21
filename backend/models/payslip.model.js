@@ -425,11 +425,62 @@ module.exports = (sequelize, DataTypes) => {
       companyInfo: payrollData.employee?.department?.company || {},
       generatedBy
     }));
-
-    const payslips = await this.bulkCreate(payslipDataArray);
+    const payslips = await this.bulkCreate(payslipDataArray, { individualHooks: true });
     
     return payslips;
   };
+
+  const VaultCrypto = require('../utils/vaultCrypto');
+
+  Payslip.beforeSave(async (payslip, options) => {
+    try {
+      const config = await sequelize.models.PayrollVaultConfig.findOne();
+      if (config && config.isEnabled) {
+        const payload = {
+          grossEarnings: payslip.getDataValue('grossEarnings'),
+          netPay: payslip.getDataValue('netPay'),
+          earnings: payslip.getDataValue('earnings'),
+          deductions: payslip.getDataValue('deductions')
+        };
+        const encrypted = VaultCrypto.encryptPayload(payload);
+        payslip.setDataValue('encryptedFinancials', JSON.stringify(encrypted));
+        
+        payslip.setDataValue('grossEarnings', null);
+        payslip.setDataValue('netPay', null);
+        payslip.setDataValue('earnings', null);
+        payslip.setDataValue('deductions', null);
+      }
+    } catch (e) {
+      console.error('Error encrypting payslip before save:', e);
+    }
+  });
+
+  const decryptPayslip = async (payslip) => {
+    const encryptedDataStr = payslip.getDataValue('encryptedFinancials');
+    if (payslip && encryptedDataStr) {
+      try {
+        const enc = JSON.parse(encryptedDataStr);
+        const payload = VaultCrypto.decryptPayload(enc.encryptedData, enc.iv, enc.authTag);
+        payslip.setDataValue('grossEarnings', payload.grossEarnings);
+        payslip.setDataValue('netPay', payload.netPay);
+        payslip.setDataValue('earnings', payload.earnings);
+        payslip.setDataValue('deductions', payload.deductions);
+      } catch (e) {
+        console.error('Failed to decrypt payslip:', e);
+      }
+    }
+  };
+
+  Payslip.afterFind(async (result, options) => {
+    if (!result) return;
+    if (Array.isArray(result)) {
+      for (const p of result) {
+        await decryptPayslip(p);
+      }
+    } else {
+      await decryptPayslip(result);
+    }
+  });
 
   return Payslip;
 };

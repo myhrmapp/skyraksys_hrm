@@ -74,53 +74,19 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     bankBranch: '',
     accountHolderName: '',
     
-    // Optional salary structure
-    salaryStructure: '',
-    
-    // Comprehensive salary details (NEW NESTED FORMAT)
-    salary: {
-      // Basic Salary Components
+    // Salary structure (Flat format matching DB model)
+    salaryStructure: {
       basicSalary: '',
+      hra: '',
+      allowances: '',
+      pfContribution: '',
+      tds: '',
+      professionalTax: '',
+      esi: '',
+      otherDeductions: '',
       currency: DEFAULT_CURRENCY_CODE,
       payFrequency: 'monthly',
-      effectiveFrom: '',
-      
-      // Allowances (NESTED)
-      allowances: {
-        hra: '',
-        transport: '',
-        medical: '',
-        food: '',
-        communication: '',
-        special: '',
-        other: ''
-      },
-      
-      // Deductions (NESTED)
-      deductions: {
-        pf: '',
-        professionalTax: '',
-        incomeTax: '',
-        esi: '',
-        other: ''
-      },
-      
-      // Benefits (NESTED)
-      benefits: {
-        bonus: '',
-        incentive: '',
-        overtime: ''
-      },
-      
-      // Tax Information (NESTED)
-      taxInformation: {
-        taxRegime: 'old',
-        ctc: '',
-        takeHome: ''
-      },
-      
-      // Salary Notes
-      salaryNotes: ''
+      effectiveFrom: ''
     },
     
     // User account details
@@ -258,37 +224,34 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
       const safeEmployee = Object.fromEntries(
         Object.entries(employee).map(([k, v]) => [k, v == null ? '' : v])
       );
+
+      // The API may return salary data nested under employee.salaryStructure or employee.salary
+      const apiSalary = employee.salaryStructure || employee.salary || {};
+
       const transformedData = {
         ...formData,
         ...safeEmployee,
-        // Ensure nested salary object is properly merged
-        salary: {
-          ...formData.salary,
-          ...(employee.salary || {}),
-          basicSalary: employee.salary?.basicSalary || '',
-          allowances: {
-            ...formData.salary.allowances,
-            ...(employee.salary?.allowances || {})
-          },
-          deductions: {
-            ...formData.salary.deductions,
-            ...(employee.salary?.deductions || {})
-          },
-          benefits: {
-            ...formData.salary.benefits,
-            ...(employee.salary?.benefits || {})
-          },
-          taxInformation: {
-            ...formData.salary.taxInformation,
-            ...(employee.salary?.taxInformation || {})
-          }
+        // Merge flat salaryStructure (matches DB model & initial formData shape)
+        salaryStructure: {
+          ...(formData.salaryStructure || {}),
+          basicSalary:      apiSalary.basicSalary      ?? '',
+          hra:              apiSalary.hra               ?? '',
+          allowances:       apiSalary.allowances        ?? '',
+          pfContribution:   apiSalary.pfContribution    ?? '',
+          tds:              apiSalary.tds               ?? '',
+          professionalTax:  apiSalary.professionalTax   ?? '',
+          esi:              apiSalary.esi               ?? '',
+          otherDeductions:  apiSalary.otherDeductions   ?? '',
+          currency:         apiSalary.currency          || 'INR',
+          payFrequency:     apiSalary.payFrequency      || 'monthly',
+          effectiveFrom:    apiSalary.effectiveFrom     ?? '',
         },
         userAccount: {
-          ...formData.userAccount,
+          ...(formData.userAccount || {}),
           ...(employee.userAccount || {})
         }
       };
-      
+
       setFormData(transformedData);
     }
   }, [employee, isEditMode, formData.id]); // eslint-disable-line react-hooks/exhaustive-deps

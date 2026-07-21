@@ -87,10 +87,34 @@ class AuthService {
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user, req);
 
+    let unlockedDek = null;
+
+    // --- Vault Seamless Login ---
+    try {
+      const VaultCrypto = require('../utils/vaultCrypto');
+      const PayrollVaultConfig = db.PayrollVaultConfig;
+      if (PayrollVaultConfig) {
+        const vaultConfig = await PayrollVaultConfig.findOne();
+        if (vaultConfig && vaultConfig.isEnabled && vaultConfig.designatedHrUserId === user.id && vaultConfig.hrEncryptedDek) {
+          const derivedKey = VaultCrypto.deriveKey(password);
+          unlockedDek = VaultCrypto.decryptPayload(
+            vaultConfig.hrEncryptedDek,
+            vaultConfig.hrIv,
+            vaultConfig.hrAuthTag,
+            derivedKey
+          );
+        }
+      }
+    } catch (vaultErr) {
+      logger.error('Failed to unlock vault during login:', vaultErr);
+      // We don't fail the login, just don't unlock the vault.
+    }
+
     return {
       rateLimitHeaders,
       accessToken,
       refreshToken,
+      unlockedDek,
       user: {
         id: user.id,
         email: user.email,

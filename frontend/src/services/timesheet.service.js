@@ -89,6 +89,18 @@ class TimesheetService {
 
   // ---- Write (manager / admin / HR) ---------------------------------------
 
+  /** Approve a single timesheet. */
+  async approve(id, data) {
+    const response = await http.post(`/timesheets/${id}/approve`, data);
+    return response.data;
+  }
+
+  /** Reject a single timesheet. */
+  async reject(id, data) {
+    const response = await http.post(`/timesheets/${id}/reject`, data);
+    return response.data;
+  }
+
   /** Approve multiple submitted timesheets. */
   async bulkApprove(timesheetIds, comments = '') {
     const response = await http.post('/timesheets/bulk-approve', { timesheetIds, comments });

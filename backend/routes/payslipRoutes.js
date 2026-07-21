@@ -14,9 +14,11 @@ const express = require('express');
 const router = express.Router();
 const payslipController = require('../controllers/payslipController');
 const { authenticateToken, authorize } = require('../middleware/auth');
+const { requireVaultUnlock } = require('../middleware/vault.middleware');
 
 // Middleware: All routes require authentication
 router.use(authenticateToken);
+router.use(requireVaultUnlock);
 
 // Use standard authorize middleware instead of custom local functions
 const isAdminOrHR = authorize('admin', 'hr');

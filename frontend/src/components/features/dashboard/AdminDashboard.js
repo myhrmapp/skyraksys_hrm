@@ -304,7 +304,7 @@ const Dashboard = () => {
             subtitle="today"
             icon={<LeaveIcon />}
             color="warning"
-            onClick={() => navigate('/leave-requests')}
+            onClick={() => navigate('/leave-requests?status=on_leave&date=' + new Date().toISOString().split('T')[0])}
           />
         </Grid>
         <Grid item xs={6} sm={3} data-testid="stat-card-new-hires">
@@ -314,7 +314,12 @@ const Dashboard = () => {
             subtitle="this month"
             icon={<TrendingUpIcon />}
             color="success"
-            onClick={() => navigate('/employees')}
+            onClick={() => {
+              const today = new Date();
+              const year = today.getFullYear();
+              const month = String(today.getMonth() + 1).padStart(2, '0');
+              navigate('/employees?filter=new_hires&month=' + year + '-' + month);
+            }}
           />
         </Grid>
         <Grid item xs={6} sm={3} data-testid="stat-card-pending-leaves">
@@ -351,7 +356,7 @@ const Dashboard = () => {
             subtitle="timesheets"
             icon={<TimesheetIcon />}
             color="warning"
-            onClick={() => navigate('/timesheets')}
+            onClick={() => navigate('/timesheets?status=draft')}
           />
         </Grid>
         <Grid item xs={6} sm={3} data-testid="stat-card-approved-timesheets">
@@ -361,7 +366,7 @@ const Dashboard = () => {
             subtitle="this month"
             icon={<CheckCircleIcon />}
             color="success"
-            onClick={() => navigate('/timesheets')}
+            onClick={() => navigate('/timesheets?status=approved')}
           />
         </Grid>
         <Grid item xs={6} sm={3} data-testid="stat-card-payroll">

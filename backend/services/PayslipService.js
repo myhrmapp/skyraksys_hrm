@@ -236,14 +236,20 @@ class PayslipService {
     const transaction = await db.sequelize.transaction();
 
     try {
-      // Get or create default template
+      // Resolve template. If a custom template was selected, enforce that it exists.
       let template;
       if (templateId) {
         const result = await payslipTemplateService.getTemplateById(templateId);
+        if (!result?.success || !result?.data) {
+          throw new ValidationError('Selected payslip template was not found or is unavailable');
+        }
         template = result.data;
       } else {
         const result = await payslipTemplateService.getDefaultTemplateFromDB();
-        template = result.data;
+        template = result?.data || payslipTemplateService.defaultTemplate || null;
+        if (!template) {
+          throw new ValidationError('No default payslip template is configured');
+        }
       }
 
       const generatedPayslips = [];
@@ -336,6 +342,9 @@ class PayslipService {
             city: 'Mumbai',
             state: 'Maharashtra',
             pincode: '400001',
+            email: 'hr@skyraksys.com',
+            website: 'https://skyraksys.com',
+            contact: '+91 22 1234 5678',
             pan: 'XXXXXX0000X',
             tan: 'MUMX00000X'
           };
@@ -345,7 +354,7 @@ class PayslipService {
             employeeId: employee.employeeId,
             name: `${employee.firstName} ${employee.lastName}`,
             email: employee.email,
-            designation: employee.position?.name || 'N/A',
+            designation: employee.position?.title || employee.position?.name || 'N/A',
             department: employee.department?.name || 'N/A',
             dateOfJoining: employee.hireDate,
             panNumber: employee.panNumber,
@@ -390,7 +399,7 @@ class PayslipService {
             payPeriodStart: startDate,
             payPeriodEnd: endDate,
             templateId: template.id || null,
-            templateVersion: '1.0',
+            templateVersion: template.version || '1.0',
             employeeInfo,
             companyInfo,
             earnings: calculation.earnings,
@@ -484,12 +493,16 @@ class PayslipService {
         throw new ValidationError(`Cannot edit payslip with status "${payslip.status}". Only draft payslips can be edited.`);
       }
 
-      // Calculate new totals
-      const grossEarnings = Object.values(earnings).reduce((sum, val) => sum + parseFloat(val || 0), 0);
-      const totalDeductions = deductions 
-        ? Object.values(deductions).reduce((sum, val) => sum + parseFloat(val || 0), 0)
-        : 0;
-      const netPay = grossEarnings - totalDeductions;
+      // Calculate new totals.
+      // If deductions are omitted, preserve existing deductions instead of zeroing them out.
+      const effectiveDeductions = deductions !== undefined ? deductions : (payslip.deductions || {});
+      const grossEarnings = Number(
+        Object.values(earnings).reduce((sum, val) => sum + (Number.parseFloat(val || 0) || 0), 0).toFixed(2)
+      );
+      const totalDeductions = Number(
+        Object.values(effectiveDeductions).reduce((sum, val) => sum + (Number.parseFloat(val || 0) || 0), 0).toFixed(2)
+      );
+      const netPay = Number((grossEarnings - totalDeductions).toFixed(2));
 
       // Validate net pay
       if (netPay < 0) {
@@ -514,7 +527,7 @@ class PayslipService {
       // Update payslip
       await payslip.update({
         earnings,
-        deductions: deductions || {},
+        deductions: effectiveDeductions,
         grossEarnings,
         totalDeductions,
         netPay,
@@ -534,7 +547,7 @@ class PayslipService {
           before: originalValues,
           after: {
             earnings,
-            deductions: deductions || {},
+            deductions: effectiveDeductions,
             grossEarnings,
             totalDeductions,
             netPay,
@@ -948,6 +961,8 @@ class PayslipService {
     // RBAC: Employees can only see their own payslips
     if (currentUser.role === 'employee') {
       where.employeeId = currentUser.employeeId;
+      // Employees should not see draft payslips.
+      where.status = { [Op.ne]: 'draft' };
     }
 
     // Build include clause
@@ -1027,6 +1042,10 @@ class PayslipService {
       order: [['year', 'DESC'], ['month', 'DESC']]
     });
 
+    if (currentUser.role === 'employee') {
+      return payslips.filter((p) => p.status !== 'draft');
+    }
+
     return payslips;
   }
 
@@ -1063,6 +1082,10 @@ class PayslipService {
       throw new ForbiddenError('Access denied');
     }
 
+    if (currentUser.role === 'employee' && payslip.status === 'draft') {
+      throw new ForbiddenError('Access denied');
+    }
+
     return payslip;
   }
 
@@ -1077,7 +1100,10 @@ class PayslipService {
     }
 
     const payslips = await db.Payslip.findAll({
-      where: { employeeId: currentUser.employeeId },
+      where: {
+        employeeId: currentUser.employeeId,
+        status: { [Op.ne]: 'draft' }
+      },
       include: [
         {
           model: db.Employee,

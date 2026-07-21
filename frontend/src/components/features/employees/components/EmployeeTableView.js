@@ -26,6 +26,7 @@ import {
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import EmptyState from '../../../shared/EmptyState';
+import { buildPhotoUrl } from '../../../../utils/photoUrl';
 
 const EmployeeTableView = ({ 
   employees, 
@@ -72,7 +73,7 @@ const EmployeeTableView = ({
               <TableCell>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Avatar 
-                    src={emp.photoUrl ? `${process.env.REACT_APP_BACKEND_URL || ''}${emp.photoUrl}` : undefined} 
+                    src={emp.photoUrl ? buildPhotoUrl(emp.photoUrl) : undefined} 
                     sx={{ width: 40, height: 40, bgcolor: 'primary.main', fontSize: '1rem' }}
                   >
                     {emp.firstName?.charAt(0)}

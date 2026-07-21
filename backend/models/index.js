@@ -68,13 +68,20 @@ db.SalaryStructure = require('./salary-structure.model')(sequelize, Sequelize);
 db.PayslipTemplate = require('./payslip-template.model')(sequelize, Sequelize);
 db.Payslip = require('./payslip.model')(sequelize, Sequelize);
 db.PayslipAuditLog = require('./payslip-audit-log.model')(sequelize, Sequelize);
+db.InvoiceTemplate = require('./invoice-template.model')(sequelize, Sequelize);
+db.Invoice = require('./invoice.model')(sequelize, Sequelize);
+db.Client = require('./client.model')(sequelize, Sequelize);
+db.PayrollVaultConfig = require('./payroll-vault-config.model')(sequelize, Sequelize);
 db.RefreshToken = require('./refresh-token.model')(sequelize, Sequelize);
 db.SystemConfig = require('./system-config.model')(sequelize, Sequelize);
 db.EmployeeReview = require('./employee-review.model')(sequelize, Sequelize);
 db.AuditLog = require('./audit-log.model')(sequelize, Sequelize);
 db.Holiday = require('./holiday.model')(sequelize, Sequelize);
+db.Notification = require('./notification.model')(sequelize, Sequelize);
 db.Attendance = require('./attendance.model')(sequelize, Sequelize);
 db.PasswordResetToken = require('./password-reset-token.model')(sequelize, Sequelize);
+db.Goal = require('./goal.model')(sequelize, Sequelize);
+db.KeyResult = require('./key-result.model')(sequelize, Sequelize);
 
 // Define associations
 Object.keys(db).forEach(modelName => {

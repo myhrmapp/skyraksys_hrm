@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Paper,
@@ -361,30 +361,47 @@ const TimesheetApproval = ({ embedded } = {}) => {
     <Card 
       sx={{ 
         height: '100%',
-        bgcolor: 'white',
+        background: 'rgba(255, 255, 255, 0.7)',
+        backdropFilter: 'blur(20px)',
         border: '1px solid',
         borderColor: 'divider',
+        borderRadius: 4,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.04)',
+        position: 'relative',
+        overflow: 'hidden',
         transition: 'all 0.3s ease',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: 4
+          boxShadow: '0 12px 40px rgba(0,0,0,0.08)',
         }
       }}
     >
-      <CardContent>
+      <Box sx={{
+        position: 'absolute',
+        top: -30,
+        right: -30,
+        width: 100,
+        height: 100,
+        bgcolor: color,
+        opacity: 0.08,
+        borderRadius: '50%',
+        filter: 'blur(30px)',
+        pointerEvents: 'none'
+      }} />
+      <CardContent sx={{ position: 'relative', zIndex: 1, p: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Avatar sx={{ bgcolor: alpha(color, 0.1), color: color, width: 48, height: 48 }}>
+          <Avatar sx={{ bgcolor: alpha(color, 0.1), color: color, width: 56, height: 56, borderRadius: 3 }}>
             {icon}
           </Avatar>
-          <Typography variant="h3" sx={{ color, fontWeight: 'bold' }}>
+          <Typography variant="h3" sx={{ color, fontWeight: '800' }}>
             {value}
           </Typography>
         </Box>
-        <Typography variant="body2" color="textSecondary" fontWeight={500}>
+        <Typography variant="body2" color="textSecondary" fontWeight={600} letterSpacing={0.5} textTransform="uppercase">
           {title}
         </Typography>
         {subtitle && (
-          <Typography variant="caption" color="textSecondary">
+          <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block', fontWeight: 500 }}>
             {subtitle}
           </Typography>
         )}
@@ -399,20 +416,21 @@ const TimesheetApproval = ({ embedded } = {}) => {
       <Paper 
         elevation={0}
         sx={{ 
-          p: 3, 
-          mb: 3,
-          bgcolor: 'white',
-          borderRadius: 2,
+          p: 4, 
+          mb: 4,
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%)',
+          borderRadius: 4,
           border: '1px solid',
-          borderColor: 'divider'
+          borderColor: 'divider',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
-            <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom color="text.primary">
+            <Typography variant="h4" component="h1" fontWeight="800" gutterBottom color="text.primary">
               Timesheet Approvals
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body1" color="text.secondary">
               Review and manage employee timesheet submissions
             </Typography>
           </Box>
@@ -420,18 +438,28 @@ const TimesheetApproval = ({ embedded } = {}) => {
             {selectedIds.length > 0 && (
               <>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   color="success"
                   startIcon={<ApproveIcon />}
                   onClick={() => handleBulkAction('approve')}
+                  sx={{ 
+                    borderRadius: 2, 
+                    fontWeight: 600,
+                    boxShadow: '0 4px 14px 0 rgba(76, 175, 80, 0.39)',
+                  }}
                 >
                   Approve ({selectedIds.length})
                 </Button>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   color="error"
                   startIcon={<RejectIcon />}
                   onClick={() => handleBulkAction('reject')}
+                  sx={{ 
+                    borderRadius: 2, 
+                    fontWeight: 600,
+                    boxShadow: '0 4px 14px 0 rgba(244, 67, 54, 0.39)',
+                  }}
                 >
                   Reject ({selectedIds.length})
                 </Button>
@@ -441,6 +469,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
               variant="outlined"
               startIcon={<DownloadIcon />}
               onClick={handleExport}
+              sx={{ borderRadius: 2, fontWeight: 600 }}
             >
               Export
             </Button>
@@ -448,6 +477,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
               variant="outlined"
               startIcon={<RefreshIcon />}
               onClick={() => { refetch(); refetchStats(); }}
+              sx={{ borderRadius: 2, fontWeight: 600 }}
             >
               Refresh
             </Button>
@@ -656,67 +686,79 @@ const TimesheetApproval = ({ embedded } = {}) => {
       </Box>
 
       {/* Timesheets Table */}
-      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 2 }}>
-        <Table>
-          <TableHead sx={{ bgcolor: 'grey.50', borderBottom: '2px solid', borderColor: 'divider' }}>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  indeterminate={selectedIds.length > 0 && selectedIds.length < paginatedTimesheets.filter(ts => ts.status === 'Submitted').length}
-                  checked={paginatedTimesheets.filter(ts => ts.status === 'Submitted').length > 0 && selectedIds.length === paginatedTimesheets.filter(ts => ts.status === 'Submitted').length}
-                  onChange={handleSelectAll}
-                />
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'employee'}
-                  direction={orderBy === 'employee' ? order : 'asc'}
-                  onClick={() => handleSort('employee')}
-                >
-                  <strong>Employee</strong>
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'weekStartDate'}
-                  direction={orderBy === 'weekStartDate' ? order : 'asc'}
-                  onClick={() => handleSort('weekStartDate')}
-                >
-                  <strong>Week Period</strong>
-                </TableSortLabel>
-              </TableCell>
-              <TableCell><strong>Project / Task</strong></TableCell>
-              <TableCell align="right">
-                <TableSortLabel
-                  active={orderBy === 'hours'}
-                  direction={orderBy === 'hours' ? order : 'asc'}
-                  onClick={() => handleSort('hours')}
-                >
-                  <strong>Hours</strong>
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'status'}
-                  direction={orderBy === 'status' ? order : 'asc'}
-                  onClick={() => handleSort('status')}
-                >
-                  <strong>Status</strong>
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'submittedAt'}
-                  direction={orderBy === 'submittedAt' ? order : 'asc'}
-                  onClick={() => handleSort('submittedAt')}
-                >
-                  <strong>Submitted</strong>
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="center"><strong>Actions</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <Card sx={{ 
+        borderRadius: 4, 
+        border: '1px solid', 
+        borderColor: 'divider',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.04)',
+        overflow: 'hidden'
+      }}>
+        <TableContainer sx={{ bgcolor: 'background.paper' }}>
+          <Table sx={{ minWidth: 800, '& .MuiTableCell-root': { borderBottom: '1px solid rgba(224, 224, 224, 0.4)' } }}>
+            <TableHead>
+              <TableRow sx={{ background: 'linear-gradient(to right, rgba(248,250,252,0.8), rgba(241,245,249,0.8))' }}>
+                <TableCell padding="checkbox" sx={{ py: 2 }}>
+                  <Checkbox
+                    indeterminate={selectedIds.length > 0 && selectedIds.length < paginatedTimesheets.filter(ts => ts.status === 'Submitted').length}
+                    checked={paginatedTimesheets.filter(ts => ts.status === 'Submitted').length > 0 && selectedIds.length === paginatedTimesheets.filter(ts => ts.status === 'Submitted').length}
+                    onChange={handleSelectAll}
+                  />
+                </TableCell>
+                <TableCell sx={{ py: 2 }}>
+                  <TableSortLabel
+                    active={orderBy === 'employee'}
+                    direction={orderBy === 'employee' ? order : 'asc'}
+                    onClick={() => handleSort('employee')}
+                    sx={{ fontWeight: 700, color: 'text.secondary' }}
+                  >
+                    Employee
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ py: 2 }}>
+                  <TableSortLabel
+                    active={orderBy === 'weekStartDate'}
+                    direction={orderBy === 'weekStartDate' ? order : 'asc'}
+                    onClick={() => handleSort('weekStartDate')}
+                    sx={{ fontWeight: 700, color: 'text.secondary' }}
+                  >
+                    Week Period
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ py: 2, fontWeight: 700, color: 'text.secondary' }}>Project / Task</TableCell>
+                <TableCell align="right" sx={{ py: 2 }}>
+                  <TableSortLabel
+                    active={orderBy === 'hours'}
+                    direction={orderBy === 'hours' ? order : 'asc'}
+                    onClick={() => handleSort('hours')}
+                    sx={{ fontWeight: 700, color: 'text.secondary' }}
+                  >
+                    Hours
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ py: 2 }}>
+                  <TableSortLabel
+                    active={orderBy === 'status'}
+                    direction={orderBy === 'status' ? order : 'asc'}
+                    onClick={() => handleSort('status')}
+                    sx={{ fontWeight: 700, color: 'text.secondary' }}
+                  >
+                    Status
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sx={{ py: 2 }}>
+                  <TableSortLabel
+                    active={orderBy === 'submittedAt'}
+                    direction={orderBy === 'submittedAt' ? order : 'asc'}
+                    onClick={() => handleSort('submittedAt')}
+                    sx={{ fontWeight: 700, color: 'text.secondary' }}
+                  >
+                    Submitted
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="center" sx={{ py: 2, fontWeight: 700, color: 'text.secondary' }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
             {loading ? (
               Array.from(new Array(5)).map((_, index) => (
                 <TableRow key={index}>
@@ -906,9 +948,10 @@ const TimesheetApproval = ({ embedded } = {}) => {
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          sx={{ borderTop: '1px solid #e0e0e0' }}
+          sx={{ borderTop: '1px solid', borderColor: 'divider' }}
         />
-      </TableContainer>
+        </TableContainer>
+      </Card>
 
       {/* Approval Dialog */}
       <Dialog 

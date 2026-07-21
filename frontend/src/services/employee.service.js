@@ -52,20 +52,18 @@ class EmployeeService {
     // Add all simple employee form data (strings, numbers, dates)
     Object.keys(employeeData).forEach(key => {
       const value = employeeData[key];
-      // Skip null, undefined, empty strings, and objects (objects should be handled separately)
+      // Skip null, undefined, empty strings, and objects
       if (value !== null && value !== undefined && value !== '' && typeof value !== 'object') {
         formData.append(key, value);
       }
     });
     
-    // Add salary as JSON string if it exists (comprehensive salary structure)
-    if (salary && typeof salary === 'object') {
-      formData.append('salary', JSON.stringify(salary));
-    }
-    
-    // Add salary structure as JSON string if it exists (legacy format)
+    // Add salary structure as JSON string if it exists
     if (salaryStructure && typeof salaryStructure === 'object') {
       formData.append('salaryStructure', JSON.stringify(salaryStructure));
+    } else if (salary && typeof salary === 'object') {
+      // Fallback: If legacy salary object is passed, map it to salaryStructure for backend
+      formData.append('salaryStructure', JSON.stringify(salary));
     }
     
     // Add photo if provided
@@ -247,6 +245,12 @@ class EmployeeService {
   // Get current user profile (alias)
   async getCurrentProfile() {
     return this.getMyProfile();
+  }
+
+  // Preview next auto-generated employee ID (SK###) without reserving it
+  async getNextEmployeeId() {
+    const response = await http.get('/employees/next-id');
+    return response.data;
   }
 }
 

@@ -173,13 +173,14 @@ class PayslipService {
   }
 
   /**
-   * Calculate ESIC (0.75% of gross salary up to ₹25,000)
+   * Calculate ESIC (0.75% of gross salary if gross ≤ ₹21,000).
+   * Threshold aligned with backend payslipCalculation.service.js ESIC_WAGE_LIMIT.
    * @param {number} grossSalary - Gross salary amount
    * @returns {number} ESIC amount
    */
   calculateESIC(grossSalary) {
-    if (grossSalary > 25000) return 0;
-    return grossSalary * 0.0075; // 0.75%
+    if (grossSalary > 21000) return 0; // ESIC not applicable above ₹21,000
+    return grossSalary * 0.0075; // 0.75% employee contribution
   }
 
   /**

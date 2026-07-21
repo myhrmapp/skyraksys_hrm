@@ -17,6 +17,7 @@ const payrollController = require('../controllers/payrollController');
 
 // Middleware
 const { authenticateToken, authorize } = require('../middleware/auth');
+const { requireVaultUnlock } = require('../middleware/vault.middleware');
 const { validate, validateQuery, validateParams } = require('../middleware/validate');
 const validators = require('../middleware/validators');
 
@@ -37,6 +38,7 @@ const upload = multer({
 
 // Apply global middleware
 router.use(authenticateToken);
+router.use(requireVaultUnlock);
 // NOTE: No global authorize - some routes allow employee access to own data
 
 /**

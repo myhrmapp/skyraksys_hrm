@@ -50,6 +50,7 @@ const StatutoryInfoSection = ({
                 value={employee.pfNumber}
                 editing={editing}
                 onChange={(val) => onChange('pfNumber', val)}
+                testId="field-pfNumber"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -58,6 +59,7 @@ const StatutoryInfoSection = ({
                 value={employee.esiNumber}
                 editing={editing}
                 onChange={(val) => onChange('esiNumber', val)}
+                testId="field-esiNumber"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -66,6 +68,7 @@ const StatutoryInfoSection = ({
                 value={employee.panNumber}
                 editing={editing}
                 onChange={(val) => onChange('panNumber', val)}
+                testId="field-panNumber"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -74,6 +77,7 @@ const StatutoryInfoSection = ({
                 value={employee.uanNumber}
                 editing={editing}
                 onChange={(val) => onChange('uanNumber', val)}
+                testId="field-uanNumber"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -82,6 +86,7 @@ const StatutoryInfoSection = ({
                 value={employee.aadhaarNumber}
                 editing={editing}
                 onChange={(val) => onChange('aadhaarNumber', val)}
+                testId="field-aadharNumber"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -90,6 +95,7 @@ const StatutoryInfoSection = ({
                 value={employee.bankName}
                 editing={editing}
                 onChange={(val) => onChange('bankName', val)}
+                testId="field-bankName"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -98,6 +104,7 @@ const StatutoryInfoSection = ({
                 value={employee.bankAccountNumber}
                 editing={editing}
                 onChange={(val) => onChange('bankAccountNumber', val)}
+                testId="field-bankAccountNumber"
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -106,6 +113,7 @@ const StatutoryInfoSection = ({
                 value={employee.ifscCode}
                 editing={editing}
                 onChange={(val) => onChange('ifscCode', val)}
+                testId="field-bankIfscCode"
               />
             </Grid>
           </Grid>

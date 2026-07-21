@@ -29,6 +29,7 @@ import {
   VpnKey as VpnKeyIcon,
   Add as AddIcon
 } from '@mui/icons-material';
+import { buildPhotoUrl } from '../../../../utils/photoUrl';
 
 const EmployeeCardView = ({ 
   employees, 
@@ -68,7 +69,7 @@ const EmployeeCardView = ({
                   {/* Avatar & Name */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Avatar
-                      src={employee.photoUrl ? `${process.env.REACT_APP_BACKEND_URL || ''}${employee.photoUrl}` : undefined}
+                      src={employee.photoUrl ? buildPhotoUrl(employee.photoUrl) : undefined}
                       sx={{
                         width: 56,
                         height: 56,

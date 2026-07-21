@@ -51,13 +51,16 @@ export const ROUTE_PERMISSIONS = {
   '/payroll-management': [ROLES.ADMIN, ROLES.HR],
   '/employee-payslips': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/admin/payslip-templates': [ROLES.ADMIN, ROLES.HR],
+  '/billing-invoices': [ROLES.HR],
+  '/notifications': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   
   // Project & Task Routes
   '/project-task-config': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/my-tasks': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   
-  // Employee Reviews
-  '/employee-reviews': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
+  // Employee Reviews & Goals
+  '/employee-reviews': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER],
+  '/goals': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
 
   // Organization
   '/organization': [ROLES.ADMIN, ROLES.HR],
@@ -80,6 +83,9 @@ export const ROUTE_PERMISSIONS = {
   
   // Debug Routes
   '/debug/validation': [ROLES.ADMIN],
+  
+  // System Showcase
+  '/system-showcase': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   
   // Utility Routes
   '/user-guide': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE]

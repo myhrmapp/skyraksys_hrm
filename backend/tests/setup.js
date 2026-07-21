@@ -58,6 +58,11 @@ async function setupTestDatabase() {
           `ALTER TABLE departments ADD COLUMN IF NOT EXISTS "code" VARCHAR(10)`,
           `ALTER TABLE departments ADD COLUMN IF NOT EXISTS "parentId" UUID REFERENCES departments(id)`,
           `ALTER TABLE departments ADD COLUMN IF NOT EXISTS "deletedAt" TIMESTAMPTZ`,
+          `ALTER TABLE projects ADD COLUMN IF NOT EXISTS "managerId" UUID REFERENCES employees(id)`,
+          `ALTER TABLE salary_structures ADD COLUMN IF NOT EXISTS "payFrequency" VARCHAR(20) DEFAULT 'monthly'`,
+          `ALTER TABLE invoices ALTER COLUMN "clientCompany" TYPE TEXT`,
+          `ALTER TABLE invoices ALTER COLUMN "clientGstin" TYPE TEXT`,
+          `ALTER TABLE invoices ALTER COLUMN "clientAddress" TYPE TEXT`,
         ];
         // Fix leave_requests.approvedBy FK: should reference employees(id) not users(id)
         try {

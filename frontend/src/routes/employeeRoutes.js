@@ -9,6 +9,7 @@ const EmployeeRecords = lazy(() => import('../components/features/employees/Empl
 const MyProfile = lazy(() => import('../components/features/employees/MyProfile'));
 const UserAccountManagementPage = lazy(() => import('../components/features/employees/UserAccountManagementPage'));
 const EmployeeReviewManagement = lazy(() => import('../components/features/reviews/EmployeeReviewManagement'));
+const MyGoals = lazy(() => import('../components/features/reviews/MyGoals'));
 
 const employeeRoutes = [
   <Route key="employees" path="employees" element={withBoundary(<EmployeeList />, 'Loading Employees...')} />,
@@ -19,8 +20,8 @@ const employeeRoutes = [
   <Route key="my-profile" path="my-profile" element={withBoundary(<MyProfile />, 'Loading My Profile...')} />,
   <Route key="my-profile-edit" path="my-profile/edit/:id" element={withBoundary(<EmployeeForm mode="self" />, 'Loading Profile Edit...')} />,
   <Route key="employee-records" path="employee-records" element={withBoundary(<EmployeeRecords />, 'Loading Employee Records...')} />,
-  <Route key="add-employee-legacy" path="add-employee" element={<Navigate to="/employees/add" replace />} />,
   <Route key="employee-reviews" path="employee-reviews" element={withBoundary(<EmployeeReviewManagement />, 'Loading Employee Reviews...')} />,
+  <Route key="employee-goals" path="goals" element={withBoundary(<MyGoals />, 'Loading My Goals...')} />,
 ];
 
 export default employeeRoutes;

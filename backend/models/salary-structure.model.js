@@ -42,6 +42,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       defaultValue: 'INR'
     },
+    payFrequency: {
+      type: DataTypes.ENUM('weekly', 'biweekly', 'monthly', 'annually'),
+      defaultValue: 'monthly'
+    },
     effectiveFrom: {
       type: DataTypes.DATEONLY,
       allowNull: false
@@ -49,6 +53,10 @@ module.exports = (sequelize, DataTypes) => {
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true
+    },
+    employeeId: {
+      type: DataTypes.UUID,
+      allowNull: false
     }
   }, {
     tableName: 'salary_structures',
@@ -73,6 +81,70 @@ module.exports = (sequelize, DataTypes) => {
       as: 'employee'
     });
   };
+
+  const VaultCrypto = require('../utils/vaultCrypto');
+
+  SalaryStructure.beforeSave(async (structure, options) => {
+    try {
+      const config = await sequelize.models.PayrollVaultConfig.findOne();
+      if (config && config.isEnabled) {
+        const payload = {
+          basicSalary: structure.getDataValue('basicSalary'),
+          hra: structure.getDataValue('hra'),
+          allowances: structure.getDataValue('allowances'),
+          pfContribution: structure.getDataValue('pfContribution'),
+          tds: structure.getDataValue('tds'),
+          professionalTax: structure.getDataValue('professionalTax'),
+          esi: structure.getDataValue('esi'),
+          otherDeductions: structure.getDataValue('otherDeductions')
+        };
+        const encrypted = VaultCrypto.encryptPayload(payload);
+        structure.setDataValue('encryptedFinancials', JSON.stringify(encrypted));
+        
+        structure.setDataValue('basicSalary', null);
+        structure.setDataValue('hra', null);
+        structure.setDataValue('allowances', null);
+        structure.setDataValue('pfContribution', null);
+        structure.setDataValue('tds', null);
+        structure.setDataValue('professionalTax', null);
+        structure.setDataValue('esi', null);
+        structure.setDataValue('otherDeductions', null);
+      }
+    } catch (e) {
+      console.error('Error encrypting SalaryStructure before save:', e);
+    }
+  });
+
+  const decryptStructure = async (structure) => {
+    const encryptedDataStr = structure.getDataValue('encryptedFinancials');
+    if (structure && encryptedDataStr) {
+      try {
+        const enc = JSON.parse(encryptedDataStr);
+        const payload = VaultCrypto.decryptPayload(enc.encryptedData, enc.iv, enc.authTag);
+        structure.setDataValue('basicSalary', payload.basicSalary);
+        structure.setDataValue('hra', payload.hra);
+        structure.setDataValue('allowances', payload.allowances);
+        structure.setDataValue('pfContribution', payload.pfContribution);
+        structure.setDataValue('tds', payload.tds);
+        structure.setDataValue('professionalTax', payload.professionalTax);
+        structure.setDataValue('esi', payload.esi);
+        structure.setDataValue('otherDeductions', payload.otherDeductions);
+      } catch (e) {
+        console.error('Failed to decrypt SalaryStructure:', e);
+      }
+    }
+  };
+
+  SalaryStructure.afterFind(async (result, options) => {
+    if (!result) return;
+    if (Array.isArray(result)) {
+      for (const p of result) {
+        await decryptStructure(p);
+      }
+    } else {
+      await decryptStructure(result);
+    }
+  });
 
   return SalaryStructure;
 };

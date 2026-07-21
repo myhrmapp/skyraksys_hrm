@@ -140,7 +140,7 @@ class PayslipCalculationService {
 
     // Overtime Pay
     if (overtimeHours > 0) {
-      const hourlyRate = (monthlyBasic / totalWorkingDays) / 8; // Assuming 8 hours/day
+      const hourlyRate = (monthlyBasic / totalWorkingDays) / 9; // 10-hour shift with 1-hour break => 9 net working hours/day
       const overtimeRate = options.overtimeRate || 1.5; // 1.5x for overtime
       earnings.overtimePay = this.roundAmount(overtimeHours * hourlyRate * overtimeRate);
     }

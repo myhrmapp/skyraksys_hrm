@@ -155,7 +155,16 @@ jest.mock('./contexts/AuthContext', () => {
     __esModule: true,
     AuthContext,
     useAuth: () => {
-      return global.__TEST_AUTH_VALUE__ || {
+      if (global.__TEST_AUTH_VALUE__) {
+        return global.__TEST_AUTH_VALUE__;
+      }
+
+      const contextValue = React.useContext(AuthContext);
+      if (contextValue && Object.keys(contextValue).length > 0) {
+        return contextValue;
+      }
+
+      return {
         user: null,
         loading: false,
         isAuthenticated: false,
