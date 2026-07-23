@@ -15,9 +15,9 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon, Print as PrintIcon, Badge as BadgeIcon } from '@mui/icons-material';
 import { buildPhotoUrl } from '../../../../utils/photoUrl';
+import api from '../../../../services/api.service';
 
-const ID_CARD_SETTINGS_KEY = 'skyraksys_id_card_settings';
-
+// Default branding — used as fallback if API call fails
 const DEFAULT_SETTINGS = {
   primaryColor:    '#1A4B8C',
   accentColor:     '#0099D4',
@@ -253,19 +253,15 @@ END:VCARD`;
 // ─── Modal ───────────────────────────────────────────────────────────────────
 const IDCardModal = ({ open, onClose, employee }) => {
   const [settings, setSettings] = useState({});
-  const [loadingSettings, setLoadingSettings] = useState(true);
 
   // Load customizations from backend API
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const { default: api } = await import('../../../../../services/api.service');
         const res = await api.get('/settings/idcard-template');
         if (res.data) setSettings(res.data);
       } catch (err) {
         console.error('Failed to load ID card settings from API', err);
-      } finally {
-        setLoadingSettings(false);
       }
     };
     if (open) {
@@ -273,16 +269,6 @@ const IDCardModal = ({ open, onClose, employee }) => {
     }
   }, [open]);
 
-  const DEFAULT_SETTINGS = {
-    primaryColor:   '#1A4B8C',
-    accentColor:    '#0099D4',
-    tagline:        'GROW TOGETHER',
-    websiteUrl:     'WWW.SKYRAKSYS.COM',
-    showQrCode:     true,
-    showDepartment: true,
-    showDesignation:true,
-    showWebsite:    true,
-  };
   const cfg = { ...DEFAULT_SETTINGS, ...settings };
 
   const [printing, setPrinting] = useState(false);

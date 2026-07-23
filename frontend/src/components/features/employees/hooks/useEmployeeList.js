@@ -139,11 +139,14 @@ export const useEmployeeList = () => {
 
   const loadDepartments = async () => {
     try {
+      // eslint-disable-next-line no-console
       console.log('🔍 Loading departments...');
       const response = await employeeService.getDepartments();
+      // eslint-disable-next-line no-console
       console.log('📦 Departments response:', response);
 
       const departmentsData = extractListResponse(response);
+      // eslint-disable-next-line no-console
       console.log('✅ Setting departments:', departmentsData);
       setDepartments(departmentsData);
     } catch (error) {

@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Card, CardContent, Typography, Button, Grid, TextField,
   Select, MenuItem, FormControl, InputLabel, Switch, FormControlLabel,
-  Divider, Paper, List, ListItem, ListItemText, ListItemSecondaryAction,
-  Dialog, DialogTitle, DialogContent, DialogActions, Chip, IconButton,
+  Divider, Paper, Chip, IconButton,
   Tabs, Tab
 } from '@mui/material';
 import {
@@ -54,6 +53,7 @@ const AVAILABLE_COLUMNS = [
 export default function EnhancedInvoiceTemplateConfiguration() {
   const { enqueueSnackbar } = useSnackbar();
   const [templates, setTemplates] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [activeTab, setActiveTab] = useState(0);

@@ -20,7 +20,6 @@ import {
   Visibility,
   VisibilityOff,
   Login as LoginIcon,
-  Business as BusinessIcon,
   Email as EmailIcon,
   Lock as LockIcon
 } from '@mui/icons-material';

@@ -22,4 +22,5 @@ class LeaveTypeAdminService {
   }
 }
 
-export default new LeaveTypeAdminService();
+const leaveTypeAdminService = new LeaveTypeAdminService();
+export default leaveTypeAdminService;

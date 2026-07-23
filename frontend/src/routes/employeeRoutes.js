@@ -1,5 +1,5 @@
 import React, { lazy } from 'react';
-import { Route, Navigate } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { withBoundary } from './routeHelpers';
 
 const EmployeeList = lazy(() => import('../components/features/employees/EmployeeList'));

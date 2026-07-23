@@ -8,7 +8,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../../services/api.service';
 import {
   Box, Card, CardContent, CardHeader, Divider, Grid,
-  TextField, Switch, FormControlLabel, Button, Typography,
+  TextField, Switch, Button, Typography,
   Alert, Chip, Tooltip, IconButton, Collapse,
 } from '@mui/material';
 import {
@@ -22,7 +22,6 @@ import {
 } from '@mui/icons-material';
 import { PreviewCard } from '../employees/components/IDCardModal';
 
-const ID_CARD_SETTINGS_KEY = 'skyraksys_id_card_settings';
 
 const DEFAULT_SETTINGS = {
   primaryColor:   '#1A4B8C',
@@ -76,7 +75,9 @@ const ColorInput = ({ label, value, onChange }) => (
 
 const IDCardCustomizer = () => {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line no-unused-vars
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -99,13 +100,10 @@ const IDCardCustomizer = () => {
     fetchSettings();
   }, []);
 
-  const handleSettingChange = (field) => (e) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setSettings(prev => ({ ...prev, [field]: value }));
-  };
 
-  const handleColorChange = (field) => (colorStr) => {
-    setSettings(prev => ({ ...prev, [field]: colorStr }));
+  // Unified change handler used in JSX — delegates by value type
+  const handleChange = (field, value) => {
+    setSettings(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSave = async () => {

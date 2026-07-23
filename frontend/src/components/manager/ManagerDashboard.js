@@ -33,6 +33,7 @@ import TeamMembersList from './TeamMembersList';
 const ManagerDashboard = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  // eslint-disable-next-line no-unused-vars
   const { hasRole } = useAuth();
   const { isLoading, setLoading } = useLoading();
   const { showNotification } = useNotification();
