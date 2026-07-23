@@ -46,7 +46,7 @@ async function createInvoice() {
       billingYear: 2026,
       issueDate: '2026-07-21',
       dueDate: '2026-08-05',
-      currency: 'USD',
+      currency: 'INR',
       workerType: 'permanent',
       status: 'sent',
       lineItems: [

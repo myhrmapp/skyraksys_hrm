@@ -15,7 +15,7 @@ const defaultTemplate = {
   name: '',
   description: '',
   isDefault: false,
-  currency: 'USD',
+  currency: 'INR',
   templateData: {
     title: 'Service Invoice',
     companySection: { showGstin: true, showAddress: true },

@@ -628,7 +628,7 @@ router.get('/:id/pdf', canManageInvoices, async (req, res) => {
     }
     // Final fallback
     if (!templateToUse) {
-      templateToUse = { templateData: defaultTemplateData, currency: 'USD' };
+      templateToUse = { templateData: defaultTemplateData, currency: 'INR' };
     }
 
     // The generateInvoicePDF function streams directly to `res`

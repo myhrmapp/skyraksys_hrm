@@ -37,7 +37,7 @@ const defaultTemplate = {
   description: '',
   isDefault: false,
   isActive: true,
-  currency: 'USD',
+  currency: 'INR',
   templateData: { ...defaultTemplateData }
 };
 

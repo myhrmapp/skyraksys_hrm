@@ -3,7 +3,7 @@ import { Box, Paper, Typography, Grid, Table, TableBody, TableCell, TableHead, T
 
 const InvoicePreview = ({ template, isMobile = false }) => {
   const {
-    currency = 'USD',
+    currency = 'INR',
     templateData = {}
   } = template || {};
 
