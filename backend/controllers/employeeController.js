@@ -31,10 +31,16 @@ exports.getAll = async (req, res, next) => {
     const sortField = req.query.sort || 'firstName';
     const sortDirection = (req.query.order || 'ASC').toUpperCase();
     
-    // RBAC: Regular employees can only see themselves
+    // RBAC: Regular employees can only see themselves, Managers see team + self
     let whereFilter = {};
     if (req.userRole === 'employee' && req.employeeId) {
       whereFilter.id = req.employeeId;
+    } else if (req.userRole === 'manager' && req.employeeId) {
+      const { Op } = require('sequelize');
+      whereFilter[Op.or] = [
+        { id: req.employeeId },
+        { managerId: req.employeeId }
+      ];
     }
 
     // Server-side filters — build into Sequelize where clause

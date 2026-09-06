@@ -37,7 +37,7 @@ import {
   useTheme,
   alpha,
   Fade,
-  Tooltip,
+  Tooltip
 } from '@mui/material';
 import {
   CalendarToday as CalendarIcon,
@@ -70,20 +70,20 @@ const ModernLeaveManagement = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [innerTab, setInnerTab] = useState(0);
   const tabs = ['All', 'Pending', 'Approved', 'Rejected'];
-  
+
   // 🚀 React Query hooks for data fetching
   const { data: leaveRequestsData } = useLeaveRequests({ limit: 500 });
   const { data: leaveBalancesData } = useLeaveBalances(undefined, {
-    enabled: isAdmin || isHR,
+    enabled: isAdmin || isHR
   });
   const { data: leaveTypesData } = useLeaveTypes();
-  
+
   // 🚀 Mutations for approve/reject
   const approveMutation = useApproveLeaveRequest();
   const rejectMutation = useRejectLeaveRequest();
   const approveCancellationMutation = useApproveLeaveCancellation();
   const rejectCancellationMutation = useRejectLeaveCancellation();
-  
+
   // Derive data from queries — normaliseResponse can return an array directly,
   // { data: [] }, or { data: { data: [], pagination: {} } } depending on endpoint.
   const toArray = (v) => {
@@ -108,7 +108,7 @@ const ModernLeaveManagement = () => {
   const [balTypeFilter, setBalTypeFilter] = useState('all');
   const [balPage, setBalPage] = useState(0);
   const [balRowsPerPage, setBalRowsPerPage] = useState(10);
-  
+
   // -- Helpers --
 
   // CSV escape helper
@@ -171,7 +171,7 @@ const ModernLeaveManagement = () => {
     URL.revokeObjectURL(url);
     showSuccess('Leave balances exported');
   };
-  
+
   if (isEmployee) {
     return null;
   }
@@ -193,29 +193,29 @@ const ModernLeaveManagement = () => {
 
   const getLeaveTypeInfo = (type) => {
     // Handle if type is an object (from API with associations)
-    const typeName = typeof type === 'object' && type?.name 
-      ? type.name.toLowerCase() 
-      : typeof type === 'string' 
-        ? type.toLowerCase() 
+    const typeName = typeof type === 'object' && type?.name
+      ? type.name.toLowerCase()
+      : typeof type === 'string'
+        ? type.toLowerCase()
         : '';
-    
+
     // Try to match with predefined types
-    const matchedType = leaveTypes.find(lt => 
-      lt.value === typeName || 
+    const matchedType = leaveTypes.find(lt =>
+      lt.value === typeName ||
       lt.label.toLowerCase() === typeName
     );
-    
+
     if (matchedType) {
       return matchedType;
     }
-    
+
     // Fallback: return a safe object with the type name
-    const displayName = typeof type === 'object' && type?.name 
-      ? type.name 
-      : typeof type === 'string' 
-        ? type 
+    const displayName = typeof type === 'object' && type?.name
+      ? type.name
+      : typeof type === 'string'
+        ? type
         : 'Unknown';
-    
+
     return { label: displayName, color: 'default' };
   };
 
@@ -372,10 +372,10 @@ const ModernLeaveManagement = () => {
       </Card>
 
       {/* Tabs and Quick Actions */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         mb: 3,
         p: 1,
         bgcolor: 'background.paper',
@@ -392,7 +392,7 @@ const ModernLeaveManagement = () => {
             '& .MuiTabs-indicator': {
               height: 3,
               borderRadius: '3px 3px 0 0',
-              background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)',
+              background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)'
             },
             '& .MuiTab-root': {
               textTransform: 'none',
@@ -403,10 +403,10 @@ const ModernLeaveManagement = () => {
               mx: 0.5,
               transition: 'all 0.2s',
               '&:hover': {
-                bgcolor: 'rgba(99, 102, 241, 0.04)',
+                bgcolor: 'rgba(99, 102, 241, 0.04)'
               },
               '&.Mui-selected': {
-                color: 'primary.main',
+                color: 'primary.main'
               }
             }
           }}
@@ -420,8 +420,8 @@ const ModernLeaveManagement = () => {
                   <Chip
                     label={getCountByStatus(tab)}
                     size="small"
-                    variant={innerTab === index ? "filled" : "outlined"}
-                    color={innerTab === index ? "primary" : "default"}
+                    variant={innerTab === index ? 'filled' : 'outlined'}
+                    color={innerTab === index ? 'primary' : 'default'}
                     sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600 }}
                   />
                 </Box>
@@ -429,7 +429,7 @@ const ModernLeaveManagement = () => {
             />
           ))}
         </Tabs>
-        
+
         <Box sx={{ pr: 1 }}>
           <Button
             variant="outlined"
@@ -444,9 +444,9 @@ const ModernLeaveManagement = () => {
       </Box>
 
       {/* Requests Table */}
-      <Card sx={{ 
-        borderRadius: 4, 
-        border: '1px solid', 
+      <Card sx={{
+        borderRadius: 4,
+        border: '1px solid',
         borderColor: 'divider',
         boxShadow: '0 10px 40px rgba(0,0,0,0.04)',
         overflow: 'hidden'
@@ -479,12 +479,12 @@ const ModernLeaveManagement = () => {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((leave, index) => {
                   const leaveTypeInfo = getLeaveTypeInfo(leave.leaveType);
-                  const employeeName = leave.employeeName || 
+                  const employeeName = leave.employeeName ||
                                       (leave.employee ? `${leave.employee.firstName} ${leave.employee.lastName}` : '') ||
                                       'Unknown Employee';
                   const employeeId = leave.employeeId || leave.employee?.employeeId || 'N/A';
                   const isCancellation = leave.isCancellation; // Check for cancellation flag
-                  
+
                   return (
                     <Fade in timeout={200 + index * 50} key={leave.id}>
                       <TableRow
@@ -514,7 +514,7 @@ const ModernLeaveManagement = () => {
                             </Box>
                           </Box>
                         </TableCell>
-                        
+
                         <TableCell>
                           <Stack direction="row" spacing={1} alignItems="center">
                             <Chip
@@ -543,7 +543,7 @@ const ModernLeaveManagement = () => {
                             )}
                           </Stack>
                         </TableCell>
-                        
+
                         <TableCell>
                           <Typography variant="body2">
                             {new Date(leave.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -551,7 +551,7 @@ const ModernLeaveManagement = () => {
                             {new Date(leave.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </Typography>
                         </TableCell>
-                        
+
                         <TableCell>
                           <Chip
                             label={`${leave.totalDays} ${leave.totalDays === 1 ? 'day' : 'days'}`}
@@ -561,7 +561,7 @@ const ModernLeaveManagement = () => {
                             sx={{ fontWeight: 600 }}
                           />
                         </TableCell>
-                        
+
                         <TableCell>
                           <Chip
                             label={leave.status}
@@ -575,7 +575,7 @@ const ModernLeaveManagement = () => {
                             sx={{ fontWeight: 600 }}
                           />
                         </TableCell>
-                        
+
                         <TableCell>
                           <Tooltip title={leave.reason}>
                             <Typography
@@ -591,11 +591,11 @@ const ModernLeaveManagement = () => {
                             </Typography>
                           </Tooltip>
                         </TableCell>
-                        
+
                         <TableCell align="right">
                           {(leave.status === 'Pending' || leave.status === 'Cancellation Requested') && (
                             <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
-                              <Tooltip title={leave.status === 'Cancellation Requested' ? "Approve Cancellation" : "Approve"}>
+                              <Tooltip title={leave.status === 'Cancellation Requested' ? 'Approve Cancellation' : 'Approve'}>
                                 <IconButton
                                   size="small"
                                   aria-label="Approve leave request"
@@ -609,8 +609,8 @@ const ModernLeaveManagement = () => {
                                   <CheckCircleIcon fontSize="small" sx={{ color: 'success.main' }} />
                                 </IconButton>
                               </Tooltip>
-                              
-                              <Tooltip title={leave.status === 'Cancellation Requested' ? "Reject Cancellation" : "Reject"}>
+
+                              <Tooltip title={leave.status === 'Cancellation Requested' ? 'Reject Cancellation' : 'Reject'}>
                                 <IconButton
                                   size="small"
                                   aria-label="Reject leave request"
@@ -626,7 +626,7 @@ const ModernLeaveManagement = () => {
                               </Tooltip>
                             </Box>
                           )}
-                          
+
                           {leave.status !== 'Pending' && (
                             <Typography variant="caption" color="text.secondary">
                               {leave.status === 'Approved' ? 'Approved' : 'Rejected'}

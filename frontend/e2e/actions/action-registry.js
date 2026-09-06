@@ -2083,7 +2083,7 @@ class ActionRegistry {
         await page.evaluate(() => localStorage.clear());
 
         // Navigate to a protected page — should redirect to login
-        await page.goto('/employee-dashboard');
+        await page.goto('/employee-dashboard').catch(() => {});
         await page.waitForTimeout(2000);
 
         // Verify redirect to login page

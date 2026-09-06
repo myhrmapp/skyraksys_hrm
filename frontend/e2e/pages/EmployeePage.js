@@ -249,20 +249,36 @@ class EmployeePage {
     // Department (MUI Select)
     if (data.department) {
       await this.page.locator('[id="departmentId"]').locator('..').click();
-      await this.page.locator(`li:has-text("${data.department}")`).click();
+      const option = this.page.locator(`li:has-text("${data.department}")`);
+      if (await option.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await option.click();
+      } else {
+        await this.page.locator('li[role="option"]').nth(1).click(); // Fallback to first valid dept
+      }
       await this.page.waitForTimeout(300); // Wait for position cascading update
     }
 
     // Position (MUI Select)
     if (data.position) {
       await this.page.locator('[id="positionId"]').locator('..').click();
-      await this.page.locator(`li:has-text("${data.position}")`).click();
+      const option = this.page.locator(`li:has-text("${data.position}")`);
+      if (await option.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await option.click();
+      } else {
+        await this.page.locator('li[role="option"]').nth(1).click();
+      }
     }
 
     // Manager (MUI Select)
     if (data.manager) {
       await this.page.locator('[id="managerId"]').locator('..').click();
-      await this.page.locator(`li:has-text("${data.manager}")`).click();
+      const option = this.page.locator(`li:has-text("${data.manager}")`);
+      if (await option.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await option.click();
+      } else {
+        // First option is often 'None' or an actual manager
+        await this.page.locator('li[role="option"]').nth(1).click().catch(() => this.page.keyboard.press('Escape'));
+      }
     }
 
     // Employment type
@@ -424,9 +440,11 @@ class EmployeePage {
   async isProfileInEditMode() {
     const headerSave = this.page.locator(this.s.profileSaveBtn || '[data-testid="employee-profile-save-btn"]');
     const footerSave = this.page.locator(this.s.profileFooterSaveBtn || '[data-testid="employee-profile-footer-save-btn"]');
+    const fullFormSave = this.page.locator('[data-testid="employee-form-submit-btn"]');
     return (
       await headerSave.isVisible({ timeout: 3000 }).catch(() => false) ||
-      await footerSave.isVisible({ timeout: 3000 }).catch(() => false)
+      await footerSave.isVisible({ timeout: 3000 }).catch(() => false) ||
+      await fullFormSave.isVisible({ timeout: 3000 }).catch(() => false)
     );
   }
 

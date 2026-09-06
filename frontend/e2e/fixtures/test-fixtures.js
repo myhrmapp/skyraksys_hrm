@@ -64,7 +64,8 @@ async function doLogin(page, role) {
 async function setupAuthMatrix(browser) {
   const pages = {};
   for (const role of Object.keys(TEST_USERS)) {
-    pages[`${role}Page`] = await browser.newPage();
+    const context = await browser.newContext();
+    pages[`${role}Page`] = await context.newPage();
     await loginAs(pages[`${role}Page`], role);
   }
   return pages;

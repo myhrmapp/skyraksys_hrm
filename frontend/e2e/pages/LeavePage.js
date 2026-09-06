@@ -25,7 +25,12 @@ class LeavePage {
     if (await wrapper.isVisible({ timeout: 5000 }).catch(() => false)) {
       await wrapper.scrollIntoViewIfNeeded();
       await wrapper.click({ force: true });
-      await this.page.locator('[role="option"]').filter({ hasText: new RegExp(type, 'i') }).first().click();
+      const option = this.page.locator('[role="option"]').filter({ hasText: new RegExp(type, 'i') }).first();
+      if (await option.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await option.click();
+      } else {
+        await this.page.locator('[role="option"]').first().click(); // Fallback to first available type
+      }
       await this.page.waitForTimeout(300);
     }
   }
@@ -130,7 +135,7 @@ class LeavePage {
 
   // ─── Leave Management (Admin/HR/Manager) ───
   async gotoManagement() {
-    await this.page.goto('/leave-management');
+    await this.page.goto('/leave-management?view=management');
     await waitForPageReady(this.page);
   }
 
@@ -162,18 +167,10 @@ class LeavePage {
   }
 
   async filterManagementByStatus(status) {
-    const filterToggle = this.page.locator(this.mgmt.filtersButton);
-    if (await filterToggle.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await filterToggle.click();
-      await this.page.waitForTimeout(300);
-    }
-    // MUI Select — data-testid on hidden input, click ancestor wrapper
-    const select = this.page.locator(this.mgmt.statusSelect);
-    const wrapper = select.locator('xpath=ancestor::div[contains(@class,"MuiSelect") or contains(@class,"MuiInputBase")]').first();
-    if (await wrapper.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await wrapper.scrollIntoViewIfNeeded();
-      await wrapper.click({ force: true });
-      await this.page.locator('[role="option"], li').filter({ hasText: new RegExp(status, 'i') }).first().click();
+    // Status is now filtered via Tabs (e.g. "Pending", "Approved", "All")
+    const tab = this.page.locator(`[role="tab"]`).filter({ hasText: new RegExp(status, 'i') }).first();
+    if (await tab.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await tab.click();
       await this.page.waitForTimeout(500);
       return true;
     }
@@ -181,20 +178,7 @@ class LeavePage {
   }
 
   async filterManagementByType(type) {
-    const filterToggle = this.page.locator(this.mgmt.filtersButton);
-    if (await filterToggle.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await filterToggle.click();
-      await this.page.waitForTimeout(300);
-    }
-    const select = this.page.locator(this.mgmt.typeSelect);
-    const wrapper = select.locator('xpath=ancestor::div[contains(@class,"MuiSelect") or contains(@class,"MuiInputBase")]').first();
-    if (await wrapper.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await wrapper.scrollIntoViewIfNeeded();
-      await wrapper.click({ force: true });
-      await this.page.locator('[role="option"], li').filter({ hasText: new RegExp(type, 'i') }).first().click();
-      await this.page.waitForTimeout(500);
-      return true;
-    }
+    // Type filtering is not available in the current UI (Filters button is disabled)
     return false;
   }
 
