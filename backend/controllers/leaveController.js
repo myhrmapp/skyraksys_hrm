@@ -14,11 +14,10 @@
  * @created 2026-02-07
  */
 
-const { leaveDataService } = require('../services/data');
+const { leaveDataService, employeeDataService, leaveBalanceDataService } = require('../services/data');
 const { leaveBusinessService } = require('../services/business'); // Phase 2: Business logic
 const ApiResponse = require('../utils/ApiResponse');
 const { NotFoundError, ValidationError, ForbiddenError, BadRequestError } = require('../utils/errors');
-const db = require('../models');
 
 /**
  * Helper: Verify if employee is in manager's team
@@ -27,9 +26,7 @@ const db = require('../models');
  * @returns {Promise<boolean>}
  */
 async function isInManagerTeam(managerId, employeeId) {
-  const employee = await db.Employee.findByPk(employeeId, {
-    attributes: ['id', 'managerId']
-  });
+  const employee = await employeeDataService.findById(employeeId);
   return employee && employee.managerId === managerId;
 }
 
@@ -80,12 +77,11 @@ const getAll = async (req, res, next) => {
         filters.employeeId = employeeId;
       } else {
         // Return manager's own + team leaves
-        const subordinates = await db.Employee.findAll({
-          where: { managerId: req.employeeId },
-          attributes: ['id']
-        });
-        const teamIds = [req.employeeId, ...subordinates.map(e => e.id)];
-        filters.employeeId = { [db.Sequelize.Op.in]: teamIds };
+        const subordinates = await employeeDataService.getSubordinates(req.employeeId);
+        const teamIds = [req.employeeId, ...subordinates.data.map(e => e.id)];
+        
+        // Pass plain array, BaseService handles IN query automatically if passed an array
+        filters.employeeId = teamIds;
       }
     }
     // RBAC: Admin/HR see all (or filter by employeeId if provided)
@@ -319,20 +315,7 @@ const getBalance = async (req, res, next) => {
     
     const year = req.query.year || new Date().getFullYear();
     
-    const db = require('../models');
-    const balances = await db.LeaveBalance.findAll({
-      where: { 
-        employeeId,
-        year: parseInt(year)
-      },
-      include: [
-        {
-          model: db.LeaveType,
-          as: 'leaveType',
-          attributes: ['id', 'name', 'description', 'maxDaysPerYear']
-        }
-      ]
-    });
+    const balances = await leaveBalanceDataService.findByEmployeeId(employeeId, parseInt(year));
     
     res.json(ApiResponse.success(balances));
   } catch (error) {

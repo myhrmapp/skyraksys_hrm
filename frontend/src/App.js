@@ -82,12 +82,27 @@ function App() {
 
                     {/* 404 catch-all */}
                     <Route path="*" element={
-                      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="60vh" gap={2}>
+                      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="60vh" gap={3}>
                         <Typography variant="h3" color="textSecondary">404</Typography>
-                        <Typography variant="body1" color="textSecondary">Page not found</Typography>
-                        <Typography variant="body2" color="textSecondary">
+                        <Typography variant="h6" color="textSecondary" fontWeight={600}>Page not found</Typography>
+                        <Typography variant="body1" color="textSecondary" textAlign="center" maxWidth={500}>
                           The page you're looking for doesn't exist or has been moved.
                         </Typography>
+                        <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                          <Typography variant="body2" color="textSecondary" fontWeight={600}>Quick Links:</Typography>
+                          <Typography variant="body2">
+                            <a href="/dashboard" style={{ textDecoration: 'none', color: '#1976d2' }}>→ Dashboard</a>
+                          </Typography>
+                          <Typography variant="body2">
+                            <a href="/employees" style={{ textDecoration: 'none', color: '#1976d2' }}>→ Employees</a>
+                          </Typography>
+                          <Typography variant="body2">
+                            <a href="/leave" style={{ textDecoration: 'none', color: '#1976d2' }}>→ Leave Requests</a>
+                          </Typography>
+                          <Typography variant="body2">
+                            <a href="/timesheets" style={{ textDecoration: 'none', color: '#1976d2' }}>→ Timesheets</a>
+                          </Typography>
+                        </Box>
                       </Box>
                     } />
                     </Routes>

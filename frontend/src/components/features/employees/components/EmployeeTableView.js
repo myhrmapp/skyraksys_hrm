@@ -22,7 +22,8 @@ import {
   Phone as PhoneIcon,
   Place as PlaceIcon,
   CalendarToday as CalendarIcon,
-  People as PeopleIcon
+  People as PeopleIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import EmptyState from '../../../shared/EmptyState';
@@ -171,6 +172,11 @@ const EmployeeTableView = ({
                   <Tooltip title="Edit">
                     <IconButton size="small" onClick={() => onEdit(emp.id)} data-testid="employee-table-edit-btn" sx={{ color: 'warning.main', bgcolor: 'warning.50' }}>
                       <EditIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Delete">
+                    <IconButton size="small" onClick={() => onDelete(emp)} data-testid="employee-table-delete-btn" sx={{ color: 'error.main', bgcolor: 'error.50' }}>
+                      <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                 </Stack>

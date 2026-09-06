@@ -17,9 +17,11 @@
 
 // CRITICAL: Set environment variables BEFORE importing app/models
 process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = 'test-secret-workflows';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-workflows';
+process.env.JWT_SECRET = 'test-secret-workflows-32chars-long-key-2026';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-workflows-32chars-long-key-2026';
 process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+process.env.DB_NAME = 'skyraksys_hrm_test';
+process.env.DB_NAME_TEST = 'skyraksys_hrm_test';
 process.env.DB_DATABASE = 'skyraksys_hrm_test';
 
 const request = require('supertest');
@@ -194,7 +196,7 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
       const employeeData = {
         firstName: 'System',
         lastName: 'Admin',
-        employeeId: 'SKYT0001',
+        employeeId: 'SK001',
         phone: '1234567890',
         hireDate: dayjs().format('YYYY-MM-DD'),
         status: 'Active',
@@ -220,7 +222,7 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
         testData.employees.admin = employee;
         
         console.log('User created with email:', user.email);
-        console.log('User created with password hash:', user.password?.substring(0, 20) + '...');
+        // Password hash hidden for security
         console.log('User isActive:', user.isActive);
         
         expect(employee).toBeDefined();
@@ -270,7 +272,7 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
         lastName: 'Manager',
         password: 'Manager123!',
         role: 'manager',
-        employeeId: 'SKYT0002',
+        employeeId: 'SK002',
         phone: '9876543210',
         hireDate: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
         status: 'Active',
@@ -349,7 +351,7 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
         lastName: 'Developer',
         password: 'Employee123!',
         role: 'employee',
-        employeeId: 'SKYT0003',
+        employeeId: 'SK003',
         phone: '9876543211',
         hireDate: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
         status: 'Active',

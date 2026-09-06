@@ -7,14 +7,16 @@ const { test: base, expect } = require('@playwright/test');
 const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
 
+const DEFAULT_SEED_PASSWORD = process.env.SEED_DEFAULT_PASSWORD || 'StrongSeedPassword2026!';
+
 const TEST_USERS = {
-  admin:    { email: 'admin@skyraksys.com',     password: 'admin123', role: 'admin' },
-  hr:       { email: 'hr@skyraksys.com',        password: 'admin123', role: 'hr' },
-  manager:  { email: 'lead@skyraksys.com',      password: 'admin123', role: 'manager' },
-  employee: { email: 'employee1@skyraksys.com',  password: 'admin123', role: 'employee' },
+  admin:    { email: process.env.E2E_ADMIN_EMAIL || 'admin@skyraksys.com', password: process.env.E2E_ADMIN_PASSWORD || DEFAULT_SEED_PASSWORD, role: 'admin' },
+  hr:       { email: process.env.E2E_HR_EMAIL || 'hr@skyraksys.com', password: process.env.E2E_HR_PASSWORD || DEFAULT_SEED_PASSWORD, role: 'hr' },
+  manager:  { email: process.env.E2E_MANAGER_EMAIL || 'lead@skyraksys.com', password: process.env.E2E_MANAGER_PASSWORD || DEFAULT_SEED_PASSWORD, role: 'manager' },
+  employee: { email: process.env.E2E_EMPLOYEE_EMAIL || 'employee1@skyraksys.com', password: process.env.E2E_EMPLOYEE_PASSWORD || DEFAULT_SEED_PASSWORD, role: 'employee' },
 };
 
-const API_URL = process.env.API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.API_URL || process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 /**
  * Login via UI form — reliable cross-origin auth.
@@ -23,11 +25,22 @@ async function loginAs(page, role) {
   const user = TEST_USERS[role];
   if (!user) throw new Error(`Unknown role: ${role}`);
 
+  console.log(`[E2E] Attempting login as ${role} (${user.email})`);
   await page.goto('/login');
   await page.getByLabel(/email/i).fill(user.email);
   await page.locator('input[type="password"]').fill(user.password);
   await page.getByRole('button', { name: /sign in|log in|login/i }).click();
-  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
+
+  try {
+    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
+    console.log(`[E2E] Login success for ${role}; current URL: ${page.url()}`);
+  } catch (error) {
+    const bodyText = await page.locator('body').innerText().catch(() => '');
+    const url = page.url();
+    console.log(`[E2E] Login did not complete for ${role}. URL=${url}. Body=${bodyText.slice(0, 400)}`);
+    throw error;
+  }
+
   await waitForPageReady(page);
 }
 
@@ -42,6 +55,19 @@ async function loginViaAPI(page, role) {
   });
   if (!res.ok()) throw new Error(`API login failed for ${role}: ${res.status()}`);
   return res;
+}
+
+async function doLogin(page, role) {
+  return loginAs(page, role);
+}
+
+async function setupAuthMatrix(browser) {
+  const pages = {};
+  for (const role of Object.keys(TEST_USERS)) {
+    pages[`${role}Page`] = await browser.newPage();
+    await loginAs(pages[`${role}Page`], role);
+  }
+  return pages;
 }
 
 /**
@@ -100,4 +126,4 @@ const test = base.extend({
   },
 });
 
-module.exports = { test, expect, TEST_USERS, API_URL, loginAs, loginViaAPI, waitForPageReady, navigateTo };
+module.exports = { test, expect, TEST_USERS, API_URL, loginAs, doLogin, setupAuthMatrix, loginViaAPI, waitForPageReady, navigateTo };

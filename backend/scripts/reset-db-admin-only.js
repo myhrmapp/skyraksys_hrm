@@ -159,7 +159,6 @@ const TABLES_TO_TRUNCATE = [
   'salary_structures',
   'payslip_templates',
   'timesheets',
-  'attendance',
   'tasks',
   'projects',
   'leave_balances',
@@ -196,22 +195,27 @@ async function main() {
   await sequelize.authenticate();
   console.log('✓ Connected to database:', dbConfig.database);
 
-  const transaction = await sequelize.transaction();
-
   try {
     // ------------------------------------------------------------------
-    // 1. Truncate all tables
+    // 1. Truncate all existing tables safely, without one missing table
+    //    aborting the entire reset.
     // ------------------------------------------------------------------
     console.log('\nTruncating tables...');
     for (const table of TABLES_TO_TRUNCATE) {
       try {
-        await sequelize.query(
-          `TRUNCATE TABLE "${table}" RESTART IDENTITY CASCADE;`,
-          { transaction }
+        const exists = await sequelize.query(
+          `SELECT to_regclass('public."${table}"') AS exists;`,
+          { type: sequelize.QueryTypes.SELECT }
         );
+
+        if (!exists[0] || !exists[0].exists) {
+          console.warn(`  ⚠  ${table} — skipped (table not present)`);
+          continue;
+        }
+
+        await sequelize.query(`TRUNCATE TABLE "${table}" RESTART IDENTITY CASCADE;`);
         console.log(`  ✓ ${table}`);
       } catch (err) {
-        // Table may not exist yet (migration not run); warn and continue.
         console.warn(`  ⚠  ${table} — skipped (${err.message.split('\n')[0]})`);
       }
     }
@@ -238,22 +242,18 @@ async function main() {
           email:     ADMIN_EMAIL,
           password:  hashedPassword,
           now
-        },
-        transaction
+        }
       }
     );
-
-    await transaction.commit();
 
     console.log('\n✓ Done!\n');
     console.log('Admin login credentials:');
     console.log(`  Email   : ${ADMIN_EMAIL}`);
-    console.log(`  Password: ${ADMIN_PASSWORD}`);
+    console.log(`  Password: [hidden for security]`);
     console.log('\nChange the admin password after your first login.\n');
 
   } catch (err) {
-    await transaction.rollback();
-    console.error('\n✗ Error — transaction rolled back.\n', err.message);
+    console.error('\n✗ Error — admin reset failed.\n', err.message);
     process.exit(1);
   } finally {
     await sequelize.close();

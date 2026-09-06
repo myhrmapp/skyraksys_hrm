@@ -1,4 +1,8 @@
+const explicitNodeEnv = process.env.NODE_ENV;
 require('dotenv').config();
+if (explicitNodeEnv) {
+  process.env.NODE_ENV = explicitNodeEnv;
+}
 const { logger } = require('./logger');
 
 // Custom query logger with timing (merged from database.js)
@@ -16,7 +20,7 @@ module.exports = {
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'admin',
     database: process.env.DB_NAME || 'skyraksys_hrm',
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || '127.0.0.1',
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
     timezone: process.env.DB_TIMEZONE || '+00:00',
@@ -33,8 +37,8 @@ module.exports = {
   test: {
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'admin',
-    database: process.env.DB_NAME_TEST || 'skyraksys_hrm_test',
-    host: process.env.DB_HOST || 'localhost',
+    database: process.env.DB_NAME_TEST || process.env.DB_NAME || 'skyraksys_hrm_test',
+    host: process.env.DB_HOST || '127.0.0.1',
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
     timezone: process.env.DB_TIMEZONE || '+00:00',
@@ -45,7 +49,7 @@ module.exports = {
     username: process.env.DB_USER || 'hrm_app',
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME || 'skyraksys_hrm_prod',
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || '127.0.0.1',
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
     timezone: process.env.DB_TIMEZONE || '+00:00',

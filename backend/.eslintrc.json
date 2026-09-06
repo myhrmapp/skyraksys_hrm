@@ -1,0 +1,43 @@
+{
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  },
+  "env": {
+    "node": true,
+    "es2021": true,
+    "jest": true
+  },
+  "rules": {
+    "no-console": "error",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-undef": "error",
+    "semi": ["warn", "always"],
+    "quotes": ["warn", "single", { "avoidEscape": true }],
+    "indent": ["warn", 2],
+    "comma-dangle": ["warn", "never"],
+    "no-trailing-spaces": "warn",
+    "eol-last": ["warn", "always"],
+    "object-curly-spacing": ["warn", "always"],
+    "array-bracket-spacing": ["warn", "never"],
+    "arrow-spacing": "warn",
+    "keyword-spacing": "warn",
+    "space-before-blocks": "warn",
+    "space-infix-ops": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["**/__tests__/**", "**/*.test.js", "**/*.spec.js"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["scripts/**", "migrations/**", "seeders/**", "models/**", "routes/debug.routes.js"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
+}

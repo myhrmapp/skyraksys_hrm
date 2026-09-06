@@ -1,8 +1,7 @@
 const PDFDocument = require('pdfkit-table');
 const { parseLineItemsEncryptedPayload, decryptText } = require('./invoiceEncryption');
-const { getActiveInvoiceSecretPhrase } = require('../services/invoiceSecret.service');
 
-const generateInvoicePDF = async (invoice, template, res) => {
+const generateInvoicePDF = async (invoice, template, res, secretPhrase) => {
     const doc = new PDFDocument({ margin: 50, size: 'A4' });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=invoice_${invoice.invoiceNumber}.pdf`);
@@ -33,24 +32,22 @@ const generateInvoicePDF = async (invoice, template, res) => {
         }
 
         doc.fontSize(12).font('Helvetica-Bold').text('Bill To:', 350, doc.y - (companySection.showAddress ? 45 : 15));
-        doc.font('Helvetica').fontSize(10).text(invoice.clientName, 350, doc.y);
-        if (clientSection.showAddress && invoice.clientAddress) {
-            doc.text(invoice.clientAddress, 350, doc.y);
+        const clientCompany = decryptText(invoice.clientCompany, secretPhrase);
+        const clientAddress = invoice.clientAddress ? decryptText(invoice.clientAddress, secretPhrase) : '';
+        const clientGstin = invoice.clientGstin ? decryptText(invoice.clientGstin, secretPhrase) : '';
+        doc.font('Helvetica').fontSize(10).text(clientCompany || 'Client', 350, doc.y);
+        if (clientSection.showAddress && clientAddress) {
+            doc.text(clientAddress, 350, doc.y);
         }
-        if (clientSection.showGstin && invoice.clientGstin) {
-            doc.text(`GSTIN: ${invoice.clientGstin}`, 350, doc.y);
+        if (clientSection.showGstin && clientGstin) {
+            doc.text(`GSTIN: ${clientGstin}`, 350, doc.y);
         }
 
         doc.moveDown(3);
 
         // 3. Line Items Table
-        let secretPhrase = await getActiveInvoiceSecretPhrase();
-        
         let lineItems = [];
-        if (invoice.lineItemsEncrypted) {
-             const decryptedItemsStr = decryptText(invoice.lineItemsEncrypted, secretPhrase);
-             lineItems = JSON.parse(decryptedItemsStr);
-        }
+           lineItems = parseLineItemsEncryptedPayload(invoice.lineItems, secretPhrase);
 
         const table = {
             title: "Services Rendered",

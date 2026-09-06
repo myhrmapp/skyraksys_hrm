@@ -230,7 +230,7 @@ describe('PayslipService', () => {
 
       expect(result.validEmployees).toHaveLength(0);
       expect(result.invalidEmployees).toHaveLength(1);
-      expect(result.invalidEmployees[0].issues).toContain('No salary structure configured');
+      expect(result.invalidEmployees[0].issues[0]).toContain('No salary structure configured');
     });
 
     it('should identify employees with existing payslips', async () => {

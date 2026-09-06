@@ -133,6 +133,466 @@
 			"command": "cd frontend && node node_modules/react-scripts/bin/react-scripts.js test --watchAll=false --runInBand --runTestsByPath src/components/features/employees/__tests__/UserAccountManagementPage.test.js src/components/features/leave/__tests__/LeaveBalanceModern.test.js src/components/features/payroll/__tests__/ModernPayrollManagement.test.js > verify_targeted_jest.txt 2>&1; echo EXIT:$?",
 			"isBackground": false,
 			"group": "test"
+		},
+		{
+			"label": "run-critical-business-smoke",
+			"type": "shell",
+			"command": "npx playwright test e2e/specs/business-critical-scenarios.spec.js --config playwright.config.js --project=chromium --reporter=line",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-critical-business-smoke-frontend",
+			"type": "shell",
+			"command": "cd frontend && npx playwright test e2e/specs/business-critical-scenarios.spec.js --config playwright.config.js --project=chromium --reporter=line",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-critical-business-smoke-frontend-rerun",
+			"type": "shell",
+			"command": "cd frontend && npx playwright test e2e/specs/business-critical-scenarios.spec.js --config playwright.config.js --project=chromium --reporter=line",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-critical-business-smoke-frontend-final",
+			"type": "shell",
+			"command": "cd frontend && npx playwright test e2e/specs/business-critical-scenarios.spec.js --config playwright.config.js --project=chromium --reporter=line",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "validate-payroll-vault-syntax",
+			"type": "shell",
+			"command": "node --check backend/models/payroll-data.model.js && node --check backend/models/payslip.model.js && node --check backend/models/salary-structure.model.js && node --check backend/migrations/20260905000001-add-payroll-vault-financial-columns.js",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "validate-invoice-vault-syntax",
+			"type": "shell",
+			"command": "node --check backend/utils/invoicePdfGenerator.js && node --check backend/routes/invoice.routes.js && node --check backend/migrations/20260905000001-add-payroll-vault-financial-columns.js",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-invoice-vault-focused-tests",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/integration/api/invoice-secret-rotation.test.js tests/integration/api/payroll-vault.test.js --runInBand",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-invoice-rotation-test",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/integration/api/invoice-secret-rotation.test.js --runInBand --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "diagnose-invoice-test-error",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/integration/api/invoice-secret-rotation.test.js --runInBand --coverage=false > invoice_rotation_debug.txt 2>&1",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "diagnose-invoice-fixture-insert",
+			"type": "shell",
+			"command": "cd backend && node -e \"process.env.NODE_ENV='test'; process.env.DB_NAME='skyraksys_hrm_test'; process.env.ENCRYPTION_KEY=process.env.ENCRYPTION_KEY||'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'; const db=require('./models'); (async()=>{try{await db.sequelize.sync({force:true}); const u=await db.User.create({email:'diag-invoice@test.com',password:'hash',firstName:'Diag',lastName:'Invoice',role:'hr',isActive:true,isLocked:false}); const inv=await db.Invoice.create({invoiceNumber:'INV-DIAG-0001',clientCompany:'client',billingMonth:7,billingYear:2026,issueDate:'2026-07-01',dueDate:'2026-07-15',currency:'INR',workerType:'mixed',status:'draft',lineItems:{isEncrypted:true,cipherText:'x'},subtotal:12000,taxPercent:18,taxAmount:2160,totalAmount:14160,createdBy:u.id,updatedBy:u.id}); console.log('INSERT_OK',inv.id)}catch(e){console.error('INSERT_ERROR',e.name,e.message); console.error('ERRORS',JSON.stringify(e.errors||[])); console.error('PARENT',e.parent?.message,e.parent?.detail,e.parent?.constraint)}finally{await db.sequelize.close()}})()\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "inspect-test-invoice-schema",
+			"type": "shell",
+			"command": "cd backend && node -e \"process.env.NODE_ENV='test'; process.env.DB_NAME='skyraksys_hrm_test'; const db=require('./models'); (async()=>{try{const [rows]=await db.sequelize.query(\\\"select column_name,data_type,is_nullable from information_schema.columns where table_name='invoices' order by ordinal_position\\\"); console.log(JSON.stringify(rows))}catch(e){console.error(e.message)}finally{await db.sequelize.close()}})()\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "reproduce-invoice-fixture",
+			"type": "shell",
+			"command": "cd backend && node -e \"process.env.NODE_ENV='test'; process.env.DB_NAME='skyraksys_hrm_test'; process.env.INVOICE_SECRET_PHRASE='SkyraskysHRSecret'; const db=require('./models'); const {encryptText,buildLineItemsEncryptedPayload}=require('./utils/invoiceEncryption'); (async()=>{try{const u=await db.User.create({email:'diag2@test.com',password:'hash',firstName:'Diag',lastName:'Invoice',role:'hr',isActive:true,isLocked:false}); const inv=await db.Invoice.create({invoiceNumber:'INV-DIAG-0002',clientCompany:encryptText('Acme Client Pvt Ltd','SkyraskysHRSecret'),clientGstin:encryptText('29ABCDE1234F1Z5','SkyraskysHRSecret'),clientAddress:encryptText('Bangalore, India','SkyraskysHRSecret'),billingMonth:7,billingYear:2026,issueDate:'2026-07-01',dueDate:'2026-07-15',currency:'INR',workerType:'mixed',status:'draft',lineItems:buildLineItemsEncryptedPayload([{employeeName:'Worker One',employmentType:'contractor',hoursSupported:12,hourlyRate:1000,amount:12000,description:'Support hours'}],'SkyraskysHRSecret'),subtotal:12000,taxPercent:18,taxAmount:2160,totalAmount:14160,notes:encryptText('Confidential billing note','SkyraskysHRSecret'),createdBy:u.id,updatedBy:u.id}); console.log('INSERT_OK',inv.id); await inv.destroy({force:true}); await u.destroy({force:true})}catch(e){console.error('INSERT_ERROR',e.name,e.message); console.error('ERRORS',JSON.stringify(e.errors||[])); console.error('PARENT',e.parent?.message,e.parent?.detail,e.parent?.constraint,e.parent?.code)}finally{await db.sequelize.close()}})()\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "reproduce-invoice-fixture-valid-user",
+			"type": "shell",
+			"command": "cd backend && node -e \"process.env.NODE_ENV='test'; process.env.DB_NAME='skyraksys_hrm_test'; process.env.INVOICE_SECRET_PHRASE='SkyraskysHRSecret'; const db=require('./models'); const bcrypt=require('bcryptjs'); const {encryptText,buildLineItemsEncryptedPayload}=require('./utils/invoiceEncryption'); (async()=>{try{const u=await db.User.create({email:'diag3@test.com',password:await bcrypt.hash('HrPass123!',10),firstName:'Diag',lastName:'Invoice',role:'hr',isActive:true,isLocked:false}); const inv=await db.Invoice.create({invoiceNumber:'INV-DIAG-0003',clientCompany:encryptText('Acme Client Pvt Ltd','SkyraskysHRSecret'),clientGstin:encryptText('29ABCDE1234F1Z5','SkyraskysHRSecret'),clientAddress:encryptText('Bangalore, India','SkyraskysHRSecret'),billingMonth:7,billingYear:2026,issueDate:'2026-07-01',dueDate:'2026-07-15',currency:'INR',workerType:'mixed',status:'draft',lineItems:buildLineItemsEncryptedPayload([{employeeName:'Worker One',employmentType:'contractor',hoursSupported:12,hourlyRate:1000,amount:12000,description:'Support hours'}],'SkyraskysHRSecret'),subtotal:12000,taxPercent:18,taxAmount:2160,totalAmount:14160,notes:encryptText('Confidential billing note','SkyraskysHRSecret'),createdBy:u.id,updatedBy:u.id}); console.log('INSERT_OK',inv.id); await inv.destroy({force:true}); await u.destroy({force:true})}catch(e){console.error('INSERT_ERROR',e.name,e.message); console.error('ERRORS',JSON.stringify(e.errors||[])); console.error('PARENT',e.parent?.message,e.parent?.detail,e.parent?.constraint,e.parent?.code)}finally{await db.sequelize.close()}})()\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "rerun-invoice-rotation-after-fix",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/integration/api/invoice-secret-rotation.test.js --runInBand --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-targeted-frontend-regressions-clean",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/features/employees/__tests__/UserAccountManagementPage.test.js src/components/features/leave/__tests__/LeaveBalanceModern.test.js src/components/features/payroll/__tests__/ModernPayrollManagement.test.js",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "summarize-targeted-payroll-tests",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/features/payroll/__tests__/ModernPayrollManagement.test.js --json --outputFile=targeted_payroll_results.json",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "list-targeted-payroll-failures",
+			"type": "shell",
+			"command": "cd frontend && node -e \"const r=require('./targeted_payroll_results.json'); console.log(r.testResults.flatMap(s=>s.assertionResults.filter(x=>x.status==='failed').map(x=>x.fullName)).join('\\n'))\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-payroll-integrity-focused",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/feature/payroll/payroll-data-integrity.test.js --runInBand --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-employee-service-focused",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/feature/employee/employee-service.test.js --runInBand --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-employee-validation-focused",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/feature/employee/employee-refactor-business-validation.test.js --runInBand --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "run-leave-focused",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/integration/api/leave.test.js --runInBand --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "rerun-employee-service-focused",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/feature/employee/employee-service.test.js --runInBand --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "rerun-employee-validation-focused",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/feature/employee/employee-refactor-business-validation.test.js --runInBand --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "rerun-leave-focused",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/integration/api/leave.test.js --runInBand --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "verify-employee-leave-fixes",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/feature/employee/employee-service.test.js tests/feature/employee/employee-refactor-business-validation.test.js tests/integration/api/leave.test.js --runInBand --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "verify-employee-service-clean",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/feature/employee/employee-service.test.js --runInBand --coverage=false --silent",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "rerun-payroll-regression-after-contract-fix",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/features/payroll/__tests__/ModernPayrollManagement.test.js --json --outputFile=targeted_payroll_results_after.json",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "list-payroll-failures-after-fix",
+			"type": "shell",
+			"command": "cd frontend && node -e \"const r=require('./targeted_payroll_results_after.json'); console.log(r.testResults.flatMap(s=>s.assertionResults.filter(x=>x.status==='failed').map(x=>x.fullName)).join('\\n'))\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "verify-payroll-regression-final",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/features/payroll/__tests__/ModernPayrollManagement.test.js --json --outputFile=targeted_payroll_results_final.json",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "list-final-payroll-failures",
+			"type": "shell",
+			"command": "cd frontend && node -e \"const r=require('./targeted_payroll_results_final.json'); console.log(r.testResults.flatMap(s=>s.assertionResults.filter(x=>x.status==='failed').map(x=>x.fullName)).join('\\n'))\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "inspect-final-payroll-failure-details",
+			"type": "shell",
+			"command": "cd frontend && node -e \"const r=require('./targeted_payroll_results_final.json'); for(const x of r.testResults.flatMap(s=>s.assertionResults).filter(x=>x.status==='failed')) console.log('\\n'+x.fullName+'\\n'+x.failureMessages[0].slice(0,700))\"",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "verify-payroll-regression-green",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/features/payroll/__tests__/ModernPayrollManagement.test.js --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "final-backend-functional-suite",
+			"type": "shell",
+			"command": "cd backend && npm test -- --forceExit",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "final-targeted-frontend-regressions",
+			"type": "shell",
+			"command": "cd frontend && npx react-scripts test --watchAll=false --runInBand --runTestsByPath src/components/features/employees/__tests__/UserAccountManagementPage.test.js src/components/features/leave/__tests__/LeaveBalanceModern.test.js src/components/features/payroll/__tests__/ModernPayrollManagement.test.js --coverage=false",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "final-critical-http-smoke",
+			"type": "shell",
+			"command": "cd frontend && npx playwright test e2e/specs/business-critical-scenarios.spec.js --config playwright.config.js --project=chromium --reporter=line",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "verify-token-lifetime-security",
+			"type": "shell",
+			"command": "cd backend && set NODE_ENV=test && set PORT=5000 && set DB_HOST=localhost && set DB_NAME=skyraksys_hrm_test && set DB_USER=postgres && set DB_PASSWORD=admin && set JWT_SECRET=test-secret-key-token-lifetime-32chars && set JWT_REFRESH_SECRET=test-refresh-secret-token-lifetime-32chars && set JWT_EXPIRES_IN=15m && set JWT_REFRESH_EXPIRES_IN=7d && set ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef && set PAYROLL_VAULT_KEY=dev_payroll_vault_key_32_chars_minimum_123456 && npx jest tests/feature/security/token-lifetime.test.js --runInBand --coverage=false --forceExit",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "verify-token-lifetime-security",
+			"type": "shell",
+			"command": "cd backend && set NODE_ENV=test && set PORT=5000 && set DB_HOST=localhost && set DB_NAME=skyraksys_hrm_test && set DB_USER=postgres && set DB_PASSWORD=admin && set JWT_SECRET=test-secret-key-token-lifetime-32chars && set JWT_REFRESH_SECRET=test-refresh-secret-token-lifetime-32chars && set JWT_EXPIRES_IN=15m && set JWT_REFRESH_EXPIRES_IN=7d && set ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef && set PAYROLL_VAULT_KEY=dev_payroll_vault_key_32_chars_minimum_123456 && npx jest tests/feature/security/token-lifetime.test.js --runInBand --coverage=false --forceExit",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "debug-test-config",
+			"type": "shell",
+			"command": "cd backend && set NODE_ENV=test && node -p \"process.env.NODE_ENV + '|' + Object.keys(require('./config/config.js')).join(',') + '|' + JSON.stringify(require('./config/config.js').test)\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "verify-token-lifetime-security-final",
+			"type": "shell",
+			"command": "cd backend && set NODE_ENV=test && set PORT=5000 && set DB_HOST=localhost && set DB_NAME=skyraksys_hrm_test && set DB_USER=postgres && set DB_PASSWORD=admin && set JWT_SECRET=test-secret-key-token-lifetime-32chars && set JWT_REFRESH_SECRET=test-refresh-secret-token-lifetime-32chars && set JWT_EXPIRES_IN=15m && set JWT_REFRESH_EXPIRES_IN=7d && set ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef && set PAYROLL_VAULT_KEY=dev_payroll_vault_key_32_chars_minimum_123456 && npx jest tests/feature/security/token-lifetime.test.js --runInBand --coverage=false --forceExit",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "boot-backend-models-direct",
+			"type": "shell",
+			"command": "cd backend && set NODE_ENV=test && set DB_HOST=localhost && set DB_NAME=skyraksys_hrm_test && set DB_USER=postgres && set DB_PASSWORD=admin && set JWT_SECRET=test-secret-key-token-lifetime-32chars && set JWT_REFRESH_SECRET=test-refresh-secret-token-lifetime-32chars && set ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef && node -e \"console.log('NODE_ENV=' + process.env.NODE_ENV); const cfg=require('./config/config.js'); console.log('DB=' + cfg.test.database); const db=require('./models'); console.log('models=' + Object.keys(db).slice(0,5).join(',')); db.sequelize.authenticate().then(()=>{console.log('DB_OK'); process.exit(0);}).catch(err=>{console.error('DB_ERR', err.message); process.exit(1);});\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "verify-backend-boot-clean",
+			"type": "shell",
+			"command": "cd backend && set NODE_ENV=test && set DB_HOST=localhost && set DB_NAME=skyraksys_hrm_test && set DB_USER=postgres && set DB_PASSWORD=admin && set JWT_SECRET=test-secret-key-token-lifetime-32chars && set JWT_REFRESH_SECRET=test-refresh-secret-token-lifetime-32chars && set ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef && node -e \"console.log('NODE_ENV=' + process.env.NODE_ENV); const cfg=require('./config/config.js'); console.log('DB=' + cfg.test.database); const db=require('./models'); console.log('models=' + Object.keys(db).slice(0,5).join(',')); db.sequelize.authenticate().then(()=>{console.log('DB_OK'); process.exit(0);}).catch(err=>{console.error('DB_ERR', err.message); process.exit(1);});\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "verify-model-boot-fallback",
+			"type": "shell",
+			"command": "cd backend && set NODE_ENV=test && set DB_HOST=localhost && set DB_NAME=skyraksys_hrm_test && set DB_USER=postgres && set DB_PASSWORD=admin && set JWT_SECRET=test-secret-key-token-lifetime-32chars && set JWT_REFRESH_SECRET=test-refresh-secret-token-lifetime-32chars && set ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef && node -e \"console.log('NODE_ENV=' + process.env.NODE_ENV); const cfg=require('./config/config.js'); console.log('DB=' + cfg.test.database); const db=require('./models'); console.log('Booted models: ' + Object.keys(db).length); db.sequelize.authenticate().then(()=>{console.log('AUTH_OK'); process.exit(0);}).catch(err=>{console.error('AUTH_FAIL:' + err.message); process.exit(1);});\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "verify-token-lifetime-live",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/feature/security/token-lifetime.test.js --runInBand --coverage=false --forceExit",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "check-live-backend-health",
+			"type": "shell",
+			"command": "cd backend && curl -sS http://localhost:5000/api/health",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "validate-live-auth-login",
+			"type": "shell",
+			"command": "cd backend && node -e \"const axios=require('axios'); axios.post('http://localhost:5000/api/auth/login',{email:'admin@token-test.com',password:'AdminPass123!'}).then(r=>{console.log('STATUS=' + r.status); console.log(JSON.stringify({success:r.data.success, hasAccess: !!r.data.data?.accessToken, hasRefresh: !!r.data.data?.refreshToken, cookies: r.headers['set-cookie'] && r.headers['set-cookie'].length}));}).catch(err=>{console.log('ERR=' + (err.response&&err.response.status || 'NA')); console.log(JSON.stringify(err.response && err.response.data ? err.response.data : {message: err.message})); process.exit(1);});\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "live-login-default-admin",
+			"type": "shell",
+			"command": "cd backend && curl -sS -D - -o /tmp/live_auth_login.out -H \"Content-Type: application/json\" -X POST -d '{\"email\":\"admin@skyraksys.com\",\"password\":\"admin123\"}' http://localhost:5000/api/auth/login && echo \"---BODY---\" && cat /tmp/live_auth_login.out",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "view-live-auth-response",
+			"type": "shell",
+			"command": "cat /tmp/live_auth_login.out",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "verify-live-db-passwords",
+			"type": "shell",
+			"command": "cd backend && node -e \"const db=require('./models'); const bcrypt=require('bcryptjs'); (async()=>{ await db.sequelize.authenticate(); const users=await db.User.findAll({attributes:['email','role','password','isActive'], raw:true, paranoid:false}); console.log(JSON.stringify(users,null,2)); const target=await db.User.findOne({where:{email:'admin@skyraksys.com'}, attributes:['password'], raw:true, paranoid:false}); for (const c of ['admin123','StrongSeedPassword2026!']) { console.log('COMPARE', c, await bcrypt.compare(c, target.password)); } process.exit(0); })().catch(e=>{ console.error(e); process.exit(1); });\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "verify-live-login-with-seed-password",
+			"type": "shell",
+			"command": "cd backend && node -e \"const axios=require('axios'); axios.post('http://localhost:5000/api/auth/login',{email:'admin@skyraksys.com',password:'StrongSeedPassword2026!'}).then(r=>{console.log('STATUS', r.status); console.log(JSON.stringify({success:r.data.success, role:r.data.data && r.data.data.role, hasAccess: !!(r.data.data && r.data.data.accessToken)}));}).catch(err=>{console.log('STATUS', err.response && err.response.status); console.log(JSON.stringify(err.response && err.response.data ? err.response.data : {message:err.message})); process.exit(1);});\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "verify-ui-login-with-seed-password",
+			"type": "shell",
+			"command": "cd frontend && cmd /c \"node -e \\\"const { chromium } = require('playwright'); (async()=>{ const browser = await chromium.launch({ headless: true }); const page = await browser.newPage(); await page.goto('http://localhost:3000/login'); await page.locator('input[type=\\\"email\\\"]').fill('admin@skyraksys.com'); await page.locator('input[type=\\\"password\\\"]').fill('StrongSeedPassword2026!'); await page.getByRole('button', { name: /sign in|log in|login/i }).click(); await page.waitForTimeout(4000); console.log('URL=' + page.url()); const alertCount = await page.locator('[data-testid=\\\"login-error-alert\\\"]').count(); console.log('ALERT_COUNT=' + alertCount); if (alertCount) console.log('ALERT=' + await page.locator('[data-testid=\\\"login-error-alert\\\"]').textContent()); await browser.close(); })().catch(err => { console.error(err); process.exit(1); });\\\"\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "reset-seed-lockouts-and-login",
+			"type": "shell",
+			"command": "cd backend && node -e \"const db=require('./models'); const {Op}=require('sequelize'); db.User.update({failedLoginAttempts:0, lockoutUntil:null, isLocked:false}, {where:{email:{[Op.in]: ['admin@skyraksys.com','hr@skyraksys.com','lead@skyraksys.com','employee1@skyraksys.com']}}}).then(()=>{console.log('LOCKOUTS_RESET'); return db.User.findAll({attributes:['email','failedLoginAttempts','lockoutUntil','isLocked'],where:{email:{[Op.in]: ['admin@skyraksys.com','hr@skyraksys.com','lead@skyraksys.com','employee1@skyraksys.com']}}, raw:true});}).then(users=>{console.log(JSON.stringify(users,null,2)); return require('axios').post('http://localhost:5000/api/auth/login',{email:'employee1@skyraksys.com',password:'StrongSeedPassword2026!'});}).then(r=>{console.log('EMP_LOGIN_STATUS=' + r.status); console.log(JSON.stringify({success:r.data.success, hasAccess: !!r.data.data?.accessToken, hasRefresh: !!r.data.data?.refreshToken}));}).catch(err=>{console.error('RESET_ERR=' + (err.response && err.response.data ? JSON.stringify(err.response.data) : err.message)); process.exit(1);});\"",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "live-login-real-seed-check",
+			"type": "shell",
+			"command": "cd backend && node -e \"const axios=require('axios'); axios.post('http://localhost:5000/api/auth/login',{email:'admin@skyraksys.com',password:'StrongSeedPassword2026!'}).then(r=>{console.log('STATUS=' + r.status); console.log(JSON.stringify({success:r.data.success, hasAccess: !!r.data.data?.accessToken, hasRefresh: !!r.data.data?.refreshToken, cookies: r.headers['set-cookie'] && r.headers['set-cookie'].length}));}).catch(err=>{console.log('ERR=' + (err.response&&err.response.status || 'NA')); console.log(JSON.stringify(err.response && err.response.data ? err.response.data : {message: err.message})); process.exit(1);});\"",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "reset-lockouts-live-and-verify-employee-login",
+			"type": "shell",
+			"command": "cd backend && node -e \"const db=require('./models'); const {Op}=require('sequelize'); db.User.update({failedLoginAttempts:0, lockoutUntil:null}, {where:{email:{[Op.in]: ['admin@skyraksys.com','hr@skyraksys.com','lead@skyraksys.com','employee1@skyraksys.com']}}}).then(()=>db.User.findAll({attributes:['email','failedLoginAttempts','lockoutUntil'],where:{email:{[Op.in]: ['admin@skyraksys.com','hr@skyraksys.com','lead@skyraksys.com','employee1@skyraksys.com']}}, raw:true})).then(users=>{console.log(JSON.stringify(users,null,2)); return require('axios').post('http://localhost:5000/api/auth/login',{email:'employee1@skyraksys.com',password:'StrongSeedPassword2026!'});}).then(r=>{console.log('EMP_LOGIN_STATUS=' + r.status); console.log(JSON.stringify({success:r.data.success, hasAccess: !!r.data.data?.accessToken, hasRefresh: !!r.data.data?.refreshToken}));}).catch(err=>{console.error('RESET_ERR=' + (err.response && err.response.data ? JSON.stringify(err.response.data) : err.message)); process.exit(1);});\"",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "inspect-live-seed-user-records",
+			"type": "shell",
+			"command": "cd backend && node -e \"const db=require('./models'); const {Op}=require('sequelize'); db.User.scope('withPassword').findAll({attributes:['email','role','isActive','failedLoginAttempts','lockoutUntil','password'],where:{email:{[Op.in]: ['admin@skyraksys.com','hr@skyraksys.com','lead@skyraksys.com','employee1@skyraksys.com','employee2@skyraksys.com']}}, raw:true}).then(rows=>{console.log(JSON.stringify(rows,null,2));}).catch(e=>{console.error(e.stack||e); process.exit(1);});\"",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "verify-dashboard-role-filtering",
+			"type": "shell",
+			"command": "cd backend && npx jest tests/feature/system/dashboard-role-filtering.test.js --runInBand --coverage=false --forceExit",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
 		}
 	]
 }

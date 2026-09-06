@@ -18,6 +18,8 @@ export const isIntegrationMode = TEST_MODE === 'integration';
  * Integration mode configuration.
  * Override via environment variables or .env.test.integration file.
  */
+const DEFAULT_SEED_PASSWORD = process.env.SEED_DEFAULT_PASSWORD || 'StrongSeedPassword2026!';
+
 export const INTEGRATION_CONFIG = {
   /** Backend API base URL */
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
@@ -26,19 +28,19 @@ export const INTEGRATION_CONFIG = {
   users: {
     admin: {
       email: process.env.TEST_ADMIN_EMAIL || 'admin@skyraksys.com',
-      password: process.env.TEST_ADMIN_PASSWORD || 'admin123',
+      password: process.env.TEST_ADMIN_PASSWORD || DEFAULT_SEED_PASSWORD,
     },
     hr: {
       email: process.env.TEST_HR_EMAIL || 'hr@skyraksys.com',
-      password: process.env.TEST_HR_PASSWORD || 'admin123',
+      password: process.env.TEST_HR_PASSWORD || DEFAULT_SEED_PASSWORD,
     },
     manager: {
       email: process.env.TEST_MANAGER_EMAIL || 'lead@skyraksys.com',
-      password: process.env.TEST_MANAGER_PASSWORD || 'admin123',
+      password: process.env.TEST_MANAGER_PASSWORD || DEFAULT_SEED_PASSWORD,
     },
     employee: {
       email: process.env.TEST_EMPLOYEE_EMAIL || 'employee1@skyraksys.com',
-      password: process.env.TEST_EMPLOYEE_PASSWORD || 'admin123',
+      password: process.env.TEST_EMPLOYEE_PASSWORD || DEFAULT_SEED_PASSWORD,
     },
   },
 

@@ -8,7 +8,8 @@
  */
 
 // Set test environment variables before requiring modules
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only-32chars-ABC';
+process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test-refresh-secret-for-testing-only-32chars-XYZ';
 process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
 const request = require('supertest');
@@ -89,7 +90,7 @@ describe('Timesheet Validator Fixes - Task 3.7', () => {
 
     // Create test employee
     testEmployee = await Employee.create({
-      employeeId: 'SKYT8881',
+      employeeId: 'SK881',
       firstName: 'Test',
       lastName: 'Employee',
       email: 'employee.ts37@test.com',

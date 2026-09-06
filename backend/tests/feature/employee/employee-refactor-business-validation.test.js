@@ -20,6 +20,8 @@ const app = require('../../../server');
 const db = require('../../../models');
 const jwt = require('jsonwebtoken');
 
+const createTestEmployeeId = () => `SK${String(Math.floor(Math.random() * 900) + 100).padStart(3, '0')}`;
+
 describe('Employee Controller - Business Use Case Validation', () => {
   let adminUser, adminToken;
   let hrUser, hrToken;
@@ -83,7 +85,7 @@ describe('Employee Controller - Business Use Case Validation', () => {
       isActive: true
     });
     const managerEmployee = await db.Employee.create({
-      employeeId: `SKYT${Date.now()}`,
+      employeeId: createTestEmployeeId(),
       firstName: 'Manager',
       lastName: 'User',
       email: managerUser.email,
@@ -110,7 +112,7 @@ describe('Employee Controller - Business Use Case Validation', () => {
       isActive: true
     });
     testEmployee = await db.Employee.create({
-      employeeId: `SKYT${Date.now()}`,
+      employeeId: createTestEmployeeId(),
       firstName: 'Employee',
       lastName: 'User',
       email: employeeUser.email,
@@ -256,7 +258,7 @@ describe('Employee Controller - Business Use Case Validation', () => {
         .send(employeeData);
 
       if (response.body.success && response.body.data) {
-        expect(response.body.data.employeeId).toMatch(/^SKYT\d+$/);
+        expect(response.body.data.employeeId).toMatch(/^SK\d{3}$/);
         
         const created = await db.Employee.findOne({ where: { email: employeeData.email } });
         if (created) {
@@ -338,7 +340,7 @@ describe('Employee Controller - Business Use Case Validation', () => {
         isActive: true
       });
       const tempEmployee = await db.Employee.create({
-        employeeId: `SKYT${Date.now()}`,
+        employeeId: createTestEmployeeId(),
         firstName: 'Temp',
         lastName: 'Employee',
         email: tempUser.email,

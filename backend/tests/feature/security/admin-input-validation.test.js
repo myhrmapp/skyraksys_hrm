@@ -10,7 +10,8 @@
  */
 
 // Set test environment variables before requiring modules
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only-32chars-ABC';
+process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test-refresh-secret-for-testing-only-32chars-XYZ';
 // ENCRYPTION_KEY must be 64 hex characters (32 bytes when decoded)
 process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 

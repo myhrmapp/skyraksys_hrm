@@ -283,7 +283,7 @@ test.describe('A#24: Leave cancel button', () => {
 test.describe('A#27: Payroll search debounce', () => {
   test('Payroll search input accepts typing without cursor jumping', async ({ page }) => {
     await loginAs(page, 'admin');
-    await page.goto('/payroll');
+    await page.goto('/payroll-management');
     await waitForPageReady(page);
 
     // Find search input
@@ -532,7 +532,7 @@ test.describe('A#1: Notification bell (Deferred)', () => {
 test.describe('A#3/A#15: Image crop (Deferred)', () => {
   test('Photo upload exists but has no crop dialog', async ({ page }) => {
     await loginAs(page, 'admin');
-    await page.goto('/settings');
+    await page.goto('/admin/settings-hub');
     await waitForPageReady(page);
 
     // Look for any photo/logo upload
@@ -569,7 +569,7 @@ test.describe('A#22: Attendance PDF export (Deferred)', () => {
 test.describe('A#2: SMTP Configuration (On Hold)', () => {
   test('SMTP settings page exists and loads', async ({ page }) => {
     await loginAs(page, 'admin');
-    await page.goto('/settings');
+    await page.goto('/admin/settings-hub');
     await waitForPageReady(page);
 
     // Look for Email/SMTP tab

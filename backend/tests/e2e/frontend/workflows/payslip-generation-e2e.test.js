@@ -5,9 +5,11 @@
  */
 
 process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = 'test-secret-payslip';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-payslip';
+process.env.JWT_SECRET = 'test-secret-payslip-32chars-long-key-2026';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-payslip-32chars-long-key-2026';
 process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+process.env.DB_NAME = 'skyraksys_hrm_test';
+process.env.DB_NAME_TEST = 'skyraksys_hrm_test';
 process.env.DB_DATABASE = 'skyraksys_hrm_test';
 
 const request = require('supertest');

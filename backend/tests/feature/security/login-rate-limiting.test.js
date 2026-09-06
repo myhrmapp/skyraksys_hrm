@@ -5,8 +5,8 @@ const bcrypt = require('bcryptjs');
 process.env.RATE_LIMIT_DISABLED = 'false'; // Re-enable rate limiting for this test
 process.env.RATE_LIMIT_AUTH_MAX = '500'; // Increase auth rate limit to avoid express-rate-limit interfering
 process.env.RATE_LIMIT_MAX = '500'; // Increase general rate limit too
-process.env.JWT_SECRET = 'test-secret-key-rate-limiting';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-rate-limiting';
+process.env.JWT_SECRET = 'test-secret-key-rate-limiting-32chars-long';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-rate-limiting-32chars-long';
 process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
 const app = require('../../../server');
@@ -44,7 +44,8 @@ describe('Task 5.2: Login Rate Limiting - Brute Force Protection', () => {
     
     resetRateLimiter(); // Clear rate limiter after admin login
     
-    process.env.JWT_SECRET = 'test-secret-key';
+    process.env.JWT_SECRET = 'test-secret-key-rate-limiting-32chars-long';
+    process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-rate-limiting-32chars-long';
     process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
     const hashedPassword = await bcrypt.hash(testPassword, 10);

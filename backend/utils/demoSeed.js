@@ -97,26 +97,59 @@ async function seedProjectsAndTasks() {
   console.log('✅ Demo projects and tasks created successfully');
 }
 
-async function seedAllDemoData() {
-  await seedUsersDepartmentsPositionsLeaves();
-  // Ensure a dedicated prod admin test account exists (for ops diagnostics)
-  try {
-    const existing = await db.User.findOne({ where: { email: 'prodadmin@company.com' } });
-    if (!existing) {
-      const user = await db.User.create({
-        firstName: 'Prod', lastName: 'Admin', email: 'prodadmin@company.com',
-        password: await bcrypt.hash('admin', 12), role: 'admin', isActive: true
+async function ensureSkyrakSeedAccounts() {
+  const defaultPassword = process.env.SEED_DEFAULT_PASSWORD || 'StrongSeedPassword2026!';
+  const hash = await bcrypt.hash(defaultPassword, 12);
+  const knownAccounts = [
+    { email: 'admin@skyraksys.com', firstName: 'System', lastName: 'Administrator', role: 'admin', employeeId: 'SK001' },
+    { email: 'hr@skyraksys.com', firstName: 'Sarah', lastName: 'Johnson', role: 'hr', employeeId: 'SK002' },
+    { email: 'lead@skyraksys.com', firstName: 'John', lastName: 'Smith', role: 'manager', employeeId: 'SK003' },
+    { email: 'employee1@skyraksys.com', firstName: 'Alice', lastName: 'Brown', role: 'employee', employeeId: 'SK004' },
+    { email: 'employee2@skyraksys.com', firstName: 'Bob', lastName: 'Wilson', role: 'employee', employeeId: 'SK005' }
+  ];
+
+  for (const account of knownAccounts) {
+    let user = await db.User.findOne({ where: { email: account.email }, paranoid: false });
+    if (!user) {
+      user = await db.User.create({
+        firstName: account.firstName,
+        lastName: account.lastName,
+        email: account.email,
+        password: hash,
+        role: account.role,
+        isActive: true
       });
-      await db.Employee.create({
-        userId: user.id, employeeId: 'EMP900', firstName: 'Prod', lastName: 'Admin',
-        email: 'prodadmin@company.com', departmentId: null, positionId: null, hireDate: new Date(),
-        salary: 0, status: 'Active'
-      }).catch(() => {});
-      console.log('🔐 Seeded prodadmin@company.com with password "admin" (admin role)');
+    } else {
+      user.role = account.role;
+      user.firstName = account.firstName;
+      user.lastName = account.lastName;
+      user.isActive = true;
+      if (!user.password || user.password === 'admin123' || user.password === 'change_me') {
+        user.password = hash;
+      }
+      await user.save();
     }
-  } catch (e) {
-    console.log('⚠️  Unable to ensure prodadmin test account:', e.message);
+
+    let employee = await db.Employee.findOne({ where: { email: account.email }, paranoid: false });
+    if (!employee) {
+      await db.Employee.create({
+        userId: user.id,
+        employeeId: account.employeeId,
+        firstName: account.firstName,
+        lastName: account.lastName,
+        email: account.email,
+        departmentId: null,
+        positionId: null,
+        hireDate: new Date(),
+        status: 'Active'
+      });
+    }
   }
+}
+
+async function seedAllDemoData() {
+  await ensureSkyrakSeedAccounts();
+  await seedUsersDepartmentsPositionsLeaves();
   await seedProjectsAndTasks();
 }
 

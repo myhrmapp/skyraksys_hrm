@@ -9,21 +9,22 @@
 const XLSX = require('xlsx');
 const path = require('path');
 
+const DEFAULT_SEED_PASSWORD = process.env.SEED_DEFAULT_PASSWORD || 'StrongSeedPassword2026!';
 const wb = XLSX.utils.book_new();
 
 // ─── 1. Login ──────────────────────────────────────
 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([
-  { testId: 'LOGIN-001', description: 'Successful admin login', action: 'login', enabled: 'TRUE', email: 'admin@skyraksys.com', password: 'admin123', expectedRole: 'admin', expectSuccess: 'TRUE' },
-  { testId: 'LOGIN-002', description: 'Successful HR login', action: 'login', enabled: 'TRUE', email: 'hr@skyraksys.com', password: 'admin123', expectedRole: 'hr', expectSuccess: 'TRUE' },
-  { testId: 'LOGIN-003', description: 'Successful manager login', action: 'login', enabled: 'TRUE', email: 'lead@skyraksys.com', password: 'admin123', expectedRole: 'manager', expectSuccess: 'TRUE' },
-  { testId: 'LOGIN-004', description: 'Successful employee login', action: 'login', enabled: 'TRUE', email: 'employee1@skyraksys.com', password: 'admin123', expectedRole: 'employee', expectSuccess: 'TRUE' },
+  { testId: 'LOGIN-001', description: 'Successful admin login', action: 'login', enabled: 'TRUE', email: 'admin@skyraksys.com', password: DEFAULT_SEED_PASSWORD, expectedRole: 'admin', expectSuccess: 'TRUE' },
+  { testId: 'LOGIN-002', description: 'Successful HR login', action: 'login', enabled: 'TRUE', email: 'hr@skyraksys.com', password: DEFAULT_SEED_PASSWORD, expectedRole: 'hr', expectSuccess: 'TRUE' },
+  { testId: 'LOGIN-003', description: 'Successful manager login', action: 'login', enabled: 'TRUE', email: 'lead@skyraksys.com', password: DEFAULT_SEED_PASSWORD, expectedRole: 'manager', expectSuccess: 'TRUE' },
+  { testId: 'LOGIN-004', description: 'Successful employee login', action: 'login', enabled: 'TRUE', email: 'employee1@skyraksys.com', password: DEFAULT_SEED_PASSWORD, expectedRole: 'employee', expectSuccess: 'TRUE' },
   { testId: 'LOGIN-005', description: 'Invalid password', action: 'login', enabled: 'TRUE', email: 'admin@skyraksys.com', password: 'wrong123', expectedRole: '', expectSuccess: 'FALSE' },
-  { testId: 'LOGIN-006', description: 'Empty email field', action: 'login', enabled: 'TRUE', email: '', password: 'admin123', expectedRole: '', expectSuccess: 'FALSE' },
+  { testId: 'LOGIN-006', description: 'Empty email field', action: 'login', enabled: 'TRUE', email: '', password: DEFAULT_SEED_PASSWORD, expectedRole: '', expectSuccess: 'FALSE' },
   { testId: 'LOGIN-007', description: 'Empty password field', action: 'login', enabled: 'TRUE', email: 'admin@skyraksys.com', password: '', expectedRole: '', expectSuccess: 'FALSE' },
-  { testId: 'LOGIN-008', description: 'Non-existent user', action: 'login', enabled: 'TRUE', email: 'nobody@skyraksys.com', password: 'admin123', expectedRole: '', expectSuccess: 'FALSE' },
+  { testId: 'LOGIN-008', description: 'Non-existent user', action: 'login', enabled: 'TRUE', email: 'nobody@skyraksys.com', password: DEFAULT_SEED_PASSWORD, expectedRole: '', expectSuccess: 'FALSE' },
   { testId: 'LOGIN-009', description: 'Toggle password visibility', action: 'togglePassword', enabled: 'TRUE', email: '', password: '', expectedRole: '', expectSuccess: 'TRUE' },
   { testId: 'LOGIN-010', description: 'Forgot password link navigation', action: 'forgotPassword', enabled: 'TRUE', email: '', password: '', expectedRole: '', expectSuccess: 'TRUE' },
-  { testId: 'LOGIN-011', description: 'Logout flow', action: 'logout', enabled: 'TRUE', email: 'admin@skyraksys.com', password: 'admin123', expectedRole: 'admin', expectSuccess: 'TRUE' },
+  { testId: 'LOGIN-011', description: 'Logout flow', action: 'logout', enabled: 'TRUE', email: 'admin@skyraksys.com', password: DEFAULT_SEED_PASSWORD, expectedRole: 'admin', expectSuccess: 'TRUE' },
 ]), 'Login');
 
 // ─── 2. Dashboard ──────────────────────────────────

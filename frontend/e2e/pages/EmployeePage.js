@@ -139,13 +139,12 @@ class EmployeePage {
     const editBtn = this.page.locator(this.s.tableEditBtn || '[data-testid="employee-table-edit-btn"]').nth(index);
     await editBtn.click();
     await waitForPageReady(this.page);
-    await this.clickEditFromProfile();
   }
 
-  /** Click delete action for an employee card by index (card view has delete, table view does not) */
+  /** Click delete action for an employee by index */
   async clickDeleteEmployee(index = 0) {
-    await this.ensureCardView();
-    const deleteBtn = this.page.locator(this.s.cardDeleteBtn || '[data-testid="employee-card-delete-btn"]').nth(index);
+    await this.ensureTableView();
+    const deleteBtn = this.page.locator(this.s.tableDeleteBtn || '[data-testid="employee-table-delete-btn"]').nth(index);
     await deleteBtn.click();
   }
 

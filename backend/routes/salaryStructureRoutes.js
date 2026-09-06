@@ -148,7 +148,7 @@ router.get('/employee/:employeeId/current',
       if (!salaryStructure) {
         return res.status(404).json({
           success: false,
-          message: 'No active salary structure found'
+          message: 'No active salary structure found. Please configure salary structure in employee profile → Salary Structure tab.'
         });
       }
 
@@ -187,7 +187,7 @@ router.get('/:id',
       if (!salaryStructure) {
         return res.status(404).json({
           success: false,
-          message: 'Salary structure not found'
+          message: 'Salary structure not found. This record may have been deleted or does not exist.'
         });
       }
 
@@ -279,7 +279,7 @@ router.put('/:id',
       if (!salaryStructure) {
         return res.status(404).json({
           success: false,
-          message: 'Salary structure not found'
+          message: 'Salary structure not found. Cannot update a record that does not exist.'
         });
       }
 
@@ -326,7 +326,7 @@ router.post('/:id/activate',
       if (!salaryStructure) {
         return res.status(404).json({
           success: false,
-          message: 'Salary structure not found'
+          message: 'Salary structure not found. Cannot activate a record that does not exist.'
         });
       }
 
@@ -372,7 +372,7 @@ router.post('/:id/deactivate',
       if (!salaryStructure) {
         return res.status(404).json({
           success: false,
-          message: 'Salary structure not found'
+          message: 'Salary structure not found. Cannot deactivate a record that does not exist.'
         });
       }
 
@@ -405,7 +405,7 @@ router.delete('/:id',
       if (!salaryStructure) {
         return res.status(404).json({
           success: false,
-          message: 'Salary structure not found'
+          message: 'Salary structure not found. Cannot delete a record that does not exist.'
         });
       }
 

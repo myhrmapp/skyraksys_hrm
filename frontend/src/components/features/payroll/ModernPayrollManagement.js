@@ -745,7 +745,7 @@ const ModernPayrollManagement = () => {
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
           <PeriodSelector />
           <Stack direction="row" spacing={1}>
-            <Button size="small" variant="outlined" startIcon={<ExportIcon />} onClick={handleExportExcel}>
+            <Button size="small" variant="outlined" startIcon={<ExportIcon />} onClick={handleExportExcel} data-testid="payroll-export-btn">
               Export Excel
             </Button>
             <Tooltip title="Refresh">
@@ -1200,6 +1200,7 @@ const ModernPayrollManagement = () => {
           onChange={handleSearchChange}
           size="small"
           sx={{ minWidth: 250 }}
+          inputProps={{ 'data-testid': 'payroll-search-input' }}
           InputProps={{
             startAdornment: (
               <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>

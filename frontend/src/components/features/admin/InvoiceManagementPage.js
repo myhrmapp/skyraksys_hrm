@@ -84,6 +84,9 @@ const defaultTemplateForm = () => ({
 });
 
 const InvoiceManagementPage = () => {
+  // Get API base URL from environment or use http instance baseURL
+  const API_BASE_URL = process.env.REACT_APP_API_URL || http.defaults.baseURL || '/api';
+  
   const { enqueueSnackbar } = useSnackbar();
   const { dialogProps, confirm } = useConfirmDialog();
   const [tab, setTab] = useState(0);
@@ -314,7 +317,8 @@ const InvoiceManagementPage = () => {
   };
 
   const downloadPdf = (id) => {
-    window.open(`http://localhost:5000/api/invoices/${id}/pdf`, '_blank');
+    // Use environment-configured API URL instead of hardcoded localhost
+    window.open(`${API_BASE_URL}/invoices/${id}/pdf`, '_blank');
   };
 
   const openCreateTemplate = () => {

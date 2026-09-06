@@ -32,9 +32,9 @@ const loginSchema = Joi.object({
 const registerSchema = Joi.object({
   employeeId: Joi.string()
     .required()
-    .pattern(/^SKYT\d{3,}$/)
+    .pattern(/^SK\d{3}$/)
     .messages({
-      'string.pattern.base': 'Employee ID must start with SKYT followed by at least 3 digits'
+      'string.pattern.base': 'Employee ID must use SK### format'
     }),
 
   username: Joi.string()

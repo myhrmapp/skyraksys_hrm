@@ -27,7 +27,8 @@
  *   16. payslip_audit_logs
  *   17. audit_logs
  *   18. system_configs
- *   19. employee_reviews
+ *   19. notifications
+ *   20. employee_reviews
  * 
  * How to use:
  *   FRESH INSTALL:
@@ -1350,7 +1351,88 @@ module.exports = {
       });
 
       // =========================================================================
-      // 19. EMPLOYEE REVIEWS
+      // 19. NOTIFICATIONS
+      // =========================================================================
+      await queryInterface.createTable('notifications', {
+        id: {
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4,
+          primaryKey: true,
+          allowNull: false
+        },
+        title: {
+          type: Sequelize.STRING,
+          allowNull: false
+        },
+        message: {
+          type: Sequelize.TEXT,
+          allowNull: false
+        },
+        type: {
+          type: Sequelize.ENUM('info', 'success', 'warning', 'error', 'broadcast'),
+          defaultValue: 'info'
+        },
+        isRead: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false
+        },
+        link: {
+          type: Sequelize.STRING,
+          allowNull: true
+        },
+        imageUrl: {
+          type: Sequelize.TEXT,
+          allowNull: true
+        },
+        isPopup: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false
+        },
+        userId: {
+          type: Sequelize.UUID,
+          allowNull: true,
+          references: { model: 'users', key: 'id' },
+          onUpdate: 'CASCADE',
+          onDelete: 'SET NULL'
+        },
+        targetAudience: {
+          type: Sequelize.ENUM('USER', 'ALL', 'DEPARTMENT'),
+          defaultValue: 'USER'
+        },
+        departmentId: {
+          type: Sequelize.UUID,
+          allowNull: true,
+          references: { model: 'departments', key: 'id' },
+          onUpdate: 'CASCADE',
+          onDelete: 'SET NULL'
+        },
+        createdAt: {
+          type: Sequelize.DATE,
+          allowNull: false,
+          defaultValue: Sequelize.fn('NOW')
+        },
+        updatedAt: {
+          type: Sequelize.DATE,
+          allowNull: false,
+          defaultValue: Sequelize.fn('NOW')
+        }
+      }, { transaction });
+
+      await queryInterface.addIndex('notifications', ['userId'], {
+        name: 'idx_notifications_user', transaction
+      });
+      await queryInterface.addIndex('notifications', ['isRead'], {
+        name: 'idx_notifications_is_read', transaction
+      });
+      await queryInterface.addIndex('notifications', ['type'], {
+        name: 'idx_notifications_type', transaction
+      });
+      await queryInterface.addIndex('notifications', ['createdAt'], {
+        name: 'idx_notifications_created_at', transaction
+      });
+
+      // =========================================================================
+      // 20. EMPLOYEE REVIEWS
       // =========================================================================
       await queryInterface.createTable('employee_reviews', {
         id: {
@@ -1431,7 +1513,7 @@ module.exports = {
       });
 
       await transaction.commit();
-      console.log('✅ Fresh consolidated schema created successfully (19 tables)');
+      console.log('✅ Fresh consolidated schema created successfully (20 tables)');
 
     } catch (error) {
       await transaction.rollback();
@@ -1446,6 +1528,7 @@ module.exports = {
       // Drop in reverse dependency order
       const tables = [
         'employee_reviews',
+        'notifications',
         'system_configs',
         'audit_logs',
         'payslip_audit_logs',

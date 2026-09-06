@@ -340,7 +340,7 @@ export default function AttendanceManagement() {
       </Paper>
 
       {/* Mark Attendance Dialog */}
-      <Dialog open={markDialogOpen} onClose={() => { setMarkDialogOpen(false); setEditRecordId(null); }} maxWidth="sm" fullWidth>
+      <Dialog data-testid="attendance-dialog" open={markDialogOpen} onClose={() => { setMarkDialogOpen(false); setEditRecordId(null); }} maxWidth="sm" fullWidth>
         <DialogTitle>Mark / Correct Attendance</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
@@ -363,6 +363,7 @@ export default function AttendanceManagement() {
                   required
                   fullWidth
                   placeholder="Search by name or ID..."
+                  inputProps={{ 'data-testid': 'attendance-employee-select' }}
                 />
               )}
               freeSolo={false}
@@ -382,6 +383,7 @@ export default function AttendanceManagement() {
               label="Status"
               fullWidth
               required
+              inputProps={{ 'data-testid': 'attendance-status-select' }}
               value={markForm.status}
               onChange={(e) => setMarkForm({ ...markForm, status: e.target.value })}
             >

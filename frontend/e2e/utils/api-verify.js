@@ -53,7 +53,7 @@ async function verifyEmployeeInDB(page, criteria) {
  * Verify a leave request exists via API.
  */
 async function verifyLeaveInDB(page, criteria) {
-  return verifyRecordViaAPI(page, '/api/leave-requests', criteria);
+  return verifyRecordViaAPI(page, '/api/leaves', criteria);
 }
 
 /**

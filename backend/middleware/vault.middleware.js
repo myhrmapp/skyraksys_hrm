@@ -1,4 +1,5 @@
 const db = require('../models');
+const logger = require('../utils/logger');
 
 /**
  * Middleware to ensure the Vault DEK is present in the session if the vault is enabled.
@@ -40,7 +41,7 @@ exports.requireVaultUnlock = async (req, res, next) => {
     
     next();
   } catch (error) {
-    console.error('Vault Middleware Error:', error);
+    logger.error('Vault Middleware Error:', error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
@@ -55,7 +56,7 @@ exports.attachVaultStatus = async (req, res, next) => {
     req.vaultConfig = config || { isEnabled: false };
     next();
   } catch (error) {
-    console.error('Attach Vault Status Error:', error);
+    logger.error('Attach Vault Status Error:', error);
     req.vaultConfig = { isEnabled: false };
     next();
   }

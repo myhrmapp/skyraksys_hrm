@@ -1,13 +1,14 @@
-const { InvoiceTemplate, User } = require('../models');
 const { AppError } = require('../utils/errors');
 const logger = require('../utils/logger');
+const invoiceTemplateDataService = require('../services/data/InvoiceTemplateDataService');
 
 // Get all invoice templates
 exports.getAllTemplates = async (req, res, next) => {
   try {
-    const templates = await InvoiceTemplate.findAll({
+    const result = await invoiceTemplateDataService.findAll({
       order: [['isDefault', 'DESC'], ['name', 'ASC']]
     });
+    const templates = result.data || result;
     res.status(200).json({ success: true, count: templates.length, data: templates });
   } catch (error) {
     logger.error('Error fetching invoice templates:', error);
@@ -18,7 +19,7 @@ exports.getAllTemplates = async (req, res, next) => {
 // Get single template
 exports.getTemplate = async (req, res, next) => {
   try {
-    const template = await InvoiceTemplate.findByPk(req.params.id);
+    const template = await invoiceTemplateDataService.findById(req.params.id);
     if (!template) {
       return next(new AppError('Template not found', 404));
     }
@@ -36,10 +37,10 @@ exports.createTemplate = async (req, res, next) => {
 
     // If this is set as default, unset other defaults
     if (isDefault) {
-      await InvoiceTemplate.update({ isDefault: false }, { where: { isDefault: true } });
+      await invoiceTemplateDataService.bulkUpdate({ isDefault: true }, { isDefault: false });
     }
 
-    const template = await InvoiceTemplate.create({
+    const template = await invoiceTemplateDataService.create({
       name,
       description,
       isDefault: isDefault || false,
@@ -59,7 +60,7 @@ exports.createTemplate = async (req, res, next) => {
 // Update template
 exports.updateTemplate = async (req, res, next) => {
   try {
-    let template = await InvoiceTemplate.findByPk(req.params.id);
+    const template = await invoiceTemplateDataService.findById(req.params.id);
     if (!template) {
       return next(new AppError('Template not found', 404));
     }
@@ -67,10 +68,10 @@ exports.updateTemplate = async (req, res, next) => {
     const { name, description, isDefault, isActive, currency, templateData } = req.body;
 
     if (isDefault && !template.isDefault) {
-      await InvoiceTemplate.update({ isDefault: false }, { where: { isDefault: true } });
+      await invoiceTemplateDataService.bulkUpdate({ isDefault: true }, { isDefault: false });
     }
 
-    await template.update({
+    await invoiceTemplateDataService.update(req.params.id, {
       name: name !== undefined ? name : template.name,
       description: description !== undefined ? description : template.description,
       isDefault: isDefault !== undefined ? isDefault : template.isDefault,
@@ -80,7 +81,8 @@ exports.updateTemplate = async (req, res, next) => {
       updatedBy: req.user.id
     });
 
-    res.status(200).json({ success: true, data: template });
+    const updatedTemplate = await invoiceTemplateDataService.findById(req.params.id);
+    res.status(200).json({ success: true, data: updatedTemplate });
   } catch (error) {
     logger.error('Error updating template:', error);
     next(new AppError('Error updating template', 500));
@@ -90,7 +92,7 @@ exports.updateTemplate = async (req, res, next) => {
 // Delete template
 exports.deleteTemplate = async (req, res, next) => {
   try {
-    const template = await InvoiceTemplate.findByPk(req.params.id);
+    const template = await invoiceTemplateDataService.findById(req.params.id);
     if (!template) {
       return next(new AppError('Template not found', 404));
     }
@@ -100,7 +102,7 @@ exports.deleteTemplate = async (req, res, next) => {
       return next(new AppError('Cannot delete the default template. Set another template as default first.', 400));
     }
 
-    await template.destroy();
+    await invoiceTemplateDataService.delete(req.params.id);
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
     logger.error('Error deleting template:', error);

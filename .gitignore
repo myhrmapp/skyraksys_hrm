@@ -82,8 +82,11 @@ backend/test-screenshots/
 *.broken
 *.deprecated
 
-# Archive moved to workspace root (d:\skyraksys_hrm1\archive)
-# archive/
+# Archive folders
+archive/
+archive_prod_folders_*/
+archive/legacy-docs/
+archive/legacy-deployments/
 
 # Test output files
 *.txt
@@ -100,10 +103,6 @@ contexttmp.md
 .server-credentials.ini
 **/deploy/.server-credentials.ini
 *.bak
-
-# Archive folders
-archive/
-archive_prod_folders_*/
 
 # Demo output (videos, audio — large binaries, not for source control)
 demo-output/
@@ -134,6 +133,9 @@ zip_extracted_v1.1/
 package_updates/
 docs/checklists/
 .git_diffs/
+
+# Current active docs are tracked intentionally; archive historical output instead of tracking it
+# Historical reports and generated artifacts remain in archive folders and are not tracked as source docs
 *REPORT*.md
 *SUMMARY*.md
 *RESULTS*.md

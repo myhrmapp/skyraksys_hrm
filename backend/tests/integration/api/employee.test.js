@@ -81,7 +81,7 @@ describe('Employee API', () => {
   describe('POST /api/employees', () => {
     it('should create employee as admin', async () => {
       const employeeData = {
-        // Don't send employeeId - let system auto-generate in SKYT#### format
+        // Don't send employeeId - let the service auto-generate the active SK### format
         firstName: 'New',
         lastName: 'Employee',
         email: `new${Date.now()}@company.com`,
@@ -101,7 +101,7 @@ describe('Employee API', () => {
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.employeeId).toMatch(/^SKYT\d{4}$/);
+      expect(response.body.data.employeeId).toMatch(/^SK\d{3}$/);
     });
 
     it('should fail without required fields', async () => {

@@ -562,10 +562,10 @@ async function setupComprehensiveTestData() {
     console.log(`- 6 employees total (including 2 without login)`);
     console.log(`- Leave balances for all employees`);
     console.log(`\nTest accounts:`);
-    console.log(`- admin@test.com (password: admin123) - System Administrator`);
-    console.log(`- hr@test.com (password: admin123) - HR Manager`);
-    console.log(`- manager@test.com (password: admin123) - Engineering Manager`);
-    console.log(`- employee@test.com (password: admin123) - Software Engineer`);
+    console.log(`- admin@test.com - System Administrator`);
+    console.log(`- hr@test.com - HR Manager`);
+    console.log(`- manager@test.com - Engineering Manager`);
+    console.log(`- employee@test.com - Software Engineer`);
     
   } catch (error) {
     console.error('Error setting up test data:', error);

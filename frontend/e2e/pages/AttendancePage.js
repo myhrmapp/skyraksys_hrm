@@ -12,7 +12,7 @@ class AttendancePage {
 
   // ─── My Attendance (Employee) ──────────
   async gotoMyAttendance() {
-    await this.page.goto('/my-attendance');
+    await this.page.goto('/attendance');
     await waitForPageReady(this.page);
   }
 
@@ -71,7 +71,7 @@ class AttendancePage {
 
   // ─── Attendance Management (Admin/HR) ──
   async gotoManagement() {
-    await this.page.goto('/attendance-management');
+    await this.page.goto('/attendance?view=management');
     await waitForPageReady(this.page);
   }
 

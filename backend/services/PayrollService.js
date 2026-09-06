@@ -104,7 +104,7 @@ class PayrollService extends BaseService {
     }
 
     if (!employee.salaryStructure) {
-      throw new Error('Employee does not have a salary structure assigned');
+      throw new Error(`Employee ${employee.employeeId} does not have a salary structure configured. Please configure salary structure in the employee's profile under the 'Salary Structure' tab before running payroll.`);
     }
 
     const calculation = await this.performPayrollCalculation(

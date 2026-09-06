@@ -202,7 +202,7 @@ class E2ETestDataSetup {
     this.testUsers.forEach((user, index) => {
       console.log(`${index + 1}. ${user.role.toUpperCase()}`);
       console.log(`   📧 Email: ${user.email}`);
-      console.log(`   🔑 Password: ${user.password}`);
+      // Password hidden for security
       console.log(`   👤 Name: ${user.firstName} ${user.lastName}`);
       console.log(`   🏢 Department: ${user.department}`);
       console.log(`   💼 Position: ${user.position}`);

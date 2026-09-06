@@ -31,6 +31,11 @@ module.exports = {
     '**/tests/**/*.spec.js'
   ],
 
+  // Module Name Mapper for ESM conflicts
+  moduleNameMapper: {
+    "^sanitize-html$": "<rootDir>/tests/mocks/sanitize-html.js"
+  },
+
   // Setup files
   setupFiles: ['./tests/env-setup.js'],
   globalSetup: './tests/setup.js',

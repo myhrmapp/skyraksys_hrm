@@ -339,4 +339,19 @@ describe('Employee Review API Integration Tests', () => {
       expect(response.status).toBe(401);
     });
   });
+
+  describe('Manager scope enforcement', () => {
+    it('should deny a manager access to a non-team employee review list', async () => {
+      const db = require('../../../models');
+      const otherEmployee = await helper.createTestUser('employee', true);
+      await db.Employee.update({ managerId: managerUser.employee.id }, { where: { id: employeeUser.employee.id } });
+
+      const response = await request(app)
+        .get(`/api/employee-reviews/employee/${otherEmployee.employee.id}`)
+        .set('Authorization', `Bearer ${managerToken}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+    });
+  });
 });

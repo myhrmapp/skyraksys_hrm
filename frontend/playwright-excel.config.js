@@ -28,6 +28,7 @@ dns.setDefaultResultOrder('ipv4first');
  */
 module.exports = defineConfig({
   testDir: './e2e/specs',
+  globalSetup: require.resolve('./e2e/fixtures/global-setup.js'),
   fullyParallel: false,          // sequential — tests may share DB state
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

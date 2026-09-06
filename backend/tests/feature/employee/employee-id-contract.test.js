@@ -1,15 +1,17 @@
 /**
  * Employee ID Contract Tests - Task 3.5
- * 
- * Tests to ensure consistent SKYT#### format across:
- * - Validator (accepts SKYT####, rejects invalid formats)
+ *
+ * Tests to ensure consistent SK### format across:
+ * - Validator (accepts SK###, rejects invalid formats)
  * - Route validation
- * - ID generator (creates SKYT#### format)
+ * - ID generator (creates SK### format)
  */
 
 // Set test environment variables before requiring modules
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only-32chars-ABC';
+process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test-refresh-secret-key-for-testing-only-32chars-XYZ';
 process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+process.env.ALLOW_TOKEN_RESPONSE = 'true';
 
 const request = require('supertest');
 const app = require('../../../server');
@@ -27,7 +29,7 @@ describe('Employee ID Contract - Task 3.5', () => {
       // Cleanup any existing test data (including users created by previous test runs)
       const testEmails = [
         'admin.idtest@test.com',
-        'test.valid9991@test.com',
+        'test.valid001@test.com',
         'test.invalidsk@test.com',
         'test.invalidemp@test.com',
         'test.autogen@test.com',
@@ -50,7 +52,7 @@ describe('Employee ID Contract - Task 3.5', () => {
         }
       }
       
-      await Employee.destroy({ where: { employeeId: ['SKYT9991', 'SKYT9992', 'SKYT9993'] }, force: true });
+      await Employee.destroy({ where: { employeeId: ['SK001', 'SK002', 'SK003'] }, force: true });
       await Employee.destroy({ where: { email: testEmails }, force: true });
       await User.destroy({ where: { email: testEmails }, force: true });
       await Department.destroy({ where: { name: 'Test Dept ID' }, force: true });
@@ -101,7 +103,7 @@ describe('Employee ID Contract - Task 3.5', () => {
     // Cleanup in reverse FK order
     const testEmails = [
       'admin.idtest@test.com',
-      'test.valid9991@test.com',
+      'test.valid001@test.com',
       'test.invalidsk@test.com',
       'test.invalidemp@test.com',
       'test.autogen@test.com',
@@ -124,7 +126,7 @@ describe('Employee ID Contract - Task 3.5', () => {
       }
     }
     
-    await Employee.destroy({ where: { employeeId: ['SKYT9991', 'SKYT9992', 'SKYT9993'] }, force: true });
+    await Employee.destroy({ where: { employeeId: ['SK001', 'SK002', 'SK003'] }, force: true });
     await Employee.destroy({ where: { email: testEmails }, force: true });
     await Position.destroy({ where: { id: testPosition.id }, force: true });
     await Department.destroy({ where: { id: testDepartment.id }, force: true });
@@ -134,16 +136,16 @@ describe('Employee ID Contract - Task 3.5', () => {
     await db.sequelize.close();
   });
 
-  describe('Validator - SKYT Format Acceptance', () => {
-    test('Should accept valid SKYT#### format (4 digits)', async () => {
+  describe('Validator - SK### Format Acceptance', () => {
+    test('Should accept valid SK### format (3 digits)', async () => {
       const res = await request(app)
         .post('/api/employees')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          employeeId: 'SKYT9991',
+          employeeId: 'SK001',
           firstName: 'Test',
           lastName: 'ValidID',
-          email: 'test.valid9991@test.com',
+          email: 'test.valid001@test.com',
           departmentId: testDepartment.id,
           positionId: testPosition.id,
           hireDate: '2026-02-05',
@@ -152,7 +154,6 @@ describe('Employee ID Contract - Task 3.5', () => {
           password: 'Test@123'
         });
 
-      // Log the full response for debugging
       if (res.status !== 201) {
         console.log('\n=== Test 1 failed ===');
         console.log('Status:', res.status);
@@ -161,15 +162,15 @@ describe('Employee ID Contract - Task 3.5', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.employeeId).toBe('SKYT9991');
+      expect(res.body.data.employeeId).toBe('SK001');
     });
 
-    test('Should reject SK#### format (missing TY)', async () => {
+    test('Should reject SKYT#### format (legacy format)', async () => {
       const res = await request(app)
         .post('/api/employees')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          employeeId: 'SK9992',
+          employeeId: 'SKYT001',
           firstName: 'Test',
           lastName: 'InvalidSK',
           email: 'test.invalidsk@test.com',
@@ -184,19 +185,18 @@ describe('Employee ID Contract - Task 3.5', () => {
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
       expect(res.body.message).toBe('Validation error');
-      // Check that errors array contains employeeId validation error
       expect(res.body.errors).toBeDefined();
       const employeeIdError = res.body.errors.find(e => e.field === 'employeeId');
       expect(employeeIdError).toBeDefined();
-      expect(employeeIdError.message).toMatch(/SKYT.*4 digits/i);
+      expect(employeeIdError.message).toMatch(/SK###/i);
     });
 
-    test('Should reject EMP#### format (old format)', async () => {
+    test('Should reject EMP### format (old format)', async () => {
       const res = await request(app)
         .post('/api/employees')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          employeeId: 'EMP9993',
+          employeeId: 'EMP003',
           firstName: 'Test',
           lastName: 'InvalidEMP',
           email: 'test.invalidemp@test.com',
@@ -211,21 +211,19 @@ describe('Employee ID Contract - Task 3.5', () => {
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
       expect(res.body.message).toBe('Validation error');
-      // Check that errors array contains employeeId validation error
       expect(res.body.errors).toBeDefined();
       const employeeIdError = res.body.errors.find(e => e.field === 'employeeId');
       expect(employeeIdError).toBeDefined();
-      expect(employeeIdError.message).toMatch(/SKYT.*4 digits/i);
+      expect(employeeIdError.message).toMatch(/SK###/i);
     });
   });
 
-  describe('ID Generator - SKYT Format Creation', () => {
-    test('Should generate SKYT#### format when no ID provided', async () => {
+  describe('ID Generator - SK### Format Creation', () => {
+    test('Should generate SK### format when no ID provided', async () => {
       const res = await request(app)
         .post('/api/employees')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          // No employeeId provided - should auto-generate
           firstName: 'Test',
           lastName: 'AutoGenerated',
           email: 'test.autogen@test.com',
@@ -239,18 +237,16 @@ describe('Employee ID Contract - Task 3.5', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.employeeId).toMatch(/^SKYT\d{4}$/);
+      expect(res.body.data.employeeId).toMatch(/^SK\d{3}$/);
 
-      // Cleanup auto-generated employee
       if (res.body.data?.id) {
         await Employee.destroy({ where: { id: res.body.data.id }, force: true });
       }
     });
 
-    test('Should generate sequential SKYT IDs with 4-digit padding', async () => {
-      // Get current max SKYT ID
+    test('Should generate sequential SK IDs with 3-digit padding', async () => {
       const lastEmployee = await Employee.findOne({
-        where: { employeeId: { [db.Sequelize.Op.like]: 'SKYT%' } },
+        where: { employeeId: { [db.Sequelize.Op.like]: 'SK%' } },
         order: [['employeeId', 'DESC']]
       });
 
@@ -270,13 +266,11 @@ describe('Employee ID Contract - Task 3.5', () => {
         });
 
       expect(res.status).toBe(201);
-      expect(res.body.data.employeeId).toMatch(/^SKYT\d{4}$/);
-      
-      // Verify it's exactly 4 digits (padded with zeros if needed)
-      const idNumber = res.body.data.employeeId.substring(4);
-      expect(idNumber).toHaveLength(4);
+      expect(res.body.data.employeeId).toMatch(/^SK\d{3}$/);
 
-      // Cleanup
+      const idNumber = res.body.data.employeeId.substring(2);
+      expect(idNumber).toHaveLength(3);
+
       if (res.body.data?.id) {
         await Employee.destroy({ where: { id: res.body.data.id }, force: true });
       }

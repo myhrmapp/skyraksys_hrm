@@ -256,11 +256,11 @@ After running the seeders, you can login with these demo accounts:
 
 | Role | Email | Password | Description |
 |------|-------|----------|-------------|
-| Admin | admin@skyraksys.com | admin123 | System Administrator |
-| HR | hr@skyraksys.com | admin123 | HR Manager |
-| Manager | lead@skyraksys.com | admin123 | Team Lead/Manager |
-| Employee | employee1@skyraksys.com | admin123 | Software Engineer |
-| Employee | employee2@skyraksys.com | admin123 | Software Engineer |
+| Admin | admin@skyraksys.com | StrongSeedPassword2026! | System Administrator |
+| HR | hr@skyraksys.com | StrongSeedPassword2026! | HR Manager |
+| Manager | lead@skyraksys.com | StrongSeedPassword2026! | Team Lead/Manager |
+| Employee | employee1@skyraksys.com | StrongSeedPassword2026! | Software Engineer |
+| Employee | employee2@skyraksys.com | StrongSeedPassword2026! | Software Engineer |
 
 ## Role-Based Access Control
 

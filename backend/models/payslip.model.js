@@ -244,6 +244,11 @@ module.exports = (sequelize, DataTypes) => {
       },
       comment: 'User who marked as paid'
     },
+    encryptedFinancials: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: 'Encrypted earnings and deduction fields when payroll vault is enabled'
+    },
     paymentMethod: {
       type: DataTypes.STRING(50),
       allowNull: true,

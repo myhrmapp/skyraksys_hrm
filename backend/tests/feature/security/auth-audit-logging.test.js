@@ -2,8 +2,8 @@ const request = require('supertest');
 const bcrypt = require('bcryptjs');
 
 // CRITICAL: Set environment variables BEFORE importing app
-process.env.JWT_SECRET = 'test-secret-key-audit-logging';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-audit-logging';
+process.env.JWT_SECRET = 'test-secret-key-audit-logging-32chars-long';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-audit-logging-32chars-long';
 process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
 const app = require('../../../server');
@@ -18,7 +18,8 @@ describe('Task 4.3: Auth Audit Logging - Comprehensive Event Tracking', () => {
     await db.sequelize.query('TRUNCATE TABLE users CASCADE');
     await db.sequelize.query('TRUNCATE TABLE audit_logs CASCADE');
     
-    process.env.JWT_SECRET = 'test-secret-key';
+    process.env.JWT_SECRET = 'test-secret-key-audit-logging-32chars-long';
+    process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-audit-logging-32chars-long';
     process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
     const hashedTestPassword = await bcrypt.hash(testPassword, 10);

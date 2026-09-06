@@ -4,7 +4,7 @@
  *
  * The component uses `http` (axios) directly via React Query – NOT a payrollService.
  * Key data shapes:
- *   - payslips:  { success, data: [...], pagination: { totalRecords } }
+ *   - payslips:  { success, data: { payslips: [...], pagination: { totalRecords } } }
  *   - employees: { success, data: [...] }
  *   - departments: { success, data: [...] }
  *   - templates: { success, data: [...] }
@@ -137,8 +137,10 @@ const setupMockGet = (overrides = {}) => {
       return Promise.resolve({
         data: {
           success: true,
-          data: mockPayslips,
-          pagination: { totalRecords: mockPayslips.length },
+          data: {
+            payslips: mockPayslips,
+            pagination: { totalRecords: mockPayslips.length },
+          },
         },
       });
     }
@@ -161,7 +163,7 @@ const setupMockGet = (overrides = {}) => {
       });
     }
     // Fallback
-    return Promise.resolve({ data: { success: true, data: [] } });
+    return Promise.resolve({ data: { success: true, data: { payslips: [], pagination: { totalRecords: 0 } } } });
   });
 };
 
@@ -261,7 +263,9 @@ describe('Overview Tab', () => {
   });
 
   test('renders payslips table with data', async () => {
+    const user = userEvent.setup();
     renderPayroll();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
 
     // Wait for payslip data to load — employee names appear in table rows
     await waitFor(() => {
@@ -272,7 +276,9 @@ describe('Overview Tab', () => {
   });
 
   test('renders table column headers', async () => {
+    const user = userEvent.setup();
     renderPayroll();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
@@ -288,7 +294,9 @@ describe('Overview Tab', () => {
   });
 
   test('shows status chips with correct labels', async () => {
+    const user = userEvent.setup();
     renderPayroll();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
     await screen.findByText('EMP001');
 
     expect(screen.getByText('draft')).toBeInTheDocument();
@@ -300,11 +308,13 @@ describe('Overview Tab', () => {
     setupMockGet({
       '/payslips': () =>
         Promise.resolve({
-          data: { success: true, data: [], pagination: { totalRecords: 0 } },
+          data: { success: true, data: { payslips: [], pagination: { totalRecords: 0 } } },
         }),
     });
 
     renderPayroll();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
     expect(await screen.findByText('No payslips found')).toBeInTheDocument();
   });
 });
@@ -318,8 +328,8 @@ describe('Tab Navigation', () => {
 
     await user.click(screen.getByRole('tab', { name: /generate/i }));
 
-    expect(await screen.findByText('Generate Payslips')).toBeInTheDocument();
-    expect(screen.getByText('Select Employees')).toBeInTheDocument();
+    expect(await screen.findByText('3 · Select Employees')).toBeInTheDocument();
+    expect(screen.getByText('1 · Pay Period & Template')).toBeInTheDocument();
   });
 
   test('navigates to Reports tab', async () => {
@@ -329,7 +339,7 @@ describe('Tab Navigation', () => {
 
     await user.click(screen.getByRole('tab', { name: /reports/i }));
 
-    expect(await screen.findByText('Reports & Analytics')).toBeInTheDocument();
+    expect(await screen.findByText('Payslips — Reports')).toBeInTheDocument();
   });
 
   test('navigates to Process Payments tab showing finalized payslips', async () => {
@@ -342,7 +352,7 @@ describe('Tab Navigation', () => {
     // The process payments tab shows a table with title
     await waitFor(() => {
       expect(
-        screen.getByText('Finalized Payslips - Ready for Payment Processing')
+        screen.getByText('Payslips — Payment Processing')
       ).toBeInTheDocument();
     });
   });
@@ -358,10 +368,10 @@ describe('Generate Tab', () => {
     await user.click(screen.getByRole('tab', { name: /generate/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/EMP001 - John Doe/)).toBeInTheDocument();
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
-    expect(screen.getByText(/EMP002 - Jane Smith/)).toBeInTheDocument();
-    expect(screen.getByText(/EMP003 - Alice Johnson/)).toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getByText('Alice Johnson')).toBeInTheDocument();
   });
 
   test('validate & generate button is disabled when no employees selected', async () => {
@@ -372,7 +382,7 @@ describe('Generate Tab', () => {
     await user.click(screen.getByRole('tab', { name: /generate/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/EMP001 - John Doe/)).toBeInTheDocument();
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
 
     const generateBtn = screen.getByRole('button', { name: /validate & generate/i });
@@ -384,7 +394,7 @@ describe('Generate Tab', () => {
 describe('Data Fetching', () => {
   test('fetches payslips, employees, departments, and templates on mount', async () => {
     renderPayroll();
-    await screen.findByText('EMP001');
+    await screen.findByText('Payroll Management System');
 
     expect(mockGet).toHaveBeenCalledWith('/payslips', expect.objectContaining({ params: expect.any(Object) }));
     expect(mockGet).toHaveBeenCalledWith('/employees', expect.objectContaining({ params: expect.any(Object) }));
@@ -396,7 +406,9 @@ describe('Data Fetching', () => {
 // ────────────────── FILTERS ──────────────────
 describe('Filters', () => {
   test('renders filter dropdowns (Month, Year, Status, Department)', async () => {
+    const user = userEvent.setup();
     renderPayroll();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
@@ -416,7 +428,9 @@ describe('Filters', () => {
   });
 
   test('renders search field', async () => {
+    const user = userEvent.setup();
     renderPayroll();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
@@ -452,13 +466,8 @@ describe('Reports Tab', () => {
 
     await user.click(screen.getByRole('tab', { name: /reports/i }));
 
-    expect(await screen.findByText('Reports & Analytics')).toBeInTheDocument();
-    expect(screen.getByText('Department Summary')).toBeInTheDocument();
-    expect(screen.getByText('Month-over-Month Variance')).toBeInTheDocument();
-    expect(screen.getByText('Statutory Deductions')).toBeInTheDocument();
-    expect(
-      screen.getByText(/comprehensive reporting features coming soon/i)
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Payslips — Reports')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search employee name or ID...')).toBeInTheDocument();
   });
 });
 
@@ -468,6 +477,7 @@ describe('Finalize Payslip', () => {
     mockPut.mockResolvedValue({ data: { success: true } });
     const user = userEvent.setup();
     renderPayroll();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
 
     // Wait for the table to load
     await waitFor(() => {
@@ -492,13 +502,14 @@ describe('Finalize Payslip', () => {
         Promise.resolve({
           data: {
             success: true,
-            data: [mockPayslips[1]], // finalized only
-            pagination: { totalRecords: 1 },
+            data: { payslips: [mockPayslips[1]], pagination: { totalRecords: 1 } }, // finalized only
           },
         }),
     });
 
     renderPayroll();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
     await waitFor(() => {
       expect(screen.getByText('Jane Smith')).toBeInTheDocument();
     });
@@ -514,6 +525,7 @@ describe('Mark as Paid', () => {
     mockPut.mockResolvedValue({ data: { success: true } });
     const user = userEvent.setup();
     renderPayroll();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
 
     await waitFor(() => {
       expect(screen.getByText('Jane Smith')).toBeInTheDocument();
@@ -536,13 +548,14 @@ describe('Mark as Paid', () => {
         Promise.resolve({
           data: {
             success: true,
-            data: [mockPayslips[0]], // draft
-            pagination: { totalRecords: 1 },
+            data: { payslips: [mockPayslips[0]], pagination: { totalRecords: 1 } }, // draft
           },
         }),
     });
 
     renderPayroll();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
@@ -561,8 +574,8 @@ describe('Export Excel', () => {
       }
       if (url.startsWith('/payslips')) {
         return Promise.resolve({
-          data: { success: true, data: mockPayslips, pagination: { totalRecords: mockPayslips.length } },
-        });
+            data: { success: true, data: { payslips: mockPayslips, pagination: { totalRecords: mockPayslips.length } } },
+          });
       }
       if (url === '/employees') {
         return Promise.resolve({ data: { success: true, data: mockEmployees } });
@@ -573,7 +586,7 @@ describe('Export Excel', () => {
       if (url === '/payslip-templates/active') {
         return Promise.resolve({ data: { success: true, data: mockTemplates } });
       }
-      return Promise.resolve({ data: { success: true, data: [] } });
+      return Promise.resolve({ data: { success: true, data: { payslips: [], pagination: { totalRecords: 0 } } } });
     });
 
     // Mock createObjectURL and revokeObjectURL for download
@@ -582,7 +595,7 @@ describe('Export Excel', () => {
 
     const user = userEvent.setup();
     renderPayroll();
-    await screen.findByText('Quick Actions');
+    await screen.findByText('Payroll Management System');
 
     const exportBtn = screen.getByRole('button', { name: /export excel/i });
     fireEvent.click(exportBtn);
@@ -598,12 +611,13 @@ describe('Employee Selection in Generate Tab', () => {
   test('selecting employees enables the generate button', async () => {
     const user = userEvent.setup();
     renderPayroll();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
     await screen.findByText('Payroll Management System');
 
     await user.click(screen.getByRole('tab', { name: /generate/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/EMP001 - John Doe/)).toBeInTheDocument();
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
 
     // Click the checkbox for first employee
@@ -623,6 +637,7 @@ describe('View Payslip', () => {
   test('clicking View Details opens payslip view dialog', async () => {
     const user = userEvent.setup();
     renderPayroll();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
 
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
@@ -645,6 +660,7 @@ describe('Checkbox Select All', () => {
   test('selecting all checkboxes shows bulk actions toolbar', async () => {
     const user = userEvent.setup();
     renderPayroll();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
 
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
@@ -667,6 +683,7 @@ describe('Checkbox Select All', () => {
   test('Clear Selection clears all selected payslips', async () => {
     const user = userEvent.setup();
     renderPayroll();
+    await user.click(screen.getByRole('tab', { name: /process payments/i }));
 
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();

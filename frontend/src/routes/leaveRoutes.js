@@ -10,6 +10,9 @@ const LeaveAccrualManagement = lazy(() => import('../components/features/leave/L
 
 const leaveRoutes = [
   <Route key="leave-hub" path="leave" element={withBoundary(<LeaveHub />, 'Loading Leave...')} />,
+  // Alias for common navigation pattern
+  <Route key="leave-requests-alias" path="leave-requests" element={withBoundary(<LeaveHub />, 'Loading Leave...')} />,
+  <Route key="leave-management-alias" path="leave-management" element={withBoundary(<LeaveHub />, 'Loading Leave...')} />,
   <Route key="add-leave-request" path="add-leave-request" element={withBoundary(<AddLeaveRequest />, 'Loading Leave Request Form...')} />,
   <Route key="admin-leave-balances" path="admin/leave-balances" element={withBoundary(<LeaveBalance />, 'Loading Leave Balance Admin...')} />,
   <Route key="admin-leave-accrual" path="admin/leave-accrual" element={withBoundary(<LeaveAccrualManagement />, 'Loading Leave Accrual...')} />,

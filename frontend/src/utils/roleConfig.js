@@ -38,8 +38,7 @@ export const ROUTE_PERMISSIONS = {
   '/admin/leave-balances': [ROLES.ADMIN, ROLES.HR],
   
   // Attendance Routes
-  '/my-attendance': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
-  '/attendance-management': [ROLES.ADMIN, ROLES.HR],
+  '/attendance': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
 
   // Timesheet Routes
   '/timesheets': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],

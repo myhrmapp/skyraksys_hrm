@@ -3,11 +3,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // CRITICAL: Set environment variables BEFORE importing app
-process.env.JWT_SECRET = 'test-secret-key-token-lifetime';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-token-lifetime';
+process.env.JWT_SECRET = 'test-secret-key-token-lifetime-32chars';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-token-lifetime-32chars';
 process.env.JWT_EXPIRES_IN = '15m';
 process.env.JWT_REFRESH_EXPIRES_IN = '7d';
 process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+delete process.env.ALLOW_TOKEN_RESPONSE;
 
 const app = require('../../../server');
 const db = require('../../../models');
@@ -58,7 +59,28 @@ describe('Token Lifetime & Refresh - 15min Access + 7-day Refresh', () => {
   });
 
   describe('POST /api/auth/login - Access & Refresh Token Generation', () => {
+    it('should not leak tokens in the JSON body by default', async () => {
+      delete process.env.ALLOW_TOKEN_RESPONSE;
+
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'admin@token-test.com', password: adminPassword });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.accessToken).toBeUndefined();
+      expect(response.body.data.refreshToken).toBeUndefined();
+      expect(response.headers['set-cookie']).toEqual(expect.arrayContaining([
+        expect.stringContaining('accessToken='),
+        expect.stringContaining('refreshToken=')
+      ]));
+
+      process.env.ALLOW_TOKEN_RESPONSE = 'true';
+    });
+
     it('should return both access token (15min) and refresh token (7 days)', async () => {
+      process.env.ALLOW_TOKEN_RESPONSE = 'true';
+
       const response = await request(app)
         .post('/api/auth/login')
         .send({ email: 'admin@token-test.com', password: adminPassword });

@@ -537,16 +537,16 @@ class EmployeeBusinessService extends BaseBusinessService {
   }
 
   /**
-   * Generate employee ID in SKYT#### format (sequential, collision-safe)
+   * Generate employee ID in SK### format (sequential, collision-safe)
    * @param {Transaction} [transaction] - Sequelize transaction for row-level locking
    * @private
    */
   async generateEmployeeId(transaction = null) {
     const { Op } = db.Sequelize;
     const queryOptions = {
-      // Numeric cast so SK100 correctly sorts after SK99
+      // Numeric cast so SK100 correctly sorts after SK099
       order: [[db.Sequelize.literal("CAST(SUBSTRING(\"employeeId\" FROM 3) AS INTEGER)"), 'DESC']],
-      where: { employeeId: { [Op.like]: 'SK%' } },
+      where: { employeeId: { [Op.regexp]: '^SK[0-9]+$' } },
       paranoid: false, // Include soft-deleted employees to avoid unique constraint violations
     };
     if (transaction) {
@@ -564,7 +564,6 @@ class EmployeeBusinessService extends BaseBusinessService {
       }
     }
 
-    // SK001, SK002, ..., SK999, SK1000 (grows beyond 3 digits automatically)
     return `SK${nextNumber.toString().padStart(3, '0')}`;
   }
 

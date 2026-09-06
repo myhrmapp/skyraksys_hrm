@@ -222,5 +222,18 @@ describe('Attendance API Integration Tests', () => {
 
       expect(response.status).toBe(401);
     });
+
+    it('should deny a manager access to an unrelated employee report', async () => {
+      const db = require('../../../models');
+      const unrelatedEmployee = await helper.createTestUser('employee', true);
+      await db.Employee.update({ managerId: managerUser.employee.id }, { where: { id: employeeUser.employee.id } });
+
+      const response = await request(app)
+        .get(`/api/attendance/employee/${unrelatedEmployee.employee.id}/report?year=${new Date().getFullYear()}&month=${new Date().getMonth() + 1}`)
+        .set('Authorization', `Bearer ${managerToken}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+    });
   });
 });

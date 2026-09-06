@@ -57,6 +57,10 @@ module.exports = (sequelize, DataTypes) => {
     employeeId: {
       type: DataTypes.UUID,
       allowNull: false
+    },
+    encryptedFinancials: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     tableName: 'salary_structures',

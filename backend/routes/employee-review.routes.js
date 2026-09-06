@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, authorize } = require('../middleware/auth');
+const { authenticateToken, authorize, canAccessEmployee } = require('../middleware/auth');
 const employeeReviewService = require('../services/EmployeeReviewService');
 const { employeeReviewSchema } = require('../middleware/validators/employeeReview.validator');
 const { validate } = require('../middleware/validate');
@@ -31,7 +31,7 @@ router.get('/', authenticateToken, async (req, res, next) => {
 });
 
 // Get reviews for a specific employee
-router.get('/employee/:employeeId', authenticateToken, async (req, res, next) => {
+router.get('/employee/:employeeId', authenticateToken, canAccessEmployee, async (req, res, next) => {
   try {
     const { employeeId } = req.params;
     const db = require('../models');

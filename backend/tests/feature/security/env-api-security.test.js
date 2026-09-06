@@ -2,8 +2,8 @@ const request = require('supertest');
 const bcrypt = require('bcryptjs');
 
 // CRITICAL: Set environment variables BEFORE importing app
-process.env.JWT_SECRET = 'test-secret-key-for-env-api-security-tests';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-env-api-security-tests';
+process.env.JWT_SECRET = 'test-secret-key-env-api-security-tests-32chars';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-env-api-security-tests-32chars';
 process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
 const app = require('../../../server');

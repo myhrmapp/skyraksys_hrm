@@ -1,10 +1,14 @@
 const { Sequelize } = require('sequelize');
+const explicitNodeEnv = process.env.NODE_ENV;
 require('dotenv').config();
+if (explicitNodeEnv) {
+  process.env.NODE_ENV = explicitNodeEnv;
+}
 const config = require('../config/config.js');
 const logger = require('../utils/logger');
 
 const env = process.env.NODE_ENV || 'development';
-const dbConfig = config[env];
+const dbConfig = config[env] || config.test || config.development || config.production;
 
 if (!dbConfig) {
   logger.error(`Database config not found for environment: ${env}`);

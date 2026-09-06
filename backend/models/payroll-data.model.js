@@ -158,6 +158,10 @@ module.exports = (sequelize) => {
     templateUsed: {
       type: DataTypes.STRING,
       defaultValue: 'default'
+    },
+    encryptedFinancials: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     tableName: 'payroll_data',

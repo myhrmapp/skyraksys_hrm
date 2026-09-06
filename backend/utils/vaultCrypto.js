@@ -20,8 +20,13 @@ class VaultCrypto {
    * Retrieves the 256-bit derived Server Key from the .env file.
    */
   static getServerKey() {
-    const secret = process.env.PAYROLL_VAULT_KEY || 'DEFAULT_INSECURE_DEV_KEY_DO_NOT_USE_IN_PROD';
-    return VaultCrypto.deriveKey(secret, 'SKYRAKSYS_SERVER_SALT');
+    const secret = process.env.PAYROLL_VAULT_KEY;
+
+    if (!secret || typeof secret !== 'string' || secret.trim().length < 32) {
+      throw new Error('PAYROLL_VAULT_KEY is required and must be at least 32 characters in production environments.');
+    }
+
+    return VaultCrypto.deriveKey(secret.trim(), 'SKYRAKSYS_SERVER_SALT');
   }
 
   /**

@@ -37,7 +37,7 @@ test.describe('Navigation & Access Control', () => {
   for (const row of rows) {
     test(`${row.testId}: ${row.description}`, async ({ page }) => {
       // Navigate to role-specific dashboard after login to ensure sidebar is visible
-      const DASHBOARD_ROUTES = { admin: '/admin-dashboard', hr: '/admin-dashboard', manager: '/manager-dashboard', employee: '/employee-dashboard' };
+      const DASHBOARD_ROUTES = { admin: '/dashboard', hr: '/dashboard', manager: '/manager-dashboard', employee: '/employee-dashboard' };
 
       if (row.role) {
         await loginAs(page, row.role);

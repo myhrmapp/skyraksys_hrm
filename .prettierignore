@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+coverage/
+.venv/
+package-lock.json
+*.min.js
+uploads/
+logs/
+frontend/build/

@@ -25,8 +25,24 @@ const User = db.User;
 const Employee = db.Employee;
 const RefreshToken = db.RefreshToken;
 
-// Cookie security: set COOKIE_SECURE=true in .env when serving over HTTPS
-const secureCookie = process.env.COOKIE_SECURE === 'true';
+// Cookies must be secure in production; local dev can opt in when behind HTTPS.
+// Evaluate at runtime so config changes in tests and env overrides are respected.
+const isSecureCookie = () => process.env.NODE_ENV === 'production' || process.env.COOKIE_SECURE === 'true';
+const isTokenResponseAllowed = () => {
+  const flag = String(process.env.ALLOW_TOKEN_RESPONSE || '').toLowerCase();
+  return flag === 'true';
+};
+
+function buildAuthSuccessPayload(user, accessToken, refreshToken, vaultUnlocked = false) {
+  const payload = { user, vaultUnlocked };
+
+  if (isTokenResponseAllowed()) {
+    payload.accessToken = accessToken;
+    payload.refreshToken = refreshToken;
+  }
+
+  return payload;
+}
 
 /**
  * AuthController
@@ -63,14 +79,14 @@ const AuthController = {
       // Set httpOnly cookies (new cookies overwrite any existing cookies with same name)
       res.cookie('accessToken', result.accessToken, {
         httpOnly: true,
-        secure: secureCookie,
+        secure: isSecureCookie(),
         sameSite: 'Lax',
         maxAge: 15 * 60 * 1000,
         path: '/'
       });
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
-        secure: secureCookie,
+        secure: isSecureCookie(),
         sameSite: 'Lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/'
@@ -81,19 +97,22 @@ const AuthController = {
         const dekBase64 = result.unlockedDek.dek;
         res.cookie('vaultDek', dekBase64, {
           httpOnly: true,
-          secure: secureCookie,
+          secure: isSecureCookie(),
           sameSite: 'Lax',
           maxAge: 15 * 60 * 1000, // Tied to access token lifetime
           path: '/'
         });
       }
 
-      return res.json(ApiResponse.success({ 
-        user: result.user,
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
-        vaultUnlocked: !!result.unlockedDek
-      }, 'Login successful'));
+      return res.json(ApiResponse.success(
+        buildAuthSuccessPayload(
+          result.user,
+          result.accessToken,
+          result.refreshToken,
+          !!result.unlockedDek
+        ),
+        'Login successful'
+      ));
     } catch (error) {
       // Handle service-level errors with proper HTTP responses
       if (error.rateLimitHeaders) {
@@ -138,7 +157,7 @@ const AuthController = {
           if (decoded && decoded.jti) {
             const remainingMs = decoded.exp ? (decoded.exp * 1000 - Date.now()) : 15 * 60 * 1000;
             if (remainingMs > 0) {
-              tokenBlacklist.add(decoded.jti, remainingMs);
+              await tokenBlacklist.add(decoded.jti, remainingMs);
             }
           }
         } catch (e) {
@@ -149,7 +168,7 @@ const AuthController = {
       // Clear the httpOnly access token cookie
       res.clearCookie('accessToken', {
         httpOnly: true,
-        secure: secureCookie,
+        secure: isSecureCookie(),
         sameSite: 'Lax',
         path: '/'
       });
@@ -157,7 +176,7 @@ const AuthController = {
       // Clear the httpOnly refresh token cookie
       res.clearCookie('refreshToken', {
         httpOnly: true,
-        secure: secureCookie,
+        secure: isSecureCookie(),
         sameSite: 'Lax',
         path: '/'
       });
@@ -308,21 +327,23 @@ const AuthController = {
       // Set new tokens as httpOnly cookies
       res.cookie('accessToken', newAccessToken, {
         httpOnly: true,
-        secure: secureCookie,
+        secure: isSecureCookie(),
         sameSite: 'Lax',
         maxAge: 15 * 60 * 1000,
         path: '/'
       });
       res.cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
-        secure: secureCookie,
+        secure: isSecureCookie(),
         sameSite: 'Lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/'
       });
 
       return res.json(ApiResponse.success(
-        { accessToken: newAccessToken, refreshToken: newRefreshToken },
+        isTokenResponseAllowed()
+          ? { accessToken: newAccessToken, refreshToken: newRefreshToken }
+          : { success: true },
         'Token refreshed successfully'
       ));
     } catch (error) {

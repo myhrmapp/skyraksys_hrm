@@ -79,15 +79,13 @@ const generateMockToken = (userId, role = 'employee') => {
 
 const generateMockEmployee = (overrides = {}) => {
   const timestamp = Date.now();
-  const fourDigit = String(timestamp).slice(-4);
+  const numericSuffix = String(timestamp).slice(-3).padStart(3, '0');
   return {
-    employeeId: `SKYT${fourDigit}`,
+    employeeId: `SK${numericSuffix}`,
     firstName: 'Test',
     lastName: 'Employee',
     email: `test.employee.${timestamp}@example.com`,
     password: 'Password123!',
-    // departmentId and positionId should be valid UUIDs if foreign keys are enforced
-    // For unit tests with mocks, we might need to create them first or mock the DB
     hireDate: new Date(),
     status: 'Active',
     ...overrides

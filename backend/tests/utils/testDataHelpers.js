@@ -89,9 +89,10 @@ const testDataHelpers = {
 
     // Create employee
     try {
+      const employeeId = `SK${String(uniqueId).slice(-3).padStart(3, '0')}`;
       const employee = await db.Employee.create({
         userId: user.id,
-        employeeId: `EMP${uniqueId}`,
+        employeeId,
         firstName: data.firstName || 'Test',
         lastName: data.lastName || 'Employee',
         email: data.email || `test.${uniqueId}@example.com`,

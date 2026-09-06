@@ -154,7 +154,7 @@ class PayslipService {
 
       // Check 1: Salary structure exists
       if (!emp.salaryStructure) {
-        issues.push('No salary structure configured');
+        issues.push('No salary structure configured. Configure in employee profile → Salary Structure tab.');
       } else if (!emp.salaryStructure.isActive) {
         issues.push('Salary structure is inactive');
       }

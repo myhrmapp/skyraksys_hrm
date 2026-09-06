@@ -609,6 +609,7 @@ router.delete('/:id', canManageInvoices, async (req, res, next) => {
 // Generate and Download Invoice PDF
 router.get('/:id/pdf', canManageInvoices, async (req, res) => {
   try {
+    const secretPhrase = await requireValidatedSecret(req);
     const invoice = await db.Invoice.findByPk(req.params.id, {
       include: [
         { model: db.User, as: 'creator', attributes: ['id', 'username'] },
@@ -632,7 +633,7 @@ router.get('/:id/pdf', canManageInvoices, async (req, res) => {
     }
 
     // The generateInvoicePDF function streams directly to `res`
-    await generateInvoicePDF(invoice, templateToUse, res);
+    await generateInvoicePDF(invoice, templateToUse, res, secretPhrase);
 
   } catch (error) {
     logger.error(`Error generating PDF for Invoice ID ${req.params.id}:`, error);

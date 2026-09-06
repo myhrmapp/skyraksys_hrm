@@ -78,7 +78,7 @@ const authenticateToken = async (req, res, next) => {
     const decoded = jwt.verify(token, authConfig.secret);
 
     // Check if token has been blacklisted (e.g. user logged out)
-    if (decoded.jti && tokenBlacklist.isBlacklisted(decoded.jti)) {
+    if (decoded.jti && await tokenBlacklist.isBlacklisted(decoded.jti)) {
       LogHelper.logAuthEvent('token_blacklisted', false, {
         reason: 'Token has been revoked (user logged out)',
         jti: decoded.jti

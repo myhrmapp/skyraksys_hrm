@@ -98,7 +98,7 @@ describe('PayrollService', () => {
         empWithoutSalary.id,
         payPeriodStart,
         payPeriodEnd
-      )).rejects.toThrow('Employee does not have a salary structure assigned');
+      )).rejects.toThrow(`Employee ${empWithoutSalary.employeeId} does not have a salary structure configured. Please configure salary structure in the employee's profile under the 'Salary Structure' tab before running payroll.`);
     });
   });
 

@@ -11,8 +11,10 @@
  */
 
 // Set test environment variables before requiring modules
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only-32chars-ABC';
+process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test-refresh-secret-for-testing-only-32chars-XYZ';
 process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+process.env.ALLOW_TOKEN_RESPONSE = 'true';
 
 const request = require('supertest');
 const app = require('../../../server');
@@ -58,7 +60,7 @@ describe('Dashboard Role Filtering - Task 3.8', () => {
 
     adminEmployee = await Employee.create({
       userId: adminUser.id,
-      employeeId: `SKYT${String(8001 + Math.floor(Math.random() * 100)).padStart(4, '0')}`,
+      employeeId: `SK${String(801 + Math.floor(Math.random() * 100)).padStart(3, '0')}`,
       firstName: 'Admin',
       lastName: 'Task38',
       email: `admin.t38.${timestamp}@test.com`,
@@ -81,7 +83,7 @@ describe('Dashboard Role Filtering - Task 3.8', () => {
 
     managerEmployee = await Employee.create({
       userId: managerUser.id,
-      employeeId: `SKYT${String(8101 + Math.floor(Math.random() * 100)).padStart(4, '0')}`,
+      employeeId: `SK${String(811 + Math.floor(Math.random() * 100)).padStart(3, '0')}`,
       firstName: 'Manager',
       lastName: 'Task38',
       email: `manager.t38.${timestamp}@test.com`,
@@ -104,7 +106,7 @@ describe('Dashboard Role Filtering - Task 3.8', () => {
 
     testEmployee = await Employee.create({
       userId: employeeUser.id,
-      employeeId: `SKYT${String(8201 + Math.floor(Math.random() * 100)).padStart(4, '0')}`,
+      employeeId: `SK${String(821 + Math.floor(Math.random() * 100)).padStart(3, '0')}`,
       firstName: 'Employee',
       lastName: 'Task38',
       email: `employee.t38.${timestamp}@test.com`,
@@ -117,7 +119,7 @@ describe('Dashboard Role Filtering - Task 3.8', () => {
 
     // Create team members under the manager
     teamMember1 = await Employee.create({
-      employeeId: `SKYT${String(8301 + Math.floor(Math.random() * 100)).padStart(4, '0')}`,
+      employeeId: `SK${String(831 + Math.floor(Math.random() * 100)).padStart(3, '0')}`,
       firstName: 'Team',
       lastName: 'Member1',
       email: `team1.t38.${timestamp}@test.com`,
@@ -129,7 +131,7 @@ describe('Dashboard Role Filtering - Task 3.8', () => {
     });
 
     teamMember2 = await Employee.create({
-      employeeId: `SKYT${String(8401 + Math.floor(Math.random() * 100)).padStart(4, '0')}`,
+      employeeId: `SK${String(841 + Math.floor(Math.random() * 100)).padStart(3, '0')}`,
       firstName: 'Team',
       lastName: 'Member2',
       email: `team2.t38.${timestamp}@test.com`,

@@ -207,12 +207,12 @@ class EmployeeService extends BaseService {
 
   async generateEmployeeId(transaction = null) {
     // Find last SK### employee ID with lock to prevent race condition
-    // Use CAST to numeric ordering so SK100 sorts after SK99
+    // Use CAST to numeric ordering so SK100 sorts after SK099
     const queryOptions = {
       order: [[db.Sequelize.literal("CAST(SUBSTRING(\"employeeId\" FROM 3) AS INTEGER)"), 'DESC']],
       where: {
         employeeId: {
-          [db.Sequelize.Op.like]: 'SK%'
+          [db.Sequelize.Op.regexp]: '^SK[0-9]+$'
         }
       },
       paranoid: false, // Include soft-deleted employees to avoid unique constraint violations
@@ -233,7 +233,7 @@ class EmployeeService extends BaseService {
       }
     }
 
-    // Generate SK### format (SK001, SK002, ..., SK999, SK1000...)
+    // Generate SK### format (SK001, SK002, ..., SK999)
     return `SK${nextNumber.toString().padStart(3, '0')}`;
   }
 

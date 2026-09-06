@@ -55,6 +55,36 @@ class EmployeeReviewService {
     return db.Employee.findOne({ where: { userId } });
   }
 
+  async _getManagedEmployeeIds(userId) {
+    const managerEmployee = await this._getEmployeeForUser(userId);
+    if (!managerEmployee) return [];
+
+    const subordinates = await db.Employee.findAll({
+      where: { managerId: managerEmployee.id },
+      attributes: ['id']
+    });
+
+    return subordinates.map((employee) => employee.id);
+  }
+
+  async _buildManagerReviewScope(userId, employeeId) {
+    const managedEmployeeIds = await this._getManagedEmployeeIds(userId);
+
+    if (!managedEmployeeIds.length) {
+      return { employeeId: null };
+    }
+
+    if (employeeId && !managedEmployeeIds.includes(employeeId)) {
+      const err = new Error('Access denied');
+      err.statusCode = 403;
+      throw err;
+    }
+
+    return employeeId
+      ? { employeeId }
+      : { employeeId: { [Op.in]: managedEmployeeIds } };
+  }
+
   /**
    * List reviews with pagination and role-based filtering.
    */
@@ -67,7 +97,6 @@ class EmployeeReviewService {
     if (reviewType) where.reviewType = reviewType;
     if (reviewPeriod) where.reviewPeriod = { [Op.like]: `%${reviewPeriod}%` };
 
-    // Role-based restrictions
     if (userRole === 'employee') {
       const employee = await this._getEmployeeForUser(userId);
       if (!employee) {
@@ -77,7 +106,7 @@ class EmployeeReviewService {
       }
       where.employeeId = employee.id;
     } else if (userRole === 'manager') {
-      where.reviewerId = userId;
+      Object.assign(where, await this._buildManagerReviewScope(userId, employeeId));
     }
 
     const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -120,7 +149,10 @@ class EmployeeReviewService {
         throw err;
       }
     } else if (userRole === 'manager') {
-      if (review.reviewerId !== userId) {
+      const managedEmployeeIds = await this._getManagedEmployeeIds(userId);
+      const isTeamMember = managedEmployeeIds.includes(review.employeeId);
+      const isReviewer = review.reviewerId === userId;
+      if (!isTeamMember && !isReviewer) {
         const err = new Error('Access denied');
         err.statusCode = 403;
         throw err;
@@ -374,7 +406,12 @@ class EmployeeReviewService {
     const where = {};
 
     if (userRole === 'manager') {
-      where.reviewerId = userId;
+      const managedEmployeeIds = await this._getManagedEmployeeIds(userId);
+      if (!managedEmployeeIds.length) {
+        where.employeeId = null;
+      } else {
+        where.employeeId = { [Op.in]: managedEmployeeIds };
+      }
     } else if (userRole === 'employee') {
       const employee = await this._getEmployeeForUser(userId);
       if (employee) {

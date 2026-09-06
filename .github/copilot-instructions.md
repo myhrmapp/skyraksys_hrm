@@ -6,6 +6,9 @@
 - **Frontend** (`frontend/`): React app, connects to backend API, standard React conventions.
 - **E2E Tests** (`frontend/e2e/`): Playwright, Page Object Model, test categories via tags, CI/CD via GitHub Actions.
 - **Admin Debug Panel** (`admin-debug-panel/`): Standalone, no-auth, for local DB inspection and manipulation. Never deploy to production.
+- **Active documentation set**: [README.md](../README.md), [docs/README.md](../docs/README.md), [docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md), [docs/SECURITY.md](../docs/SECURITY.md), and [docs/HELP_AND_SUPPORT.md](../docs/HELP_AND_SUPPORT.md).
+- **Archive boundary**: historical notes, legacy deployment guidance, generated reports, and old debug artifacts are retained under [archive/](../archive) and [logs/](../logs) for reference only and must not be treated as active support material.
+- **Operating contract**: repo-wide working rules are defined in [AGENTS.md](../AGENTS.md), with the cleanup and audit plan in [docs/WORKSPACE_AUDIT_AND_CLEANUP_PLAN.md](../docs/WORKSPACE_AUDIT_AND_CLEANUP_PLAN.md) and agent roles in [docs/AGENT_TEAM_AND_BEST_PRACTICES.md](../docs/AGENT_TEAM_AND_BEST_PRACTICES.md).
 
 ## Key Workflows
 - **Install**: `npm install` in both `backend/` and `frontend/`.
@@ -28,11 +31,14 @@
 - **Data Flow**: Frontend and debug panel both talk to backend API (default port 5000). Backend talks to PostgreSQL.
 - **Testing**: E2E tests expect frontend on 3000, backend on 5000. Use `.env` files to configure.
 - **CI/CD**: See `frontend/e2e/README.md` for GitHub Actions setup.
+- **Documentation policy**: When a change affects product behavior, deployment flow, security, or user help, update the matching active file in the docs set and keep archive material in [archive/](../archive) only as historical reference.
+- **Agent policy**: Use the repo operating model in [AGENTS.md](../AGENTS.md). Do not treat old archived notes as the active support path.
 
 ## References
-- See `README.md` (root, backend, frontend/e2e, admin-debug-panel) for detailed guides, API docs, and troubleshooting.
-- For deployment, see `docs/deployment/`.
-- For API structure, see backend `README.md` and `docs/api/`.
+- See [README.md](../README.md), [docs/README.md](../docs/README.md), backend docs, frontend/e2e docs, and [docs/HELP_AND_SUPPORT.md](../docs/HELP_AND_SUPPORT.md) for the live operational set.
+- For deployment, see [docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md) and [docs/deployment/](../docs/deployment).
+- For API structure, see backend `README.md` and the active docs set.
+- For workspace hygiene and project governance, see [AGENTS.md](../AGENTS.md) and [docs/WORKSPACE_AUDIT_AND_CLEANUP_PLAN.md](../docs/WORKSPACE_AUDIT_AND_CLEANUP_PLAN.md).
 
 ---
 

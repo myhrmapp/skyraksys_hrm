@@ -9,16 +9,16 @@ const Joi = require('joi');
 /**
  * Schema for creating a new employee
  *
- * Note: employeeId is optional on create. If provided, it must match
- * SKYT + exactly 4 digits; if omitted, the backend will auto-generate one.
+ * Note: employeeId is optional on create. The active contract requires
+ * SK### IDs, and omitted IDs are auto-generated.
  */
 const createEmployeeSchema = Joi.object({
   employeeId: Joi.string()
     .optional()
     .allow('', null)
-    .pattern(/^SKYT\d{4}$/)
+    .pattern(/^SK\d{3}$/)
     .messages({
-      'string.pattern.base': 'Employee ID must be in format SKYT#### (SKYT followed by exactly 4 digits)'
+      'string.pattern.base': 'Employee ID must be in format SK###. Leave blank for auto-generation.'
     }),
 
   firstName: Joi.string()

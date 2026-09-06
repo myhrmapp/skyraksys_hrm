@@ -20,11 +20,11 @@
  *   npx sequelize-cli db:seed:undo:all   (to remove all seeded data)
  * 
  * Default credentials (change SEED_DEFAULT_PASSWORD in .env):
- *   admin@skyraksys.com     / admin123  (Admin)
- *   hr@skyraksys.com        / admin123  (HR)
- *   lead@skyraksys.com      / admin123  (Manager)
- *   employee1@skyraksys.com / admin123  (Employee)
- *   employee2@skyraksys.com / admin123  (Employee)
+ *   admin@skyraksys.com     / StrongSeedPassword2026!  (Admin)
+ *   hr@skyraksys.com        / StrongSeedPassword2026!  (HR)
+ *   lead@skyraksys.com      / StrongSeedPassword2026!  (Manager)
+ *   employee1@skyraksys.com / StrongSeedPassword2026!  (Employee)
+ *   employee2@skyraksys.com / StrongSeedPassword2026!  (Employee)
  */
 
 const bcrypt = require('bcryptjs');
@@ -45,7 +45,11 @@ module.exports = {
         return;
       }
 
-      const defaultPassword = process.env.SEED_DEFAULT_PASSWORD || 'admin123';
+      const defaultPassword = process.env.SEED_DEFAULT_PASSWORD;
+      if (!defaultPassword || defaultPassword.length < 12 || /REPLACE_WITH_|your-|admin123|change_me|changeme|password$/i.test(defaultPassword)) {
+        throw new Error('SEED_DEFAULT_PASSWORD must be set to a strong non-default value before seeding demo credentials.');
+      }
+
       const bcryptRounds = parseInt(process.env.BCRYPT_ROUNDS || '12', 10);
       const hashedPassword = await bcrypt.hash(defaultPassword, bcryptRounds);
       const now = new Date();
@@ -403,7 +407,7 @@ module.exports = {
       console.log('║  4  Payslip Templates                   ║');
       console.log('╠══════════════════════════════════════════╣');
       console.log('║  Default Login Credentials:             ║');
-      console.log(`║  Password: ${defaultPassword.padEnd(29)}║`);
+      console.log(`║  Password: [hidden for security]        ║`);
       console.log('║  admin@skyraksys.com     (Admin)        ║');
       console.log('║  hr@skyraksys.com        (HR)           ║');
       console.log('║  lead@skyraksys.com      (Manager)      ║');

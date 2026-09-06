@@ -7,7 +7,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, authorize } = require('../middleware/auth');
+const { authenticateToken, authorize, canAccessEmployee } = require('../middleware/auth');
 const { attendanceSchema } = require('../middleware/validators/attendance.validator');
 const logger = require('../utils/logger');
 const attendanceService = require('../services/attendance.service');
@@ -370,7 +370,7 @@ router.get('/daily', authorize('admin', 'hr', 'manager'), async (req, res, next)
  * GET /employee/:employeeId/report — Get monthly report for specific employee (admin)
  * Query: year, month
  */
-router.get('/employee/:employeeId/report', authorize('admin', 'hr', 'manager'), async (req, res, next) => {
+router.get('/employee/:employeeId/report', authenticateToken, authorize('admin', 'hr', 'manager'), canAccessEmployee, async (req, res, next) => {
   try {
     const { year, month } = req.query;
     if (!year || !month) {

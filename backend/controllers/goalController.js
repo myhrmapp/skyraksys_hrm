@@ -1,5 +1,7 @@
-const { Goal, KeyResult, Employee, User } = require('../models');
+const { KeyResult } = require('../models');
 const { AppError } = require('../utils/errors');
+const goalDataService = require('../services/data/GoalDataService');
+const keyResultDataService = require('../services/data/KeyResultDataService');
 
 // Get all goals for the logged-in employee
 exports.getMyGoals = async (req, res, next) => {
@@ -9,7 +11,7 @@ exports.getMyGoals = async (req, res, next) => {
       return next(new AppError('No employee profile found for this user', 404));
     }
 
-    const goals = await Goal.findAll({
+    const result = await goalDataService.findAll({
       where: { employeeId },
       include: [
         { model: KeyResult, as: 'keyResults' }
@@ -17,6 +19,7 @@ exports.getMyGoals = async (req, res, next) => {
       order: [['createdAt', 'DESC']]
     });
 
+    const goals = result.data || result;
     res.status(200).json({ success: true, count: goals.length, data: goals });
   } catch (error) {
     next(error);
@@ -29,7 +32,7 @@ exports.getEmployeeGoals = async (req, res, next) => {
     const { employeeId } = req.params;
     
     // In a real app, verify that the requester is the manager of this employee or HR/Admin
-    const goals = await Goal.findAll({
+    const result = await goalDataService.findAll({
       where: { employeeId },
       include: [
         { model: KeyResult, as: 'keyResults' }
@@ -37,6 +40,7 @@ exports.getEmployeeGoals = async (req, res, next) => {
       order: [['createdAt', 'DESC']]
     });
 
+    const goals = result.data || result;
     res.status(200).json({ success: true, count: goals.length, data: goals });
   } catch (error) {
     next(error);
@@ -52,7 +56,7 @@ exports.createGoal = async (req, res, next) => {
       return next(new AppError('Employee ID is required', 400));
     }
 
-    const goal = await Goal.create({
+    const goal = await goalDataService.create({
       employeeId,
       title: req.body.title,
       description: req.body.description,
@@ -69,12 +73,12 @@ exports.createGoal = async (req, res, next) => {
 // Update a goal
 exports.updateGoal = async (req, res, next) => {
   try {
-    const goal = await Goal.findByPk(req.params.id);
+    const goal = await goalDataService.findById(req.params.id);
     if (!goal) return next(new AppError('Goal not found', 404));
 
     // Verify ownership or permission here if needed
 
-    await goal.update({
+    await goalDataService.update(req.params.id, {
       title: req.body.title !== undefined ? req.body.title : goal.title,
       description: req.body.description !== undefined ? req.body.description : goal.description,
       period: req.body.period !== undefined ? req.body.period : goal.period,
@@ -82,7 +86,10 @@ exports.updateGoal = async (req, res, next) => {
       dueDate: req.body.dueDate !== undefined ? req.body.dueDate : goal.dueDate
     });
 
-    res.status(200).json({ success: true, data: goal });
+    // fetch updated record
+    const updatedGoal = await goalDataService.findById(req.params.id);
+
+    res.status(200).json({ success: true, data: updatedGoal });
   } catch (error) {
     next(error);
   }
@@ -91,10 +98,10 @@ exports.updateGoal = async (req, res, next) => {
 // Delete a goal
 exports.deleteGoal = async (req, res, next) => {
   try {
-    const goal = await Goal.findByPk(req.params.id);
+    const goal = await goalDataService.findById(req.params.id);
     if (!goal) return next(new AppError('Goal not found', 404));
 
-    await goal.destroy();
+    await goalDataService.delete(req.params.id);
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
     next(error);
@@ -105,10 +112,10 @@ exports.deleteGoal = async (req, res, next) => {
 exports.addKeyResult = async (req, res, next) => {
   try {
     const goalId = req.params.id;
-    const goal = await Goal.findByPk(goalId);
+    const goal = await goalDataService.findById(goalId);
     if (!goal) return next(new AppError('Goal not found', 404));
 
-    const kr = await KeyResult.create({
+    const kr = await keyResultDataService.create({
       goalId,
       title: req.body.title,
       targetValue: req.body.targetValue,
@@ -127,10 +134,10 @@ exports.addKeyResult = async (req, res, next) => {
 // Update a key result
 exports.updateKeyResult = async (req, res, next) => {
   try {
-    const kr = await KeyResult.findByPk(req.params.krId);
+    const kr = await keyResultDataService.findById(req.params.krId);
     if (!kr) return next(new AppError('Key Result not found', 404));
 
-    await kr.update({
+    await keyResultDataService.update(req.params.krId, {
       title: req.body.title !== undefined ? req.body.title : kr.title,
       targetValue: req.body.targetValue !== undefined ? req.body.targetValue : kr.targetValue,
       currentValue: req.body.currentValue !== undefined ? req.body.currentValue : kr.currentValue,
@@ -139,7 +146,8 @@ exports.updateKeyResult = async (req, res, next) => {
 
     await updateGoalProgress(kr.goalId);
 
-    res.status(200).json({ success: true, data: kr });
+    const updatedKr = await keyResultDataService.findById(req.params.krId);
+    res.status(200).json({ success: true, data: updatedKr });
   } catch (error) {
     next(error);
   }
@@ -148,11 +156,11 @@ exports.updateKeyResult = async (req, res, next) => {
 // Delete a key result
 exports.deleteKeyResult = async (req, res, next) => {
   try {
-    const kr = await KeyResult.findByPk(req.params.krId);
+    const kr = await keyResultDataService.findById(req.params.krId);
     if (!kr) return next(new AppError('Key Result not found', 404));
 
     const goalId = kr.goalId;
-    await kr.destroy();
+    await keyResultDataService.delete(req.params.krId);
     await updateGoalProgress(goalId);
 
     res.status(200).json({ success: true, data: {} });
@@ -163,14 +171,12 @@ exports.deleteKeyResult = async (req, res, next) => {
 
 // Helper: Calculate average progress of all key results and update parent goal
 async function updateGoalProgress(goalId) {
-  const goal = await Goal.findByPk(goalId, {
-    include: [{ model: KeyResult, as: 'keyResults' }]
-  });
+  const goal = await goalDataService.findById(goalId, [{ model: KeyResult, as: 'keyResults' }]);
   
   if (!goal) return;
 
   if (!goal.keyResults || goal.keyResults.length === 0) {
-    await goal.update({ progress: 0 });
+    await goalDataService.update(goalId, { progress: 0 });
     return;
   }
 
@@ -184,5 +190,5 @@ async function updateGoalProgress(goalId) {
   });
 
   const avgProgress = totalProgress / goal.keyResults.length;
-  await goal.update({ progress: avgProgress });
+  await goalDataService.update(goalId, { progress: avgProgress });
 }

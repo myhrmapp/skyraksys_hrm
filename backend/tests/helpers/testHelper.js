@@ -4,6 +4,14 @@ const bcrypt = require('bcryptjs');
 const db = require('../../models');
 const authConfig = require('../../config/auth.config');
 
+// Monotonic counter to guarantee unique SK### employeeIds across a test run
+// (avoids random collisions that intermittently violate the unique constraint).
+let employeeIdCounter = 0;
+function nextEmployeeId() {
+  employeeIdCounter = (employeeIdCounter % 900) + 1;
+  return `SK${String(employeeIdCounter).padStart(3, '0')}`;
+}
+
 /**
  * Test Helper Functions
  */
@@ -58,15 +66,15 @@ class TestHelper {
     if (withEmployee) {
       const employeeData = {
         userId: user.id,
-        employeeId: `SKYT${Math.floor(1000 + Math.random() * 9000)}`,  // Use SKYT format
+        employeeId: nextEmployeeId(),
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
         phone: '9876543210',
         hireDate: new Date(),
         status: 'Active',
-        departmentId: department.id,  // Add required field
-        positionId: position.id        // Add required field
+        departmentId: department.id,
+        positionId: position.id
       };
       const employee = await db.Employee.create(employeeData);
       this.testEmployees.push(employee);

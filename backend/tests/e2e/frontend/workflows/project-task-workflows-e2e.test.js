@@ -11,9 +11,12 @@
 
 // CRITICAL: Set environment variables BEFORE importing app/models
 process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = 'test-secret-project-task';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-project-task';
+process.env.JWT_SECRET = 'test-secret-project-task-32chars-long-key-2026';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-project-task-32chars-long-key-2026';
 process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+process.env.ALLOW_TOKEN_RESPONSE = 'true';
+process.env.DB_NAME = 'skyraksys_hrm_test';
+process.env.DB_NAME_TEST = 'skyraksys_hrm_test';
 process.env.DB_DATABASE = 'skyraksys_hrm_test';
 
 const request = require('supertest');
@@ -75,7 +78,7 @@ describe('🚀 PROJECT & TASK MANAGEMENT E2E WORKFLOW TESTS', () => {
     const managerData = {
       firstName: 'Project',
       lastName: 'Manager',
-      employeeId: 'SKYT0010',
+      employeeId: 'SK010',
       phone: '1234567890',
       hireDate: dayjs().format('YYYY-MM-DD'),
       status: 'Active',
@@ -108,7 +111,7 @@ describe('🚀 PROJECT & TASK MANAGEMENT E2E WORKFLOW TESTS', () => {
     const emp1Data = {
       firstName: 'Developer',
       lastName: 'One',
-      employeeId: 'SKYT0011',
+      employeeId: 'SK011',
       phone: '1234567891',
       hireDate: dayjs().format('YYYY-MM-DD'),
       status: 'Active',
@@ -142,7 +145,7 @@ describe('🚀 PROJECT & TASK MANAGEMENT E2E WORKFLOW TESTS', () => {
     const emp2Data = {
       firstName: 'Developer',
       lastName: 'Two',
-      employeeId: 'SKYT0012',
+      employeeId: 'SK012',
       phone: '1234567892',
       hireDate: dayjs().format('YYYY-MM-DD'),
       status: 'Active',

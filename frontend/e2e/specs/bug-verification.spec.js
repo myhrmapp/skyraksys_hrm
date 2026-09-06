@@ -11,7 +11,7 @@ dns.setDefaultResultOrder('ipv4first');
 test.describe('A#4: Settings save', () => {
   test('Admin can load and interact with settings page', async ({ page }) => {
     await loginAs(page, 'admin');
-    await page.goto('/settings');
+    await page.goto('/admin/settings-hub');
     await waitForPageReady(page);
 
     // Verify settings page loads with some form fields
@@ -79,7 +79,7 @@ test.describe('A#10: Payslip date selection', () => {
   test('Payslip date/year selection works', async ({ page }) => {
     await loginAs(page, 'admin');
     // Navigate to an employee's payslip page
-    await page.goto('/payroll');
+    await page.goto('/payroll-management');
     await waitForPageReady(page);
 
     const pageContent = await page.textContent('body');
@@ -275,7 +275,7 @@ test.describe('A#20: Leave balance creation', () => {
 test.describe('A#23: Task edit', () => {
   test('Task page loads and edit works', async ({ page }) => {
     await loginAs(page, 'admin');
-    await page.goto('/tasks');
+    await page.goto('/my-tasks');
     await waitForPageReady(page);
 
     const pageContent = await page.textContent('body');
@@ -321,7 +321,7 @@ test.describe('A#25: User creation access', () => {
 test.describe('A#26: Restore records', () => {
   test('Restore records page loads and shows data or empty state', async ({ page }) => {
     await loginAs(page, 'admin');
-    await page.goto('/restore-records');
+    await page.goto('/admin/restore');
     await waitForPageReady(page);
 
     const pageContent = await page.textContent('body');

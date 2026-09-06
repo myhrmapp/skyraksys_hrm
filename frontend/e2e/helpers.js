@@ -5,11 +5,12 @@
 const { expect } = require('@playwright/test');
 
 /** Default test users (must match seeded data in the database) */
+const DEFAULT_SEED_PASSWORD = process.env.SEED_DEFAULT_PASSWORD || 'StrongSeedPassword2026!';
 const TEST_USERS = {
-  admin: { email: 'admin@skyraksys.com', password: 'admin123', role: 'admin' },
-  hr:    { email: 'hr@skyraksys.com',    password: 'admin123', role: 'hr' },
-  manager: { email: 'lead@skyraksys.com', password: 'admin123', role: 'manager' },
-  employee: { email: 'employee1@skyraksys.com', password: 'admin123', role: 'employee' },
+  admin: { email: 'admin@skyraksys.com', password: DEFAULT_SEED_PASSWORD, role: 'admin' },
+  hr:    { email: 'hr@skyraksys.com',    password: DEFAULT_SEED_PASSWORD, role: 'hr' },
+  manager: { email: 'lead@skyraksys.com', password: DEFAULT_SEED_PASSWORD, role: 'manager' },
+  employee: { email: 'employee1@skyraksys.com', password: DEFAULT_SEED_PASSWORD, role: 'employee' },
 };
 
 const API_URL = process.env.API_URL || 'http://localhost:5000/api';

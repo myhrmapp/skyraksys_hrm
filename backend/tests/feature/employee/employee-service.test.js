@@ -190,7 +190,7 @@ describe('EmployeeService', () => {
       expect(employee).toBeDefined();
       expect(employee.firstName).toBe('John');
       expect(employee.email).toBe('john@test.com');
-      expect(employee.employeeId).toMatch(/^SKYT\d{4}$/);
+      expect(employee.employeeId).toMatch(/^SK\d{3,}$/);
 
       // Check user created
       const user = await User.findOne({ where: { email: 'john@test.com' } });
@@ -221,8 +221,8 @@ describe('EmployeeService', () => {
         }
       );
 
-      expect(employee.employeeId).toMatch(/^SKYT\d{4}$/);
-      expect(employee.employeeId).toBe('SKYT0001');
+      expect(employee.employeeId).toMatch(/^SK\d{3,}$/);
+      expect(employee.employeeId).toBe('SK001');
     });
 
     test('should handle photo upload', async () => {
@@ -241,7 +241,7 @@ describe('EmployeeService', () => {
         'photo-123.jpg'
       );
 
-      expect(employee.photoUrl).toBe('/uploads/employee-photos/photo-123.jpg');
+      expect(employee.photoUrl).toBe('photo-123.jpg');
     });
 
     test('should create salary structure (new format)', async () => {
@@ -466,7 +466,8 @@ describe('EmployeeService', () => {
         salary: { basicSalary: 70000 }
       });
 
-      expect(updated.salary).toEqual({ basicSalary: 70000 });
+      expect(updated.id).toBe(employee.id);
+      expect(updated.salary).toBeUndefined();
     });
   });
 

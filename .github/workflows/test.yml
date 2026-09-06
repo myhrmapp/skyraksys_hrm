@@ -1,0 +1,261 @@
+name: CI - Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # Validation Jobs
+  validate:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd backend && npm ci
+          cd ../frontend && npm ci
+      
+      - name: Validate Routes
+        run: npm run validate:routes
+      
+      - name: Validate Environment (with .env.example)
+        run: |
+          cp backend/.env.example backend/.env
+          npm run validate:env
+  
+  # Backend Tests
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: skyraksys_hrm_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: cd backend && npm ci
+      
+      - name: Setup test environment
+        run: |
+          cd backend
+          cp .env.example .env
+          echo "NODE_ENV=test" >> .env
+          echo "DB_HOST=localhost" >> .env
+          echo "DB_PORT=5432" >> .env
+          echo "DB_NAME=skyraksys_hrm_test" >> .env
+          echo "DB_USER=postgres" >> .env
+          echo "DB_PASSWORD=postgres" >> .env
+      
+      - name: Run database migrations
+        run: cd backend && npm run db:migrate
+        env:
+          NODE_ENV: test
+      
+      - name: Run backend tests
+        run: cd backend && npm test -- --forceExit
+        env:
+          NODE_ENV: test
+      
+      - name: Upload test coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage
+  
+  # Frontend Tests
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: cd frontend && npm ci
+      
+      - name: Lint frontend
+        run: cd frontend && npm run lint
+      
+      - name: Run frontend tests
+        run: cd frontend && npm test -- --watchAll=false --coverage
+      
+      - name: Upload test coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage
+  
+  # E2E Tests
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: skyraksys_hrm_e2e
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd backend && npm ci
+          cd ../frontend && npm ci
+      
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+      
+      - name: Setup backend environment
+        run: |
+          cd backend
+          cp .env.example .env
+          echo "NODE_ENV=development" >> .env
+          echo "DB_HOST=localhost" >> .env
+          echo "DB_NAME=skyraksys_hrm_e2e" >> .env
+      
+      - name: Setup database
+        run: cd backend && npm run db:migrate && npm run db:seed
+      
+      - name: Start backend
+        run: cd backend && npm start &
+        env:
+          PORT: 5000
+      
+      - name: Wait for backend
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:5000/api/health; do sleep 2; done'
+      
+      - name: Start frontend
+        run: cd frontend && npm start &
+        env:
+          PORT: 3000
+      
+      - name: Wait for frontend
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
+      
+      - name: Run E2E tests
+        run: cd frontend && npx playwright test --grep="@smoke"
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+  
+  # Security Scan
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Run npm audit (Backend)
+        run: cd backend && npm audit --audit-level=moderate
+        continue-on-error: true
+      
+      - name: Run npm audit (Frontend)
+        run: cd frontend && npm audit --audit-level=moderate
+        continue-on-error: true
+  
+  # Build Check
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+      
+      - name: Build frontend
+        run: cd frontend && npm run build
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/build

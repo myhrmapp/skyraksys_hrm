@@ -137,10 +137,8 @@ describe('Upload Middleware', () => {
       const tempFilePath = path.join(__dirname, 'test-invalid-file.jpg');
       
       // Create a fake file with invalid content
-      fs.writeFileSync(tempFilePath, 'This is not a valid image file');
-      
       mockReq.file = {
-        path: tempFilePath,
+        buffer: Buffer.from('This is not a valid image file'),
         mimetype: 'image/jpeg',
         originalname: 'test.jpg'
       };
@@ -152,9 +150,6 @@ describe('Upload Middleware', () => {
         success: false,
         message: 'Invalid file: file content does not match the declared image type.'
       });
-      
-      // File should be deleted
-      expect(fs.existsSync(tempFilePath)).toBe(false);
     });
   });
 });

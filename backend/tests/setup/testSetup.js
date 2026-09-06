@@ -2,7 +2,9 @@ const db = require('../../models');
 
 // Set test environment
 process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = 'test-secret-key-for-testing-only';
+process.env.JWT_SECRET = 'test-secret-key-for-testing-only-32chars-ABC';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-for-testing-only-32chars-XYZ';
+process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 process.env.DB_NAME = 'skyraksys_hrm_test';
 
 // Global test setup
@@ -56,7 +58,7 @@ global.testHelpers = {
 
   async createTestEmployee(employeeData = {}) {
     const defaultEmployee = {
-      employeeId: `EMP${Date.now()}`,
+      employeeId: `SK${String(Date.now()).slice(-3).padStart(3, '0')}`,
       firstName: 'Test',
       lastName: 'Employee',
       email: `emp${Date.now()}@example.com`,

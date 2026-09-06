@@ -27,7 +27,8 @@ describe('Week 14: Payroll Data Integrity Tests', () => {
 
   beforeAll(async () => {
     // Set required environment variables for tests
-    process.env.JWT_SECRET = 'test-secret-key-for-testing-only';
+    process.env.JWT_SECRET = 'test-secret-key-for-testing-only-32chars';
+    process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-for-testing-only-32chars';
     process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
     process.env.SMTP_HOST = ''; // Disable email service to avoid encryption errors
     

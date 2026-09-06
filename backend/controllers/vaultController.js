@@ -1,11 +1,11 @@
 const crypto = require('crypto');
-const db = require('../models');
 const VaultCrypto = require('../utils/vaultCrypto');
 const ApiResponse = require('../utils/ApiResponse');
+const vaultConfigService = require('../services/data/PayrollVaultConfigDataService');
 
 exports.getVaultStatus = async (req, res, next) => {
   try {
-    const config = await db.PayrollVaultConfig.findOne();
+    const config = await vaultConfigService.findOne();
     const isEnabled = config ? config.isEnabled : false;
     
     return res.json(ApiResponse.success({
@@ -23,18 +23,18 @@ exports.setupVault = async (req, res, next) => {
     let { designatedHrUserId } = req.body;
     if (designatedHrUserId === '') designatedHrUserId = null;
     
-    let config = await db.PayrollVaultConfig.findOne();
+    let config = await vaultConfigService.findOne();
     if (config && config.isEnabled) {
       return res.status(400).json(ApiResponse.error('Vault is already set up and enabled.'));
     }
 
     if (!config) {
-      config = await db.PayrollVaultConfig.create({
+      config = await vaultConfigService.create({
         isEnabled: true,
         designatedHrUserId
       });
     } else {
-      await config.update({
+      await vaultConfigService.update(config.id, {
         isEnabled: true,
         designatedHrUserId
       });
@@ -53,16 +53,16 @@ exports.toggleVault = async (req, res, next) => {
     let { enable, designatedHrUserId } = req.body;
     if (designatedHrUserId === '') designatedHrUserId = null;
     
-    let config = await db.PayrollVaultConfig.findOne();
+    let config = await vaultConfigService.findOne();
     if (!config) {
       return res.status(400).json(ApiResponse.error('Vault not configured. Please run setup first.'));
     }
 
     if (enable) {
-      await config.update({ isEnabled: true, designatedHrUserId });
+      await vaultConfigService.update(config.id, { isEnabled: true, designatedHrUserId });
       return res.json(ApiResponse.success({ message: 'Vault enabled.' }));
     } else {
-      await config.update({ isEnabled: false });
+      await vaultConfigService.update(config.id, { isEnabled: false });
       return res.json(ApiResponse.success({ message: 'Vault disabled. New data will be stored in plain text.' }));
     }
   } catch (error) {

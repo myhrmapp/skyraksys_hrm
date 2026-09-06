@@ -41,7 +41,7 @@ module.exports = defineConfig({
   timeout: 60000,               // 60s — full-workflow tests need more time
 
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.BASE_URL || process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

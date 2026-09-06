@@ -1,0 +1,91 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      
+      - name: Install backend dependencies
+        run: cd backend && npm ci
+      
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+      
+      - name: Lint backend
+        run: cd backend && npm run lint
+      
+      - name: Lint frontend
+        run: cd frontend && npm run lint
+      
+      - name: Check backend formatting
+        run: cd backend && npm run format:check
+      
+      - name: Check frontend formatting
+        run: cd frontend && npm run format:check
+  
+  console-audit:
+    name: Console.log Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run console.log audit
+        run: npm run audit:console
+        continue-on-error: true
+  
+  code-metrics:
+    name: Code Metrics
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Count lines of code
+        run: |
+          echo "📊 Code Statistics"
+          echo "=================="
+          echo ""
+          echo "Backend:"
+          find backend -name "*.js" -not -path "*/node_modules/*" -not -path "*/coverage/*" | xargs wc -l | tail -1
+          echo ""
+          echo "Frontend:"
+          find frontend/src -name "*.js" -o -name "*.jsx" | xargs wc -l | tail -1
+          echo ""
+          echo "Tests:"
+          find backend/tests -name "*.test.js" | xargs wc -l | tail -1
+          find frontend/src -name "*.test.js" | xargs wc -l | tail -1
+      
+      - name: Check file counts
+        run: |
+          echo "📁 File Counts"
+          echo "=============="
+          echo "Backend files: $(find backend -name "*.js" -not -path "*/node_modules/*" | wc -l)"
+          echo "Frontend files: $(find frontend/src -name "*.js" -o -name "*.jsx" | wc -l)"
+          echo "Test files: $(find . -name "*.test.js" -not -path "*/node_modules/*" | wc -l)"

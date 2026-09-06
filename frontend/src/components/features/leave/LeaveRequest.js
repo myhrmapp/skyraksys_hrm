@@ -187,7 +187,7 @@ const LeaveRequest = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box maxWidth={900} mx="auto" mt={4} mb={6}>
+      <Box maxWidth={900} mx="auto" mt={4} mb={6} data-testid="leave-request-page">
         <Card sx={{
           borderRadius: 4,
           boxShadow: '0 12px 40px rgba(0,0,0,0.08)',

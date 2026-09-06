@@ -1,4 +1,5 @@
-process.env.INVOICE_SECRET_PHRASE = 'SkyraskysHRSecret';
+process.env.INVOICE_SECRET_PHRASE = 'AsteriaInvoicePhrase2026!';
+process.env.ALLOW_TOKEN_RESPONSE = 'true';
 process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
 const request = require('supertest');
@@ -59,11 +60,13 @@ describe('Invoice secret phrase rotation API', () => {
     await db.Invoice.destroy({ where: {}, force: true });
     invoiceCounter += 1;
 
+    const validInvoiceSecretPhrase = 'AsteriaInvoicePhrase2026!';
+
     invoice = await db.Invoice.create({
       invoiceNumber: `INV-202607-${String(invoiceCounter).padStart(4, '0')}`,
-      clientCompany: encryptText('Acme Client Pvt Ltd', 'SkyraskysHRSecret'),
-      clientGstin: encryptText('29ABCDE1234F1Z5', 'SkyraskysHRSecret'),
-      clientAddress: encryptText('Bangalore, India', 'SkyraskysHRSecret'),
+      clientCompany: encryptText('Acme Client Pvt Ltd', validInvoiceSecretPhrase),
+      clientGstin: encryptText('29ABCDE1234F1Z5', validInvoiceSecretPhrase),
+      clientAddress: encryptText('Bangalore, India', validInvoiceSecretPhrase),
       billingMonth: 7,
       billingYear: 2026,
       issueDate: '2026-07-01',
@@ -81,12 +84,12 @@ describe('Invoice secret phrase rotation API', () => {
           amount: 12000,
           description: 'Support hours'
         }
-      ], 'SkyraskysHRSecret'),
+      ], validInvoiceSecretPhrase),
       subtotal: 12000,
       taxPercent: 18,
       taxAmount: 2160,
       totalAmount: 14160,
-      notes: encryptText('Confidential billing note', 'SkyraskysHRSecret'),
+      notes: encryptText('Confidential billing note', validInvoiceSecretPhrase),
       createdBy: hrUser.id,
       updatedBy: hrUser.id
     });
@@ -105,9 +108,9 @@ describe('Invoice secret phrase rotation API', () => {
       .set('Authorization', `Bearer ${hrToken}`)
       .send({
         password: hrPassword,
-        currentPhrase: 'SkyraskysHRSecret',
-        newPhrase: 'NewSkyraksysPhrase2026',
-        confirmPhrase: 'NewSkyraksysPhrase2026'
+        currentPhrase: 'AsteriaInvoicePhrase2026!',
+        newPhrase: 'OrionInvoicePhrase2026!',
+        confirmPhrase: 'OrionInvoicePhrase2026!'
       });
 
     expect(rotateResponse.status).toBe(200);
@@ -117,14 +120,14 @@ describe('Invoice secret phrase rotation API', () => {
     const oldPhraseResponse = await request(app)
       .get(`/api/invoices/${invoice.id}`)
       .set('Authorization', `Bearer ${hrToken}`)
-      .set('x-invoice-secret-phrase', 'SkyraskysHRSecret');
+      .set('x-invoice-secret-phrase', 'AsteriaInvoicePhrase2026!');
 
     expect(oldPhraseResponse.status).toBe(403);
 
     const newPhraseResponse = await request(app)
       .get(`/api/invoices/${invoice.id}`)
       .set('Authorization', `Bearer ${hrToken}`)
-      .set('x-invoice-secret-phrase', 'NewSkyraksysPhrase2026');
+      .set('x-invoice-secret-phrase', 'OrionInvoicePhrase2026!');
 
     expect(newPhraseResponse.status).toBe(200);
     expect(newPhraseResponse.body.data.clientCompany).toBe('Acme Client Pvt Ltd');
@@ -146,9 +149,9 @@ describe('Invoice secret phrase rotation API', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
         password: hrPassword,
-        currentPhrase: 'SkyraskysHRSecret',
-        newPhrase: 'AnotherPhrase2026',
-        confirmPhrase: 'AnotherPhrase2026'
+        currentPhrase: 'AsteriaInvoicePhrase2026!',
+        newPhrase: 'AnotherInvoicePhrase2026!',
+        confirmPhrase: 'AnotherInvoicePhrase2026!'
       });
 
     expect(response.status).toBe(403);

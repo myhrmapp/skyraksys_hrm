@@ -37,7 +37,17 @@ Enterprise-grade Human Resource Management System built for modern organizations
 
 ---
 
+## Workspace governance and active docs
+
+The repo currently follows a strict active-vs-archive split:
+
+- Active runtime and operational guidance live in [README.md](README.md), [docs/README.md](docs/README.md), [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/SECURITY.md](docs/SECURITY.md), and [docs/HELP_AND_SUPPORT.md](docs/HELP_AND_SUPPORT.md).
+- Historical reports, stale deployment notes, and generated outputs are archived under [archive/](archive) and remain reference-only.
+- Repo-wide operating rules are captured in [AGENTS.md](AGENTS.md), with detailed cleanup and audit guidance in [docs/WORKSPACE_AUDIT_AND_CLEANUP_PLAN.md](docs/WORKSPACE_AUDIT_AND_CLEANUP_PLAN.md), [docs/AGENT_TEAM_AND_BEST_PRACTICES.md](docs/AGENT_TEAM_AND_BEST_PRACTICES.md), and [docs/QA_AGENT_COVERAGE_MATRIX.md](docs/QA_AGENT_COVERAGE_MATRIX.md).
+
 ## Quick Start (Docker)
+
+> Canonical production path: use Docker Compose from the repo root. Legacy deployment scripts in `scripts/deploy/` and older docs are archived for reference only and are not the default operational path.
 
 ```bash
 # 1. Clone the repository
@@ -49,14 +59,14 @@ cp .env.production.template .env.production
 # Edit .env.production with your DB passwords, JWT secrets, SMTP config
 
 # 3. Start all services
-docker compose up -d
+docker compose --env-file .env.production up -d --build
 
 # 4. Run database migrations
 bash scripts/deploy/run-migrations.sh
-
-# 5. First time only — go-live setup (rotates JWT secrets, creates admin)
-bash scripts/deploy/go-live.sh
 ```
+
+For the full canonical runbook, see [docs/deployment/CANONICAL_DEPLOYMENT.md](docs/deployment/CANONICAL_DEPLOYMENT.md).
+For archived legacy deployment material, see [archive/legacy-deployments/README.md](archive/legacy-deployments/README.md).
 
 ---
 

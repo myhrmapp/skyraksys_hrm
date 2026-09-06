@@ -1,51 +1,33 @@
-# SkyrakSys HRM — Developer Documentation
+# Project Documentation
 
-> **Last updated:** 2026-03-22
+This is the active documentation set for the current implementation. It replaces outdated deployment and architecture notes that were left behind by previous stages of the project.
 
-## Documentation Index
+## Active documentation
 
-| # | Document | Description |
-|---|----------|-------------|
-| 1 | [Frontend Architecture Guide](01-FRONTEND_ARCHITECTURE.md) | Component tree, routing, state management, service layer, form patterns, utilities |
-| 2 | [API Reference](02-API_REFERENCE.md) | All ~238 endpoints grouped by module with methods, paths, auth, and parameters |
-| 3 | [Database Design Guide](03-DATABASE_DESIGN.md) | All 22 models, fields, associations, indexes, 19 migrations |
-| 4 | [Business Rules Reference](04-BUSINESS_RULES.md) | Payroll calculation, leave management, timesheet workflow, attendance, employee lifecycle |
-| 5 | [Security Architecture](05-SECURITY_ARCHITECTURE.md) | Auth flow, middleware chain, RBAC matrix, token lifecycle, rate limiting |
-| 6 | [UX & Design System](06-UX_DESIGN_SYSTEM.md) | MUI theme, component patterns, form patterns, navigation, accessibility |
-| 7 | [Configuration Guide](07-CONFIGURATION.md) | All environment variables, SystemConfig keys, PM2 config, Docker |
-| 8 | [Operations Runbook](08-OPERATIONS_RUNBOOK.md) | Health checks, logging, scheduled tasks, monitoring, troubleshooting |
+Current validation snapshot: the verified green workflow set includes authentication/security, employee service, leave, and payroll. Attendance, invoice, and project/task remain open pending final evidence capture.
 
-## Technical Reference
+- [ARCHITECTURE.md](ARCHITECTURE.md) — application structure, services, runtime architecture, and system boundaries
+- [DEPLOYMENT.md](DEPLOYMENT.md) — supported production deployment path, Docker Compose flow, and host requirements
+- [SECURITY.md](SECURITY.md) — auth, JWT, secrets, RBAC, encryption, and hardening guidance
+- [HELP_AND_SUPPORT.md](HELP_AND_SUPPORT.md) — live user and operator support workflow guidance
+- [WORKSPACE_AUDIT_AND_CLEANUP_PLAN.md](WORKSPACE_AUDIT_AND_CLEANUP_PLAN.md) — repo-wide audit, archive policy, and cleanup plan
+- [AGENT_TEAM_AND_BEST_PRACTICES.md](AGENT_TEAM_AND_BEST_PRACTICES.md) — agent roles and working rules
+- [QA_AGENT_COVERAGE_MATRIX.md](QA_AGENT_COVERAGE_MATRIX.md) — parallel agent workflow, module coverage plan, and evidence standard
+- [../README.md](../README.md) — repository overview and quick start
+- [../AGENTS.md](../AGENTS.md) — active operating contract for repo-wide work
+- [deployment/CANONICAL_DEPLOYMENT.md](deployment/CANONICAL_DEPLOYMENT.md) — canonical Docker deployment flow
+- [deployment/RED_HAT_PRODUCTION_RUNBOOK.md](deployment/RED_HAT_PRODUCTION_RUNBOOK.md) — Red Hat production operations guide
+- [deployment/OPERATOR_DEPLOYMENT_GUIDE.md](deployment/OPERATOR_DEPLOYMENT_GUIDE.md) — operator checklist and execution steps
+- [deployment/DEPLOYMENT_CHEAT_SHEET.md](deployment/DEPLOYMENT_CHEAT_SHEET.md) — one page reference
 
-| Document | Description |
-|----------|-------------|
-| [Comprehensive Technical Docs](COMPREHENSIVE_TECHNICAL_DOCUMENTATION.md) | Complete API reference — all 238 endpoints, models, middleware |
-| [E2E Coverage Audit](E2E_COVERAGE_AUDIT_REPORT.md) | Per-module E2E gap analysis and Playwright coverage breakdown |
-| [Gap Analysis Report](GAP_ANALYSIS_REPORT.md) | 45 open items by priority (P0–P4) with effort estimates |
+## Archive
 
-## Deployment Documentation
+Superseded deployment and generated review material is stored under [../archive](../archive) and [../archive/legacy-docs](../archive/legacy-docs). Those files are historical reference only and must not be used as the active production runbook.
 
-See [`deployment/`](deployment/README.md) for all production deployment guides.
+## Documentation rules
 
-| Document | Description |
-|----------|-------------|
-| [Production Checklist](deployment/PROD_DEPLOYMENT_CHECKLIST.md) | **Start here** — complete first-time setup on `skyait.skyraksys.com` |
-| [Deployment Guide](deployment/DEPLOYMENT_GUIDE.md) | Detailed manual reference (PM2 + Nginx, 8 steps) |
-| [Quick Start](deployment/DEPLOY_QUICK_START.md) | One-page: upload → secrets → deploy → Nginx → SSL |
-
-## Tech Stack Summary
-
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| Frontend | React (CRA) | 18.3 |
-| UI Library | Material UI (MUI) | 5.15 |
-| State | React Query (TanStack) | 5.90 |
-| Routing | React Router | 6.25 |
-| HTTP Client | Axios | 1.7 |
-| Backend | Express.js | 4.18 |
-| ORM | Sequelize | 6.35 |
-| Database | PostgreSQL | 15 |
-| Auth | JWT (httpOnly cookies) | — |
-| Testing | Jest + RTL + Playwright | 29 / 16 / 1.58 |
-| Process Manager | PM2 | cluster × 2 |
-| Server | Nginx | 1.x |
+- These files are the source of truth for the current implementation.
+- Any product, deployment, or security change must update the relevant active document.
+- Legacy reports or build artifacts remain in archive folders and are not part of the live support process.
+- Any new workspace audit, agent task, or cleanup plan must be captured here and reflected in the root operating contract in [../AGENTS.md](../AGENTS.md).
+- Active support and operations guidance must always point to the live docs set, not historical notes under [../archive](../archive).

@@ -14,11 +14,10 @@
  * @updated 2026-02-07
  */
 
-const { timesheetDataService } = require('../services/data');
+const { timesheetDataService, employeeDataService } = require('../services/data');
 const { timesheetBusinessService } = require('../services/business');
 const ApiResponse = require('../utils/ApiResponse');
 const { NotFoundError, ValidationError, ForbiddenError, BadRequestError } = require('../utils/errors');
-const db = require('../models');
 
 /**
  * Helper: Verify if employee is in manager's team
@@ -27,9 +26,7 @@ const db = require('../models');
  * @returns {Promise<boolean>}
  */
 async function isInManagerTeam(managerId, employeeId) {
-  const employee = await db.Employee.findByPk(employeeId, {
-    attributes: ['id', 'managerId']
-  });
+  const employee = await employeeDataService.findById(employeeId);
   return employee && employee.managerId === managerId;
 }
 
@@ -92,11 +89,8 @@ const getAll = async (req, res, next) => {
         filters.employeeId = employeeId;
       } else {
         // Return manager's own + team timesheets — pass plain array, let data layer build Op.in
-        const subordinates = await db.Employee.findAll({
-          where: { managerId: req.employeeId },
-          attributes: ['id']
-        });
-        filters.teamIds = [req.employeeId, ...subordinates.map(e => e.id)];
+        const subordinates = await employeeDataService.getSubordinates(req.employeeId);
+        filters.teamIds = [req.employeeId, ...subordinates.data.map(e => e.id)];
       }
     }
     // RBAC: Admin/HR see all
@@ -107,7 +101,7 @@ const getAll = async (req, res, next) => {
     }
     
     if (filters.teamIds) {
-      filters.employeeId = { [db.Sequelize.Op.in]: filters.teamIds };
+      filters.employeeId = filters.teamIds;
       delete filters.teamIds;
     }
 
@@ -579,11 +573,8 @@ const getTimesheetHistory = async (req, res, next) => {
         }
         filters.employeeId = employeeId;
       } else {
-        const subordinates = await db.Employee.findAll({
-          where: { managerId: req.employeeId },
-          attributes: ['id']
-        });
-        filters.teamIds = [req.employeeId, ...subordinates.map(e => e.id)];
+        const subordinates = await employeeDataService.getSubordinates(req.employeeId);
+        filters.teamIds = [req.employeeId, ...subordinates.data.map(e => e.id)];
       }
     }
     // RBAC: Admin/HR see all
@@ -593,9 +584,9 @@ const getTimesheetHistory = async (req, res, next) => {
       }
     }
 
-    // Resolve teamIds to Op.in for Sequelize
+    // Resolve teamIds for BaseService mapping
     if (filters.teamIds) {
-      filters.employeeId = { [db.Sequelize.Op.in]: filters.teamIds };
+      filters.employeeId = filters.teamIds;
       delete filters.teamIds;
     }
 
