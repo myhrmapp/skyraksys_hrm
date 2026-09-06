@@ -11,8 +11,8 @@ const rows = reader.readEnabledTests('Dashboard');
 const DASHBOARD_ROUTES = {
   admin: '/dashboard',
   hr: '/dashboard',
-  manager: '/manager-dashboard',
-  employee: '/employee-dashboard',
+  manager: '/dashboard',
+  employee: '/dashboard',
 };
 
 test.describe('Dashboard Module', () => {
