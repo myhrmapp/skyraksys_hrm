@@ -16,8 +16,8 @@ jest.mock('../../../../http-common', () => {
       get: jest.fn(),
       post: jest.fn(),
       put: jest.fn(),
-      delete: jest.fn(),
-    },
+      delete: jest.fn()
+    }
   };
 });
 const mockHttp = require('../../../../http-common').default;
@@ -34,7 +34,7 @@ const mockTodayCheckedIn = {
   status: 'present',
   checkIn: '2026-02-13T09:00:00Z',
   checkOut: null,
-  lateMinutes: 0,
+  lateMinutes: 0
 };
 
 // Checked in and out
@@ -44,7 +44,7 @@ const mockTodayComplete = {
   status: 'present',
   checkIn: '2026-02-13T09:00:00Z',
   checkOut: '2026-02-13T17:30:00Z',
-  lateMinutes: 0,
+  lateMinutes: 0
 };
 
 // Checked in late
@@ -54,7 +54,7 @@ const mockTodayLate = {
   status: 'late',
   checkIn: '2026-02-13T10:30:00Z',
   checkOut: null,
-  lateMinutes: 90,
+  lateMinutes: 90
 };
 
 const mockMonthlyReport = {
@@ -68,8 +68,8 @@ const mockMonthlyReport = {
     holidays: 0,
     averageHoursPerDay: 8,
     totalHoursWorked: 144,
-    totalOvertimeHours: 2,
-  },
+    totalOvertimeHours: 2
+  }
 };
 
 const employeeUser = createMockUser('employee');
@@ -94,7 +94,7 @@ function setupMocks(todayData = mockTodayNoCheckIn, reportData = mockMonthlyRepo
 
 function renderComponent() {
   return render(<MyAttendance />, {
-    authValue: { user: employeeUser },
+    authValue: { user: employeeUser }
   });
 }
 
@@ -317,8 +317,8 @@ describe('MyAttendance', () => {
         expect(mockHttp.get).toHaveBeenCalledWith('/attendance/my/report', {
           params: {
             year: new Date().getFullYear(),
-            month: new Date().getMonth() + 1,
-          },
+            month: new Date().getMonth() + 1
+          }
         });
       });
     });
@@ -341,7 +341,7 @@ describe('MyAttendance', () => {
 
       await waitFor(() => {
         expect(mockHttp.get).toHaveBeenCalledWith('/attendance/my/report', {
-          params: expect.objectContaining({ month: 1 }),
+          params: expect.objectContaining({ month: 1 })
         });
       });
     });
@@ -390,7 +390,7 @@ describe('MyAttendance', () => {
     it('shows error snackbar when check-in API fails', async () => {
       setupMocks(mockTodayNoCheckIn);
       mockHttp.post.mockRejectedValueOnce({
-        response: { data: { message: 'Already checked in' } },
+        response: { data: { message: 'Already checked in' } }
       });
 
       renderComponent();

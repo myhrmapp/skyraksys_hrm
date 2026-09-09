@@ -71,11 +71,11 @@ export const validateLeaveRequest = (values) => {
     const startDate = new Date(values.startDate);
     const endDate = new Date(values.endDate);
     const today = new Date();
-    
+
     if (startDate < today) {
       errors.startDate = 'Start date cannot be in the past';
     }
-    
+
     if (endDate < startDate) {
       errors.endDate = 'End date must be after start date';
     }
@@ -131,7 +131,7 @@ export const validateTimesheetEntry = (entry) => {
     const entryDate = new Date(entry.date);
     const today = new Date();
     const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-    
+
     if (entryDate > today) {
       errors.date = 'Date cannot be in the future';
     } else if (entryDate < oneMonthAgo) {
@@ -208,7 +208,7 @@ export const validatePayslip = (values) => {
   if (values.payPeriodStart && values.payPeriodEnd) {
     const startDate = new Date(values.payPeriodStart);
     const endDate = new Date(values.payPeriodEnd);
-    
+
     if (endDate <= startDate) {
       errors.payPeriodEnd = 'End date must be after start date';
     }

@@ -31,9 +31,9 @@ const EmployeeProfileCard = ({
   onPhotoSelect,
   onPhotoRemove
 }) => {
-  
+
   const getStatusColor = (status) => {
-    switch(status?.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'active': return 'success';
       case 'inactive': return 'error';
       case 'on leave': return 'warning';
@@ -46,10 +46,10 @@ const EmployeeProfileCard = ({
 
   return (
     <Fade in={true}>
-      <Card sx={{ 
-        mb: 4, 
-        borderRadius: 4, 
-        boxShadow: '0 12px 40px rgba(99, 102, 241, 0.08)', 
+      <Card sx={{
+        mb: 4,
+        borderRadius: 4,
+        boxShadow: '0 12px 40px rgba(99, 102, 241, 0.08)',
         overflow: 'visible',
         background: 'linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.9) 100%)',
         border: '1px solid rgba(255, 255, 255, 0.8)',
@@ -129,10 +129,10 @@ const EmployeeProfileCard = ({
                 </Typography>
               </Box>
 
-              <Stack 
-                direction="row" 
-                spacing={1.5} 
-                flexWrap="wrap" 
+              <Stack
+                direction="row"
+                spacing={1.5}
+                flexWrap="wrap"
                 sx={{ mb: 3, justifyContent: { xs: 'center', sm: 'flex-start' } }}
               >
                 <Chip
@@ -158,19 +158,19 @@ const EmployeeProfileCard = ({
               </Stack>
 
               {/* Contact Row */}
-              <Stack 
-                direction="row" 
-                spacing={3} 
+              <Stack
+                direction="row"
+                spacing={3}
                 flexWrap="wrap"
-                sx={{ 
+                sx={{
                   justifyContent: { xs: 'center', sm: 'flex-start' },
                   gap: 2
                 }}
               >
                 {employee.email && (
-                  <Link 
-                    href={`mailto:${employee.email}`} 
-                    underline="hover" 
+                  <Link
+                    href={`mailto:${employee.email}`}
+                    underline="hover"
                     color="inherit"
                     sx={{ display: 'flex', alignItems: 'center', gap: 1, '&:hover': { color: 'primary.main' } }}
                   >
@@ -181,9 +181,9 @@ const EmployeeProfileCard = ({
                   </Link>
                 )}
                 {employee.phone && (
-                  <Link 
-                    href={`tel:${employee.phone}`} 
-                    underline="hover" 
+                  <Link
+                    href={`tel:${employee.phone}`}
+                    underline="hover"
                     color="inherit"
                     sx={{ display: 'flex', alignItems: 'center', gap: 1, '&:hover': { color: 'primary.main' } }}
                   >

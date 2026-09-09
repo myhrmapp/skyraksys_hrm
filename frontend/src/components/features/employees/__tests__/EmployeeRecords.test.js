@@ -21,7 +21,7 @@ const theme = createTheme();
 
 const renderWithProviders = (component) => {
   useAuth.mockReturnValue({
-    user: { id: 1, employee: { id: 1 }, isAdmin: false, isManager: false },
+    user: { id: 1, employee: { id: 1 }, isAdmin: false, isManager: false }
   });
 
   return render(
@@ -43,7 +43,7 @@ describe('EmployeeRecords Component', () => {
       days: 5,
       status: 'approved',
       appliedDate: '2026-02-15',
-      approverComments: 'Approved',
+      approverComments: 'Approved'
     },
     {
       id: 2,
@@ -55,8 +55,8 @@ describe('EmployeeRecords Component', () => {
       days: 3,
       status: 'pending',
       appliedDate: '2026-01-08',
-      createdAt: '2026-01-08',
-    },
+      createdAt: '2026-01-08'
+    }
   ];
 
   const mockTimesheetHistory = [
@@ -66,13 +66,13 @@ describe('EmployeeRecords Component', () => {
       weekStartDate: '2026-02-10',
       weekEndDate: '2026-02-16',
       totalHours: 40,
-      status: 'approved',
-    },
+      status: 'approved'
+    }
   ];
 
   const mockEmployees = [
     { id: 1, firstName: 'John', lastName: 'Doe', employeeId: 'EMP001' },
-    { id: 2, firstName: 'Jane', lastName: 'Smith', employeeId: 'EMP002' },
+    { id: 2, firstName: 'Jane', lastName: 'Smith', employeeId: 'EMP002' }
   ];
 
   beforeEach(() => {
@@ -84,11 +84,11 @@ describe('EmployeeRecords Component', () => {
       timesheetHistory: mockTimesheetHistory,
       attendanceHistory: [],
       loading: false,
-      error: null,
+      error: null
     });
 
     employeeService.getAll.mockResolvedValue({
-      data: mockEmployees,
+      data: mockEmployees
     });
   });
 
@@ -127,7 +127,7 @@ describe('EmployeeRecords Component', () => {
       timesheetHistory: [],
       attendanceHistory: [],
       loading: true,
-      error: null,
+      error: null
     });
 
     renderWithProviders(<EmployeeRecords />);
@@ -146,7 +146,7 @@ describe('EmployeeRecords Component', () => {
     });
 
     const tabs = screen.getAllByRole('tab');
-    
+
     // Switch to timesheet tab if available
     const timesheetTab = tabs.find(tab => /timesheet/i.test(tab.textContent));
     if (timesheetTab) {
@@ -171,7 +171,7 @@ describe('EmployeeRecords Component', () => {
       days: 5,
       status: 'approved',
       appliedDate: '2026-02-15',
-      createdAt: '2026-02-15',
+      createdAt: '2026-02-15'
     }));
 
     useEmployeeRecords.mockReturnValue({
@@ -179,7 +179,7 @@ describe('EmployeeRecords Component', () => {
       timesheetHistory: [],
       attendanceHistory: [],
       loading: false,
-      error: null,
+      error: null
     });
 
     renderWithProviders(<EmployeeRecords />);

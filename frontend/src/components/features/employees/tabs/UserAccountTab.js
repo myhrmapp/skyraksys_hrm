@@ -40,7 +40,7 @@ const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur
         </Typography>
         <Divider sx={{ mb: 3 }} />
       </Grid>
-      
+
       <Grid item xs={12}>
         <FormControlLabel
           control={
@@ -110,7 +110,7 @@ const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur
               sx={{ mt: 1 }}
             />
           </Grid>
-          
+
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth

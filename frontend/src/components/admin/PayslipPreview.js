@@ -102,7 +102,7 @@ const PayslipPreview = ({ template, sampleData }) => {
               <img src={companyInfo.logo} alt="Logo" style={{ width: '100%', maxWidth: '100px' }} />
             </Grid>
           )}
-          
+
           <Grid item xs={companyInfo.logo ? 8 : 12} sx={{ textAlign: companyInfo.logoPosition === 'center' ? 'center' : 'left' }}>
             <Typography variant="h5" sx={{ color: styling.primaryColor, fontWeight: 'bold', mb: 1 }}>
               {companyInfo.name}
@@ -206,7 +206,7 @@ const PayslipPreview = ({ template, sampleData }) => {
                 </TableRow>
               );
             })}
-            
+
             {/* Totals Row */}
             <TableRow sx={{ backgroundColor: '#f9f9f9', fontWeight: 'bold' }}>
               <TableCell sx={{ fontWeight: 'bold' }}>Total Earnings</TableCell>
@@ -219,10 +219,10 @@ const PayslipPreview = ({ template, sampleData }) => {
       </TableContainer>
 
       {/* Net Pay Section */}
-      <Box sx={{ 
-        backgroundColor: styling.primaryColor, 
-        color: '#fff', 
-        p: 2, 
+      <Box sx={{
+        backgroundColor: styling.primaryColor,
+        color: '#fff',
+        p: 2,
         borderRadius: 1,
         display: 'flex',
         justifyContent: 'space-between',

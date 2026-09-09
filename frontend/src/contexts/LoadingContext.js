@@ -192,11 +192,11 @@ const GlobalLoadingBackdrop = () => {
  */
 export const useLoading = () => {
   const context = useContext(LoadingContext);
-  
+
   if (!context) {
     throw new Error('useLoading must be used within a LoadingProvider');
   }
-  
+
   return context;
 };
 
@@ -290,7 +290,7 @@ export const LoadingButton = ({
 }) => {
   const handleClick = async (event) => {
     if (loading || disabled) return;
-    
+
     if (onClick) {
       await onClick(event);
     }
@@ -413,7 +413,7 @@ export const LoadingSkeleton = ({ variant = 'default', count = 1 }) => {
                 </CardContent>
               </Card>
             </Grid>
-            
+
             {/* Chart Placeholders */}
             <Grid item xs={12} md={8}>
               <Card>
@@ -457,7 +457,7 @@ export const LoadingSkeleton = ({ variant = 'default', count = 1 }) => {
 export const withLoading = (Component, options = {}) => {
   const WrappedComponent = (props) => {
     const { loading, ...restProps } = props;
-    
+
     return (
       <LoadingWrapper loading={loading} {...options}>
         <Component {...restProps} />
@@ -466,7 +466,7 @@ export const withLoading = (Component, options = {}) => {
   };
 
   WrappedComponent.displayName = `withLoading(${Component.displayName || Component.name})`;
-  
+
   return WrappedComponent;
 };
 

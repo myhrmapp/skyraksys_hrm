@@ -52,7 +52,7 @@ const ValidatedLeaveRequestForm = ({ onSubmit, onCancel, initialValues }) => {
   // Set tomorrow as default start date
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  
+
   const defaultValues = {
     leaveType: '',
     startDate: tomorrow.toISOString().split('T')[0],
@@ -124,7 +124,7 @@ const ValidatedLeaveRequestForm = ({ onSubmit, onCancel, initialValues }) => {
               helperText={touched.startDate && errors.startDate}
               disabled={isSubmitting}
               InputLabelProps={{
-                shrink: true,
+                shrink: true
               }}
             />
 
@@ -140,7 +140,7 @@ const ValidatedLeaveRequestForm = ({ onSubmit, onCancel, initialValues }) => {
               helperText={touched.endDate && errors.endDate}
               disabled={isSubmitting}
               InputLabelProps={{
-                shrink: true,
+                shrink: true
               }}
               inputProps={{
                 min: values.startDate
@@ -159,7 +159,7 @@ const ValidatedLeaveRequestForm = ({ onSubmit, onCancel, initialValues }) => {
               onChange={(e) => setFieldValue('reason', e.target.value)}
               error={touched.reason && Boolean(errors.reason)}
               helperText={
-                (touched.reason && errors.reason) || 
+                (touched.reason && errors.reason) ||
                 `${values.reason.length}/500 characters`
               }
               disabled={isSubmitting}
@@ -185,7 +185,7 @@ const ValidatedLeaveRequestForm = ({ onSubmit, onCancel, initialValues }) => {
                   Please fix the following errors:
                 </Typography>
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
-                  {Object.entries(errors).map(([field, error]) => 
+                  {Object.entries(errors).map(([field, error]) =>
                     touched[field] && (
                       <li key={field}>
                         <Typography variant="caption">{error}</Typography>

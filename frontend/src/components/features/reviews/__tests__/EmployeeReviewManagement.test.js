@@ -15,15 +15,15 @@ jest.mock('../../../../hooks/queries');
 const createTestQueryClient = () => new QueryClient({
   defaultOptions: {
     queries: { retry: false },
-    mutations: { retry: false },
-  },
+    mutations: { retry: false }
+  }
 });
 
 // Mock notification context
 const mockNotification = {
   showSuccess: jest.fn(),
   showError: jest.fn(),
-  showInfo: jest.fn(),
+  showInfo: jest.fn()
 };
 
 // Wrapper component
@@ -48,7 +48,7 @@ describe('EmployeeReviewManagement Component', () => {
     isAdmin: true,
     isHR: false,
     isManager: false,
-    isEmployee: false,
+    isEmployee: false
   };
 
   const mockEmployeeAuth = {
@@ -56,7 +56,7 @@ describe('EmployeeReviewManagement Component', () => {
     isAdmin: false,
     isHR: false,
     isManager: false,
-    isEmployee: true,
+    isEmployee: true
   };
 
   const mockReviews = [
@@ -69,7 +69,7 @@ describe('EmployeeReviewManagement Component', () => {
       overallRating: 4.5,
       technicalSkills: 4,
       communication: 5,
-      reviewDate: '2026-02-15',
+      reviewDate: '2026-02-15'
     },
     {
       id: 2,
@@ -80,13 +80,13 @@ describe('EmployeeReviewManagement Component', () => {
       overallRating: 3.5,
       technicalSkills: 4,
       communication: 3,
-      reviewDate: '2026-02-10',
-    },
+      reviewDate: '2026-02-10'
+    }
   ];
 
   const mockEmployees = [
     { id: 1, firstName: 'John', lastName: 'Doe', employeeId: 'EMP001' },
-    { id: 2, firstName: 'Jane', lastName: 'Smith', employeeId: 'EMP002' },
+    { id: 2, firstName: 'Jane', lastName: 'Smith', employeeId: 'EMP002' }
   ];
 
   beforeEach(() => {
@@ -96,49 +96,49 @@ describe('EmployeeReviewManagement Component', () => {
     queries.useEmployeeReviews.mockReturnValue({
       data: { reviews: mockReviews, totalCount: 2 },
       isLoading: false,
-      isError: false,
+      isError: false
     });
 
     queries.useReviewDashboard.mockReturnValue({
-      data: {},
+      data: {}
     });
 
     queries.useEmployees.mockReturnValue({
-      data: mockEmployees,
+      data: mockEmployees
     });
 
     queries.useCreateEmployeeReview.mockReturnValue({
       mutate: jest.fn(),
-      isLoading: false,
+      isLoading: false
     });
 
     queries.useUpdateEmployeeReview.mockReturnValue({
       mutate: jest.fn(),
-      isLoading: false,
+      isLoading: false
     });
 
     queries.useUpdateReviewStatus.mockReturnValue({
       mutate: jest.fn(),
-      isLoading: false,
+      isLoading: false
     });
 
     queries.useDeleteEmployeeReview.mockReturnValue({
       mutate: jest.fn(),
-      isLoading: false,
+      isLoading: false
     });
   });
 
   // Test 1: Renders component with header
   test('should render component with header and title', () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     expect(screen.getByText(/Employee Review Management/i)).toBeInTheDocument();
   });
 
   // Test 2: Displays review list for admin
   test('should display list of reviews for admin', async () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('Jane Smith')).toBeInTheDocument();
@@ -150,11 +150,11 @@ describe('EmployeeReviewManagement Component', () => {
     queries.useEmployeeReviews.mockReturnValue({
       data: null,
       isLoading: true,
-      isError: false,
+      isError: false
     });
 
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
@@ -164,35 +164,35 @@ describe('EmployeeReviewManagement Component', () => {
       data: null,
       isLoading: false,
       isError: true,
-      error: { message: 'Failed to fetch reviews' },
+      error: { message: 'Failed to fetch reviews' }
     });
 
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     expect(screen.getByText(/failed to fetch reviews/i)).toBeInTheDocument();
   });
 
   // Test 5: Shows "Create Review" button for admin/HR/manager
   test('should show create button for admin users', () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     expect(screen.getByRole('button', { name: /create review/i })).toBeInTheDocument();
   });
 
   // Test 6: Hides "Create Review" button for employees
   test('should hide create button for regular employees', () => {
     renderWithProviders(<EmployeeReviewManagement />, mockEmployeeAuth);
-    
+
     expect(screen.queryByRole('button', { name: /create review/i })).not.toBeInTheDocument();
   });
 
   // Test 7: Opens create dialog when button clicked
   test('should open create dialog when create button is clicked', async () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     const createButton = screen.getByRole('button', { name: /create review/i });
     fireEvent.click(createButton);
-    
+
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.getByText(/new review/i)).toBeInTheDocument();
@@ -202,7 +202,7 @@ describe('EmployeeReviewManagement Component', () => {
   // Test 8: Displays review status chips with correct colors
   test('should display status chips with appropriate colors', async () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Completed')).toBeInTheDocument();
       expect(screen.getByText('Pending Approval')).toBeInTheDocument();
@@ -212,15 +212,15 @@ describe('EmployeeReviewManagement Component', () => {
   // Test 9: Filters reviews by status
   test('should filter reviews by status', async () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     // Initially both reviews should be visible
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Jane Smith')).toBeInTheDocument();
-    
+
     // Apply status filter
     const statusFilter = screen.getByLabelText(/status/i);
     fireEvent.change(statusFilter, { target: { value: 'completed' } });
-    
+
     await waitFor(() => {
       expect(queries.useEmployeeReviews).toHaveBeenCalledWith(
         expect.objectContaining({ status: 'completed' })
@@ -231,10 +231,10 @@ describe('EmployeeReviewManagement Component', () => {
   // Test 10: Searches reviews by employee name
   test('should search reviews by employee name', async () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     const searchInput = screen.getByPlaceholderText(/search/i);
     fireEvent.change(searchInput, { target: { value: 'John' } });
-    
+
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
@@ -248,17 +248,17 @@ describe('EmployeeReviewManagement Component', () => {
       reviewPeriod: '2026 Q1',
       reviewType: 'quarterly',
       status: 'completed',
-      overallRating: 4,
+      overallRating: 4
     }));
 
     queries.useEmployeeReviews.mockReturnValue({
       data: { reviews: manyReviews, totalCount: 25 },
       isLoading: false,
-      isError: false,
+      isError: false
     });
 
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     // Check pagination exists
     const pagination = screen.getByRole('navigation', { name: /pagination/i });
     expect(pagination).toBeInTheDocument();
@@ -267,12 +267,12 @@ describe('EmployeeReviewManagement Component', () => {
   // Test 12: Opens edit dialog when edit button clicked
   test('should open edit dialog when edit button is clicked', async () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     await waitFor(() => {
       const editButtons = screen.getAllByRole('button', { name: /edit/i });
       fireEvent.click(editButtons[0]);
     });
-    
+
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
@@ -281,7 +281,7 @@ describe('EmployeeReviewManagement Component', () => {
   // Test 13: Displays rating stars for reviews
   test('should display rating stars for each review', async () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     await waitFor(() => {
       // Ratings should be visible (4.5 and 3.5)
       expect(screen.getByText(/4\.5/)).toBeInTheDocument();
@@ -292,12 +292,12 @@ describe('EmployeeReviewManagement Component', () => {
   // Test 14: Shows delete confirmation dialog
   test('should show delete confirmation when delete button clicked', async () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
-    
+
     await waitFor(() => {
       const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
       fireEvent.click(deleteButtons[0]);
     });
-    
+
     await waitFor(() => {
       expect(screen.getByText(/are you sure/i)).toBeInTheDocument();
     });

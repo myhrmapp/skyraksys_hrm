@@ -42,14 +42,14 @@ const STATUS_CONFIG = {
   pending_employee_input: { label: 'Pending Employee Input', color: 'info' },
   pending_approval: { label: 'Pending Approval', color: 'warning' },
   completed: { label: 'Completed', color: 'success' },
-  archived: { label: 'Archived', color: 'secondary' },
+  archived: { label: 'Archived', color: 'secondary' }
 };
 
 const REVIEW_TYPES = [
   { value: 'quarterly', label: 'Quarterly' },
   { value: 'annual', label: 'Annual' },
   { value: 'probationary', label: 'Probationary' },
-  { value: 'performance_improvement', label: 'Performance Improvement' },
+  { value: 'performance_improvement', label: 'Performance Improvement' }
 ];
 
 const RATING_FIELDS = [
@@ -58,7 +58,7 @@ const RATING_FIELDS = [
   { key: 'communication', label: 'Communication' },
   { key: 'teamwork', label: 'Teamwork' },
   { key: 'leadership', label: 'Leadership' },
-  { key: 'punctuality', label: 'Punctuality' },
+  { key: 'punctuality', label: 'Punctuality' }
 ];
 
 const initialFormState = {
@@ -76,7 +76,7 @@ const initialFormState = {
   goals: '',
   reviewerComments: '',
   reviewDate: new Date().toISOString().split('T')[0],
-  nextReviewDate: '',
+  nextReviewDate: ''
 };
 
 const EmployeeReviewManagement = () => {
@@ -110,7 +110,7 @@ const EmployeeReviewManagement = () => {
     page: page + 1,
     limit: rowsPerPage,
     ...(statusFilter && { status: statusFilter }),
-    ...(typeFilter && { reviewType: typeFilter }),
+    ...(typeFilter && { reviewType: typeFilter })
   }), [page, rowsPerPage, statusFilter, typeFilter]);
 
   const { data: reviewsData, isLoading, isError, error: queryError } = useEmployeeReviews(filters);
@@ -147,7 +147,7 @@ const EmployeeReviewManagement = () => {
   const handleCreate = useCallback(() => {
     const { employeeId, reviewPeriod, reviewType, ...rest } = formData;
     if (!employeeId || !reviewPeriod) return;
-    
+
     const payload = { employeeId, reviewPeriod, reviewType };
     // Include rating fields if provided
     RATING_FIELDS.forEach(({ key }) => {
@@ -161,7 +161,7 @@ const EmployeeReviewManagement = () => {
       onSuccess: () => {
         setCreateDialogOpen(false);
         setFormData(initialFormState);
-      },
+      }
     });
   }, [formData, createMutation]);
 
@@ -182,7 +182,7 @@ const EmployeeReviewManagement = () => {
       onSuccess: () => {
         setEditDialogOpen(false);
         setSelectedReview(null);
-      },
+      }
     });
   }, [selectedReview, formData, updateMutation]);
 
@@ -190,13 +190,13 @@ const EmployeeReviewManagement = () => {
     if (!selectedReview) return;
     statusMutation.mutate({
       id: selectedReview.id,
-      data: statusAction,
+      data: statusAction
     }, {
       onSuccess: () => {
         setStatusDialogOpen(false);
         setSelectedReview(null);
         setStatusAction({ status: '', hrApproved: false });
-      },
+      }
     });
   }, [selectedReview, statusAction, statusMutation]);
 
@@ -204,13 +204,13 @@ const EmployeeReviewManagement = () => {
     if (!selectedReview || !selfAssessment.trim()) return;
     updateMutation.mutate({
       id: selectedReview.id,
-      data: { employeeSelfAssessment: selfAssessment },
+      data: { employeeSelfAssessment: selfAssessment }
     }, {
       onSuccess: () => {
         setSelfAssessDialogOpen(false);
         setSelectedReview(null);
         setSelfAssessment('');
-      },
+      }
     });
   }, [selectedReview, selfAssessment, updateMutation]);
 
@@ -220,7 +220,7 @@ const EmployeeReviewManagement = () => {
       onSuccess: () => {
         setDeleteDialogOpen(false);
         setSelectedReview(null);
-      },
+      }
     });
   }, [selectedReview, deleteMutation]);
 
@@ -241,7 +241,7 @@ const EmployeeReviewManagement = () => {
       goals: review.goals || '',
       reviewerComments: review.reviewerComments || '',
       reviewDate: review.reviewDate ? review.reviewDate.split('T')[0] : '',
-      nextReviewDate: review.nextReviewDate ? review.nextReviewDate.split('T')[0] : '',
+      nextReviewDate: review.nextReviewDate ? review.nextReviewDate.split('T')[0] : ''
     });
     setEditDialogOpen(true);
   }, []);

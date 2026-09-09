@@ -4,7 +4,7 @@ export const DEFAULT_PAYSLIP_TEMPLATE = {
   name: 'Standard Payslip Template',
   version: '1.0',
   isActive: true,
-  
+
   // Company branding configuration
   // These values should come from SystemSettings (payslip template settings)
   companyInfo: {
@@ -23,7 +23,7 @@ export const DEFAULT_PAYSLIP_TEMPLATE = {
   structure: {
     // Header information
     header: {
-      title: "PAY SLIP",
+      title: 'PAY SLIP',
       showMonth: true,
       showYear: true,
       showPayPeriod: true
@@ -61,116 +61,116 @@ export const DEFAULT_PAYSLIP_TEMPLATE = {
 
     // Earnings configuration
     earnings: {
-      title: "EARNINGS",
+      title: 'EARNINGS',
       fields: [
-        { 
-          key: 'basicSalary', 
-          label: 'Basic Salary', 
-          required: true, 
-          editable: true, 
+        {
+          key: 'basicSalary',
+          label: 'Basic Salary',
+          required: true,
+          editable: true,
           type: 'currency',
           calculation: 'fixed', // fixed, percentage, formula
           description: 'Basic salary component'
         },
-        { 
-          key: 'houseRentAllowance', 
-          label: 'House Rent Allowance (HRA)', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'houseRentAllowance',
+          label: 'House Rent Allowance (HRA)',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'percentage', // Can be percentage of basic
           percentage: 40,
           description: 'House rent allowance'
         },
-        { 
-          key: 'conveyanceAllowance', 
-          label: 'Conveyance Allowance', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'conveyanceAllowance',
+          label: 'Conveyance Allowance',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'fixed',
           maxAmount: 1600, // As per tax exemption
           description: 'Transport allowance'
         },
-        { 
-          key: 'medicalAllowance', 
-          label: 'Medical Allowance', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'medicalAllowance',
+          label: 'Medical Allowance',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'fixed',
           maxAmount: 15000, // Annual limit
           description: 'Medical reimbursement'
         },
-        { 
-          key: 'specialAllowance', 
-          label: 'Special Allowance', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'specialAllowance',
+          label: 'Special Allowance',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'fixed',
           description: 'Special allowance or city compensatory allowance'
         },
-        { 
-          key: 'performanceBonus', 
-          label: 'Performance Bonus', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'performanceBonus',
+          label: 'Performance Bonus',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'variable',
           description: 'Performance based bonus'
         },
-        { 
-          key: 'overtimeAllowance', 
-          label: 'Overtime Allowance', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'overtimeAllowance',
+          label: 'Overtime Allowance',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'formula',
           formula: 'overtimeHours * hourlyRate * 2', // Double rate for overtime
           description: 'Overtime payment'
         },
-        { 
-          key: 'lta', 
-          label: 'Leave Travel Allowance (LTA)', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'lta',
+          label: 'Leave Travel Allowance (LTA)',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'fixed',
           description: 'Leave travel allowance'
         },
-        { 
-          key: 'shiftAllowance', 
-          label: 'Shift Allowance', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'shiftAllowance',
+          label: 'Shift Allowance',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'fixed',
           description: 'Night/shift differential'
         },
-        { 
-          key: 'internetAllowance', 
-          label: 'Internet Allowance', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'internetAllowance',
+          label: 'Internet Allowance',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'fixed',
           description: 'Internet/mobile reimbursement'
         },
-        { 
-          key: 'arrears', 
-          label: 'Arrears', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'arrears',
+          label: 'Arrears',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'variable',
           description: 'Previous month arrears'
         },
-        { 
-          key: 'incentive', 
-          label: 'Incentive', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'incentive',
+          label: 'Incentive',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'variable',
           description: 'Sales/target incentive'
@@ -180,44 +180,44 @@ export const DEFAULT_PAYSLIP_TEMPLATE = {
 
     // Deductions configuration
     deductions: {
-      title: "DEDUCTIONS",
+      title: 'DEDUCTIONS',
       fields: [
-        { 
-          key: 'providentFund', 
-          label: 'Provident Fund (PF)', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'providentFund',
+          label: 'Provident Fund (PF)',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'percentage',
           percentage: 12, // 12% of basic
           maxAmount: 1800, // Current PF ceiling
           description: 'Employee provident fund contribution'
         },
-        { 
-          key: 'voluntaryPF', 
-          label: 'Voluntary PF', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'voluntaryPF',
+          label: 'Voluntary PF',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'fixed',
           description: 'Additional voluntary PF contribution'
         },
-        { 
-          key: 'esic', 
-          label: 'ESIC', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'esic',
+          label: 'ESIC',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'percentage',
           percentage: 0.75, // Employee share 0.75%
           maxAmount: 21000, // ESIC wage ceiling
           description: 'Employee state insurance contribution'
         },
-        { 
-          key: 'professionalTax', 
-          label: 'Professional Tax', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'professionalTax',
+          label: 'Professional Tax',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'slab', // Based on salary slabs
           slabs: [
@@ -228,66 +228,66 @@ export const DEFAULT_PAYSLIP_TEMPLATE = {
           ],
           description: 'State professional tax'
         },
-        { 
-          key: 'tds', 
-          label: 'Tax Deducted at Source (TDS)', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'tds',
+          label: 'Tax Deducted at Source (TDS)',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'formula', // Complex tax calculation
           description: 'Income tax deduction'
         },
-        { 
-          key: 'medicalPremium', 
-          label: 'Medical Insurance Premium', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'medicalPremium',
+          label: 'Medical Insurance Premium',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'fixed',
           description: 'Group medical insurance premium'
         },
-        { 
-          key: 'nps', 
-          label: 'National Pension Scheme (NPS)', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'nps',
+          label: 'National Pension Scheme (NPS)',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'percentage',
           percentage: 10, // Employee contribution
           description: 'NPS employee contribution'
         },
-        { 
-          key: 'loanEmi', 
-          label: 'Loan EMI', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'loanEmi',
+          label: 'Loan EMI',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'fixed',
           description: 'Employee loan EMI deduction'
         },
-        { 
-          key: 'advances', 
-          label: 'Salary Advance', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'advances',
+          label: 'Salary Advance',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'variable',
           description: 'Salary advance recovery'
         },
-        { 
-          key: 'canteenCharges', 
-          label: 'Canteen Charges', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'canteenCharges',
+          label: 'Canteen Charges',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'variable',
           description: 'Canteen/meal deduction'
         },
-        { 
-          key: 'otherDeductions', 
-          label: 'Other Deductions', 
-          required: false, 
-          editable: true, 
+        {
+          key: 'otherDeductions',
+          label: 'Other Deductions',
+          required: false,
+          editable: true,
           type: 'currency',
           calculation: 'variable',
           description: 'Miscellaneous deductions'
@@ -308,7 +308,7 @@ export const DEFAULT_PAYSLIP_TEMPLATE = {
     // Payment information
     payment: {
       fields: [
-        { key: 'paymentMode', label: 'Payment Mode', required: true, editable: true, 
+        { key: 'paymentMode', label: 'Payment Mode', required: true, editable: true,
           options: ['Online Transfer', 'Cheque', 'Cash', 'UPI'] },
         { key: 'disbursementDate', label: 'Disbursement Date', required: true, editable: true, type: 'date' },
         { key: 'payPeriod', label: 'Pay Period', required: true, editable: true },
@@ -320,9 +320,9 @@ export const DEFAULT_PAYSLIP_TEMPLATE = {
     // Footer
     footer: {
       showSignature: true,
-      signatureText: "This is a computer generated payslip and does not require signature.",
+      signatureText: 'This is a computer generated payslip and does not require signature.',
       showDisclaimer: true,
-      disclaimer: "This payslip is confidential and for the named employee only."
+      disclaimer: 'This payslip is confidential and for the named employee only.'
     }
   },
 
@@ -330,57 +330,57 @@ export const DEFAULT_PAYSLIP_TEMPLATE = {
   calculations: {
     // Gross salary calculation
     grossSalary: {
-      formula: "SUM(earnings.*)",
-      description: "Sum of all earnings"
+      formula: 'SUM(earnings.*)',
+      description: 'Sum of all earnings'
     },
-    
+
     // Total deductions calculation
     totalDeductions: {
-      formula: "SUM(deductions.*)",
-      description: "Sum of all deductions"
+      formula: 'SUM(deductions.*)',
+      description: 'Sum of all deductions'
     },
-    
+
     // Net salary calculation
     netSalary: {
-      formula: "grossSalary - totalDeductions",
-      description: "Gross salary minus total deductions"
+      formula: 'grossSalary - totalDeductions',
+      description: 'Gross salary minus total deductions'
     },
 
     // HRA calculation (if percentage based)
     houseRentAllowance: {
-      formula: "basicSalary * 0.40",
+      formula: 'basicSalary * 0.40',
       condition: "calculation === 'percentage'",
-      description: "40% of basic salary"
+      description: '40% of basic salary'
     },
 
     // PF calculation
     providentFund: {
-      formula: "MIN(basicSalary * 0.12, 1800)",
-      description: "12% of basic salary, capped at ₹1800"
+      formula: 'MIN(basicSalary * 0.12, 1800)',
+      description: '12% of basic salary, capped at ₹1800'
     },
 
     // ESIC calculation
     esic: {
-      formula: "IF(grossSalary <= 21000, grossSalary * 0.0075, 0)",
-      description: "0.75% of gross salary if gross <= ₹21000"
+      formula: 'IF(grossSalary <= 21000, grossSalary * 0.0075, 0)',
+      description: '0.75% of gross salary if gross <= ₹21000'
     },
 
     // Professional Tax calculation
     professionalTax: {
-      formula: "LOOKUP(grossSalary, professionalTaxSlabs)",
-      description: "Based on salary slabs"
+      formula: 'LOOKUP(grossSalary, professionalTaxSlabs)',
+      description: 'Based on salary slabs'
     },
 
     // Absent days calculation
     absentDays: {
-      formula: "totalWorkingDays - presentDays",
-      description: "Total working days minus present days"
+      formula: 'totalWorkingDays - presentDays',
+      description: 'Total working days minus present days'
     },
 
     // Paid days calculation
     paidDays: {
-      formula: "presentDays - lopDays",
-      description: "Present days minus LOP days"
+      formula: 'presentDays - lopDays',
+      description: 'Present days minus LOP days'
     }
   },
 
@@ -458,7 +458,7 @@ export const TEMPLATE_VARIANTS = {
       }
     }
   },
-  
+
   'intern': {
     ...DEFAULT_PAYSLIP_TEMPLATE,
     id: 'intern',
@@ -466,7 +466,7 @@ export const TEMPLATE_VARIANTS = {
     structure: {
       ...DEFAULT_PAYSLIP_TEMPLATE.structure,
       earnings: {
-        title: "STIPEND & ALLOWANCES",
+        title: 'STIPEND & ALLOWANCES',
         fields: [
           { key: 'stipend', label: 'Monthly Stipend', required: true, editable: true, type: 'currency' },
           { key: 'transportAllowance', label: 'Transport Allowance', required: false, editable: true, type: 'currency' },
@@ -474,7 +474,7 @@ export const TEMPLATE_VARIANTS = {
         ]
       },
       deductions: {
-        title: "DEDUCTIONS",
+        title: 'DEDUCTIONS',
         fields: [
           { key: 'tds', label: 'TDS (if applicable)', required: false, editable: true, type: 'currency' }
         ]
@@ -489,7 +489,7 @@ export const TEMPLATE_VARIANTS = {
     structure: {
       ...DEFAULT_PAYSLIP_TEMPLATE.structure,
       earnings: {
-        title: "PROFESSIONAL FEES",
+        title: 'PROFESSIONAL FEES',
         fields: [
           { key: 'consultingFee', label: 'Consulting Fee', required: true, editable: true, type: 'currency' },
           { key: 'projectBonus', label: 'Project Bonus', required: false, editable: true, type: 'currency' },
@@ -497,7 +497,7 @@ export const TEMPLATE_VARIANTS = {
         ]
       },
       deductions: {
-        title: "DEDUCTIONS",
+        title: 'DEDUCTIONS',
         fields: [
           { key: 'tds', label: 'TDS', required: true, editable: true, type: 'currency' },
           { key: 'gst', label: 'GST (if applicable)', required: false, editable: true, type: 'currency' }
@@ -522,10 +522,10 @@ export const getAllTemplates = () => {
 
 export const validatePayslipData = (data, template = DEFAULT_PAYSLIP_TEMPLATE) => {
   const errors = [];
-  
+
   template.validation.rules.forEach(rule => {
     const value = data[rule.field];
-    
+
     switch (rule.rule) {
       case 'required':
         if (!value && value !== 0) {
@@ -554,6 +554,6 @@ export const validatePayslipData = (data, template = DEFAULT_PAYSLIP_TEMPLATE) =
         break;
     }
   });
-  
+
   return errors;
 };

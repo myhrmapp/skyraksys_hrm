@@ -39,7 +39,7 @@ function TabPanel({ children, value, index, hasBeenActive, contentSx }) {
 TabPanel.propTypes = {
   children: PropTypes.node,
   index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired
 };
 
 const TabbedPage = ({ title, subtitle, icon, tabs = [], defaultTab = 0, testId }) => {
@@ -66,7 +66,7 @@ const TabbedPage = ({ title, subtitle, icon, tabs = [], defaultTab = 0, testId }
           pb: 0,
           borderRadius: 0,
           bgcolor: 'background.paper',
-          borderBottom: `1px solid ${theme.palette.divider}`,
+          borderBottom: `1px solid ${theme.palette.divider}`
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
@@ -80,7 +80,7 @@ const TabbedPage = ({ title, subtitle, icon, tabs = [], defaultTab = 0, testId }
                 height: 40,
                 borderRadius: 1.5,
                 bgcolor: alpha(theme.palette.primary.main, 0.1),
-                color: 'primary.main',
+                color: 'primary.main'
               }}
             >
               {icon}
@@ -107,12 +107,12 @@ const TabbedPage = ({ title, subtitle, icon, tabs = [], defaultTab = 0, testId }
               textTransform: 'none',
               fontWeight: 600,
               fontSize: '0.9rem',
-              minHeight: 48,
+              minHeight: 48
             },
             '& .MuiTabs-indicator': {
               height: 3,
-              borderRadius: '3px 3px 0 0',
-            },
+              borderRadius: '3px 3px 0 0'
+            }
           }}
         >
           {tabs.map((tab, i) => (
@@ -148,11 +148,11 @@ TabbedPage.propTypes = {
       label: PropTypes.string.isRequired,
       icon: PropTypes.node,
       component: PropTypes.node,
-      render: PropTypes.func,
+      render: PropTypes.func
     })
   ).isRequired,
   defaultTab: PropTypes.number,
-  testId: PropTypes.string,
+  testId: PropTypes.string
 };
 
 export { TabPanel };

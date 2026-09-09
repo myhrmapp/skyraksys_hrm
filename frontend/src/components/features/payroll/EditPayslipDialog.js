@@ -222,7 +222,7 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
                       value={value}
                       onChange={(e) => handleEarningChange(key, e.target.value)}
                       InputProps={{
-                        startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>,
+                        startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>
                       }}
                       size="small"
                     />
@@ -282,7 +282,7 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
                       value={value}
                       onChange={(e) => handleDeductionChange(key, e.target.value)}
                       InputProps={{
-                        startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>,
+                        startAdornment: <Typography sx={{ mr: 1 }}>₹</Typography>
                       }}
                       size="small"
                     />
@@ -331,12 +331,12 @@ const EditPayslipDialog = ({ open, payslip, onClose, onSave, loading }) => {
 
           {/* Net Pay Amount */}
           <Grid item xs={12} md={6}>
-            <Paper 
-              elevation={3} 
-              sx={{ 
-                p: 3, 
+            <Paper
+              elevation={3}
+              sx={{
+                p: 3,
                 bgcolor: errors.netPay ? 'error.light' : 'primary.main',
-                color: 'white' 
+                color: 'white'
               }}
             >
               <Stack direction="row" justifyContent="space-between" alignItems="center">

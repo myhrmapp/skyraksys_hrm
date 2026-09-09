@@ -8,7 +8,7 @@ const EmployeeFormHeader = ({
   autoSaving,
   currentUser,
   onBack,
-  employeeName,
+  employeeName
 }) => {
   const theme = useTheme();
   // Tick every 30s so the "saved N mins ago" label stays current.
@@ -35,9 +35,9 @@ const EmployeeFormHeader = ({
         </Box>
 
         <Box>
-          <Typography 
-            variant="h4" 
-            component="h1" 
+          <Typography
+            variant="h4"
+            component="h1"
             sx={{ fontWeight: 700, color: 'text.primary', mb: 0.25 }}
           >
             {isEditMode
@@ -48,7 +48,7 @@ const EmployeeFormHeader = ({
             {isEditMode ? 'Update employee details across all sections' : 'Fill in all sections to create a complete employee profile'}
           </Typography>
         </Box>
-        
+
         <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
           {/* Auto-save Status Indicator */}
           {lastSaved && (
@@ -56,8 +56,8 @@ const EmployeeFormHeader = ({
               size="small"
               icon={autoSaving ? <CircularProgress size={14} color="inherit" /> : <SaveIcon fontSize="small" />}
               label={
-                autoSaving 
-                  ? 'Saving...' 
+                autoSaving
+                  ? 'Saving...'
                   : `Saved ${(() => {
                       const minutes = Math.floor((new Date() - lastSaved) / 60000);
                       if (minutes < 1) return 'just now';
@@ -76,12 +76,12 @@ const EmployeeFormHeader = ({
               }}
             />
           )}
-          
+
           {currentUser && (
-            <Chip 
+            <Chip
               avatar={
-                <Avatar 
-                  sx={{ 
+                <Avatar
+                  sx={{
                     bgcolor: 'primary.main',
                     width: 28,
                     height: 28
@@ -91,7 +91,7 @@ const EmployeeFormHeader = ({
                 </Avatar>
               }
               label={`${currentUser.firstName || ''} ${currentUser.lastName || ''}`}
-              sx={{ 
+              sx={{
                 fontWeight: 600,
                 bgcolor: 'rgba(99, 102, 241, 0.08)',
                 color: theme.palette.primary.main,
@@ -107,9 +107,9 @@ const EmployeeFormHeader = ({
       </Box>
 
       {/* Info Card */}
-      <Card 
-        elevation={0} 
-        sx={{ 
+      <Card
+        elevation={0}
+        sx={{
           bgcolor: 'primary.50',
           border: '1px solid',
           borderColor: 'primary.100',
@@ -117,8 +117,8 @@ const EmployeeFormHeader = ({
         }}
       >
         <CardContent sx={{ p: 2 }}>
-          <Box 
-            sx={{ 
+          <Box
+            sx={{
               color: theme.palette.text.secondary,
               fontSize: '0.875rem',
               display: 'flex',

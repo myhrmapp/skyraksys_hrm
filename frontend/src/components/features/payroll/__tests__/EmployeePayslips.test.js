@@ -12,8 +12,8 @@ jest.mock('../../../../services/payslip/payslipService', () => {
   return {
     payslipService: {
       getPayslipHistory: jest.fn(),
-      downloadPayslipByIdPDF: jest.fn(),
-    },
+      downloadPayslipByIdPDF: jest.fn()
+    }
   };
 });
 const { payslipService } = require('../../../../services/payslip/payslipService');
@@ -35,7 +35,7 @@ jest.mock('../../../payslip/PayslipViewer', () => {
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
+  useNavigate: () => mockNavigate
 }));
 
 // ─── Mock data ──────────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ const mockPayslips = [
     totalDeductions: 16000,
     status: 'paid',
     paidDate: '2026-01-31',
-    payslipNumber: 'PS-2026-01',
+    payslipNumber: 'PS-2026-01'
   },
   {
     id: 2,
@@ -65,7 +65,7 @@ const mockPayslips = [
     totalDeductions: 16000,
     status: 'paid',
     paidDate: '2025-12-31',
-    payslipNumber: 'PS-2025-12',
+    payslipNumber: 'PS-2025-12'
   },
   {
     id: 3,
@@ -77,15 +77,15 @@ const mockPayslips = [
     totalDeductions: 16000,
     status: 'generated',
     paidDate: null,
-    payslipNumber: 'PS-2026-02',
-  },
+    payslipNumber: 'PS-2026-02'
+  }
 ];
 
 const defaultAuthValue = { user: createMockUser('employee') };
 
 const renderComponent = (authOverrides = {}) => {
   return render(<EmployeePayslips />, {
-    authValue: { ...defaultAuthValue, ...authOverrides },
+    authValue: { ...defaultAuthValue, ...authOverrides }
   });
 };
 
@@ -201,8 +201,8 @@ describe('EmployeePayslips', () => {
         {
           id: 4, month: 3, year: 2026, basicSalary: 50000,
           grossEarnings: 82850, netPay: 66850, totalDeductions: 16000,
-          status: 'finalized', paidDate: null, payslipNumber: 'PS-2026-03',
-        },
+          status: 'finalized', paidDate: null, payslipNumber: 'PS-2026-03'
+        }
       ];
       payslipService.getPayslipHistory.mockResolvedValue(payslipsWithFinalized);
       renderComponent();
@@ -216,8 +216,8 @@ describe('EmployeePayslips', () => {
         {
           id: 5, month: 4, year: 2026, basicSalary: 50000,
           grossEarnings: 82850, netPay: 66850, totalDeductions: 16000,
-          status: 'draft', paidDate: null, payslipNumber: 'PS-2026-04',
-        },
+          status: 'draft', paidDate: null, payslipNumber: 'PS-2026-04'
+        }
       ];
       payslipService.getPayslipHistory.mockResolvedValue(payslipsWithDraft);
       renderComponent();
@@ -436,7 +436,7 @@ describe('EmployeePayslips', () => {
         totalDeductions: 16000,
         status: 'paid',
         paidDate: `${2026 - Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, '0')}-28`,
-        payslipNumber: `PS-${i + 1}`,
+        payslipNumber: `PS-${i + 1}`
       }));
 
       payslipService.getPayslipHistory.mockResolvedValue(manyPayslips);

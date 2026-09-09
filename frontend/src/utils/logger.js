@@ -10,21 +10,21 @@ const logger = {
       console.log(...args);
     }
   },
-  
+
   info: (...args) => {
     if (isDevelopment) {
       console.info(...args);
     }
   },
-  
+
   warn: (...args) => {
     console.warn(...args); // Always log warnings
   },
-  
+
   error: (...args) => {
     console.error(...args); // Always log errors
   },
-  
+
   debug: (...args) => {
     if (isDevelopment) {
       console.debug(...args);

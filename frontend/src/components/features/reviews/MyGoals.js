@@ -18,13 +18,13 @@ import { useAuth } from '../../../contexts/AuthContext';
 export default function MyGoals() {
   const { enqueueSnackbar } = useSnackbar();
   const { user } = useAuth();
-  
+
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [openGoalDialog, setOpenGoalDialog] = useState(false);
   const [goalForm, setGoalForm] = useState({ id: null, title: '', description: '', period: 'Q3 2025', status: 'not_started' });
-  
+
   const [openKrDialog, setOpenKrDialog] = useState(false);
   const [activeGoalId, setActiveGoalId] = useState(null);
   const [krForm, setKrForm] = useState({ id: null, title: '', targetValue: 100, currentValue: 0, metric: '%' });
@@ -50,7 +50,7 @@ export default function MyGoals() {
       enqueueSnackbar('Title and period are required', { variant: 'warning' });
       return;
     }
-    
+
     try {
       if (goalForm.id) {
         await goalService.updateGoal(goalForm.id, goalForm);
@@ -151,14 +151,14 @@ export default function MyGoals() {
         <Grid container spacing={3}>
           {goals.map(goal => (
             <Grid item xs={12} md={6} lg={4} key={goal.id}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', 
+              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column',
                           background: 'rgba(255, 255, 255, 0.65)', backdropFilter: 'blur(16px)' }}>
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
                     <Typography variant="h6" fontWeight="bold">{goal.title}</Typography>
                     <Chip label={goal.period} size="small" color="primary" variant="outlined" />
                   </Box>
-                  
+
                   <Typography variant="body2" color="text.secondary" mb={2}>
                     {goal.description || 'No description provided.'}
                   </Typography>
@@ -171,7 +171,7 @@ export default function MyGoals() {
 
                   <Divider sx={{ my: 2 }} />
                   <Typography variant="subtitle2" mb={1}>Key Results</Typography>
-                  
+
                   {goal.keyResults && goal.keyResults.length > 0 ? (
                     goal.keyResults.map(kr => {
                       const krPercent = Math.min(100, (kr.currentValue / kr.targetValue) * 100);
@@ -217,7 +217,7 @@ export default function MyGoals() {
               </Card>
             </Grid>
           ))}
-          
+
           {goals.length === 0 && (
             <Grid item xs={12}>
               <Paper sx={{ p: 5, textAlign: 'center' }}>
@@ -235,13 +235,13 @@ export default function MyGoals() {
         <DialogContent dividers>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField fullWidth label="Objective Title" value={goalForm.title} onChange={e => setGoalForm({...goalForm, title: e.target.value})} required />
+              <TextField fullWidth label="Objective Title" value={goalForm.title} onChange={e => setGoalForm({ ...goalForm, title: e.target.value })} required />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Period" value={goalForm.period} onChange={e => setGoalForm({...goalForm, period: e.target.value})} placeholder="e.g. Q3 2025" required />
+              <TextField fullWidth label="Period" value={goalForm.period} onChange={e => setGoalForm({ ...goalForm, period: e.target.value })} placeholder="e.g. Q3 2025" required />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth select label="Status" value={goalForm.status} onChange={e => setGoalForm({...goalForm, status: e.target.value})}>
+              <TextField fullWidth select label="Status" value={goalForm.status} onChange={e => setGoalForm({ ...goalForm, status: e.target.value })}>
                 <MenuItem value="not_started">Not Started</MenuItem>
                 <MenuItem value="on_track">On Track</MenuItem>
                 <MenuItem value="at_risk">At Risk</MenuItem>
@@ -249,10 +249,10 @@ export default function MyGoals() {
               </TextField>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth type="date" label="Due Date" InputLabelProps={{ shrink: true }} value={goalForm.dueDate || ''} onChange={e => setGoalForm({...goalForm, dueDate: e.target.value})} />
+              <TextField fullWidth type="date" label="Due Date" InputLabelProps={{ shrink: true }} value={goalForm.dueDate || ''} onChange={e => setGoalForm({ ...goalForm, dueDate: e.target.value })} />
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth multiline rows={3} label="Description" value={goalForm.description || ''} onChange={e => setGoalForm({...goalForm, description: e.target.value})} />
+              <TextField fullWidth multiline rows={3} label="Description" value={goalForm.description || ''} onChange={e => setGoalForm({ ...goalForm, description: e.target.value })} />
             </Grid>
           </Grid>
         </DialogContent>
@@ -268,16 +268,16 @@ export default function MyGoals() {
         <DialogContent dividers>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField fullWidth label="Key Result" value={krForm.title} onChange={e => setKrForm({...krForm, title: e.target.value})} required />
+              <TextField fullWidth label="Key Result" value={krForm.title} onChange={e => setKrForm({ ...krForm, title: e.target.value })} required />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField fullWidth type="number" label="Target Value" value={krForm.targetValue} onChange={e => setKrForm({...krForm, targetValue: e.target.value})} required />
+              <TextField fullWidth type="number" label="Target Value" value={krForm.targetValue} onChange={e => setKrForm({ ...krForm, targetValue: e.target.value })} required />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField fullWidth type="number" label="Current Value" value={krForm.currentValue} onChange={e => setKrForm({...krForm, currentValue: e.target.value})} required />
+              <TextField fullWidth type="number" label="Current Value" value={krForm.currentValue} onChange={e => setKrForm({ ...krForm, currentValue: e.target.value })} required />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField fullWidth label="Metric" value={krForm.metric} onChange={e => setKrForm({...krForm, metric: e.target.value})} placeholder="% or $" />
+              <TextField fullWidth label="Metric" value={krForm.metric} onChange={e => setKrForm({ ...krForm, metric: e.target.value })} placeholder="% or $" />
             </Grid>
           </Grid>
         </DialogContent>

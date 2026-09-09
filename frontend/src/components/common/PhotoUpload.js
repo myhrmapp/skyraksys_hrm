@@ -24,15 +24,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import http from '../../http-common';
 import { buildPhotoUrl } from '../../utils/photoUrl';
 
-const PhotoUpload = ({ 
-  employeeId, 
-  currentPhotoUrl, 
-  onUploadSuccess, 
-  onUploadError, 
+const PhotoUpload = ({
+  employeeId,
+  currentPhotoUrl,
+  onUploadSuccess,
+  onUploadError,
   disabled = false,
   size = 150,
   showUploadButton = true,
-  allowDelete = true 
+  allowDelete = true
 }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(currentPhotoUrl || '');
@@ -102,7 +102,7 @@ const PhotoUpload = ({
 
       setSuccess('Photo uploaded successfully!');
       setSelectedFile(null);
-      
+
       // Update the preview URL with the resolved backend URL
       setPreviewUrl(buildPhotoUrl(data.data.photoUrl));
 
@@ -116,7 +116,7 @@ const PhotoUpload = ({
     } catch (error) {
       console.error('Upload error:', error);
       setError(error.message || 'Failed to upload photo');
-      
+
       // Reset preview to original photo
       setPreviewUrl(currentPhotoUrl || '');
       setSelectedFile(null);
@@ -131,7 +131,7 @@ const PhotoUpload = ({
 
   const handleDeletePhoto = async () => {
     setConfirmDialog(false);
-    
+
     if (!employeeId) return;
 
     setUploading(true);
@@ -278,7 +278,7 @@ const PhotoUpload = ({
               >
                 Select Photo
               </Button>
-              
+
               {previewUrl && allowDelete && (
                 <Tooltip title="Remove current photo">
                   <IconButton
@@ -306,7 +306,7 @@ const PhotoUpload = ({
               >
                 {uploading ? 'Uploading...' : 'Upload'}
               </Button>
-              
+
               <Button
                 variant="outlined"
                 onClick={cancelSelection}
@@ -364,9 +364,9 @@ const PhotoUpload = ({
           <Button onClick={() => setConfirmDialog(false)}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleDeletePhoto} 
-            color="error" 
+          <Button
+            onClick={handleDeletePhoto}
+            color="error"
             variant="contained"
             disabled={uploading}
           >

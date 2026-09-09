@@ -14,21 +14,21 @@ test.describe('Goals & OKRs Management', () => {
   test('TC-GOAL-01: Employee can navigate to My Goals', async () => {
     await employeePage.goto('/goals');
     // Verify the page loaded by looking for a heading or the add button
-    await expect(employeePage.getByRole('heading', { name: /Goals/i })).toBeVisible({ timeout: 5000 });
+    await expect(employeePage.getByRole('heading', { name: 'My Goals & OKRs' })).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-GOAL-02: Employee can create a new Goal', async () => {
     await employeePage.goto('/goals');
     
     // Open create dialog
-    await employeePage.getByRole('button', { name: /Add Goal/i }).click();
+    await employeePage.getByRole('button', { name: /New Goal/i }).click();
     
     // Fill the form
     await employeePage.getByLabel(/Title/i).fill('Increase Q3 Sales');
     await employeePage.getByLabel(/Description/i).fill('Focus on enterprise leads.');
     
     // Select Timeframe
-    await employeePage.getByLabel(/Timeframe/i).click();
+    await employeePage.getByLabel(/Period/i).fill('Q3');
     await employeePage.getByRole('option', { name: /Q3/i }).first().click().catch(async () => {
         // Fallback if Q3 isn't available
         await employeePage.keyboard.press('Escape');
@@ -45,10 +45,10 @@ test.describe('Goals & OKRs Management', () => {
     
     // Expand or click into the goal to add a key result
     // Assuming there is a + button for key results inside the goal card
-    const addKrBtn = employeePage.locator('button[aria-label="Add Key Result"], button:has-text("Add KR")').first();
+    const addKrBtn = employeePage.getByRole('button', { name: /Add Key Result/i }).first();
     await expect(addKrBtn).toBeVisible();
     await addKrBtn.click();
-    await employeePage.getByLabel(/Title/i).fill('Close 5 Enterprise deals');
+    await employeePage.getByLabel(/Key Result/i).fill('Close 5 Enterprise deals');
     await employeePage.getByLabel(/Target/i).fill('5');
     await employeePage.getByRole('button', { name: /Save/i }).click();
 
@@ -57,7 +57,7 @@ test.describe('Goals & OKRs Management', () => {
 
   test('TC-GOAL-04: Admin/Manager can view team goals', async () => {
     await adminPage.goto('/goals'); // Admins can also have goals
-    await expect(adminPage.getByRole('heading', { name: /Goals/i })).toBeVisible({ timeout: 5000 });
+    await expect(adminPage.getByRole('heading', { name: 'My Goals & OKRs' })).toBeVisible({ timeout: 5000 });
     
     // Try visiting employee list and navigating to profile to see goals (if integrated)
     // Or just ensuring Admin has the My Goals page

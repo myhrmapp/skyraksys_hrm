@@ -45,8 +45,8 @@ const adminRoutes = [
   <Route key="system-showcase" path="system-showcase" element={withBoundary(<SystemShowcase />, 'Loading System Showcase...')} />,
   // Debug — development only
   ...(process.env.NODE_ENV !== 'production' ? [
-    <Route key="debug-validation" path="debug/validation" element={withBoundary(<SimpleValidationDiagnostic />, 'Loading Validation Diagnostic...')} />,
-  ] : []),
+    <Route key="debug-validation" path="debug/validation" element={withBoundary(<SimpleValidationDiagnostic />, 'Loading Validation Diagnostic...')} />
+  ] : [])
 ];
 
 export default adminRoutes;

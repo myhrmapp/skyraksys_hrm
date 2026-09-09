@@ -9,7 +9,7 @@ class SocketService {
   connect() {
     if (!this.socket) {
       const user = authService.getCurrentUser();
-      
+
       this.socket = io(SOCKET_URL, {
         auth: {
           token: user ? user.accessToken : null

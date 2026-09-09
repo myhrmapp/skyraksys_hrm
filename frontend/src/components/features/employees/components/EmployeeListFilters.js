@@ -33,9 +33,9 @@ const EmployeeListFilters = ({
   totalRecords
 }) => {
   return (
-    <Card 
-      sx={{ 
-        mb: 3, 
+    <Card
+      sx={{
+        mb: 3,
         borderRadius: 3,
         bgcolor: 'white',
         boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
@@ -139,11 +139,11 @@ const EmployeeListFilters = ({
             </Box>
           </Grid>
         </Grid>
-        
+
         <Divider sx={{ my: 2.5 }} />
 
         {/* Results Summary */}
-        <Box sx={{ 
+        <Box sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -153,48 +153,48 @@ const EmployeeListFilters = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             <FilterIcon fontSize="small" color="action" />
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-              Active Filters: 
+              Active Filters:
             </Typography>
             {searchTerm && (
-              <Chip 
-                label={`Search: "${searchTerm}"`} 
-                size="small" 
+              <Chip
+                label={`Search: "${searchTerm}"`}
+                size="small"
                 onDelete={() => setSearchTerm('')}
                 color="primary"
                 variant="outlined"
               />
             )}
             {statusFilter && (
-              <Chip 
-                label={`Status: ${statusFilter}`} 
-                size="small" 
+              <Chip
+                label={`Status: ${statusFilter}`}
+                size="small"
                 onDelete={() => setStatusFilter('')}
                 color="primary"
                 variant="outlined"
               />
             )}
             {departmentFilter && departmentFilter !== 'all' && (
-              <Chip 
+              <Chip
                 label={`Department: ${departments?.find(d => d.id === departmentFilter)?.name || 'Selected'}`}
-                size="small" 
+                size="small"
                 onDelete={() => setDepartmentFilter('all')}
                 color="primary"
                 variant="outlined"
               />
             )}
             {employmentTypeFilter && (
-              <Chip 
+              <Chip
                 label={`Type: ${employmentTypeFilter}`}
-                size="small" 
+                size="small"
                 onDelete={() => setEmploymentTypeFilter('')}
                 color="primary"
                 variant="outlined"
               />
             )}
             {locationFilter && (
-              <Chip 
+              <Chip
                 label={`Location: ${locationFilter}`}
-                size="small" 
+                size="small"
                 onDelete={() => setLocationFilter('')}
                 color="primary"
                 variant="outlined"

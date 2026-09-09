@@ -154,7 +154,7 @@ const DefaultMobileCard = ({ item, columns }) => {
               {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>
           </Box>
-          
+
           <Collapse in={expanded}>
             <Divider sx={{ my: 1 }} />
             {hiddenColumns.map((column) => (
@@ -414,7 +414,7 @@ export const LeaveRequestMobileCard = ({ request, onAction }) => {
 // PayrollMobileCard component for payroll entries
 export const PayrollMobileCard = ({ payslip, onAction, onDownload }) => {
   const [expanded, setExpanded] = useState(false);
-  
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'approved': return 'success';
@@ -584,9 +584,9 @@ export const PayrollMobileCard = ({ payslip, onAction, onDownload }) => {
 
 // Timesheet Mobile Card Component
 export const TimesheetMobileCard = ({ timesheet, onApprove, onReject, onView }) => (
-  <Card 
-    sx={{ 
-      mb: 2, 
+  <Card
+    sx={{
+      mb: 2,
       border: '1px solid',
       borderColor: 'divider',
       borderRadius: 2,
@@ -600,9 +600,9 @@ export const TimesheetMobileCard = ({ timesheet, onApprove, onReject, onView }) 
       {/* Header with Employee and Status */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-          <Avatar 
-            sx={{ 
-              mr: 2, 
+          <Avatar
+            sx={{
+              mr: 2,
               bgcolor: 'primary.main',
               width: 40,
               height: 40
@@ -676,8 +676,8 @@ export const TimesheetMobileCard = ({ timesheet, onApprove, onReject, onView }) 
 
       {/* Actions */}
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        <Button 
-          size="small" 
+        <Button
+          size="small"
           variant="outlined"
           onClick={() => onView?.(timesheet)}
           sx={{ flex: 1, minWidth: 'auto' }}
@@ -686,8 +686,8 @@ export const TimesheetMobileCard = ({ timesheet, onApprove, onReject, onView }) 
         </Button>
         {timesheet.status?.toLowerCase() === 'submitted' && (
           <>
-            <Button 
-              size="small" 
+            <Button
+              size="small"
               variant="contained"
               color="success"
               onClick={() => onApprove?.(timesheet.id)}
@@ -695,8 +695,8 @@ export const TimesheetMobileCard = ({ timesheet, onApprove, onReject, onView }) 
             >
               Approve
             </Button>
-            <Button 
-              size="small" 
+            <Button
+              size="small"
               variant="contained"
               color="error"
               onClick={() => onReject?.(timesheet.id)}

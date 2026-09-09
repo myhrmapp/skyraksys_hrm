@@ -17,10 +17,10 @@ import {
 } from '@mui/icons-material';
 import InfoField from './InfoField';
 
-const StatutoryInfoSection = ({ 
-  employee, 
-  editing, 
-  onChange, 
+const StatutoryInfoSection = ({
+  employee,
+  editing,
+  onChange,
   canEditSensitive,
   showStatutory,
   setShowStatutory

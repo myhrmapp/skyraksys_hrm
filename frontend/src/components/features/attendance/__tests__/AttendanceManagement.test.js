@@ -3,6 +3,8 @@ import { screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders as render, createMockUser } from '../../../../test-utils/testUtils';
 
+import AttendanceManagement from '../AttendanceManagement';
+
 // ─── Mock DataGrid (v6 installed but component uses v7 valueGetter API) ─────
 jest.mock('@mui/x-data-grid', () => {
   const React = require('react');
@@ -42,11 +44,9 @@ jest.mock('@mui/x-data-grid', () => {
     DataGrid: MockDataGrid,
     GridToolbarContainer: ({ children }) => <div>{children}</div>,
     GridToolbarFilterButton: () => <button>Filter</button>,
-    GridToolbarExport: () => <button>Export</button>,
+    GridToolbarExport: () => <button>Export</button>
   };
 });
-
-import AttendanceManagement from '../AttendanceManagement';
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
@@ -60,8 +60,8 @@ jest.mock('../../../../http-common', () => {
       get: jest.fn(),
       post: jest.fn(),
       put: jest.fn(),
-      delete: jest.fn(),
-    },
+      delete: jest.fn()
+    }
   };
 });
 const mockHttp = require('../../../../http-common').default;
@@ -72,8 +72,8 @@ jest.mock('../../../../services', () => {
   }
   return {
     employeeService: {
-      getAll: jest.fn(),
-    },
+      getAll: jest.fn()
+    }
   };
 });
 const { employeeService } = require('../../../../services');
@@ -84,18 +84,18 @@ const mockAttendanceRecords = [
   {
     id: 1, employeeId: 'EMP001',
     employee: { firstName: 'John', lastName: 'Doe', employeeId: 'EMP001' },
-    date: '2026-02-13', status: 'present', checkIn: '2026-02-13T09:00', checkOut: '2026-02-13T17:30', notes: '',
+    date: '2026-02-13', status: 'present', checkIn: '2026-02-13T09:00', checkOut: '2026-02-13T17:30', notes: ''
   },
   {
     id: 2, employeeId: 'EMP002',
     employee: { firstName: 'Jane', lastName: 'Smith', employeeId: 'EMP002' },
-    date: '2026-02-13', status: 'absent', checkIn: null, checkOut: null, notes: 'Sick',
+    date: '2026-02-13', status: 'absent', checkIn: null, checkOut: null, notes: 'Sick'
   },
   {
     id: 3, employeeId: 'EMP003',
     employee: { firstName: 'Bob', lastName: 'Wilson', employeeId: 'EMP003' },
-    date: '2026-02-13', status: 'late', checkIn: '2026-02-13T10:30', checkOut: '2026-02-13T18:00', notes: '',
-  },
+    date: '2026-02-13', status: 'late', checkIn: '2026-02-13T10:30', checkOut: '2026-02-13T18:00', notes: ''
+  }
 ];
 
 const mockSummary = {
@@ -103,14 +103,14 @@ const mockSummary = {
   absent: 3,
   late: 2,
   'half-day': 1,
-  'on-leave': 4,
+  'on-leave': 4
 };
 
 const mockEmployeeList = [
   { id: 1, employeeId: 'EMP001', firstName: 'John', lastName: 'Doe' },
   { id: 2, employeeId: 'EMP002', firstName: 'Jane', lastName: 'Smith' },
   { id: 3, employeeId: 'EMP003', firstName: 'Bob', lastName: 'Wilson' },
-  { id: 4, employeeId: 'EMP004', firstName: 'Alice', lastName: 'Brown' },
+  { id: 4, employeeId: 'EMP004', firstName: 'Alice', lastName: 'Brown' }
 ];
 
 const adminUser = createMockUser('admin');
@@ -121,7 +121,7 @@ function setupDefaultMocks() {
   mockHttp.get.mockImplementation((url) => {
     if (url.includes('/attendance/daily')) {
       return Promise.resolve({
-        data: { data: mockAttendanceRecords, totalCount: mockAttendanceRecords.length },
+        data: { data: mockAttendanceRecords, totalCount: mockAttendanceRecords.length }
       });
     }
     if (url.includes('/attendance/summary')) {
@@ -133,13 +133,13 @@ function setupDefaultMocks() {
   mockHttp.post.mockResolvedValue({ data: { success: true } });
 
   employeeService.getAll.mockResolvedValue({
-    data: mockEmployeeList,
+    data: mockEmployeeList
   });
 }
 
 function renderComponent() {
   return render(<AttendanceManagement />, {
-    authValue: { user: adminUser },
+    authValue: { user: adminUser }
   });
 }
 
@@ -188,7 +188,7 @@ describe('AttendanceManagement', () => {
       expect(mockHttp.get).toHaveBeenCalledWith(
         '/attendance/daily',
         expect.objectContaining({
-          params: expect.objectContaining({ date: expect.any(String) }),
+          params: expect.objectContaining({ date: expect.any(String) })
         })
       );
     });
@@ -202,8 +202,8 @@ describe('AttendanceManagement', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             startDate: expect.any(String),
-            endDate: expect.any(String),
-          }),
+            endDate: expect.any(String)
+          })
         })
       );
     });
@@ -332,7 +332,7 @@ describe('AttendanceManagement', () => {
       expect(mockHttp.post).toHaveBeenCalledWith(
         '/attendance/mark',
         expect.objectContaining({
-          status: 'present',
+          status: 'present'
         })
       );
     });
@@ -401,8 +401,8 @@ describe('AttendanceManagement', () => {
       if (url.includes('/attendance/summary')) {
         return Promise.resolve({
           data: {
-            data: { present: 0, absent: 0, late: 0, 'half-day': 0, 'on-leave': 0 },
-          },
+            data: { present: 0, absent: 0, late: 0, 'half-day': 0, 'on-leave': 0 }
+          }
         });
       }
       return Promise.resolve({ data: {} });
@@ -428,8 +428,8 @@ describe('AttendanceManagement', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             page: expect.any(Number),
-            limit: expect.any(Number),
-          }),
+            limit: expect.any(Number)
+          })
         })
       );
     });
@@ -444,8 +444,8 @@ describe('AttendanceManagement', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             startDate: expect.any(String),
-            endDate: expect.any(String),
-          }),
+            endDate: expect.any(String)
+          })
         })
       );
     });

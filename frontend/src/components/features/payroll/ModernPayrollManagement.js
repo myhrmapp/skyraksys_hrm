@@ -43,7 +43,7 @@ import {
   CircularProgress,
   LinearProgress,
   InputAdornment,
-  Avatar,
+  Avatar
 } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 import {
@@ -62,7 +62,7 @@ import {
   ArrowForward as ArrowIcon,
   People as PeopleIcon,
   MonetizationOn as PaidIcon,
-  HourglassEmpty as DraftIcon,
+  HourglassEmpty as DraftIcon
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
@@ -77,7 +77,7 @@ import { formatCurrency } from '../../../utils/formatCurrency';
 // ── Shared constants ───────────────────────────────
 const MONTHS = Array.from({ length: 12 }, (_, i) => ({
   value: i + 1,
-  label: new Date(2000, i).toLocaleString('default', { month: 'long' }),
+  label: new Date(2000, i).toLocaleString('default', { month: 'long' })
 }));
 const YEARS = Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i);
 
@@ -114,7 +114,7 @@ const ModernPayrollManagement = () => {
 
   // Navigate to Generate tab (used by Overview quick-start)
   const goToGenerateTab = () => setActiveTab(1);
-  
+
   // Filters state
   const [filters, setFilters] = useState({
     month: new Date().getMonth() + 1,
@@ -123,7 +123,7 @@ const ModernPayrollManagement = () => {
     status: '',
     templateId: ''
   });
-  
+
   // 🚀 React Query for payslips
   const { data: payslipsData, isLoading: isLoadingPayslips, isError: isErrorPayslips, refetch: refetchPayslips } = useQuery({
     queryKey: ['payslips', filters, page, rowsPerPage],
@@ -144,7 +144,7 @@ const ModernPayrollManagement = () => {
       enqueueSnackbar('Failed to load payslips', { variant: 'error' });
     }
   });
-  
+
   // 🚀 React Query for employees
   const { data: employeesData } = useQuery({
     queryKey: ['employees', 'active'],
@@ -156,7 +156,7 @@ const ModernPayrollManagement = () => {
     },
     onError: (error) => console.error('Load employees error:', error)
   });
-  
+
   // 🚀 React Query for departments
   const { data: departmentsData } = useQuery({
     queryKey: ['departments'],
@@ -166,7 +166,7 @@ const ModernPayrollManagement = () => {
     },
     onError: (error) => console.error('Load departments error:', error)
   });
-  
+
   // 🚀 React Query for templates
   const { data: templatesData } = useQuery({
     queryKey: ['payslip-templates', 'active'],
@@ -176,7 +176,7 @@ const ModernPayrollManagement = () => {
     },
     onError: (error) => console.error('Load templates error:', error)
   });
-  
+
   // Derived data
   const payslips = useMemo(
     () => payslipsData?.success ? (payslipsData.data?.payslips || []) : [],
@@ -225,7 +225,7 @@ const ModernPayrollManagement = () => {
       return nameMatch && deptMatch;
     });
   }, [employees, empSearch, empDept]);
-  
+
   // Dialog state
   const [viewDialog, setViewDialog] = useState(false);
   const [selectedPayslip, setSelectedPayslip] = useState(null);
@@ -233,11 +233,11 @@ const ModernPayrollManagement = () => {
   const [overtimeOverrides, setOvertimeOverrides] = useState({});
   const [editDialog, setEditDialog] = useState(false);
   const [payslipToEdit, setPayslipToEdit] = useState(null);
-  
+
   // Validation
   const [validationDialog, setValidationDialog] = useState(false);
   const [validationResults, setValidationResults] = useState(null);
-  
+
   // Bulk operations
   const [selectedPayslipIds, setSelectedPayslipIds] = useState([]);
 
@@ -284,7 +284,7 @@ const ModernPayrollManagement = () => {
     const validIds = validationResults.validEmployees.map(emp => emp.id);
     setSelectedEmployees(validIds);
     setValidationDialog(false);
-    
+
     // Proceed with generation
     handleGeneratePayslips(validIds);
   };
@@ -295,21 +295,21 @@ const ModernPayrollManagement = () => {
 
   const handleGeneratePayslips = async (employeeIdsToGenerate = null) => {
     const idsToUse = employeeIdsToGenerate || selectedEmployees;
-    
+
     if (idsToUse.length === 0) {
       enqueueSnackbar('Please select at least one employee', { variant: 'warning' });
       return;
     }
-    
+
     try {
       setOperationLoading(true);
-      
+
       const payload = {
         employeeIds: idsToUse,
         month: filters.month,
         year: filters.year
       };
-      
+
       // Include templateId if selected
       if (filters.templateId) {
         payload.templateId = filters.templateId;
@@ -324,9 +324,9 @@ const ModernPayrollManagement = () => {
       if (Object.keys(activeOT).length > 0) {
         payload.options = { ...payload.options, overtimeOverrides: activeOT };
       }
-      
+
       const response = await http.post('/payslips/generate', payload);
-      
+
       if (response.data.success) {
         enqueueSnackbar(
           response.data.message || 'Payslips generated successfully',
@@ -384,7 +384,7 @@ const ModernPayrollManagement = () => {
     try {
       setOperationLoading(true);
       const response = await http.put(`/payslips/${payslipId}/finalize`);
-      
+
       if (response.data.success) {
         enqueueSnackbar('Payslip finalized successfully', { variant: 'success' });
         refetchPayslips();
@@ -401,7 +401,7 @@ const ModernPayrollManagement = () => {
     try {
       setOperationLoading(true);
       const response = await http.put(`/payslips/${payslipId}/mark-paid`);
-      
+
       if (response.data.success) {
         enqueueSnackbar('Payslip marked as paid', { variant: 'success' });
         refetchPayslips();
@@ -419,7 +419,7 @@ const ModernPayrollManagement = () => {
       const response = await http.get(`/payslips/${payslipId}/pdf`, {
         responseType: 'blob'
       });
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href = url;
@@ -428,7 +428,7 @@ const ModernPayrollManagement = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
+
       enqueueSnackbar('PDF downloaded successfully', { variant: 'success' });
     } catch (error) {
       console.error('Download PDF error:', error);
@@ -446,7 +446,7 @@ const ModernPayrollManagement = () => {
         },
         responseType: 'blob'
       });
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
       const link = document.createElement('a');
       link.href = url;
@@ -455,7 +455,7 @@ const ModernPayrollManagement = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
+
       enqueueSnackbar('Excel exported successfully', { variant: 'success' });
     } catch (error) {
       console.error('Export error:', error);
@@ -707,7 +707,7 @@ const ModernPayrollManagement = () => {
         color: theme.palette.grey[600],
         bgColor: alpha(theme.palette.grey[500], 0.07),
         icon: <PeopleIcon />,
-        action: null,
+        action: null
       },
       {
         label: 'Draft',
@@ -717,7 +717,7 @@ const ModernPayrollManagement = () => {
         icon: <DraftIcon />,
         action: stats.draft > 0
           ? { label: 'View Drafts', onClick: () => { setFilters(f => ({ ...f, status: 'draft' })); setActiveTab(2); } }
-          : null,
+          : null
       },
       {
         label: 'Finalized',
@@ -727,7 +727,7 @@ const ModernPayrollManagement = () => {
         icon: <LockIcon />,
         action: stats.finalized > 0
           ? { label: 'Process Payments', onClick: () => setActiveTab(4) }
-          : null,
+          : null
       },
       {
         label: 'Paid',
@@ -735,8 +735,8 @@ const ModernPayrollManagement = () => {
         color: theme.palette.success.dark,
         bgColor: alpha(theme.palette.success.main, 0.08),
         icon: <PaidIcon />,
-        action: null,
-      },
+        action: null
+      }
     ];
 
     return (
@@ -786,7 +786,7 @@ const ModernPayrollManagement = () => {
                     gap: 0.5,
                     cursor: stage.action ? 'pointer' : 'default',
                     transition: 'box-shadow 0.15s',
-                    ...(stage.action && { '&:hover': { boxShadow: 4 } }),
+                    ...(stage.action && { '&:hover': { boxShadow: 4 } })
                   }}
                 >
                   <Box sx={{ color: stage.color }}>
@@ -848,7 +848,7 @@ const ModernPayrollManagement = () => {
             </Card>
           </Grid>
           <Grid item xs={6} sm={3}>
-            <Card sx={{ 
+            <Card sx={{
               background: 'rgba(255, 255, 255, 0.7)',
               backdropFilter: 'blur(20px)',
               border: '1px solid',
@@ -865,7 +865,7 @@ const ModernPayrollManagement = () => {
             </Card>
           </Grid>
           <Grid item xs={6} sm={3}>
-            <Card sx={{ 
+            <Card sx={{
               background: 'rgba(255, 255, 255, 0.7)',
               backdropFilter: 'blur(20px)',
               border: '1px solid',
@@ -915,10 +915,10 @@ const ModernPayrollManagement = () => {
       <Grid container spacing={4} alignItems="flex-start">
         {/* LEFT — Config panel */}
         <Grid item xs={12} md={4}>
-          <Card sx={{ 
-            p: 3, 
-            borderRadius: 4, 
-            border: '1px solid', 
+          <Card sx={{
+            p: 3,
+            borderRadius: 4,
+            border: '1px solid',
             borderColor: 'divider',
             boxShadow: '0 8px 32px rgba(0,0,0,0.04)'
           }}>
@@ -977,9 +977,9 @@ const ModernPayrollManagement = () => {
               startIcon={operationLoading ? <CircularProgress size={18} color="inherit" /> : <GenerateIcon />}
               onClick={handleValidateAndGenerate}
               disabled={operationLoading || selectedEmployees.length === 0}
-              sx={{ 
-                borderRadius: 2, 
-                py: 1.5, 
+              sx={{
+                borderRadius: 2,
+                py: 1.5,
                 fontWeight: 600,
                 background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                 boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
@@ -1010,12 +1010,12 @@ const ModernPayrollManagement = () => {
 
         {/* RIGHT — Employee picker */}
         <Grid item xs={12} md={8}>
-          <Card sx={{ 
-            overflow: 'hidden', 
-            borderRadius: 4, 
-            border: '1px solid', 
+          <Card sx={{
+            overflow: 'hidden',
+            borderRadius: 4,
+            border: '1px solid',
             borderColor: 'divider',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.04)' 
+            boxShadow: '0 8px 32px rgba(0,0,0,0.04)'
           }}>
             {/* Header + search */}
             <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider', background: 'linear-gradient(to right, rgba(248,250,252,0.8), rgba(241,245,249,0.8))' }}>
@@ -1041,7 +1041,7 @@ const ModernPayrollManagement = () => {
                           <ClearIcon fontSize="small" />
                         </IconButton>
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
                 <FormControl size="small" sx={{ minWidth: 160 }}>
@@ -1064,7 +1064,7 @@ const ModernPayrollManagement = () => {
             <Box sx={{
               px: 2, py: 1,
               borderBottom: 1, borderColor: 'divider',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between'
             }}>
               <FormControlLabel
                 control={
@@ -1119,16 +1119,16 @@ const ModernPayrollManagement = () => {
                         '&:hover': {
                           bgcolor: isSelected
                             ? alpha(theme.palette.primary.main, 0.10)
-                            : alpha(theme.palette.action.hover, 0.5),
+                            : alpha(theme.palette.action.hover, 0.5)
                         },
-                        '&:last-child': { borderBottom: 'none' },
+                        '&:last-child': { borderBottom: 'none' }
                       }}
                     >
                       <Checkbox checked={isSelected} size="small" readOnly tabIndex={-1} />
                       <Avatar sx={{
                         width: 32, height: 32, fontSize: 13,
                         bgcolor: theme.palette.primary.light,
-                        color: theme.palette.primary.contrastText,
+                        color: theme.palette.primary.contrastText
                       }}>
                         {emp.firstName?.[0]}{emp.lastName?.[0]}
                       </Avatar>
@@ -1209,7 +1209,7 @@ const ModernPayrollManagement = () => {
             )
           }}
         />
-        
+
         <FormControl sx={{ minWidth: 120 }}>
           <InputLabel>Month</InputLabel>
           <Select
@@ -1225,7 +1225,7 @@ const ModernPayrollManagement = () => {
             ))}
           </Select>
         </FormControl>
-        
+
         <FormControl sx={{ minWidth: 120 }}>
           <InputLabel>Year</InputLabel>
           <Select
@@ -1240,7 +1240,7 @@ const ModernPayrollManagement = () => {
             })}
           </Select>
         </FormControl>
-        
+
         {!statusFilter && (
         <FormControl sx={{ minWidth: 150 }}>
           <InputLabel>Status</InputLabel>
@@ -1258,7 +1258,7 @@ const ModernPayrollManagement = () => {
           </Select>
         </FormControl>
         )}
-        
+
         <FormControl sx={{ minWidth: 200 }}>
           <InputLabel>Department</InputLabel>
           <Select
@@ -1274,7 +1274,7 @@ const ModernPayrollManagement = () => {
           </Select>
         </FormControl>
       </Box>
-      
+
       {/* Bulk Actions Toolbar */}
       {selectedPayslipIds.length > 0 && (
         <Paper sx={{ p: 2, m: 2, bgcolor: 'primary.light' }}>
@@ -1314,8 +1314,8 @@ const ModernPayrollManagement = () => {
             >
               Bulk Delete
             </Button>
-            <Button 
-              size="small" 
+            <Button
+              size="small"
               onClick={() => setSelectedPayslipIds([])}
             >
               Clear Selection
@@ -1323,7 +1323,7 @@ const ModernPayrollManagement = () => {
           </Stack>
         </Paper>
       )}
-      
+
       {loading && <LinearProgress />}
 
       {isErrorPayslips ? (
@@ -1332,9 +1332,9 @@ const ModernPayrollManagement = () => {
           onRetry={refetchPayslips}
         />
       ) : (
-      <Card sx={{ 
-        borderRadius: 4, 
-        border: '1px solid', 
+      <Card sx={{
+        borderRadius: 4,
+        border: '1px solid',
         borderColor: 'divider',
         boxShadow: '0 10px 40px rgba(0,0,0,0.04)',
         overflow: 'hidden'
@@ -1370,7 +1370,7 @@ const ModernPayrollManagement = () => {
                   const firstName = (p.employee?.firstName || '').toLowerCase();
                   const lastName = (p.employee?.lastName || '').toLowerCase();
                   const fullName = `${firstName} ${lastName}`;
-                  return empId.includes(query) || fullName.includes(query) || 
+                  return empId.includes(query) || fullName.includes(query) ||
                          firstName.includes(query) || lastName.includes(query);
                 });
               if (filteredPayslips.length === 0) {
@@ -1513,21 +1513,21 @@ const ModernPayrollManagement = () => {
                 {selectedPayslip.employeeInfo?.designation || 'N/A'} | {selectedPayslip.employeeInfo?.department?.name || selectedPayslip.employeeInfo?.department || 'N/A'}
               </Typography>
             </Grid>
-            
+
             <Grid item xs={6}>
               <Typography variant="subtitle2" color="textSecondary">Pay Period</Typography>
               <Typography variant="body1">{selectedPayslip.payPeriod}</Typography>
             </Grid>
-            
+
             <Grid item xs={6}>
               <Typography variant="subtitle2" color="textSecondary">Status</Typography>
               <Chip label={selectedPayslip.status} color={getStatusColor(selectedPayslip.status)} size="small" />
             </Grid>
-            
+
             <Grid item xs={12}>
               <Divider sx={{ my: 1 }} />
             </Grid>
-            
+
             <Grid item xs={6}>
               <Typography variant="subtitle2" color="textSecondary">Earnings</Typography>
               {Object.entries(selectedPayslip.earnings || {}).map(([key, value]) => (
@@ -1543,7 +1543,7 @@ const ModernPayrollManagement = () => {
                 </Typography>
               </Box>
             </Grid>
-            
+
             <Grid item xs={6}>
               <Typography variant="subtitle2" color="textSecondary">Deductions</Typography>
               {Object.entries(selectedPayslip.deductions || {}).map(([key, value]) => (
@@ -1559,7 +1559,7 @@ const ModernPayrollManagement = () => {
                 </Typography>
               </Box>
             </Grid>
-            
+
             <Grid item xs={12}>
               <Divider sx={{ my: 1 }} />
               <Box display="flex" justifyContent="space-between">
@@ -1607,8 +1607,8 @@ const ModernPayrollManagement = () => {
       <DialogContent dividers>
         {validationResults && (
           <>
-            <Alert 
-              severity={validationResults.canProceed ? 'success' : 'error'} 
+            <Alert
+              severity={validationResults.canProceed ? 'success' : 'error'}
               sx={{ mb: 3 }}
             >
               <Typography variant="body1" fontWeight="bold">
@@ -1688,11 +1688,11 @@ const ModernPayrollManagement = () => {
                                 <TableCell>
                                   <Stack spacing={0.5}>
                                     {emp.issues.map((issue, idx) => (
-                                      <Chip 
-                                        key={idx} 
-                                        label={issue} 
-                                        color="error" 
-                                        size="small" 
+                                      <Chip
+                                        key={idx}
+                                        label={issue}
+                                        color="error"
+                                        size="small"
                                         sx={{ fontSize: '0.75rem' }}
                                       />
                                     ))}
@@ -1747,7 +1747,7 @@ const ModernPayrollManagement = () => {
           Comprehensive payslip generation, approval, and payment processing
         </Typography>
       </Box>
-      
+
       <Paper sx={{ mb: 3 }}>
         <Tabs data-testid="payroll-tabs" value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
           <Tab label="Overview" icon={<AssessmentIcon />} iconPosition="start" />
@@ -1756,25 +1756,25 @@ const ModernPayrollManagement = () => {
           <Tab label="Reports" icon={<AssessmentIcon />} iconPosition="start" />
         </Tabs>
       </Paper>
-      
+
       <Box sx={{ mt: 3 }}>
         {activeTab === 0 && <OverviewTab />}
         {activeTab === 1 && <GenerateTab />}
         {activeTab === 2 && (
-          <PayslipsTable 
+          <PayslipsTable
             title="Payslips — Payment Processing"
           />
         )}
         {activeTab === 3 && (
-          <PayslipsTable 
+          <PayslipsTable
             title="Payslips — Reports"
           />
         )}
       </Box>
-      
+
       <ViewPayslipDialog />
       <ValidationDialog />
-      <EditPayslipDialog 
+      <EditPayslipDialog
         open={editDialog}
         payslip={payslipToEdit}
         onClose={() => {

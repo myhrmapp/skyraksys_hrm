@@ -11,7 +11,7 @@ export const useErrorRecovery = (options = {}) => {
   const [recoveryAttempts, setRecoveryAttempts] = useState(0);
   const [lastError, setLastError] = useState(null);
   const [recoveryHistory, setRecoveryHistory] = useState([]);
-  
+
   const activeOperations = useRef(new Map());
 
   const {
@@ -37,7 +37,7 @@ export const useErrorRecovery = (options = {}) => {
    * Execute operation with comprehensive error recovery
    */
   const executeWithRecovery = useCallback(async (
-    operation, 
+    operation,
     recoveryConfig = {}
   ) => {
     const {
@@ -65,7 +65,7 @@ export const useErrorRecovery = (options = {}) => {
     try {
       // Execute operation
       const result = await operation();
-      
+
       // Success - cleanup and notify
       const operationData = activeOperations.current.get(operationId);
       if (operationData && operationData.attempts > 0) {
@@ -75,16 +75,16 @@ export const useErrorRecovery = (options = {}) => {
         }
         onRecoverySuccess?.(result, operationData.attempts);
       }
-      
+
       activeOperations.current.delete(operationId);
       onSuccess?.(result);
-      
+
       return result;
 
     } catch (error) {
       console.error(`Operation ${operationId} failed:`, error);
       setLastError(error);
-      
+
       const operationData = activeOperations.current.get(operationId);
       if (operationData) {
         operationData.attempts++;
@@ -97,7 +97,7 @@ export const useErrorRecovery = (options = {}) => {
       // Skip recovery if requested or max attempts reached
       if (skipRecovery || recoveryAttempts >= maxAttempts) {
         activeOperations.current.delete(operationId);
-        
+
         if (recoveryAttempts >= maxAttempts) {
           onMaxAttemptsReached?.(error, recoveryAttempts);
           if (enableNotifications && showErrorMessage) {
@@ -109,12 +109,12 @@ export const useErrorRecovery = (options = {}) => {
         } else if (enableNotifications && showErrorMessage) {
           showError(getErrorMessage(error));
         }
-        
+
         // Return fallback value if provided
         if (fallbackValue !== undefined) {
           return fallbackValue;
         }
-        
+
         throw error;
       }
 
@@ -172,14 +172,14 @@ export const useErrorRecovery = (options = {}) => {
     try {
       // Try each recovery strategy
       let recoverySuccessful = false;
-      
+
       for (const strategy of strategies) {
         try {
           if (await strategy.canRecover(error)) {
             if (logRecoveryAttempts) {
               console.log(`Attempting recovery strategy: ${strategy.name} for operation ${operationId}`);
             }
-            
+
             recoveryAttempt.strategiesAttempted.push({
               name: strategy.name,
               attempted: true,
@@ -188,22 +188,22 @@ export const useErrorRecovery = (options = {}) => {
             });
 
             await strategy.recover(error, operationId);
-            
+
             // Mark strategy as successful
             const lastStrategy = recoveryAttempt.strategiesAttempted[recoveryAttempt.strategiesAttempted.length - 1];
             lastStrategy.success = true;
-            
+
             recoverySuccessful = true;
-            
+
             if (enableNotifications) {
               showInfo(`Recovery successful using ${strategy.name}`, { autoHideDuration: 3000 });
             }
-            
+
             break;
           }
         } catch (recoveryError) {
           console.warn(`Recovery strategy ${strategy.name} failed:`, recoveryError);
-          
+
           const lastStrategy = recoveryAttempt.strategiesAttempted[recoveryAttempt.strategiesAttempted.length - 1];
           if (lastStrategy) {
             lastStrategy.error = recoveryError.message;
@@ -220,26 +220,26 @@ export const useErrorRecovery = (options = {}) => {
       if (recoverySuccessful || config.retryable) {
         try {
           const result = await operation();
-          
+
           recoveryAttempt.success = true;
           setRecoveryHistory(prev => [...prev, recoveryAttempt].slice(-10)); // Keep last 10
-          
+
           setIsRecovering(false);
           setRecoveryAttempts(0);
           activeOperations.current.delete(operationId);
-          
+
           if (enableNotifications && config.showSuccessMessage) {
             showSuccess(config.showSuccessMessage);
           }
-          
+
           onRecoverySuccess?.(result, recoveryAttempts + 1);
           config.onSuccess?.(result);
-          
+
           return result;
-          
+
         } catch (retryError) {
           console.error(`Operation retry failed for ${operationId}:`, retryError);
-          
+
           // Recursive recovery attempt if we haven't hit max attempts
           if (recoveryAttempts + 1 < config.maxAttempts) {
             return attemptRecovery(
@@ -260,20 +260,20 @@ export const useErrorRecovery = (options = {}) => {
     } catch (finalError) {
       recoveryAttempt.success = false;
       setRecoveryHistory(prev => [...prev, recoveryAttempt].slice(-10));
-      
+
       setIsRecovering(false);
       activeOperations.current.delete(operationId);
-      
+
       onRecoveryFailure?.(finalError, recoveryAttempts + 1);
-      
+
       if (recoveryAttempts + 1 >= config.maxAttempts) {
         setRecoveryAttempts(0);
         onMaxAttemptsReached?.(finalError, recoveryAttempts + 1);
-        
+
         if (enableNotifications && config.showErrorMessage) {
           showError(
             'Maximum recovery attempts reached. Please contact support.',
-            { 
+            {
               persist: true,
               action: {
                 label: 'Report Issue',
@@ -288,12 +288,12 @@ export const useErrorRecovery = (options = {}) => {
           { autoHideDuration: 5000 }
         );
       }
-      
+
       // Return fallback value if provided
       if (config.fallbackValue !== undefined) {
         return config.fallbackValue;
       }
-      
+
       throw finalError;
     }
   }, [
@@ -333,11 +333,11 @@ export const useErrorRecovery = (options = {}) => {
 
     // Reset recovery attempts for manual retry
     setRecoveryAttempts(0);
-    
+
     // This would need the original operation function to be stored
     // For now, just clear the operation
     activeOperations.current.delete(operationId);
-    
+
     if (enableNotifications) {
       showInfo('Manual retry initiated');
     }
@@ -351,7 +351,7 @@ export const useErrorRecovery = (options = {}) => {
       activeOperations.current.delete(operationId);
       setIsRecovering(false);
       setRecoveryAttempts(0);
-      
+
       if (enableNotifications) {
         showInfo('Recovery cancelled');
       }
@@ -416,7 +416,7 @@ export const useErrorRecovery = (options = {}) => {
     if (process.env.NODE_ENV === 'development') {
       console.log('Error report generated:', errorReport);
     }
-    
+
     // Could integrate with external error reporting service here
     // e.g., Sentry, LogRocket, etc.
   }, [recoveryHistory]);
@@ -426,7 +426,7 @@ export const useErrorRecovery = (options = {}) => {
    */
   const getRecoveryStats = useCallback(() => {
     const activeOps = Array.from(activeOperations.current.values());
-    
+
     return {
       isRecovering,
       recoveryAttempts,
@@ -454,24 +454,24 @@ export const useErrorRecovery = (options = {}) => {
   return {
     // Main recovery function
     executeWithRecovery,
-    
+
     // Helper functions
     createRecoverableOperation,
     retryOperation,
     cancelRecovery,
-    
+
     // State
     isRecovering,
     recoveryAttempts,
     lastError,
     recoveryHistory,
-    
+
     // Utilities
     getRecoveryStats,
     clearRecoveryHistory,
     getErrorMessage,
     reportError,
-    
+
     // State checks
     hasReachedMaxAttempts: recoveryAttempts >= maxRecoveryAttempts,
     hasActiveOperations: activeOperations.current.size > 0
@@ -497,7 +497,7 @@ export const commonRecoveryStrategies = {
             resolve();
           };
           window.addEventListener('online', handleOnline);
-          
+
           // Timeout after 30 seconds
           setTimeout(() => {
             window.removeEventListener('online', handleOnline);
@@ -505,7 +505,7 @@ export const commonRecoveryStrategies = {
           }, 30000);
         });
       }
-      
+
       // Wait a bit for network to stabilize
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
@@ -550,11 +550,11 @@ export const commonRecoveryStrategies = {
       if ('caches' in window) {
         await caches.delete('api-cache');
       }
-      
+
       // Clear relevant localStorage cache
       const cacheKeys = Object.keys(localStorage).filter(key => key.startsWith('cache_'));
       cacheKeys.forEach(key => localStorage.removeItem(key));
-      
+
       // Wait a bit before retry
       await new Promise(resolve => setTimeout(resolve, 1000));
     }

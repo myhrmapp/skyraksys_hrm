@@ -11,7 +11,7 @@ const TabPanel = ({ children, value, index, ...other }) => {
       {...other}
     >
       {value === index && (
-        <Box sx={{ 
+        <Box sx={{
           p: { xs: 3, md: 4 },
           bgcolor: 'white',
           minHeight: '500px'

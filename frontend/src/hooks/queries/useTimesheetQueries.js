@@ -12,7 +12,7 @@ export const timesheetKeys = {
   list: (filters) => [...timesheetKeys.lists(), filters],
   details: () => [...timesheetKeys.all, 'detail'],
   detail: (id) => [...timesheetKeys.details(), id],
-  pendingApprovals: () => [...timesheetKeys.all, 'pending-approvals'],
+  pendingApprovals: () => [...timesheetKeys.all, 'pending-approvals']
 };
 
 /**
@@ -22,7 +22,7 @@ export const useTimesheets = (filters = {}, options = {}) => {
   return useQuery({
     queryKey: timesheetKeys.list(filters),
     queryFn: () => timesheetService.getAll(filters),
-    ...options,
+    ...options
   });
 };
 
@@ -34,7 +34,7 @@ export const useTimesheet = (id, options = {}) => {
     queryKey: timesheetKeys.detail(id),
     queryFn: () => timesheetService.getById(id),
     enabled: !!id,
-    ...options,
+    ...options
   });
 };
 
@@ -45,7 +45,7 @@ export const usePendingTimesheetApprovals = (options = {}) => {
   return useQuery({
     queryKey: timesheetKeys.pendingApprovals(),
     queryFn: () => timesheetService.getPendingApprovals(),
-    ...options,
+    ...options
   });
 };
 
@@ -63,10 +63,10 @@ export const useCreateTimesheet = () => {
       enqueueSnackbar('Timesheet created successfully', { variant: 'success' });
     },
     onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to create timesheet', { 
-        variant: 'error' 
+      enqueueSnackbar(error.message || 'Failed to create timesheet', {
+        variant: 'error'
       });
-    },
+    }
   });
 };
 
@@ -85,10 +85,10 @@ export const useUpdateTimesheet = () => {
       enqueueSnackbar('Timesheet updated successfully', { variant: 'success' });
     },
     onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to update timesheet', { 
-        variant: 'error' 
+      enqueueSnackbar(error.message || 'Failed to update timesheet', {
+        variant: 'error'
       });
-    },
+    }
   });
 };
 
@@ -108,10 +108,10 @@ export const useSubmitTimesheet = () => {
       enqueueSnackbar('Timesheet submitted for approval', { variant: 'success' });
     },
     onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to submit timesheet', { 
-        variant: 'error' 
+      enqueueSnackbar(error.message || 'Failed to submit timesheet', {
+        variant: 'error'
       });
-    },
+    }
   });
 };
 
@@ -131,10 +131,10 @@ export const useApproveTimesheet = () => {
       enqueueSnackbar('Timesheet approved', { variant: 'success' });
     },
     onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to approve timesheet', { 
-        variant: 'error' 
+      enqueueSnackbar(error.message || 'Failed to approve timesheet', {
+        variant: 'error'
       });
-    },
+    }
   });
 };
 
@@ -154,9 +154,9 @@ export const useRejectTimesheet = () => {
       enqueueSnackbar('Timesheet rejected', { variant: 'success' });
     },
     onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to reject timesheet', { 
-        variant: 'error' 
+      enqueueSnackbar(error.message || 'Failed to reject timesheet', {
+        variant: 'error'
       });
-    },
+    }
   });
 };

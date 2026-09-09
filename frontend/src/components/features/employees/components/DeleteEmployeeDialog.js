@@ -13,12 +13,12 @@ import {
 } from '@mui/material';
 import { Warning as WarningIcon } from '@mui/icons-material';
 
-const DeleteEmployeeDialog = ({ 
-  open, 
-  onClose, 
-  onConfirm, 
-  employee, 
-  loading 
+const DeleteEmployeeDialog = ({
+  open,
+  onClose,
+  onConfirm,
+  employee,
+  loading
 }) => {
   const theme = useTheme();
 
@@ -31,8 +31,8 @@ const DeleteEmployeeDialog = ({
     >
       <DialogTitle>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Avatar 
-            sx={{ 
+          <Avatar
+            sx={{
               bgcolor: alpha(theme.palette.error.main, 0.1),
               width: 48,
               height: 48
@@ -50,7 +50,7 @@ const DeleteEmployeeDialog = ({
           </Box>
         </Box>
       </DialogTitle>
-      
+
       <DialogContent>
         <Typography variant="body1" color="text.secondary">
           Are you sure you want to terminate{' '}
@@ -64,11 +64,11 @@ const DeleteEmployeeDialog = ({
           )}
           ?
         </Typography>
-        <Box 
-          sx={{ 
-            mt: 2, 
-            p: 2, 
-            bgcolor: alpha(theme.palette.info.main, 0.1), 
+        <Box
+          sx={{
+            mt: 2,
+            p: 2,
+            bgcolor: alpha(theme.palette.info.main, 0.1),
             borderRadius: 2,
             border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
           }}
@@ -78,7 +78,7 @@ const DeleteEmployeeDialog = ({
           </Typography>
         </Box>
       </DialogContent>
-      
+
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
         <Button
           onClick={onClose}

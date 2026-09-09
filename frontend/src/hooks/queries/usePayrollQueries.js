@@ -12,7 +12,7 @@ export const payrollKeys = {
   payslipsList: (filters) => [...payrollKeys.payslips(), filters],
   payslipDetail: (id) => [...payrollKeys.payslips(), id],
   runs: () => [...payrollKeys.all, 'runs'],
-  runsList: (filters) => [...payrollKeys.runs(), filters],
+  runsList: (filters) => [...payrollKeys.runs(), filters]
 };
 
 /**
@@ -22,7 +22,7 @@ export const usePayslips = (filters = {}, options = {}) => {
   return useQuery({
     queryKey: payrollKeys.payslipsList(filters),
     queryFn: () => payrollService.getPayslips(filters),
-    ...options,
+    ...options
   });
 };
 
@@ -34,7 +34,7 @@ export const usePayslip = (id, options = {}) => {
     queryKey: payrollKeys.payslipDetail(id),
     queryFn: () => payrollService.getPayslipById(id),
     enabled: !!id,
-    ...options,
+    ...options
   });
 };
 
@@ -45,7 +45,7 @@ export const usePayrollRuns = (filters = {}, options = {}) => {
   return useQuery({
     queryKey: payrollKeys.runsList(filters),
     queryFn: () => payrollService.getPayrollRuns(filters),
-    ...options,
+    ...options
   });
 };
 
@@ -62,15 +62,15 @@ export const useGeneratePayslips = () => {
       queryClient.invalidateQueries({ queryKey: payrollKeys.payslips() });
       queryClient.invalidateQueries({ queryKey: payrollKeys.runs() });
       enqueueSnackbar(
-        `Generated ${result.count || result.payslips?.length || 0} payslips`, 
+        `Generated ${result.count || result.payslips?.length || 0} payslips`,
         { variant: 'success' }
       );
     },
     onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to generate payslips', { 
-        variant: 'error' 
+      enqueueSnackbar(error.message || 'Failed to generate payslips', {
+        variant: 'error'
       });
-    },
+    }
   });
 };
 
@@ -89,10 +89,10 @@ export const useUpdatePayslip = () => {
       enqueueSnackbar('Payslip updated successfully', { variant: 'success' });
     },
     onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to update payslip', { 
-        variant: 'error' 
+      enqueueSnackbar(error.message || 'Failed to update payslip', {
+        variant: 'error'
       });
-    },
+    }
   });
 };
 
@@ -111,10 +111,10 @@ export const useApprovePayslip = () => {
       enqueueSnackbar('Payslip approved', { variant: 'success' });
     },
     onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to approve payslip', { 
-        variant: 'error' 
+      enqueueSnackbar(error.message || 'Failed to approve payslip', {
+        variant: 'error'
       });
-    },
+    }
   });
 };
 
@@ -130,9 +130,9 @@ export const useDownloadPayslip = () => {
       enqueueSnackbar('Payslip downloaded successfully', { variant: 'success' });
     },
     onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to download payslip', { 
-        variant: 'error' 
+      enqueueSnackbar(error.message || 'Failed to download payslip', {
+        variant: 'error'
       });
-    },
+    }
   });
 };

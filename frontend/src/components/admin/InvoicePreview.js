@@ -67,7 +67,7 @@ const InvoicePreview = ({ template, isMobile = false }) => {
       default: return code;
     }
   };
-  
+
   const symbol = getCurrencySymbol(currency);
 
   const columnHeaders = {
@@ -145,7 +145,7 @@ const InvoicePreview = ({ template, isMobile = false }) => {
             </Typography>
           )}
         </Grid>
-        
+
         <Grid item xs={6}>
           <Typography variant="subtitle2" color="textSecondary" sx={{ textTransform: 'uppercase', mb: 1 }}>
             {labels.to}
@@ -183,8 +183,8 @@ const InvoicePreview = ({ template, isMobile = false }) => {
               <TableRow key={idx}>
                 {lineColumns.map((col) => (
                   <TableCell key={col}>
-                    {col === 'amount' || col === 'hourlyRate' 
-                      ? `${symbol}${item[col].toLocaleString()}` 
+                    {col === 'amount' || col === 'hourlyRate'
+                      ? `${symbol}${item[col].toLocaleString()}`
                       : item[col]}
                   </TableCell>
                 ))}
@@ -204,18 +204,18 @@ const InvoicePreview = ({ template, isMobile = false }) => {
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
               <Typography variant="body1">{symbol}{subtotalAmount.toLocaleString()}</Typography>
             </Grid>
-            
+
             <Grid item xs={6}>
               <Typography variant="body1" color="textSecondary">{labels.tax} ({taxPercent}%):</Typography>
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
               <Typography variant="body1">{symbol}{taxAmount.toLocaleString()}</Typography>
             </Grid>
-            
+
             <Grid item xs={12}>
               <Divider sx={{ my: 1 }} />
             </Grid>
-            
+
             <Grid item xs={6}>
               <Typography variant="h6" fontWeight="bold" color="#1f4037">{labels.total}:</Typography>
             </Grid>
@@ -238,7 +238,7 @@ const InvoicePreview = ({ template, isMobile = false }) => {
             </Typography>
           </Box>
         )}
-        
+
         {footerNote && (
           <Box sx={{ textAlign: 'center', mt: 4, pt: 2, borderTop: '1px solid #e0e0e0' }}>
             <Typography variant="caption" color="textSecondary">

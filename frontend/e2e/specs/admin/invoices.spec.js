@@ -18,7 +18,7 @@ test.describe('Client Invoices Management', () => {
 
   test('TC-INV-02: Admin can open Create Invoice Dialog', async () => {
     await adminPage.goto('/billing-invoices');
-    const createBtn = adminPage.getByRole('button', { name: /Create Invoice/i });
+    const createBtn = adminPage.getByRole('button', { name: /New Invoice/i });
     await expect(createBtn).toBeVisible();
     await createBtn.click();
     
@@ -33,8 +33,8 @@ test.describe('Client Invoices Management', () => {
     // Check if there are any invoices. If not, this step succeeds since there's no row.
     const hasRows = await adminPage.locator('table tbody tr').count();
     if (hasRows > 0) {
-      // Find the first download PDF button (often has color="primary" and a PDF icon)
-      const pdfBtn = adminPage.locator('button[color="primary"] svg[data-testid="PictureAsPdfIcon"]').first();
+      // Find the first download PDF button
+      const pdfBtn = adminPage.locator('button:has(svg[data-testid="PictureAsPdfIcon"])').first();
       // It should be visible if rows exist
       await expect(pdfBtn).toBeVisible();
     }
@@ -43,10 +43,7 @@ test.describe('Client Invoices Management', () => {
   test('TC-INV-04: RBAC - Employee is denied access to invoices', async () => {
     await employeePage.goto('/billing-invoices');
     
-    const currentUrl = employeePage.url();
-    // Assuming unauthorized access redirects to dashboard or shows "Access Denied"
-    const denied = !currentUrl.includes('/billing-invoices') || 
-                   await employeePage.locator('text=Access Denied, text=Unauthorized').isVisible();
-    expect(denied).toBeTruthy();
+    // Wait for the Access Denied page to render
+    await expect(employeePage.getByText(/Access Denied/i)).toBeVisible({ timeout: 10000 });
   });
 });

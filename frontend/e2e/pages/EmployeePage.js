@@ -670,9 +670,9 @@ class EmployeePage {
       await this.page.locator(this.s.salaryPayFrequency).click();
       await this.page.locator(`li[data-value="${data.payFrequency}"]`).click();
     }
-    // Basic salary (id-based since no data-testid on the TextField)
+    // Basic salary
     if (data.basicSalary) {
-      const input = this.page.locator('#salary\\.basicSalary, [name="salary.basicSalary"], [data-testid="salary-basicSalary"]').first();
+      const input = this.page.locator('#salaryStructure\\.basicSalary, [name="salaryStructure.basicSalary"], [data-testid="salary-basicSalary"] input').first();
       if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
         await input.clear();
         await input.fill(String(data.basicSalary));
@@ -731,38 +731,64 @@ class EmployeePage {
     await this.fillSalaryInfo(data);
 
     // Allowances
-    const allowanceFields = ['hra', 'transport', 'medical', 'food', 'communication', 'special', 'other'];
+    if (data.allowance_hra !== undefined) {
+      const input = this.page.locator(`[name="salaryStructure.hra"]`).first();
+      if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await input.clear();
+        await input.fill(String(data.allowance_hra));
+      }
+    }
+    
+    // Sum up other allowances
+    let otherAllowances = 0;
+    const allowanceFields = ['transport', 'medical', 'food', 'communication', 'special', 'other'];
     for (const key of allowanceFields) {
       if (data[`allowance_${key}`] !== undefined) {
-        const input = this.page.locator(`[name="salary.allowances.${key}"], #salary\\.allowances\\.${key}`).first();
-        if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
-          await input.clear();
-          await input.fill(String(data[`allowance_${key}`]));
-        }
+        otherAllowances += Number(data[`allowance_${key}`]);
+      }
+    }
+    if (otherAllowances > 0) {
+      const input = this.page.locator(`[name="salaryStructure.allowances"]`).first();
+      if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await input.clear();
+        await input.fill(String(otherAllowances));
       }
     }
 
     // Deductions
-    const deductionFields = ['pf', 'professionalTax', 'incomeTax', 'esi', 'other'];
-    for (const key of deductionFields) {
-      if (data[`deduction_${key}`] !== undefined) {
-        const input = this.page.locator(`[name="salary.deductions.${key}"], #salary\\.deductions\\.${key}`).first();
-        if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
-          await input.clear();
-          await input.fill(String(data[`deduction_${key}`]));
-        }
+    if (data.deduction_pf !== undefined) {
+      const input = this.page.locator(`[name="salaryStructure.pfContribution"]`).first();
+      if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await input.clear();
+        await input.fill(String(data.deduction_pf));
       }
     }
-
-    // Benefits
-    const benefitFields = ['bonus', 'incentive', 'overtime'];
-    for (const key of benefitFields) {
-      if (data[`benefit_${key}`] !== undefined) {
-        const input = this.page.locator(`[name="salary.benefits.${key}"], #salary\\.benefits\\.${key}`).first();
-        if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
-          await input.clear();
-          await input.fill(String(data[`benefit_${key}`]));
-        }
+    if (data.deduction_professionalTax !== undefined) {
+      const input = this.page.locator(`[name="salaryStructure.professionalTax"]`).first();
+      if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await input.clear();
+        await input.fill(String(data.deduction_professionalTax));
+      }
+    }
+    if (data.deduction_incomeTax !== undefined) {
+      const input = this.page.locator(`[name="salaryStructure.tds"]`).first();
+      if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await input.clear();
+        await input.fill(String(data.deduction_incomeTax));
+      }
+    }
+    if (data.deduction_esi !== undefined) {
+      const input = this.page.locator(`[name="salaryStructure.esi"]`).first();
+      if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await input.clear();
+        await input.fill(String(data.deduction_esi));
+      }
+    }
+    if (data.deduction_other !== undefined) {
+      const input = this.page.locator(`[name="salaryStructure.otherDeductions"]`).first();
+      if (await input.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await input.clear();
+        await input.fill(String(data.deduction_other));
       }
     }
 

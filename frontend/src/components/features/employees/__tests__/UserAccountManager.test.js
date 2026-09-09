@@ -15,8 +15,8 @@ jest.mock('../../../../services/auth.service', () => {
   return {
     authService: {
       resetUserPassword: jest.fn(),
-      updateUserAccount: jest.fn(),
-    },
+      updateUserAccount: jest.fn()
+    }
   };
 });
 const { authService } = require('../../../../services/auth.service');
@@ -24,8 +24,8 @@ const { authService } = require('../../../../services/auth.service');
 const mockShowNotification = jest.fn();
 jest.mock('../../../../contexts/NotificationContext', () => ({
   useNotifications: () => ({
-    showNotification: mockShowNotification,
-  }),
+    showNotification: mockShowNotification
+  })
 }));
 
 // ---------------------------------------------------------------------------
@@ -48,8 +48,8 @@ const mockEmployeeWithAccount = {
     role: 'employee',
     isActive: true,
     isLocked: false,
-    forcePasswordChange: false,
-  },
+    forcePasswordChange: false
+  }
 };
 
 const mockEmployeeWithoutAccount = {
@@ -62,7 +62,7 @@ const mockEmployeeWithoutAccount = {
   department: { name: 'HR' },
   position: { name: 'HR Specialist' },
   hireDate: '2024-06-01',
-  user: null,
+  user: null
 };
 
 // ---------------------------------------------------------------------------
@@ -677,7 +677,7 @@ describe('UserAccountManager', () => {
           expect.objectContaining({
             role: 'employee',
             enableLogin: true,
-            email: 'jane.smith@company.com',
+            email: 'jane.smith@company.com'
           })
         );
       });
@@ -702,7 +702,7 @@ describe('UserAccountManager', () => {
           expect.objectContaining({
             role: 'employee',
             enableLogin: true,
-            email: 'john.doe@company.com',
+            email: 'john.doe@company.com'
           })
         );
       });
@@ -775,7 +775,7 @@ describe('UserAccountManager', () => {
       await waitFor(() => {
         expect(mockOnUpdate).toHaveBeenCalledWith(
           expect.objectContaining({
-            enableLogin: false,
+            enableLogin: false
           })
         );
       });

@@ -1,4 +1,4 @@
-import http from "../http-common";
+import http from '../http-common';
 
 class ProjectService {
   getAll(params = {}) {
@@ -20,8 +20,8 @@ class ProjectService {
       clientName: data.clientName || '',
       managerId: data.managerId || null
     };
-    
-    return http.post("/projects", payload);
+
+    return http.post('/projects', payload);
   }
 
   update(id, data) {

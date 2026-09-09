@@ -16,9 +16,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import WarningIcon from '@mui/icons-material/Warning';
-import { 
-  validateEmployeeData, 
-  getValidationQuickFixes 
+import {
+  validateEmployeeData,
+  getValidationQuickFixes
 } from '../../utils/validationFixes';
 
 const SimpleValidationDiagnostic = () => {
@@ -57,7 +57,7 @@ const SimpleValidationDiagnostic = () => {
     const results = testCases.map(testCase => {
       const validationResult = validateEmployeeData(testCase.data);
       const quickFixes = getValidationQuickFixes(validationResult.errors);
-      
+
       return {
         ...testCase,
         validationResult,
@@ -73,7 +73,7 @@ const SimpleValidationDiagnostic = () => {
       <Typography variant="h4" sx={{ mb: 3 }}>
         🔧 Validation Diagnostic Tool
       </Typography>
-      
+
       <Alert severity="info" sx={{ mb: 3 }}>
         This tool helps diagnose validation issues with form data.
         Click "Run Validation Tests" to see how the validation system handles different data scenarios.
@@ -84,8 +84,8 @@ const SimpleValidationDiagnostic = () => {
           <Typography variant="h6" sx={{ mb: 2 }}>
             🧪 Test Controls
           </Typography>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={runValidationTests}
             startIcon={<CheckCircleIcon />}
             color="primary"
@@ -107,7 +107,7 @@ const SimpleValidationDiagnostic = () => {
                   <Typography variant="h6" sx={{ mb: 2 }}>
                     {testCase.name}
                   </Typography>
-                  
+
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="subtitle2" sx={{ mb: 1 }}>Original Data:</Typography>
                     <Paper sx={{ p: 1, bgcolor: 'grey.100', fontSize: '0.8rem' }}>
@@ -124,8 +124,8 @@ const SimpleValidationDiagnostic = () => {
 
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                      Validation Status: 
-                      <Chip 
+                      Validation Status:
+                      <Chip
                         label={testCase.validationResult.isValid ? 'Valid' : 'Invalid'}
                         color={testCase.validationResult.isValid ? 'success' : 'error'}
                         size="small"
@@ -149,9 +149,9 @@ const SimpleValidationDiagnostic = () => {
                     <Box>
                       <Typography variant="subtitle2" sx={{ mb: 1 }}>Quick Fixes:</Typography>
                       {testCase.quickFixes.map((fix, fixIndex) => (
-                        <Alert 
+                        <Alert
                           key={`fix-${fixIndex}`}
-                          severity={fix.type === 'error' ? 'error' : 'warning'} 
+                          severity={fix.type === 'error' ? 'error' : 'warning'}
                           sx={{ mb: 1 }}
                         >
                           <Typography variant="body2">

@@ -29,13 +29,13 @@ import dayjs from 'dayjs';
 import EmptyState from '../../../shared/EmptyState';
 import { buildPhotoUrl } from '../../../../utils/photoUrl';
 
-const EmployeeTableView = ({ 
-  employees, 
-  onView, 
-  onEdit, 
-  onDelete, 
-  onCreateUserAccount, 
-  onManageUserAccount 
+const EmployeeTableView = ({
+  employees,
+  onView,
+  onEdit,
+  onDelete,
+  onCreateUserAccount,
+  onManageUserAccount
 }) => {
   return (
     <TableContainer component={Paper} sx={{ borderRadius: 3, mt: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
@@ -62,10 +62,10 @@ const EmployeeTableView = ({
               </TableCell>
             </TableRow>
           ) : employees.map((emp) => (
-            <TableRow 
-              key={emp.id} 
-              hover 
-              sx={{ 
+            <TableRow
+              key={emp.id}
+              hover
+              sx={{
                 '&:last-child td, &:last-child th': { border: 0 },
                 transition: 'background-color 0.2s'
               }}
@@ -73,8 +73,8 @@ const EmployeeTableView = ({
               {/* Employee Name & ID */}
               <TableCell>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar 
-                    src={emp.photoUrl ? buildPhotoUrl(emp.photoUrl) : undefined} 
+                  <Avatar
+                    src={emp.photoUrl ? buildPhotoUrl(emp.photoUrl) : undefined}
                     sx={{ width: 40, height: 40, bgcolor: 'primary.main', fontSize: '1rem' }}
                   >
                     {emp.firstName?.charAt(0)}
@@ -154,7 +154,7 @@ const EmployeeTableView = ({
                       <VisibilityIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
-                  
+
                   {!emp.userId ? (
                     <Tooltip title="Create Login">
                       <IconButton size="small" onClick={() => onCreateUserAccount(emp)} data-testid="employee-table-create-login-btn" sx={{ color: 'success.main', bgcolor: 'success.50' }}>

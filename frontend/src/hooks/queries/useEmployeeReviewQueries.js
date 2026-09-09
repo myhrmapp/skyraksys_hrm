@@ -12,7 +12,7 @@ export const employeeReviewKeys = {
   list: (filters) => [...employeeReviewKeys.lists(), filters],
   details: () => [...employeeReviewKeys.all, 'detail'],
   detail: (id) => [...employeeReviewKeys.details(), id],
-  dashboard: () => [...employeeReviewKeys.all, 'dashboard'],
+  dashboard: () => [...employeeReviewKeys.all, 'dashboard']
 };
 
 /**
@@ -22,7 +22,7 @@ export const useEmployeeReviews = (filters = {}, options = {}) => {
   return useQuery({
     queryKey: employeeReviewKeys.list(filters),
     queryFn: () => employeeReviewService.getAll(filters),
-    ...options,
+    ...options
   });
 };
 
@@ -34,7 +34,7 @@ export const useEmployeeReview = (id, options = {}) => {
     queryKey: employeeReviewKeys.detail(id),
     queryFn: () => employeeReviewService.getById(id),
     enabled: !!id,
-    ...options,
+    ...options
   });
 };
 
@@ -46,7 +46,7 @@ export const useReviewDashboard = (options = {}) => {
     queryKey: employeeReviewKeys.dashboard(),
     queryFn: () => employeeReviewService.getDashboardStats(),
     staleTime: 2 * 60 * 1000,
-    ...options,
+    ...options
   });
 };
 
@@ -66,9 +66,9 @@ export const useCreateEmployeeReview = () => {
     },
     onError: (error) => {
       enqueueSnackbar(error?.response?.data?.message || error.message || 'Failed to create review', {
-        variant: 'error',
+        variant: 'error'
       });
-    },
+    }
   });
 };
 
@@ -89,9 +89,9 @@ export const useUpdateEmployeeReview = () => {
     },
     onError: (error) => {
       enqueueSnackbar(error?.response?.data?.message || error.message || 'Failed to update review', {
-        variant: 'error',
+        variant: 'error'
       });
-    },
+    }
   });
 };
 
@@ -112,9 +112,9 @@ export const useUpdateReviewStatus = () => {
     },
     onError: (error) => {
       enqueueSnackbar(error?.response?.data?.message || error.message || 'Failed to update status', {
-        variant: 'error',
+        variant: 'error'
       });
-    },
+    }
   });
 };
 
@@ -134,8 +134,8 @@ export const useDeleteEmployeeReview = () => {
     },
     onError: (error) => {
       enqueueSnackbar(error?.response?.data?.message || error.message || 'Failed to delete review', {
-        variant: 'error',
+        variant: 'error'
       });
-    },
+    }
   });
 };

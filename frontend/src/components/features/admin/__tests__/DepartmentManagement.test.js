@@ -14,13 +14,13 @@ jest.mock('../../../../http-common', () => {
   }
   return {
     __esModule: true,
-    default: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
+    default: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() }
   };
 });
 const mockHttp = require('../../../../http-common').default;
 
 jest.mock('../../../../contexts/LoadingContext', () => ({
-  useLoading: () => ({ isLoading: false, setLoading: jest.fn() }),
+  useLoading: () => ({ isLoading: false, setLoading: jest.fn() })
 }));
 
 jest.mock('../../../common/ConfirmDialog', () => {
@@ -45,8 +45,8 @@ jest.mock('../../../../hooks/useConfirmDialog', () => ({
     confirm: jest.fn().mockImplementation(({ onConfirm } = {}) => {
       if (onConfirm) onConfirm();
       return Promise.resolve(true);
-    }),
-  }),
+    })
+  })
 }));
 
 // ---------------------------------------------------------------------------
@@ -56,12 +56,12 @@ jest.mock('../../../../hooks/useConfirmDialog', () => ({
 const mockDepartments = [
   { id: 1, name: 'Engineering', description: 'Software development', managerId: 1, manager: { firstName: 'Alice', lastName: 'Manager' }, isActive: true, employeeCount: 10 },
   { id: 2, name: 'HR', description: 'Human resources', managerId: null, manager: null, isActive: true, employeeCount: 5 },
-  { id: 3, name: 'Finance', description: 'Financial operations', managerId: 2, manager: { firstName: 'Bob', lastName: 'Lead' }, isActive: false, employeeCount: 3 },
+  { id: 3, name: 'Finance', description: 'Financial operations', managerId: 2, manager: { firstName: 'Bob', lastName: 'Lead' }, isActive: false, employeeCount: 3 }
 ];
 
 const mockEmployees = [
   { id: 1, firstName: 'Alice', lastName: 'Manager', status: 'Active', employmentStatus: 'Active', employeeId: 'EMP001' },
-  { id: 2, firstName: 'Bob', lastName: 'Lead', status: 'Active', employmentStatus: 'Active', employeeId: 'EMP002' },
+  { id: 2, firstName: 'Bob', lastName: 'Lead', status: 'Active', employmentStatus: 'Active', employeeId: 'EMP002' }
 ];
 
 // ---------------------------------------------------------------------------
@@ -82,7 +82,7 @@ const setupHttp = (departments = mockDepartments, employees = mockEmployees) => 
 const renderAsAdmin = async (extraAuth = {}) => {
   setupHttp();
   const result = render(<DepartmentManagement />, {
-    authValue: { user: createMockUser('admin'), ...extraAuth },
+    authValue: { user: createMockUser('admin'), ...extraAuth }
   });
   // Wait for data to actually render (not just API call)
   await waitFor(() => {
@@ -94,7 +94,7 @@ const renderAsAdmin = async (extraAuth = {}) => {
 const renderAsHr = async () => {
   setupHttp();
   const result = render(<DepartmentManagement />, {
-    authValue: { user: createMockUser('hr') },
+    authValue: { user: createMockUser('hr') }
   });
   await waitFor(() => {
     expect(screen.getByText('Engineering')).toBeInTheDocument();
@@ -116,12 +116,12 @@ describe('Access control', () => {
   it('shows permission error for non-admin / non-hr user', async () => {
     setupHttp();
     render(<DepartmentManagement />, {
-      authValue: { user: createMockUser('employee') },
+      authValue: { user: createMockUser('employee') }
     });
 
     await waitFor(() => {
       expect(
-        screen.getByText(/you don't have permission/i),
+        screen.getByText(/you don't have permission/i)
       ).toBeInTheDocument();
     });
   });
@@ -129,11 +129,11 @@ describe('Access control', () => {
   it('shows permission error for manager role', () => {
     setupHttp();
     render(<DepartmentManagement />, {
-      authValue: { user: createMockUser('manager') },
+      authValue: { user: createMockUser('manager') }
     });
 
     expect(
-      screen.getByText(/you don't have permission/i),
+      screen.getByText(/you don't have permission/i)
     ).toBeInTheDocument();
   });
 });
@@ -146,7 +146,7 @@ describe('Rendering', () => {
 
     expect(screen.getByText('Department Management')).toBeInTheDocument();
     expect(
-      screen.getByText(/manage organizational departments/i),
+      screen.getByText(/manage organizational departments/i)
     ).toBeInTheDocument();
   });
 
@@ -154,7 +154,7 @@ describe('Rendering', () => {
     await renderAsAdmin();
 
     expect(
-      screen.getByRole('button', { name: /add department/i }),
+      screen.getByRole('button', { name: /add department/i })
     ).toBeInTheDocument();
   });
 
@@ -178,7 +178,7 @@ describe('Rendering', () => {
 
     expect(screen.getByText('Department Management')).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: /add department/i }),
+      screen.getByRole('button', { name: /add department/i })
     ).toBeInTheDocument();
   });
 });
@@ -289,7 +289,7 @@ describe('Search', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/no departments found matching your search/i),
+        screen.getByText(/no departments found matching your search/i)
       ).toBeInTheDocument();
     });
   });
@@ -356,7 +356,7 @@ describe('Create department', () => {
     await waitFor(() => {
       expect(mockHttp.post).toHaveBeenCalledWith('/departments', expect.objectContaining({
         name: 'Marketing',
-        description: 'Marketing team',
+        description: 'Marketing team'
       }));
     });
   }, 15000);
@@ -430,7 +430,7 @@ describe('Edit department', () => {
     await waitFor(() => {
       expect(mockHttp.put).toHaveBeenCalledWith(
         '/departments/1',
-        expect.objectContaining({ name: 'Engineering v2' }),
+        expect.objectContaining({ name: 'Engineering v2' })
       );
     });
   });
@@ -537,7 +537,7 @@ describe('Error handling', () => {
     });
 
     render(<DepartmentManagement />, {
-      authValue: { user: createMockUser('admin') },
+      authValue: { user: createMockUser('admin') }
     });
 
     await waitFor(() => {
@@ -560,11 +560,11 @@ describe('Error handling', () => {
       return Promise.resolve({ data: { data: [] } });
     });
     mockHttp.post.mockRejectedValue({
-      response: { data: { message: 'Duplicate department name' } },
+      response: { data: { message: 'Duplicate department name' } }
     });
 
     render(<DepartmentManagement />, {
-      authValue: { user: createMockUser('admin') },
+      authValue: { user: createMockUser('admin') }
     });
 
     await waitFor(() => {
@@ -590,11 +590,11 @@ describe('Error handling', () => {
     const user = userEvent.setup();
     setupHttp();
     mockHttp.delete.mockRejectedValue({
-      response: { data: { message: 'Cannot delete department with employees' } },
+      response: { data: { message: 'Cannot delete department with employees' } }
     });
 
     render(<DepartmentManagement />, {
-      authValue: { user: createMockUser('admin') },
+      authValue: { user: createMockUser('admin') }
     });
 
     await waitFor(() => {
@@ -621,7 +621,7 @@ describe('Empty state', () => {
     });
 
     render(<DepartmentManagement />, {
-      authValue: { user: createMockUser('admin') },
+      authValue: { user: createMockUser('admin') }
     });
 
     await waitFor(() => {
@@ -637,7 +637,7 @@ describe('Empty state', () => {
     });
 
     render(<DepartmentManagement />, {
-      authValue: { user: createMockUser('admin') },
+      authValue: { user: createMockUser('admin') }
     });
 
     await waitFor(() => {

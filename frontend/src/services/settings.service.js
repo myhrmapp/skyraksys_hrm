@@ -8,7 +8,7 @@ const getPayslipTemplate = () => {
 
 const updatePayslipTemplate = (settings, logoFile) => {
   const formData = new FormData();
-  
+
   // Append settings data
   Object.keys(settings).forEach(key => {
     formData.append(key, settings[key]);
@@ -21,15 +21,15 @@ const updatePayslipTemplate = (settings, logoFile) => {
 
   return http.put(`${API_URL}/payslip-template`, formData, {
     headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+      'Content-Type': 'multipart/form-data'
+    }
   });
 };
 
 
 const settingsService = {
   getPayslipTemplate,
-  updatePayslipTemplate,
+  updatePayslipTemplate
 };
 
 export default settingsService;

@@ -41,7 +41,7 @@ import ValidationSummaryDialog from '../../shared/ValidationSummaryDialog';
 const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
   const navigate = useNavigate();
   const [showValidationSummary, setShowValidationSummary] = useState(false);
-  
+
   const {
     // State
     activeTab,
@@ -63,11 +63,11 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
     currentUser,
     isAuthenticated,
     isEditMode,
-    
+
     // Computed
     isCurrentTabValid,
     getTabValidationStatus,
-    
+
     // Actions
     setActiveTab,
     handleFieldChange,
@@ -79,7 +79,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
     handlePhotoRemove,
     handleCancelNavigation,
     handleConfirmNavigation,
-    
+
     // Draft restore dialog
     draftRestoreDialog,
     handleRestoreDraft,
@@ -94,28 +94,28 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
   // Show modern authentication error if not logged in
   if (!loadingRefData && !isAuthenticated) {
     return (
-      <Box sx={{ 
-        minHeight: '100vh', 
-        bgcolor: 'grey.50', 
-        display: 'flex', 
-        alignItems: 'center', 
+      <Box sx={{
+        minHeight: '100vh',
+        bgcolor: 'grey.50',
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
         p: 2
       }}>
-        <Card 
-          elevation={4} 
-          sx={{ 
-            maxWidth: 600, 
-            width: '100%', 
-            p: 4, 
+        <Card
+          elevation={4}
+          sx={{
+            maxWidth: 600,
+            width: '100%',
+            p: 4,
             textAlign: 'center',
             borderRadius: 3
           }}
         >
-          <Typography 
-            variant="h3" 
-            component="h1" 
-            sx={{ 
+          <Typography
+            variant="h3"
+            component="h1"
+            sx={{
               fontWeight: 700,
               color: 'primary.main',
               mb: 0.5,
@@ -124,10 +124,10 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
           >
             {isEditMode ? 'Edit Employee' : 'Add New Employee'}
           </Typography>
-          <Typography 
-            variant="body1" 
+          <Typography
+            variant="body1"
             color="text.secondary"
-            sx={{ 
+            sx={{
               fontWeight: 500,
               fontSize: { xs: '0.875rem', md: '1rem' },
               mb: 4
@@ -136,7 +136,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
             {isEditMode ? 'Update employee details and information' : 'Create a comprehensive employee profile with all necessary details'}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4, lineHeight: 1.6 }}>
-            You need to be logged in to access the employee creation form. 
+            You need to be logged in to access the employee creation form.
             Please authenticate to continue.
           </Typography>
           <Button
@@ -144,8 +144,8 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
             startIcon={<LoginIcon />}
             onClick={handleLoginRedirect}
             size="large"
-            sx={{ 
-              py: 1.5, 
+            sx={{
+              py: 1.5,
               px: 4,
               borderRadius: 2,
               textTransform: 'none',
@@ -162,12 +162,12 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
 
   if (loadingRefData) {
     return (
-      <Box 
-        sx={{ 
+      <Box
+        sx={{
           minHeight: '100vh',
           bgcolor: 'grey.50',
-          display: 'flex', 
-          justifyContent: 'center', 
+          display: 'flex',
+          justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'column',
           gap: 3
@@ -187,7 +187,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
       <Box sx={{ maxWidth: 1400, mx: 'auto', p: { xs: 2, sm: 3, md: 4 } }}>
-        
+
         <EmployeeFormHeader
           isEditMode={isEditMode}
           lastSaved={lastSaved}
@@ -199,10 +199,10 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
 
         {/* Progress Messages */}
         {submitError && (
-          <Alert 
-            severity="error" 
+          <Alert
+            severity="error"
             data-testid="employee-form-error-alert"
-            sx={{ 
+            sx={{
               mb: 3,
               borderRadius: 2,
               '& .MuiAlert-message': {
@@ -215,10 +215,10 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
         )}
 
         {submitSuccess && (
-          <Alert 
-            severity="success" 
+          <Alert
+            severity="success"
             data-testid="employee-form-success-alert"
-            sx={{ 
+            sx={{
               mb: 3,
               borderRadius: 2
             }}
@@ -228,9 +228,9 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
         )}
 
         {/* Modern Tab-based Form */}
-        <Card 
+        <Card
           elevation={0}
-          sx={{ 
+          sx={{
             borderRadius: 3,
             border: '1px solid',
             borderColor: 'grey.200',
@@ -246,7 +246,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
 
           {/* Tab Panels */}
           <TabPanel value={activeTab} index={0}>
-            <PersonalInformationTab 
+            <PersonalInformationTab
               formData={formData}
               errors={errors}
               touchedFields={touchedFields}
@@ -259,7 +259,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
               isEditMode={isEditMode}
             />
           </TabPanel>
-          
+
           <TabPanel value={activeTab} index={1}>
             {/* Combined Employment & Compensation Tab */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -286,7 +286,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
               />
             </Box>
           </TabPanel>
-          
+
           <TabPanel value={activeTab} index={2}>
             <ContactEmergencyTab
               formData={formData}
@@ -296,7 +296,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
               onBlur={handleFieldBlur}
             />
           </TabPanel>
-          
+
           {mode !== 'self' && (
           <TabPanel value={activeTab} index={3}>
             {/* Combined Statutory, Banking & Access Tab */}
@@ -337,7 +337,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
           />
         </Card>
       </Box>
-      
+
       {/* Unsaved Changes Warning Dialog */}
       <Dialog
         open={showUnsavedDialog}
@@ -358,16 +358,16 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            You have unsaved changes that will be lost if you leave this page. 
+            You have unsaved changes that will be lost if you leave this page.
             Are you sure you want to continue?
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button 
+          <Button
             onClick={handleCancelNavigation}
             variant="outlined"
             data-testid="unsaved-dialog-stay-btn"
-            sx={{ 
+            sx={{
               textTransform: 'none',
               fontWeight: 600,
               borderRadius: 2
@@ -375,12 +375,12 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
           >
             Stay on Page
           </Button>
-          <Button 
+          <Button
             onClick={handleConfirmNavigation}
             variant="contained"
             color="warning"
             data-testid="unsaved-dialog-leave-btn"
-            sx={{ 
+            sx={{
               textTransform: 'none',
               fontWeight: 600,
               borderRadius: 2
@@ -440,7 +440,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Cross-tab Validation Summary Dialog */}
       <ValidationSummaryDialog
         open={showValidationSummary}
@@ -450,7 +450,7 @@ const TabBasedEmployeeForm = ({ mode = 'admin' }) => {
           { tabIndex: 0, tabLabel: 'Personal Info', fields: getTabValidationStatus[0]?.errorFields || [] },
           { tabIndex: 1, tabLabel: 'Employment & Compensation', fields: getTabValidationStatus[1]?.errorFields || [] },
           { tabIndex: 2, tabLabel: 'Contact & Emergency', fields: getTabValidationStatus[2]?.errorFields || [] },
-          ...(mode !== 'self' ? [{ tabIndex: 3, tabLabel: 'Statutory, Banking & Access', fields: getTabValidationStatus[3]?.errorFields || [] }] : []),
+          ...(mode !== 'self' ? [{ tabIndex: 3, tabLabel: 'Statutory, Banking & Access', fields: getTabValidationStatus[3]?.errorFields || [] }] : [])
         ]}
       />
     </Box>

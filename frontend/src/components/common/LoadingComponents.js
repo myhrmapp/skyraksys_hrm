@@ -1,8 +1,8 @@
 import React from 'react';
-import { 
-  Box, 
-  CircularProgress, 
-  Typography, 
+import {
+  Box,
+  CircularProgress,
+  Typography,
   Skeleton,
   Card,
   CardContent,
@@ -11,22 +11,22 @@ import {
 } from '@mui/material';
 
 // Basic loading spinner
-export const LoadingSpinner = ({ 
-  size = 40, 
-  text = "Loading...", 
-  color = "primary",
-  variant = "indeterminate" 
+export const LoadingSpinner = ({
+  size = 40,
+  text = 'Loading...',
+  color = 'primary',
+  variant = 'indeterminate'
 }) => (
-  <Box 
-    display="flex" 
+  <Box
+    display="flex"
     flexDirection="column"
-    justifyContent="center" 
-    alignItems="center" 
+    justifyContent="center"
+    alignItems="center"
     minHeight="200px"
     gap={2}
   >
-    <CircularProgress 
-      size={size} 
+    <CircularProgress
+      size={size}
       color={color}
       variant={variant}
     />
@@ -39,7 +39,7 @@ export const LoadingSpinner = ({
 );
 
 // Full page loading overlay
-export const LoadingOverlay = ({ text = "Loading...", open = true }) => {
+export const LoadingOverlay = ({ text = 'Loading...', open = true }) => {
   if (!open) return null;
 
   return (
@@ -121,10 +121,10 @@ export const ListSkeleton = ({ items = 5 }) => (
 );
 
 // Progress bar with text
-export const ProgressLoader = ({ 
-  progress = 0, 
-  text = "Processing...", 
-  showPercentage = true 
+export const ProgressLoader = ({
+  progress = 0,
+  text = 'Processing...',
+  showPercentage = true
 }) => (
   <Box width="100%" p={2}>
     <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
@@ -142,12 +142,12 @@ export const ProgressLoader = ({
 );
 
 // Button loading state
-export const LoadingButton = ({ 
-  loading = false, 
-  children, 
-  loadingText = "Loading...",
+export const LoadingButton = ({
+  loading = false,
+  children,
+  loadingText = 'Loading...',
   component: Component = 'button',
-  ...props 
+  ...props
 }) => (
   <Box position="relative" display="inline-block">
     <Component
@@ -164,7 +164,7 @@ export const LoadingButton = ({
           top: '50%',
           left: '50%',
           marginTop: '-12px',
-          marginLeft: '-12px',
+          marginLeft: '-12px'
         }}
       />
     )}
@@ -172,14 +172,14 @@ export const LoadingButton = ({
 );
 
 // Enhanced fallback component for Suspense
-export const SuspenseFallback = ({ 
-  text = "Loading component...",
-  variant = "spinner" // "spinner", "skeleton", "progress"
+export const SuspenseFallback = ({
+  text = 'Loading component...',
+  variant = 'spinner' // "spinner", "skeleton", "progress"
 }) => {
   switch (variant) {
-    case "skeleton":
+    case 'skeleton':
       return <CardSkeleton count={3} />;
-    case "progress":
+    case 'progress':
       return <ProgressLoader text={text} progress={75} />;
     default:
       return <LoadingSpinner text={text} />;
@@ -187,14 +187,14 @@ export const SuspenseFallback = ({
 };
 
 // Data loading states
-export const DataLoader = ({ 
-  loading, 
-  error, 
-  data, 
+export const DataLoader = ({
+  loading,
+  error,
+  data,
   children,
   loadingComponent,
   errorComponent,
-  emptyComponent 
+  emptyComponent
 }) => {
   if (loading) {
     return loadingComponent || <LoadingSpinner text="Loading data..." />;
@@ -207,7 +207,7 @@ export const DataLoader = ({
           Error loading data
         </Typography>
         <Typography color="textSecondary" variant="body2">
-          {error.message || "Something went wrong"}
+          {error.message || 'Something went wrong'}
         </Typography>
       </Box>
     );

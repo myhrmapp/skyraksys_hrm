@@ -3,9 +3,9 @@ import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, Tab
 import { formatCurrency, CURRENCY_SYMBOL } from '../../utils/formatCurrency';
 import './PayslipTemplate.css';
 
-const PayslipTemplate = ({ 
-  employee, 
-  payslipData, 
+const PayslipTemplate = ({
+  employee,
+  payslipData,
   companyInfo = {
     name: '',
     address: '',
@@ -16,7 +16,7 @@ const PayslipTemplate = ({
 }) => {
   // Default payslip data structure
   const defaultPayslipData = {
-    month: "December 2024",
+    month: 'December 2024',
     totalWorkingDays: 21,
     lopDays: 0,
     paidDays: 21,
@@ -36,14 +36,14 @@ const PayslipTemplate = ({
       tds: 0,
       otherDeductions: 0
     },
-    paymentMode: "Online Transfer",
+    paymentMode: 'Online Transfer',
     disbursementDate: new Date().toLocaleDateString('en-GB')
   };
 
   // Merge default data with provided payslipData
   // Handle potential key mismatches if backend uses different keys
   const mergedData = { ...defaultPayslipData, ...payslipData };
-  
+
   // Normalize earnings if needed (map backend keys to what we want to display if they differ)
   const earnings = {
     basicSalary: mergedData.earnings?.basicSalary || mergedData.earnings?.basic || 0,
@@ -128,9 +128,9 @@ const PayslipTemplate = ({
     <div className="payslip-container" id="payslip-content">
       {/* Header */}
       <div className="payslip-header">
-        <img 
-          src="/assets/company/logo.png" 
-          alt="Company Logo" 
+        <img
+          src="/assets/company/logo.png"
+          alt="Company Logo"
           className="company-logo"
           onError={(e) => {
             e.target.style.display = 'none';
@@ -323,9 +323,9 @@ const PayslipTemplate = ({
 
       {/* Signature */}
       <div className="signature-section">
-        <img 
-          src="/assets/company/signature.png" 
-          alt="HR Signature" 
+        <img
+          src="/assets/company/signature.png"
+          alt="HR Signature"
           className="signature-image"
           onError={(e) => {
             e.target.style.display = 'none';

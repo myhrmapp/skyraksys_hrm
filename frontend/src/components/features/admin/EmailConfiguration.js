@@ -53,37 +53,37 @@ const EmailConfiguration = ({ embedded } = {}) => {
 
   // Predefined SMTP providers
   const smtpProviders = [
-    { 
-      label: 'Gmail', 
-      host: 'smtp.gmail.com', 
-      port: '587', 
+    {
+      label: 'Gmail',
+      host: 'smtp.gmail.com',
+      port: '587',
       secure: false,
       help: 'Use App Password (not regular password)'
     },
-    { 
-      label: 'Outlook/Office 365', 
-      host: 'smtp.office365.com', 
-      port: '587', 
-      secure: false 
+    {
+      label: 'Outlook/Office 365',
+      host: 'smtp.office365.com',
+      port: '587',
+      secure: false
     },
-    { 
-      label: 'SendGrid', 
-      host: 'smtp.sendgrid.net', 
-      port: '587', 
+    {
+      label: 'SendGrid',
+      host: 'smtp.sendgrid.net',
+      port: '587',
       secure: false,
       help: 'User: apikey, Password: Your API Key'
     },
-    { 
-      label: 'Mailgun', 
-      host: 'smtp.mailgun.org', 
-      port: '587', 
-      secure: false 
+    {
+      label: 'Mailgun',
+      host: 'smtp.mailgun.org',
+      port: '587',
+      secure: false
     },
-    { 
-      label: 'Custom', 
-      host: '', 
-      port: '587', 
-      secure: false 
+    {
+      label: 'Custom',
+      host: '',
+      port: '587',
+      secure: false
     }
   ];
 
@@ -258,8 +258,8 @@ const EmailConfiguration = ({ embedded } = {}) => {
                   <ErrorIcon sx={{ color: 'error.main', mr: 1 }} />
                 )}
                 <Typography variant="body1" fontWeight="medium">
-                  {connectionStatus === 'connected' 
-                    ? 'SMTP Connection Successful' 
+                  {connectionStatus === 'connected'
+                    ? 'SMTP Connection Successful'
                     : 'SMTP Connection Failed'}
                 </Typography>
               </Box>
@@ -488,7 +488,7 @@ const EmailConfiguration = ({ embedded } = {}) => {
 };
 
 EmailConfiguration.propTypes = {
-  embedded: PropTypes.bool,
+  embedded: PropTypes.bool
 };
 
 export default EmailConfiguration;

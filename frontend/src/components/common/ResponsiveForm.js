@@ -41,9 +41,9 @@ const ResponsiveForm = ({
   currentStep = 0,
   onStepChange,
   loading = false,
-  submitText = "Submit",
+  submitText = 'Submit',
   showStepper = false,
-  maxWidth = "md",
+  maxWidth = 'md',
   ...props
 }) => {
   const theme = useTheme();
@@ -51,7 +51,7 @@ const ResponsiveForm = ({
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
 
   return (
-    <Box sx={{ 
+    <Box sx={{
       px: { xs: 2, sm: 3, md: 4 },
       py: { xs: 2, md: 3 },
       maxWidth: maxWidth,
@@ -62,9 +62,9 @@ const ResponsiveForm = ({
       {(title || subtitle) && (
         <Box sx={{ mb: { xs: 3, md: 4 }, textAlign: { xs: 'center', md: 'left' } }}>
           {title && (
-            <Typography 
-              variant={isMobile ? "h5" : "h4"} 
-              component="h1" 
+            <Typography
+              variant={isMobile ? 'h5' : 'h4'}
+              component="h1"
               fontWeight="bold"
               gutterBottom
             >
@@ -72,8 +72,8 @@ const ResponsiveForm = ({
             </Typography>
           )}
           {subtitle && (
-            <Typography 
-              variant="body1" 
+            <Typography
+              variant="body1"
               color="text.secondary"
               sx={{ maxWidth: 600 }}
             >
@@ -87,9 +87,9 @@ const ResponsiveForm = ({
       {showStepper && steps && (
         <Card sx={{ mb: { xs: 3, md: 4 } }}>
           <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-            <Stepper 
-              activeStep={currentStep} 
-              orientation={isMobile ? "vertical" : "horizontal"}
+            <Stepper
+              activeStep={currentStep}
+              orientation={isMobile ? 'vertical' : 'horizontal'}
               sx={{
                 '& .MuiStepLabel-label': {
                   fontSize: { xs: '0.875rem', md: '1rem' }
@@ -144,16 +144,16 @@ export const ResponsiveFormActions = ({
   onNext,
   onSubmit,
   loading = false,
-  submitText = "Submit",
+  submitText = 'Submit',
   showBack = false,
   showNext = false,
   isLastStep = true,
-  orientation = "horizontal"
+  orientation = 'horizontal'
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
-  const buttonSize = isMobile ? "large" : "medium";
+
+  const buttonSize = isMobile ? 'large' : 'medium';
   const buttonProps = {
     size: buttonSize,
     sx: {
@@ -165,11 +165,11 @@ export const ResponsiveFormActions = ({
     }
   };
 
-  if (orientation === "vertical" || isMobile) {
+  if (orientation === 'vertical' || isMobile) {
     return (
-      <Stack 
-        spacing={2} 
-        sx={{ 
+      <Stack
+        spacing={2}
+        sx={{
           mt: { xs: 3, md: 4 },
           width: '100%'
         }}
@@ -195,7 +195,7 @@ export const ResponsiveFormActions = ({
             Next
           </Button>
         )}
-        
+
         {showBack && (
           <Button
             onClick={onBack}
@@ -212,9 +212,9 @@ export const ResponsiveFormActions = ({
   }
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
+    <Box sx={{
+      display: 'flex',
+      justifyContent: 'space-between',
       alignItems: 'center',
       mt: { xs: 3, md: 4 },
       gap: 2
@@ -259,15 +259,15 @@ export const ResponsiveFormActions = ({
 /**
  * Enhanced Password Field with Toggle
  */
-export const ResponsivePasswordField = ({ 
-  label = "Password",
+export const ResponsivePasswordField = ({
+  label = 'Password',
   value,
   onChange,
   error,
   helperText,
   required = false,
-  autoComplete = "current-password",
-  ...props 
+  autoComplete = 'current-password',
+  ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -293,7 +293,7 @@ export const ResponsivePasswordField = ({
               {showPassword ? <VisibilityOff /> : <Visibility />}
             </IconButton>
           </InputAdornment>
-        ),
+        )
       }}
       {...props}
     />
@@ -354,7 +354,7 @@ export const ResponsiveSelectField = ({
         )}
       </Select>
       {helperText && (
-        <Typography variant="caption" color={error ? "error" : "text.secondary"} sx={{ mt: 1 }}>
+        <Typography variant="caption" color={error ? 'error' : 'text.secondary'} sx={{ mt: 1 }}>
           {helperText}
         </Typography>
       )}
@@ -368,10 +368,10 @@ export const ResponsiveSelectField = ({
 export const FormSection = ({ title, children, ...props }) => (
   <Box sx={{ mb: { xs: 3, md: 4 } }} {...props}>
     {title && (
-      <Typography 
-        variant="h6" 
-        fontWeight="bold" 
-        sx={{ 
+      <Typography
+        variant="h6"
+        fontWeight="bold"
+        sx={{
           mb: 2,
           pb: 1,
           borderBottom: 1,

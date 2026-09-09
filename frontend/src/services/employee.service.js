@@ -28,11 +28,11 @@ class EmployeeService {
   // Get audit history for employee (placeholder)
   async getAuditHistory(employeeId) {
     // Return empty audit history for now since the endpoint doesn't exist yet
-    return Promise.resolve({ 
-      data: { 
-        success: true, 
-        data: [] 
-      } 
+    return Promise.resolve({
+      data: {
+        success: true,
+        data: []
+      }
     });
   }
 
@@ -45,10 +45,10 @@ class EmployeeService {
   // Create new employee with photo
   async createWithPhoto(data, photo) {
     const formData = new FormData();
-    
+
     // Handle complex objects separately - they need to be stringified for FormData
     const { salaryStructure, salary, ...employeeData } = data;
-    
+
     // Add all simple employee form data (strings, numbers, dates)
     Object.keys(employeeData).forEach(key => {
       const value = employeeData[key];
@@ -57,7 +57,7 @@ class EmployeeService {
         formData.append(key, value);
       }
     });
-    
+
     // Add salary structure as JSON string if it exists
     if (salaryStructure && typeof salaryStructure === 'object') {
       formData.append('salaryStructure', JSON.stringify(salaryStructure));
@@ -65,16 +65,16 @@ class EmployeeService {
       // Fallback: If legacy salary object is passed, map it to salaryStructure for backend
       formData.append('salaryStructure', JSON.stringify(salary));
     }
-    
+
     // Add photo if provided
     if (photo) {
       formData.append('photo', photo);
     }
-    
+
     const response = await http.post('/employees', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+        'Content-Type': 'multipart/form-data'
+      }
     });
     return normalizeResponse(response);
   }
@@ -83,11 +83,11 @@ class EmployeeService {
   async uploadPhoto(employeeId, photo) {
     const formData = new FormData();
     formData.append('photo', photo);
-    
+
     const response = await http.post(`/employees/${employeeId}/photo`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+        'Content-Type': 'multipart/form-data'
+      }
     });
     return normalizeResponse(response);
   }
@@ -162,7 +162,7 @@ class EmployeeService {
       // Fallback to basic count if statistics endpoint doesn't exist
       const allEmployees = await this.getAll();
       const employees = allEmployees.data || allEmployees;
-      
+
       const active = employees.filter(emp => emp.status === 'Active').length;
       const inactive = employees.filter(emp => emp.status === 'Inactive').length;
       const thisMonth = employees.filter(emp => {
@@ -190,7 +190,7 @@ class EmployeeService {
 
   // Export employees
   async exportEmployees(filters = {}) {
-    const response = await http.get('/employees/export', { 
+    const response = await http.get('/employees/export', {
       params: filters,
       responseType: 'blob'
     });

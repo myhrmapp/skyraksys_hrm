@@ -1,5 +1,7 @@
 // Test setup file
 // Polyfills for jsdom - MUST be before any imports
+import '@testing-library/jest-dom';
+
 if (typeof global.TextEncoder === 'undefined') {
   const { TextEncoder, TextDecoder } = require('util');
   global.TextEncoder = TextEncoder;
@@ -14,8 +16,6 @@ if (typeof globalThis.crypto === 'undefined') {
 
 // Increase default timeout for combined-run resource contention
 jest.setTimeout(30000);
-
-import '@testing-library/jest-dom';
 
 // ── Test Mode Toggle ──────────────────────────────────────────────
 // Set REACT_APP_TEST_MODE=integration to run against real backend.
@@ -51,7 +51,7 @@ if (isIntegrationMode) {
     'mockRejectedValue', 'mockRejectedValueOnce',
     'mockImplementation', 'mockImplementationOnce',
     'mockReturnValue', 'mockReturnValueOnce',
-    'mockReset', 'mockClear', 'mockRestore',
+    'mockReset', 'mockClear', 'mockRestore'
   ];
   for (const method of mockMethodNoops) {
     if (!(method in Function.prototype)) {
@@ -59,7 +59,7 @@ if (isIntegrationMode) {
         value: function () { return this; },
         configurable: true,
         writable: true,
-        enumerable: false,
+        enumerable: false
       });
     }
   }
@@ -72,7 +72,7 @@ if (isIntegrationMode) {
     'toHaveBeenNthCalledWith', 'toHaveBeenCalledTimes', 'toHaveReturnedWith',
     'toHaveLastReturnedWith', 'toHaveNthReturnedWith', 'toReturn',
     'toReturnWith', 'lastReturnedWith', 'nthReturnedWith',
-    'toReturnTimes', 'toHaveReturned',
+    'toReturnTimes', 'toHaveReturned'
   ];
   global.expect = function (actual) {
     const result = _origExpect(actual);
@@ -135,7 +135,7 @@ jest.mock('./http-common', () => {
       baseURL: BASE_URL,
       headers: { 'Content-type': 'application/json' },
       withCredentials: true,
-      adapter: 'http',
+      adapter: 'http'
     });
     return { __esModule: true, default: instance };
   }
@@ -155,11 +155,12 @@ jest.mock('./contexts/AuthContext', () => {
     __esModule: true,
     AuthContext,
     useAuth: () => {
+      const contextValue = React.useContext(AuthContext);
+
       if (global.__TEST_AUTH_VALUE__) {
         return global.__TEST_AUTH_VALUE__;
       }
 
-      const contextValue = React.useContext(AuthContext);
       if (contextValue && Object.keys(contextValue).length > 0) {
         return contextValue;
       }
@@ -179,10 +180,10 @@ jest.mock('./contexts/AuthContext', () => {
         login: jest.fn(),
         logout: jest.fn(),
         hasRole: jest.fn(() => false),
-        hasAnyRole: jest.fn(() => false),
+        hasAnyRole: jest.fn(() => false)
       };
     },
-    AuthProvider: ({ children }) => children,
+    AuthProvider: ({ children }) => children
   };
 });
 
@@ -204,7 +205,7 @@ jest.mock('./contexts/NotificationContext', () => {
     showError: jest.fn(),
     showWarning: jest.fn(),
     showInfo: jest.fn(),
-    showNotification: jest.fn(),
+    showNotification: jest.fn()
   }),
   useNotification: () => ({
     notifications: [],
@@ -215,7 +216,7 @@ jest.mock('./contexts/NotificationContext', () => {
     showError: jest.fn(),
     showWarning: jest.fn(),
     showInfo: jest.fn(),
-    showNotification: jest.fn(),
+    showNotification: jest.fn()
   }),
   useApiNotifications: () => ({
     notifications: [],
@@ -235,9 +236,9 @@ jest.mock('./contexts/NotificationContext', () => {
     showOperationSuccess: jest.fn(),
     showSaveSuccess: jest.fn(),
     showDeleteSuccess: jest.fn(),
-    showUpdateSuccess: jest.fn(),
+    showUpdateSuccess: jest.fn()
   }),
-  withNotifications: (Component) => Component,
+  withNotifications: (Component) => Component
   };
 });
 
@@ -259,14 +260,14 @@ jest.mock('./contexts/LoadingContext', () => {
     getLoadingState: jest.fn(() => null),
     isAnyLoading: jest.fn(() => false),
     clearAllLoading: jest.fn(),
-    updateProgress: jest.fn(),
+    updateProgress: jest.fn()
   }),
   useComponentLoading: () => ({
     isLoading: false,
     loadingState: null,
     startLoading: jest.fn(),
     stopLoading: jest.fn(),
-    setProgress: jest.fn(),
+    setProgress: jest.fn()
   }),
   LoadingWrapper: ({ children }) => children,
   LoadingButton: ({ children, ...props }) => {
@@ -274,7 +275,7 @@ jest.mock('./contexts/LoadingContext', () => {
     return React.createElement('button', props, children);
   },
   LoadingSkeleton: () => null,
-  withLoading: (Component) => Component,
+  withLoading: (Component) => Component
   };
 });
 
@@ -343,7 +344,7 @@ window.matchMedia = query => ({
   removeListener: jest.fn(), // deprecated
   addEventListener: jest.fn(),
   removeEventListener: jest.fn(),
-  dispatchEvent: jest.fn(),
+  dispatchEvent: jest.fn()
 });
 
 // Mock IntersectionObserver
@@ -362,7 +363,7 @@ const localStorageMock = {
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
-  clear: jest.fn(),
+  clear: jest.fn()
 };
 global.localStorage = localStorageMock;
 
@@ -371,7 +372,7 @@ const sessionStorageMock = {
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
-  clear: jest.fn(),
+  clear: jest.fn()
 };
 global.sessionStorage = sessionStorageMock;
 

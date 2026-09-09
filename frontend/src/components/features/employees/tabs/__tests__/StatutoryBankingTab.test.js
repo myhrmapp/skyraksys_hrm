@@ -26,7 +26,7 @@ const createFormData = (overrides = {}) => ({
   ifscCode: '',
   accountHolderName: '',
   bankBranch: '',
-  ...overrides,
+  ...overrides
 });
 
 const createProps = (overrides = {}) => ({
@@ -34,7 +34,7 @@ const createProps = (overrides = {}) => ({
   errors: overrides.errors || {},
   touchedFields: overrides.touchedFields || {},
   onChange: overrides.onChange || jest.fn(),
-  onBlur: overrides.onBlur || jest.fn(),
+  onBlur: overrides.onBlur || jest.fn()
 });
 
 const renderTab = (overrides = {}) => {
@@ -93,7 +93,7 @@ describe('StatutoryBankingTab', () => {
     it('should show error when touched and invalid', () => {
       renderTab({
         errors: { aadhaarNumber: 'Aadhaar number must be exactly 12 digits' },
-        touchedFields: { aadhaarNumber: true },
+        touchedFields: { aadhaarNumber: true }
       });
       expect(screen.getByText('Aadhaar number must be exactly 12 digits')).toBeInTheDocument();
     });
@@ -137,7 +137,7 @@ describe('StatutoryBankingTab', () => {
     it('should show error when touched and invalid', () => {
       renderTab({
         errors: { panNumber: 'PAN number format is invalid (e.g., ABCDE1234F)' },
-        touchedFields: { panNumber: true },
+        touchedFields: { panNumber: true }
       });
       expect(screen.getByText(/PAN number format is invalid/)).toBeInTheDocument();
     });
@@ -167,7 +167,7 @@ describe('StatutoryBankingTab', () => {
     it('should show error when touched and invalid', () => {
       renderTab({
         errors: { uanNumber: 'UAN number must be at least 12 alphanumeric characters' },
-        touchedFields: { uanNumber: true },
+        touchedFields: { uanNumber: true }
       });
       expect(screen.getByText(/UAN number must be at least 12/)).toBeInTheDocument();
     });
@@ -266,7 +266,7 @@ describe('StatutoryBankingTab', () => {
     it('should show error when touched and invalid', () => {
       renderTab({
         errors: { bankAccountNumber: 'Bank account number must be 9-20 characters' },
-        touchedFields: { bankAccountNumber: true },
+        touchedFields: { bankAccountNumber: true }
       });
       expect(screen.getByText('Bank account number must be 9-20 characters')).toBeInTheDocument();
     });
@@ -306,7 +306,7 @@ describe('StatutoryBankingTab', () => {
     it('should show error when touched and invalid', () => {
       renderTab({
         errors: { ifscCode: 'IFSC code format is invalid (e.g., SBIN0000123)' },
-        touchedFields: { ifscCode: true },
+        touchedFields: { ifscCode: true }
       });
       expect(screen.getByText(/IFSC code format is invalid/)).toBeInTheDocument();
     });
@@ -376,8 +376,8 @@ describe('StatutoryBankingTab', () => {
           bankAccountNumber: '12345678901234',
           ifscCode: 'SBIN0000123',
           accountHolderName: 'Rahul Sharma',
-          bankBranch: 'Main Branch, Mumbai',
-        },
+          bankBranch: 'Main Branch, Mumbai'
+        }
       });
 
       expect(screen.getByDisplayValue('123456789012')).toBeInTheDocument();

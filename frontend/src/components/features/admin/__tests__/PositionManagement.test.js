@@ -14,13 +14,13 @@ jest.mock('../../../../http-common', () => {
   }
   return {
     __esModule: true,
-    default: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
+    default: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() }
   };
 });
 const mockHttp = require('../../../../http-common').default;
 
 jest.mock('../../../../contexts/LoadingContext', () => ({
-  useLoading: () => ({ isLoading: false, setLoading: jest.fn() }),
+  useLoading: () => ({ isLoading: false, setLoading: jest.fn() })
 }));
 
 jest.mock('../../../common/ConfirmDialog', () => {
@@ -45,8 +45,8 @@ jest.mock('../../../../hooks/useConfirmDialog', () => ({
     confirm: jest.fn().mockImplementation(({ onConfirm } = {}) => {
       if (onConfirm) onConfirm();
       return Promise.resolve(true);
-    }),
-  }),
+    })
+  })
 }));
 
 // ---------------------------------------------------------------------------
@@ -56,12 +56,12 @@ jest.mock('../../../../hooks/useConfirmDialog', () => ({
 const mockPositions = [
   { id: 1, title: 'Software Engineer', description: 'Develops software', departmentId: 1, department: { name: 'Engineering' }, level: 'Mid-Level', requirements: 'CS degree', responsibilities: 'Write code', minSalary: 40000, maxSalary: 80000, isActive: true },
   { id: 2, title: 'HR Manager', description: 'Manages HR', departmentId: 2, department: { name: 'HR' }, level: 'Manager', requirements: 'HR certification', responsibilities: 'Manage HR ops', minSalary: 60000, maxSalary: 100000, isActive: true },
-  { id: 3, title: 'Junior Developer', description: 'Entry dev role', departmentId: 1, department: { name: 'Engineering' }, level: 'Junior', requirements: '', responsibilities: '', minSalary: 25000, maxSalary: 40000, isActive: false },
+  { id: 3, title: 'Junior Developer', description: 'Entry dev role', departmentId: 1, department: { name: 'Engineering' }, level: 'Junior', requirements: '', responsibilities: '', minSalary: 25000, maxSalary: 40000, isActive: false }
 ];
 
 const mockDepartments = [
   { id: 1, name: 'Engineering' },
-  { id: 2, name: 'HR' },
+  { id: 2, name: 'HR' }
 ];
 
 // ---------------------------------------------------------------------------
@@ -82,7 +82,7 @@ const setupHttp = (positions = mockPositions, departments = mockDepartments) => 
 const renderAsAdmin = async (extraAuth = {}) => {
   setupHttp();
   const result = render(<PositionManagement />, {
-    authValue: { user: createMockUser('admin'), ...extraAuth },
+    authValue: { user: createMockUser('admin'), ...extraAuth }
   });
   await waitFor(() => {
     expect(screen.getByText('Software Engineer')).toBeInTheDocument();
@@ -93,7 +93,7 @@ const renderAsAdmin = async (extraAuth = {}) => {
 const renderAsHr = async () => {
   setupHttp();
   const result = render(<PositionManagement />, {
-    authValue: { user: createMockUser('hr') },
+    authValue: { user: createMockUser('hr') }
   });
   await waitFor(() => {
     expect(mockHttp.get).toHaveBeenCalledWith('/positions');
@@ -131,11 +131,11 @@ describe('Access control', () => {
   it('shows permission error for non-admin / non-hr user (employee)', () => {
     setupHttp();
     render(<PositionManagement />, {
-      authValue: { user: createMockUser('employee') },
+      authValue: { user: createMockUser('employee') }
     });
 
     expect(
-      screen.getByText(/you don't have permission/i),
+      screen.getByText(/you don't have permission/i)
     ).toBeInTheDocument();
 
     // Note: useEffect still fires API calls even for denied users (component quirk)
@@ -144,11 +144,11 @@ describe('Access control', () => {
   it('shows permission error for manager role', () => {
     setupHttp();
     render(<PositionManagement />, {
-      authValue: { user: createMockUser('manager') },
+      authValue: { user: createMockUser('manager') }
     });
 
     expect(
-      screen.getByText(/you don't have permission/i),
+      screen.getByText(/you don't have permission/i)
     ).toBeInTheDocument();
   });
 });
@@ -161,7 +161,7 @@ describe('Rendering', () => {
 
     expect(screen.getByText('Position Management')).toBeInTheDocument();
     expect(
-      screen.getByText(/manage organizational positions/i),
+      screen.getByText(/manage organizational positions/i)
     ).toBeInTheDocument();
   });
 
@@ -169,7 +169,7 @@ describe('Rendering', () => {
     await renderAsAdmin();
 
     expect(
-      screen.getByRole('button', { name: /add position/i }),
+      screen.getByRole('button', { name: /add position/i })
     ).toBeInTheDocument();
   });
 
@@ -178,7 +178,7 @@ describe('Rendering', () => {
 
     expect(screen.getByText('Position Management')).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: /add position/i }),
+      screen.getByRole('button', { name: /add position/i })
     ).toBeInTheDocument();
   });
 
@@ -332,7 +332,7 @@ describe('Search', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/no positions found matching your search/i),
+        screen.getByText(/no positions found matching your search/i)
       ).toBeInTheDocument();
     });
   });
@@ -410,7 +410,7 @@ describe('Create position', () => {
     await waitFor(() => {
       expect(mockHttp.post).toHaveBeenCalledWith('/positions', expect.objectContaining({
         title: 'DevOps Engineer',
-        description: 'Handles infrastructure',
+        description: 'Handles infrastructure'
       }));
     });
   });
@@ -493,7 +493,7 @@ describe('Edit position', () => {
     await waitFor(() => {
       expect(mockHttp.put).toHaveBeenCalledWith(
         '/positions/1',
-        expect.objectContaining({ title: 'Senior Software Engineer' }),
+        expect.objectContaining({ title: 'Senior Software Engineer' })
       );
     });
   });
@@ -675,7 +675,7 @@ describe('Error handling', () => {
     });
 
     render(<PositionManagement />, {
-      authValue: { user: createMockUser('admin') },
+      authValue: { user: createMockUser('admin') }
     });
 
     await waitFor(() => {
@@ -690,11 +690,11 @@ describe('Error handling', () => {
     const user = userEvent.setup();
     setupHttp();
     mockHttp.post.mockRejectedValue({
-      response: { data: { message: 'Duplicate position title' } },
+      response: { data: { message: 'Duplicate position title' } }
     });
 
     render(<PositionManagement />, {
-      authValue: { user: createMockUser('admin') },
+      authValue: { user: createMockUser('admin') }
     });
 
     await waitFor(() => {
@@ -722,11 +722,11 @@ describe('Error handling', () => {
     const user = userEvent.setup();
     setupHttp();
     mockHttp.delete.mockRejectedValue({
-      response: { data: { message: 'Cannot delete position with employees' } },
+      response: { data: { message: 'Cannot delete position with employees' } }
     });
 
     render(<PositionManagement />, {
-      authValue: { user: createMockUser('admin') },
+      authValue: { user: createMockUser('admin') }
     });
 
     await waitFor(() => {
@@ -753,7 +753,7 @@ describe('Empty state', () => {
     });
 
     render(<PositionManagement />, {
-      authValue: { user: createMockUser('admin') },
+      authValue: { user: createMockUser('admin') }
     });
 
     await waitFor(() => {
@@ -769,7 +769,7 @@ describe('Empty state', () => {
     });
 
     render(<PositionManagement />, {
-      authValue: { user: createMockUser('admin') },
+      authValue: { user: createMockUser('admin') }
     });
 
     await waitFor(() => {
@@ -860,7 +860,7 @@ describe('Quick Create Department', () => {
     await waitFor(() => {
       expect(mockHttp.post).toHaveBeenCalledWith('/departments', expect.objectContaining({
         name: 'Marketing',
-        isActive: true,
+        isActive: true
       }));
     });
   });

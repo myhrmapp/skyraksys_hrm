@@ -96,7 +96,7 @@ class LeaveService {
 
   // Create a new leave balance
   async createBalance(data) {
-    const response = await http.post("/admin/leave-balances", data);
+    const response = await http.post('/admin/leave-balances', data);
     return normalizeResponse(response);
   }
 
@@ -108,13 +108,13 @@ class LeaveService {
 
   // Initialize balances for all employees
   async initializeBalances(data) {
-    const response = await http.post("/admin/leave-balances/bulk/initialize", data);
+    const response = await http.post('/admin/leave-balances/bulk/initialize', data);
     return normalizeResponse(response);
   }
 
   // Get leave balances by employee and type (Admin)
   async getLeaveBalanceAdmin(employeeId, leaveTypeId) {
-    let url = "/admin/leave-balances?limit=100";
+    let url = '/admin/leave-balances?limit=100';
     if (employeeId) url += `&employeeId=${employeeId}`;
     if (leaveTypeId) url += `&leaveTypeId=${leaveTypeId}`;
     const response = await http.get(url);
@@ -136,7 +136,7 @@ class LeaveService {
 
   // Get pending leave requests for manager approval
   async getPendingForManager() {
-    const response = await http.get("/leaves/pending-for-manager");
+    const response = await http.get('/leaves/pending-for-manager');
     return normalizeResponse(response);
   }
 
@@ -154,7 +154,7 @@ class LeaveService {
 
   // Get recent approvals
   async getRecentApprovals() {
-    const response = await http.get("/leaves/recent-approvals");
+    const response = await http.get('/leaves/recent-approvals');
     return normalizeResponse(response);
   }
 

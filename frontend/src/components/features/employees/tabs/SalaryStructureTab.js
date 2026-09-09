@@ -27,7 +27,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
       </Typography>
       <Divider sx={{ mb: 3 }} />
     </Grid>
-    
+
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
@@ -44,12 +44,12 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         error={touchedFields['salaryStructure.basicSalary'] && !!errors['salaryStructure.basicSalary']}
         helperText={touchedFields['salaryStructure.basicSalary'] && errors['salaryStructure.basicSalary'] ? errors['salaryStructure.basicSalary'] : 'Required: Enter basic salary amount'}
         InputProps={{
-          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>
         }}
         placeholder="50000"
       />
     </Grid>
-    
+
     <Grid item xs={12} sm={6}>
       <FormControl fullWidth error={touchedFields['salaryStructure.currency'] && !!errors['salaryStructure.currency']}>
         <InputLabel>Currency</InputLabel>
@@ -70,7 +70,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         {touchedFields['salaryStructure.currency'] && errors['salaryStructure.currency'] && <FormHelperText>{errors['salaryStructure.currency']}</FormHelperText>}
       </FormControl>
     </Grid>
-    
+
     <Grid item xs={12} sm={6}>
       <FormControl fullWidth error={touchedFields['salaryStructure.payFrequency'] && !!errors['salaryStructure.payFrequency']}>
         <InputLabel>Pay Frequency</InputLabel>
@@ -91,7 +91,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         {touchedFields['salaryStructure.payFrequency'] && errors['salaryStructure.payFrequency'] && <FormHelperText>{errors['salaryStructure.payFrequency']}</FormHelperText>}
       </FormControl>
     </Grid>
-    
+
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
@@ -115,7 +115,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
       </Typography>
       <Divider sx={{ mb: 3 }} />
     </Grid>
-    
+
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
@@ -132,11 +132,11 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         error={touchedFields['salaryStructure.hra'] && !!errors['salaryStructure.hra']}
         helperText={touchedFields['salaryStructure.hra'] && errors['salaryStructure.hra'] ? errors['salaryStructure.hra'] : ''}
         InputProps={{
-          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>
         }}
       />
     </Grid>
-    
+
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
@@ -153,11 +153,11 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         error={touchedFields['salaryStructure.allowances'] && !!errors['salaryStructure.allowances']}
         helperText={touchedFields['salaryStructure.allowances'] && errors['salaryStructure.allowances'] ? errors['salaryStructure.allowances'] : 'Total sum of all other allowances'}
         InputProps={{
-          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>
         }}
       />
     </Grid>
-    
+
     {/* Deductions Section */}
     <Grid item xs={12}>
       <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
@@ -165,7 +165,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
       </Typography>
       <Divider sx={{ mb: 3 }} />
     </Grid>
-    
+
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
@@ -180,11 +180,11 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         error={!!errors['salaryStructure.pfContribution']}
         helperText={errors['salaryStructure.pfContribution']}
         InputProps={{
-          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>
         }}
       />
     </Grid>
-    
+
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
@@ -199,11 +199,11 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         error={!!errors['salaryStructure.tds']}
         helperText={errors['salaryStructure.tds']}
         InputProps={{
-          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>
         }}
       />
     </Grid>
-    
+
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
@@ -218,11 +218,11 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         error={!!errors['salaryStructure.professionalTax']}
         helperText={errors['salaryStructure.professionalTax']}
         InputProps={{
-          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>
         }}
       />
     </Grid>
-    
+
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
@@ -237,11 +237,11 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         error={!!errors['salaryStructure.esi']}
         helperText={errors['salaryStructure.esi']}
         InputProps={{
-          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>
         }}
       />
     </Grid>
-    
+
     <Grid item xs={12} sm={6}>
       <TextField
         fullWidth
@@ -256,7 +256,7 @@ const SalaryStructureTab = ({ formData, errors, touchedFields = {}, onChange, on
         error={!!errors['salaryStructure.otherDeductions']}
         helperText={errors['salaryStructure.otherDeductions']}
         InputProps={{
-          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>,
+          startAdornment: <InputAdornment position="start">{formData.salaryStructure?.currency === 'USD' ? '$' : '₹'}</InputAdornment>
         }}
       />
     </Grid>

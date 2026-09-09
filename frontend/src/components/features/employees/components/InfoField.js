@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { Box, Typography, TextField, IconButton, Tooltip, Fade } from '@mui/material';
 import { ContentCopy as CopyIcon, Check as CheckIcon } from '@mui/icons-material';
 
-const InfoField = ({ 
-  label, 
-  value, 
+const InfoField = ({
+  label,
+  value,
   displayValue, // Optional: formatted value for display mode
-  editing, 
-  onChange, 
-  type = 'text', 
-  required = false, 
-  multiline = false, 
+  editing,
+  onChange,
+  type = 'text',
+  required = false,
+  multiline = false,
   sensitive = false,
   testId,
   InputProps // Optional: props for the input element in edit mode
@@ -42,8 +42,8 @@ const InfoField = ({
         rows={multiline ? 3 : 1}
         variant="outlined"
         size="small"
+        data-testid={testId}
         InputProps={InputProps}
-        inputProps={{ 'data-testid': testId }}
         InputLabelProps={type === 'date' ? { shrink: true } : undefined}
         sx={{
           '& .MuiOutlinedInput-root': {
@@ -64,10 +64,10 @@ const InfoField = ({
   }
 
   return (
-    <Box 
+    <Box
       onMouseEnter={() => setShowCopy(true)}
       onMouseLeave={() => setShowCopy(false)}
-      sx={{ 
+      sx={{
         position: 'relative',
         p: 1.5,
         mx: -1.5, // Negative margin to offset padding so alignment stays same
@@ -80,14 +80,14 @@ const InfoField = ({
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <Box sx={{ flex: 1 }}>
-          <Typography 
-            variant="caption" 
-            color="text.secondary" 
-            fontWeight={600} 
-            display="block" 
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            fontWeight={600}
+            display="block"
             gutterBottom
-            sx={{ 
-              textTransform: 'uppercase', 
+            sx={{
+              textTransform: 'uppercase',
               letterSpacing: '0.5px',
               fontSize: '0.7rem',
               opacity: 0.8
@@ -95,10 +95,10 @@ const InfoField = ({
           >
             {label}
           </Typography>
-          <Typography 
-            variant="body1" 
-            fontWeight={500} 
-            sx={{ 
+          <Typography
+            variant="body1"
+            fontWeight={500}
+            sx={{
               wordBreak: 'break-word',
               color: contentToDisplay ? 'text.primary' : 'text.disabled',
               fontFamily: sensitive ? 'monospace' : 'inherit',
@@ -108,21 +108,21 @@ const InfoField = ({
             {sensitive && value ? '••••••••' : contentToDisplay || 'Not provided'}
           </Typography>
         </Box>
-        
+
         {!sensitive && value && (
           <Fade in={showCopy}>
-            <Tooltip title={copied ? "Copied!" : "Copy to clipboard"} placement="left">
-              <IconButton 
-                size="small" 
+            <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'} placement="left">
+              <IconButton
+                size="small"
                 onClick={handleCopy}
-                sx={{ 
-                  ml: 1, 
+                sx={{
+                  ml: 1,
                   mt: -0.5,
                   opacity: showCopy ? 1 : 0,
                   bgcolor: copied ? 'success.light' : 'rgba(0,0,0,0.05)',
                   color: copied ? 'white' : 'text.secondary',
                   '&:hover': {
-                    bgcolor: copied ? 'success.main' : 'rgba(0,0,0,0.1)',
+                    bgcolor: copied ? 'success.main' : 'rgba(0,0,0,0.1)'
                   },
                   width: 28,
                   height: 28

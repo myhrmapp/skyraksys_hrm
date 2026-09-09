@@ -19,7 +19,7 @@ describe('DeleteEmployeeDialog Component', () => {
     lastName: 'Doe',
     employeeId: 'EMP001',
     designation: 'Software Engineer',
-    department: 'Engineering',
+    department: 'Engineering'
   };
   const onClose = jest.fn();
   const onConfirm = jest.fn();
@@ -29,7 +29,7 @@ describe('DeleteEmployeeDialog Component', () => {
     onClose,
     onConfirm,
     employee: mockEmployee,
-    loading: false,
+    loading: false
   };
 
   beforeEach(() => {

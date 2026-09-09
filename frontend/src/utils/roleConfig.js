@@ -20,7 +20,7 @@ export const ROUTE_PERMISSIONS = {
   '/employee-dashboard': [ROLES.EMPLOYEE],
   '/manager-dashboard': [ROLES.MANAGER],
   '/performance-dashboard': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER],
-  
+
   // Employee Management Routes
   '/employees': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER],
   '/employees/add': [ROLES.ADMIN, ROLES.HR],
@@ -30,13 +30,14 @@ export const ROUTE_PERMISSIONS = {
   '/employee-records': [ROLES.ADMIN, ROLES.HR],
   '/my-profile': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/my-profile/edit/:id': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
-  
+
   // Leave Management Routes
+  '/leave': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/leave-management': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER],
   '/leave-requests': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/add-leave-request': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/admin/leave-balances': [ROLES.ADMIN, ROLES.HR],
-  
+
   // Attendance Routes
   '/attendance': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
 
@@ -45,18 +46,18 @@ export const ROUTE_PERMISSIONS = {
   '/timesheets/week/:weekStart': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/timesheets/history': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/timesheets/approvals': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER],
-  
+
   // Payroll Routes
   '/payroll-management': [ROLES.ADMIN, ROLES.HR],
   '/employee-payslips': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/admin/payslip-templates': [ROLES.ADMIN, ROLES.HR],
   '/billing-invoices': [ROLES.HR],
   '/notifications': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
-  
+
   // Project & Task Routes
   '/project-task-config': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   '/my-tasks': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
-  
+
   // Employee Reviews & Goals
   '/employee-reviews': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER],
   '/goals': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
@@ -79,13 +80,13 @@ export const ROUTE_PERMISSIONS = {
   '/reports': [ROLES.ADMIN, ROLES.HR],
   '/admin/consolidated-reports': [ROLES.ADMIN, ROLES.HR],
   '/admin/payslip-templates-old': [ROLES.ADMIN, ROLES.HR],
-  
+
   // Debug Routes
   '/debug/validation': [ROLES.ADMIN],
-  
+
   // System Showcase
   '/system-showcase': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
-  
+
   // Utility Routes
   '/user-guide': [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE]
 };
@@ -94,12 +95,12 @@ export const ROUTE_PERMISSIONS = {
 export const hasRouteAccess = (userRole, routePath) => {
   // Admin has access to everything
   if (userRole === ROLES.ADMIN) return true;
-  
+
   // Check exact match first
   if (ROUTE_PERMISSIONS[routePath]) {
     return ROUTE_PERMISSIONS[routePath].includes(userRole);
   }
-  
+
   // Check pattern match for dynamic routes
   const routePattern = Object.keys(ROUTE_PERMISSIONS).find(pattern => {
     if (pattern.includes(':')) {
@@ -108,11 +109,11 @@ export const hasRouteAccess = (userRole, routePath) => {
     }
     return false;
   });
-  
+
   if (routePattern) {
     return ROUTE_PERMISSIONS[routePattern].includes(userRole);
   }
-  
+
   // Default deny
   return false;
 };

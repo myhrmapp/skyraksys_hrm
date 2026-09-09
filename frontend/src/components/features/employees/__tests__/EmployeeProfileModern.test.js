@@ -22,7 +22,7 @@ const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
-  useParams: () => ({ id: '1' }),
+  useParams: () => ({ id: '1' })
 }));
 
 // Default hook state factory
@@ -53,7 +53,7 @@ const createProfileHookDefaults = (overrides = {}) => ({
   formatCurrency: jest.fn((v) => `$${v}`),
   navigate: mockNavigate,
   id: '1',
-  ...overrides,
+  ...overrides
 });
 
 let mockProfileHook = createProfileHookDefaults();
@@ -65,7 +65,7 @@ jest.mock('../hooks/useEmployeeProfile', () => {
   return {
     __esModule: true,
     default: () => mockProfileHook,
-    useEmployeeProfile: () => mockProfileHook,
+    useEmployeeProfile: () => mockProfileHook
   };
 });
 
@@ -78,8 +78,8 @@ jest.mock('../../../../hooks/useMetadataCache', () => {
     useMetadataCache: () => ({
       departments: [],
       positions: [],
-      managers: [],
-    }),
+      managers: []
+    })
   };
 });
 

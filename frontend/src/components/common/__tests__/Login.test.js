@@ -8,7 +8,7 @@ import Login from '../Login';
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
+  useNavigate: () => mockNavigate
 }));
 
 describe('Login Component', () => {
@@ -131,7 +131,7 @@ describe('Login Component', () => {
       const mockLogin = jest.fn().mockResolvedValue({ success: true });
 
       const { auth } = render(<Login />, {
-        authValue: { login: mockLogin },
+        authValue: { login: mockLogin }
       });
 
       const emailInput = screen.getByLabelText(/email/i);
@@ -151,11 +151,11 @@ describe('Login Component', () => {
     it('should show error message for invalid credentials', async () => {
       const user = userEvent.setup();
       const mockLogin = jest.fn().mockRejectedValue({
-        response: { data: { message: 'Invalid credentials' } },
+        response: { data: { message: 'Invalid credentials' } }
       });
 
       render(<Login />, {
-        authValue: { login: mockLogin },
+        authValue: { login: mockLogin }
       });
 
       const emailInput = screen.getByLabelText(/email/i);
@@ -176,7 +176,7 @@ describe('Login Component', () => {
       const mockLogin = jest.fn().mockRejectedValue(new Error('Network error'));
 
       render(<Login />, {
-        authValue: { login: mockLogin },
+        authValue: { login: mockLogin }
       });
 
       const emailInput = screen.getByLabelText(/email/i);
@@ -199,7 +199,7 @@ describe('Login Component', () => {
       );
 
       render(<Login />, {
-        authValue: { login: mockLogin },
+        authValue: { login: mockLogin }
       });
 
       const emailInput = screen.getByLabelText(/email/i);
@@ -222,7 +222,7 @@ describe('Login Component', () => {
       );
 
       render(<Login />, {
-        authValue: { login: mockLogin },
+        authValue: { login: mockLogin }
       });
 
       const emailInput = screen.getByLabelText(/email/i);
@@ -287,7 +287,7 @@ describe('Login Component', () => {
       const mockLogin = jest.fn().mockResolvedValue({ success: true });
 
       render(<Login />, {
-        authValue: { login: mockLogin },
+        authValue: { login: mockLogin }
       });
 
       const emailInput = screen.getByLabelText(/email/i);
@@ -308,12 +308,12 @@ describe('Login Component', () => {
       const mockLogin = jest.fn().mockRejectedValue({
         response: {
           status: 429,
-          data: { message: 'Account locked due to multiple failed login attempts' },
-        },
+          data: { message: 'Account locked due to multiple failed login attempts' }
+        }
       });
 
       render(<Login />, {
-        authValue: { login: mockLogin },
+        authValue: { login: mockLogin }
       });
 
       const emailInput = screen.getByLabelText(/email/i);

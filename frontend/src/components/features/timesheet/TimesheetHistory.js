@@ -61,11 +61,11 @@ const TimesheetHistory = ({ embedded } = {}) => {
   // If the user is an admin/HR, we don't filter by employeeId unless one is specified (which it isn't in this component).
   // For other roles, it's always their own ID.
   const queryEmployeeId = canViewAll ? undefined : myEmployeeId;
-  
+
   // eslint-disable-next-line no-unused-vars
   const [apiPage, setApiPage] = useState(1);
   const pageSize = 100; // Backend max limit is 100
-  
+
   // React Query for timesheets — paginated
   const { data: timesheetsData, isLoading: loading } = useQuery({
     queryKey: ['timesheets', 'history', queryEmployeeId, apiPage],
@@ -74,13 +74,13 @@ const TimesheetHistory = ({ embedded } = {}) => {
     select: (response) => {
       const allTimesheets = Array.isArray(response.data) ? response.data : (response.data?.data || []);
       // Admin/HR see all, others see only their own
-      const myTimesheets = canViewAll 
+      const myTimesheets = canViewAll
         ? allTimesheets
         : allTimesheets.filter(ts => ts.employeeId === myEmployeeId || ts.employee?.id === myEmployeeId);
       return myTimesheets.sort((a, b) => new Date(b.weekStartDate) - new Date(a.weekStartDate));
     }
   });
-  
+
   const timesheets = useMemo(() => timesheetsData || [], [timesheetsData]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -112,7 +112,7 @@ const TimesheetHistory = ({ embedded } = {}) => {
           totalWeekHours: 0,
           overallStatus:  timesheet.status,
           latestSubmitted: timesheet.submittedAt,
-          latestResponse:  timesheet.approvedAt || timesheet.rejectedAt,
+          latestResponse:  timesheet.approvedAt || timesheet.rejectedAt
         };
       }
       groups[weekKey].timesheets.push(timesheet);
@@ -149,11 +149,11 @@ const TimesheetHistory = ({ embedded } = {}) => {
 
   const handleViewDetails = (timesheet) => {
     // Find all timesheets for this week
-    const weekTimesheets = timesheets.filter(ts => 
+    const weekTimesheets = timesheets.filter(ts =>
       ts.employeeId === timesheet.employeeId &&
       ts.weekStartDate === timesheet.weekStartDate
     );
-    
+
     setSelectedTimesheet({
       ...timesheet,
       weekTimesheets: weekTimesheets
@@ -222,12 +222,12 @@ const TimesheetHistory = ({ embedded } = {}) => {
     // Flatten grouped data for CSV export
     const csvRows = [];
     csvRows.push(['Week Start', 'Week End', 'Projects/Tasks', 'Total Hours', 'Status', 'Submitted Date', 'Response Date']);
-    
+
     filteredTimesheets.forEach(weekData => {
-      const tasksList = weekData.timesheets.map(ts => 
+      const tasksList = weekData.timesheets.map(ts =>
         `${ts.project?.name || 'N/A'} - ${ts.task?.name || 'N/A'} (${ts.totalHoursWorked || 0}h)`
       ).join('; ');
-      
+
       csvRows.push([
         escCsv(formatDate(weekData.weekStartDate)),
         escCsv(formatDate(weekData.weekEndDate)),
@@ -309,9 +309,9 @@ const TimesheetHistory = ({ embedded } = {}) => {
 
       {/* Alert */}
       <Collapse in={alert.show}>
-        <Alert 
-          severity={alert.type} 
-          sx={{ mb: 2 }} 
+        <Alert
+          severity={alert.type}
+          sx={{ mb: 2 }}
           onClose={() => setAlert({ ...alert, show: false })}
         >
           {alert.message}
@@ -359,8 +359,8 @@ const TimesheetHistory = ({ embedded } = {}) => {
               id="tsHistoryTo"
               inputProps={{ 'data-testid': 'ts-history-end-date' }}
             />
-            <Button 
-              variant="text" 
+            <Button
+              variant="text"
               onClick={clearFilters}
               disabled={!statusFilter && !dateRange.start && !dateRange.end}
               size="small"
@@ -400,8 +400,8 @@ const TimesheetHistory = ({ embedded } = {}) => {
                       No timesheets found
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      {statusFilter || dateRange.start || dateRange.end 
-                        ? 'Try adjusting your filters' 
+                      {statusFilter || dateRange.start || dateRange.end
+                        ? 'Try adjusting your filters'
                         : 'Start by submitting your first timesheet'}
                     </Typography>
                   </Box>
@@ -409,10 +409,10 @@ const TimesheetHistory = ({ embedded } = {}) => {
               </TableRow>
             ) : (
               paginatedTimesheets.map((weekData, index) => (
-                <TableRow 
-                  key={weekData.weekStartDate} 
+                <TableRow
+                  key={weekData.weekStartDate}
                   hover
-                  sx={{ 
+                  sx={{
                     bgcolor: index % 2 === 0 ? 'white' : alpha(theme.palette.background.default, 0.3),
                     '&:hover': { bgcolor: `${alpha(theme.palette.primary.main, 0.05)} !important` }
                   }}
@@ -428,9 +428,9 @@ const TimesheetHistory = ({ embedded } = {}) => {
                   <TableCell>
                     <Box sx={{ minWidth: 350 }}>
                       {weekData.timesheets.map((timesheet, taskIndex) => (
-                        <Box 
-                          key={timesheet.id} 
-                          sx={{ 
+                        <Box
+                          key={timesheet.id}
+                          sx={{
                             mb: taskIndex < weekData.timesheets.length - 1 ? 1 : 0,
                             display: 'flex',
                             alignItems: 'center',
@@ -439,16 +439,16 @@ const TimesheetHistory = ({ embedded } = {}) => {
                         >
                           <Box sx={{ flex: 1 }}>
                             <Typography variant="body2" fontWeight={500}>
-                              {timesheet.project?.name || 'N/A'} 
+                              {timesheet.project?.name || 'N/A'}
                             </Typography>
                             <Typography variant="caption" color="textSecondary">
                               {timesheet.task?.name || 'N/A'}
                             </Typography>
                           </Box>
-                          <Chip 
+                          <Chip
                             label={`${timesheet.totalHoursWorked || 0}h`}
-                            size="small" 
-                            variant="outlined" 
+                            size="small"
+                            variant="outlined"
                             sx={{ ml: 1, fontSize: '0.75rem', minWidth: 45 }}
                           />
                         </Box>
@@ -464,10 +464,10 @@ const TimesheetHistory = ({ embedded } = {}) => {
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    <Chip 
+                    <Chip
                       icon={getStatusIcon(weekData.overallStatus)}
-                      label={weekData.overallStatus} 
-                      color={getStatusColor(weekData.overallStatus)} 
+                      label={weekData.overallStatus}
+                      color={getStatusColor(weekData.overallStatus)}
                       size="small"
                       sx={{ fontWeight: 500, minWidth: 100 }}
                     />
@@ -513,11 +513,11 @@ const TimesheetHistory = ({ embedded } = {}) => {
                   </TableCell>
                   <TableCell align="center">
                     <Tooltip title="View Week Details">
-                      <IconButton 
-                        size="small" 
+                      <IconButton
+                        size="small"
                         aria-label="View week details"
                         onClick={() => handleViewDetails(weekData.timesheets[0])} // Pass first timesheet for backward compatibility
-                        sx={{ 
+                        sx={{
                           bgcolor: 'action.hover',
                           '&:hover': { bgcolor: 'info.light', color: 'info.main' }
                         }}
@@ -544,14 +544,14 @@ const TimesheetHistory = ({ embedded } = {}) => {
       </TableContainer>
 
       {/* View Details Dialog */}
-      <Dialog 
-        open={viewDialogOpen} 
+      <Dialog
+        open={viewDialogOpen}
         onClose={() => setViewDialogOpen(false)}
         maxWidth="md"
         fullWidth
         PaperProps={{ sx: { borderRadius: 2 } }}
       >
-        <DialogTitle sx={{ 
+        <DialogTitle sx={{
           bgcolor: 'primary.light',
           color: 'primary.dark',
           display: 'flex',
@@ -584,10 +584,10 @@ const TimesheetHistory = ({ embedded } = {}) => {
                       Status
                     </Typography>
                     <Box sx={{ mt: 0.5 }}>
-                      <Chip 
+                      <Chip
                         icon={getStatusIcon(selectedTimesheet.status)}
-                        label={selectedTimesheet.status} 
-                        color={getStatusColor(selectedTimesheet.status)} 
+                        label={selectedTimesheet.status}
+                        color={getStatusColor(selectedTimesheet.status)}
                         size="small"
                         sx={{ fontWeight: 500 }}
                       />
@@ -612,7 +612,7 @@ const TimesheetHistory = ({ embedded } = {}) => {
                   Hours Breakdown
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
-                
+
                 <TableContainer>
                   <Table size="small">
                     <TableHead>
@@ -684,7 +684,7 @@ const TimesheetHistory = ({ embedded } = {}) => {
 };
 
 TimesheetHistory.propTypes = {
-  embedded: PropTypes.bool,
+  embedded: PropTypes.bool
 };
 
 export default TimesheetHistory;

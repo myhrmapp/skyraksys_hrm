@@ -18,21 +18,21 @@ const FIELD_PERMISSIONS = {
       'firstName', 'lastName', 'email', 'phone', 'dateOfBirth', 'gender',
       'maritalStatus', 'nationality', 'address', 'city', 'state', 'pinCode',
       'photoUrl',
-      
+
       // Employment Information
       'employeeId', 'hireDate', 'joiningDate', 'confirmationDate', 'departmentId',
       'positionId', 'managerId', 'employmentType', 'workLocation', 'status',
       'probationPeriod', 'noticePeriod', 'resignationDate', 'lastWorkingDate',
-      
+
       // Contact Information
       'emergencyContactName', 'emergencyContactPhone', 'emergencyContactRelation',
-      
+
       // Statutory Information
       'aadhaarNumber', 'panNumber', 'uanNumber', 'pfNumber', 'esiNumber',
-      
+
       // Banking Information
       'bankName', 'bankAccountNumber', 'ifscCode', 'bankBranch', 'accountHolderName',
-      
+
       // Salary Information
       'salaryStructure'
     ],
@@ -53,10 +53,10 @@ const FIELD_PERMISSIONS = {
       'firstName', 'lastName', 'email', 'phone', 'employeeId',
       'hireDate', 'departmentId', 'positionId', 'employmentType', 'workLocation',
       'status', 'photoUrl',
-      
+
       // Contact Information (for emergencies)
       'emergencyContactName', 'emergencyContactPhone',
-      
+
       // Work-related address
       'workLocation', 'address', 'city', 'state'
     ],
@@ -162,15 +162,15 @@ export function useFieldPermissions(targetEmployeeId = null) {
     function canViewField(fieldName) {
       // Admin can view everything
       if (userPermissions.view.includes('*')) return true;
-      
+
       // Check if field is explicitly allowed
       if (userPermissions.view.includes(fieldName)) return true;
-      
+
       // Special case: employees can only view their own data
       if (securityContext.isOwnRecord && user.role === 'employee') {
         return userPermissions.view.includes(fieldName);
       }
-      
+
       return false;
     }
 
@@ -180,15 +180,15 @@ export function useFieldPermissions(targetEmployeeId = null) {
     function canEditField(fieldName) {
       // Admin can edit everything
       if (userPermissions.edit.includes('*')) return true;
-      
+
       // Check if field is explicitly allowed for editing
       if (userPermissions.edit.includes(fieldName)) return true;
-      
+
       // Special case: employees can only edit their own allowed fields
       if (securityContext.isOwnRecord && user.role === 'employee') {
         return userPermissions.edit.includes(fieldName);
       }
-      
+
       return false;
     }
 
@@ -204,9 +204,9 @@ export function useFieldPermissions(targetEmployeeId = null) {
      */
     function filterEmployeeData(employeeData) {
       if (!employeeData) return {};
-      
+
       const filteredData = {};
-      
+
       Object.keys(employeeData).forEach(field => {
         if (canViewField(field)) {
           // Additional check for sensitive fields
@@ -221,7 +221,7 @@ export function useFieldPermissions(targetEmployeeId = null) {
           }
         }
       });
-      
+
       return filteredData;
     }
 
@@ -242,13 +242,13 @@ export function useFieldPermissions(targetEmployeeId = null) {
      */
     function getVisibleFields(category = null) {
       let allFields = [];
-      
+
       if (category && FIELD_CATEGORIES[category]) {
         allFields = FIELD_CATEGORIES[category];
       } else {
         allFields = Object.values(FIELD_CATEGORIES).flat();
       }
-      
+
       return allFields.filter(field => canViewField(field));
     }
 
@@ -257,13 +257,13 @@ export function useFieldPermissions(targetEmployeeId = null) {
      */
     function getEditableFields(category = null) {
       let allFields = [];
-      
+
       if (category && FIELD_CATEGORIES[category]) {
         allFields = FIELD_CATEGORIES[category];
       } else {
         allFields = Object.values(FIELD_CATEGORIES).flat();
       }
-      
+
       return allFields.filter(field => canEditField(field));
     }
 
@@ -272,13 +272,13 @@ export function useFieldPermissions(targetEmployeeId = null) {
      */
     function validateFieldEdit(updateData) {
       const errors = [];
-      
+
       Object.keys(updateData).forEach(field => {
         if (!canEditField(field)) {
           errors.push(`You don't have permission to edit ${field}`);
         }
       });
-      
+
       return {
         isValid: errors.length === 0,
         errors
@@ -309,18 +309,18 @@ export function useFieldPermissions(targetEmployeeId = null) {
 /**
  * Enhanced Form Field Component with Permission-Based Rendering
  */
-export function PermissionField({ 
-  fieldName, 
-  children, 
+export function PermissionField({
+  fieldName,
+  children,
   targetEmployeeId = null,
   showRestricted = true,
-  restrictedText = "Access Restricted"
+  restrictedText = 'Access Restricted'
 }) {
   const { canViewField, canEditField } = useFieldPermissions(targetEmployeeId);
-  
+
   const canView = canViewField(fieldName);
   const canEdit = canEditField(fieldName);
-  
+
   if (!canView) {
     return showRestricted ? (
       <div className="restricted-field">
@@ -328,7 +328,7 @@ export function PermissionField({
       </div>
     ) : null;
   }
-  
+
   // Clone children and add disabled prop if user can't edit
   const enhancedChildren = React.Children.map(children, child => {
     if (React.isValidElement(child)) {
@@ -339,27 +339,27 @@ export function PermissionField({
     }
     return child;
   });
-  
+
   return <>{enhancedChildren}</>;
 }
 
 /**
  * Permission-based field group component
  */
-export function PermissionFieldGroup({ 
-  category, 
-  children, 
+export function PermissionFieldGroup({
+  category,
+  children,
   targetEmployeeId = null,
-  title = null 
+  title = null
 }) {
   const { getVisibleFields } = useFieldPermissions(targetEmployeeId);
-  
+
   const visibleFields = getVisibleFields(category);
-  
+
   if (visibleFields.length === 0) {
     return null;
   }
-  
+
   return (
     <div className="permission-field-group">
       {title && <h4>{title}</h4>}
@@ -374,9 +374,9 @@ export function PermissionFieldGroup({
 export function SecurityIndicator({ fieldName, showLevel = true }) {
   const isSensitive = SENSITIVE_FIELDS.includes(fieldName);
   const { canAccessSensitive } = useFieldPermissions();
-  
+
   if (!isSensitive) return null;
-  
+
   return (
     <div className={`security-indicator ${isSensitive ? 'sensitive' : ''}`}>
       🔒

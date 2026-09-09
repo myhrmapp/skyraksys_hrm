@@ -28,8 +28,8 @@ const createTestQueryClient = () =>
   new QueryClient({
     defaultOptions: {
       queries: { retry: false },
-      mutations: { retry: false },
-    },
+      mutations: { retry: false }
+    }
   });
 
 const renderWithProviders = (component, { queryClient = createTestQueryClient() } = {}) => {

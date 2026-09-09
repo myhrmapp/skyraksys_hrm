@@ -35,7 +35,7 @@ const EmployeeProfileHeader = ({
           <ArrowBackIcon />
         </IconButton>
       </Tooltip>
-      
+
       <Box sx={{ flex: 1 }}>
         <Typography variant="h4" fontWeight={700} color="text.primary">
           Employee Profile
@@ -44,7 +44,7 @@ const EmployeeProfileHeader = ({
           Manage employee information and settings
         </Typography>
       </Box>
-      
+
       <Stack direction="row" spacing={2} alignItems="center">
         {/* View Mode Actions */}
         {!editing && (
@@ -56,7 +56,7 @@ const EmployeeProfileHeader = ({
                   startIcon={<ReceiptIcon />}
                   onClick={onViewPayslip}
                   data-testid="employee-profile-payslip-btn"
-                  sx={{ 
+                  sx={{
                     color: 'text.secondary',
                     textTransform: 'none',
                     '&:hover': { color: 'primary.main', bgcolor: 'primary.50' }
@@ -68,7 +68,7 @@ const EmployeeProfileHeader = ({
                   variant="text"
                   startIcon={<ManageAccountsIcon />}
                   onClick={onManageUser}
-                  sx={{ 
+                  sx={{
                     color: 'text.secondary',
                     textTransform: 'none',
                     '&:hover': { color: 'primary.main', bgcolor: 'primary.50' }
@@ -97,7 +97,7 @@ const EmployeeProfileHeader = ({
                 ID Card
               </Button>
             </Tooltip>
-            
+
             {canEdit && (
               <Button
                 variant="contained"
@@ -129,8 +129,8 @@ const EmployeeProfileHeader = ({
               onClick={onCancel}
               disabled={saving}
               data-testid="employee-profile-cancel-btn"
-              sx={{ 
-                textTransform: 'none', 
+              sx={{
+                textTransform: 'none',
                 borderRadius: 2,
                 borderColor: 'divider',
                 color: 'text.secondary',

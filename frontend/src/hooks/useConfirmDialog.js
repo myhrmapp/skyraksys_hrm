@@ -2,10 +2,10 @@ import { useState, useCallback } from 'react';
 
 /**
  * Hook to manage ConfirmDialog state.
- * 
+ *
  * Usage:
  *   const { dialogProps, confirm } = useConfirmDialog();
- * 
+ *
  *   // Trigger confirmation:
  *   const handleDelete = () => {
  *     confirm({
@@ -15,7 +15,7 @@ import { useState, useCallback } from 'react';
  *       onConfirm: async () => { await deleteItem(id); }
  *     });
  *   };
- * 
+ *
  *   // In JSX:
  *   <ConfirmDialog {...dialogProps} />
  */
@@ -28,7 +28,7 @@ const useConfirmDialog = () => {
     confirmText: undefined,
     cancelText: 'Cancel',
     loading: false,
-    onConfirmCallback: null,
+    onConfirmCallback: null
   });
 
   const confirm = useCallback(({
@@ -37,7 +37,7 @@ const useConfirmDialog = () => {
     variant = 'warning',
     confirmText,
     cancelText = 'Cancel',
-    onConfirm,
+    onConfirm
   }) => {
     setState({
       open: true,
@@ -47,7 +47,7 @@ const useConfirmDialog = () => {
       confirmText,
       cancelText,
       loading: false,
-      onConfirmCallback: onConfirm,
+      onConfirmCallback: onConfirm
     });
   }, []);
 
@@ -80,7 +80,7 @@ const useConfirmDialog = () => {
     cancelText: state.cancelText,
     loading: state.loading,
     onConfirm: handleConfirm,
-    onCancel: handleCancel,
+    onCancel: handleCancel
   };
 
   return { dialogProps, confirm };

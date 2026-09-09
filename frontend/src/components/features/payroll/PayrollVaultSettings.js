@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, Typography, Paper, Switch, FormControlLabel, 
-  Button, Select, MenuItem, InputLabel, FormControl, 
+import {
+  Box, Typography, Paper, Switch, FormControlLabel,
+  Button, Select, MenuItem, InputLabel, FormControl,
   Alert, Divider, CircularProgress
 } from '@mui/material';
 import { Security, Lock, LockOpen, Warning } from '@mui/icons-material';
@@ -36,7 +36,7 @@ const PayrollVaultSettings = () => {
       // Filter for HR/Admin users (since backend doesn't support ?role=HR filtering natively yet)
       const hrUsers = (usersRes.data || []).filter(u => u.role === 'hr' || u.role === 'admin' || u.role === 'HR' || u.role === 'Admin');
       setUsers(hrUsers);
-      
+
     } catch (err) {
       console.error('Error fetching vault data', err);
       setError('Failed to load Vault Settings.');
@@ -62,8 +62,8 @@ const PayrollVaultSettings = () => {
       }
 
       const endpoint = !vaultStatus.isConfigured ? '/vault/setup' : '/vault/toggle';
-      const payload = !vaultStatus.isConfigured ? 
-        { designatedHrUserId: selectedUserId } : 
+      const payload = !vaultStatus.isConfigured ?
+        { designatedHrUserId: selectedUserId } :
         { enable: isEnabled, designatedHrUserId: selectedUserId };
 
       await api.post(endpoint, payload);
@@ -87,7 +87,7 @@ const PayrollVaultSettings = () => {
             Payroll & Invoice Security Vault
           </Typography>
         </Box>
-        
+
         <Typography variant="body1" color="textSecondary" mb={4}>
           The Security Vault encrypts all financial data in the database. When enabled, only the Designated HR can view all payslips. Employees can still view their own payslips.
         </Typography>
@@ -97,7 +97,7 @@ const PayrollVaultSettings = () => {
 
         {!isEnabled && vaultStatus?.isConfigured && (
           <Alert severity="warning" icon={<Warning />} sx={{ mb: 3 }}>
-            <strong>WARNING:</strong> The Vault is currently disabled. All salaries are stored in plain text in the database. 
+            <strong>WARNING:</strong> The Vault is currently disabled. All salaries are stored in plain text in the database.
             System administrators and developers can read all payroll data.
           </Alert>
         )}
@@ -105,10 +105,10 @@ const PayrollVaultSettings = () => {
         <Box mb={4}>
           <FormControlLabel
             control={
-              <Switch 
-                checked={isEnabled} 
-                onChange={handleToggle} 
-                color="success" 
+              <Switch
+                checked={isEnabled}
+                onChange={handleToggle}
+                color="success"
                 size="large"
               />
             }
@@ -125,7 +125,7 @@ const PayrollVaultSettings = () => {
         <Typography variant="h6" gutterBottom>
           Access Configuration
         </Typography>
-        
+
         <FormControl fullWidth sx={{ mb: 4 }}>
           <InputLabel>Designated HR User</InputLabel>
           <Select
@@ -143,8 +143,8 @@ const PayrollVaultSettings = () => {
         </FormControl>
 
         <Box display="flex" justifyContent="flex-end">
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             color={isEnabled ? 'success' : 'error'}
             size="large"
             startIcon={<Security />}

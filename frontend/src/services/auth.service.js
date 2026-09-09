@@ -108,9 +108,9 @@ class AuthService {
   // Reset user password (Admin/HR only)
   async resetUserPassword(userId, newPassword) {
     try {
-      const response = await http.put(`/auth/users/${userId}/reset-password`, { 
+      const response = await http.put(`/auth/users/${userId}/reset-password`, {
         newPassword,
-        forceChange: true 
+        forceChange: true
       });
       return response.data;
     } catch (error) {
@@ -163,8 +163,8 @@ class AuthService {
   // Send password reset email to user
   async sendPasswordResetEmail(userId, tempPassword) {
     try {
-      const response = await http.post(`/email/password-reset/${userId}`, { 
-        tempPassword 
+      const response = await http.post(`/email/password-reset/${userId}`, {
+        tempPassword
       });
       return response.data;
     } catch (error) {
@@ -178,8 +178,8 @@ class AuthService {
   // Send account status change email
   async sendAccountStatusEmail(userId, isActive) {
     try {
-      const response = await http.post(`/email/account-status/${userId}`, { 
-        isActive 
+      const response = await http.post(`/email/account-status/${userId}`, {
+        isActive
       });
       return response.data;
     } catch (error) {

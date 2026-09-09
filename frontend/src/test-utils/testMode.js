@@ -28,27 +28,27 @@ export const INTEGRATION_CONFIG = {
   users: {
     admin: {
       email: process.env.TEST_ADMIN_EMAIL || 'admin@skyraksys.com',
-      password: process.env.TEST_ADMIN_PASSWORD || DEFAULT_SEED_PASSWORD,
+      password: process.env.TEST_ADMIN_PASSWORD || DEFAULT_SEED_PASSWORD
     },
     hr: {
       email: process.env.TEST_HR_EMAIL || 'hr@skyraksys.com',
-      password: process.env.TEST_HR_PASSWORD || DEFAULT_SEED_PASSWORD,
+      password: process.env.TEST_HR_PASSWORD || DEFAULT_SEED_PASSWORD
     },
     manager: {
       email: process.env.TEST_MANAGER_EMAIL || 'lead@skyraksys.com',
-      password: process.env.TEST_MANAGER_PASSWORD || DEFAULT_SEED_PASSWORD,
+      password: process.env.TEST_MANAGER_PASSWORD || DEFAULT_SEED_PASSWORD
     },
     employee: {
       email: process.env.TEST_EMPLOYEE_EMAIL || 'employee1@skyraksys.com',
-      password: process.env.TEST_EMPLOYEE_PASSWORD || DEFAULT_SEED_PASSWORD,
-    },
+      password: process.env.TEST_EMPLOYEE_PASSWORD || DEFAULT_SEED_PASSWORD
+    }
   },
 
   /** Timeout for integration API calls (ms) */
   apiTimeout: Number(process.env.TEST_API_TIMEOUT) || 10000,
 
   /** Jest test timeout for integration tests (ms) */
-  testTimeout: Number(process.env.TEST_TIMEOUT) || 30000,
+  testTimeout: Number(process.env.TEST_TIMEOUT) || 30000
 };
 
 /**

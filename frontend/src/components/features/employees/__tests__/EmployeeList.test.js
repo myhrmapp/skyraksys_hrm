@@ -18,7 +18,7 @@ jest.mock('../../../../services/auth.service', () => {
     return jest.requireActual('../../../../services/auth.service');
   }
   return {
-    authService: { createUserAccount: jest.fn() },
+    authService: { createUserAccount: jest.fn() }
   };
 });
 
@@ -26,7 +26,7 @@ jest.mock('../../../../services/auth.service', () => {
 jest.mock('file-saver', () => ({ saveAs: jest.fn() }));
 jest.mock('xlsx', () => ({
   utils: { json_to_sheet: jest.fn(), book_new: jest.fn(() => ({})), book_append_sheet: jest.fn() },
-  write: jest.fn(() => []),
+  write: jest.fn(() => [])
 }));
 
 describe('EmployeeList Component', () => {
@@ -36,7 +36,7 @@ describe('EmployeeList Component', () => {
   const mockEmployees = [
     createMockEmployee({ id: 1, employeeId: 'EMP001', firstName: 'John', lastName: 'Doe', status: 'Active' }),
     createMockEmployee({ id: 2, employeeId: 'EMP002', firstName: 'Jane', lastName: 'Smith', status: 'Active' }),
-    createMockEmployee({ id: 3, employeeId: 'EMP003', firstName: 'Bob', lastName: 'Johnson', status: 'Inactive' }),
+    createMockEmployee({ id: 3, employeeId: 'EMP003', firstName: 'Bob', lastName: 'Johnson', status: 'Inactive' })
   ];
 
   beforeEach(() => {
@@ -45,11 +45,11 @@ describe('EmployeeList Component', () => {
     employeeService.getAll = jest.fn().mockResolvedValue({
       data: mockEmployees,
       total: 3,
-      pagination: { totalItems: 3, currentPage: 1, totalPages: 1 },
+      pagination: { totalItems: 3, currentPage: 1, totalPages: 1 }
     });
     // Mock getDepartments
     employeeService.getDepartments = jest.fn().mockResolvedValue({
-      data: { success: true, data: [{ id: 1, name: 'Engineering' }, { id: 2, name: 'HR' }] },
+      data: { success: true, data: [{ id: 1, name: 'Engineering' }, { id: 2, name: 'HR' }] }
     });
     // Mock delete
     employeeService.delete = jest.fn().mockResolvedValue({ data: { success: true } });
@@ -290,7 +290,7 @@ describe('EmployeeList Component', () => {
         .mockResolvedValue({
           data: mockEmployees,
           total: 3,
-          pagination: { totalItems: 3, currentPage: 1, totalPages: 1 },
+          pagination: { totalItems: 3, currentPage: 1, totalPages: 1 }
         });
 
       const user = userEvent.setup();
@@ -316,7 +316,7 @@ describe('EmployeeList Component', () => {
       employeeService.getAll.mockResolvedValue({
         data: [],
         total: 0,
-        pagination: { totalItems: 0, currentPage: 1, totalPages: 0 },
+        pagination: { totalItems: 0, currentPage: 1, totalPages: 0 }
       });
 
       render(<EmployeeList />, { authValue: { user: adminUser } });

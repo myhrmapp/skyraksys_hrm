@@ -99,7 +99,7 @@ export const usePrevious = (value) => {
  */
 export const useIsMounted = () => {
   const isMountedRef = useRef(true);
-  
+
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
@@ -121,18 +121,18 @@ export const useSafeAsync = (asyncFn, deps = []) => {
     error: null,
     data: null
   });
-  
+
   const isMounted = useIsMounted();
 
   const execute = useCallback(async (...args) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       const result = await asyncFn(...args);
-      
+
       if (isMounted()) {
         setState({ loading: false, error: null, data: result });
       }
-      
+
       return result;
     } catch (error) {
       if (isMounted()) {
@@ -168,9 +168,9 @@ export const useDeepMemo = (value) => {
  */
 const deepEqual = (a, b) => {
   if (a === b) return true;
-  
+
   if (a == null || b == null) return false;
-  
+
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) return false;
     for (let i = 0; i < a.length; i++) {
@@ -178,20 +178,20 @@ const deepEqual = (a, b) => {
     }
     return true;
   }
-  
+
   if (typeof a === 'object' && typeof b === 'object') {
     const keysA = Object.keys(a);
     const keysB = Object.keys(b);
-    
+
     if (keysA.length !== keysB.length) return false;
-    
+
     for (let key of keysA) {
       if (!keysB.includes(key)) return false;
       if (!deepEqual(a[key], b[key])) return false;
     }
     return true;
   }
-  
+
   return false;
 };
 
@@ -257,14 +257,14 @@ export const useIntersectionObserver = (options = {}) => {
 export const useWindowSize = () => {
   const [windowSize, setWindowSize] = useState({
     width: undefined,
-    height: undefined,
+    height: undefined
   });
 
   useEffect(() => {
     const handleResize = () => {
       setWindowSize({
         width: window.innerWidth,
-        height: window.innerHeight,
+        height: window.innerHeight
       });
     };
 
@@ -344,15 +344,15 @@ export const useVirtualization = (items, itemHeight, containerHeight) => {
 export const usePerformance = (name, deps = []) => {
   useEffect(() => {
     const startTime = performance.now();
-    
+
     return () => {
       const endTime = performance.now();
       const duration = endTime - startTime;
-      
+
       if (duration > 16.67) { // Longer than 1 frame at 60fps
         console.warn(`Performance: ${name} took ${duration.toFixed(2)}ms`);
       }
-      
+
       // Mark performance for profiling tools
       if (typeof performance.mark === 'function') {
         performance.mark(`${name}-end`);
@@ -360,7 +360,7 @@ export const usePerformance = (name, deps = []) => {
       }
     };
   }, deps);
-  
+
   useEffect(() => {
     if (typeof performance.mark === 'function') {
       performance.mark(`${name}-start`);
@@ -371,11 +371,11 @@ export const usePerformance = (name, deps = []) => {
 /**
  * Component for lazy loading with Intersection Observer
  */
-export const LazyComponent = memo(({ 
-  children, 
-  fallback = <div>Loading...</div>, 
+export const LazyComponent = memo(({
+  children,
+  fallback = <div>Loading...</div>,
   rootMargin = '100px',
-  threshold = 0.1 
+  threshold = 0.1
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [ref, setRef] = useState(null);
@@ -420,7 +420,7 @@ export const withPerformanceMonitoring = (Component, name) => {
   };
 
   MonitoredComponent.displayName = `withPerformanceMonitoring(${Component.displayName || Component.name})`;
-  
+
   return MonitoredComponent;
 };
 

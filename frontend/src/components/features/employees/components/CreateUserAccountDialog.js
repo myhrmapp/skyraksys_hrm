@@ -82,7 +82,7 @@ const CreateUserAccountDialog = ({
           </Box>
         </Box>
       </DialogTitle>
-      
+
       <DialogContent sx={{ mt: 3 }}>
         <Stack spacing={3}>
           {/* Email Field */}
@@ -100,7 +100,7 @@ const CreateUserAccountDialog = ({
                 <InputAdornment position="start">
                   <EmailIcon color="action" />
                 </InputAdornment>
-              ),
+              )
             }}
             helperText="This email will be used for login"
           />
@@ -177,7 +177,7 @@ const CreateUserAccountDialog = ({
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
-              ),
+              )
             }}
             helperText="Min 8 chars, uppercase, lowercase, number, special char (@$!%*?&)"
             error={!!validationError && validationError.toLowerCase().includes('password') && !validationError.toLowerCase().includes('match')}
@@ -207,7 +207,7 @@ const CreateUserAccountDialog = ({
                     {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
-              ),
+              )
             }}
           />
 
@@ -215,22 +215,22 @@ const CreateUserAccountDialog = ({
             <Alert severity="error">{validationError}</Alert>
           )}
 
-          <Box 
-            sx={{ 
-              p: 2, 
-              bgcolor: alpha(theme.palette.info.main, 0.1), 
+          <Box
+            sx={{
+              p: 2,
+              bgcolor: alpha(theme.palette.info.main, 0.1),
               borderRadius: 2,
               border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
             }}
           >
             <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <LightbulbIcon fontSize="small" /> <strong>Note:</strong> The user will be able to login immediately with these credentials. 
+              <LightbulbIcon fontSize="small" /> <strong>Note:</strong> The user will be able to login immediately with these credentials.
               Make sure to securely share the password with the employee.
             </Typography>
           </Box>
         </Stack>
       </DialogContent>
-      
+
       <DialogActions sx={{ p: 3, gap: 1 }}>
         <Button
           onClick={onClose}

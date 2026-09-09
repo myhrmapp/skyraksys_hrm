@@ -16,7 +16,7 @@ const timesheetRoutes = [
   <Route key="add-timesheet-legacy" path="add-timesheet" element={<Navigate to="/timesheets" replace />} />,
   <Route key="weekly-timesheet-legacy" path="weekly-timesheet" element={<Navigate to="/timesheets" replace />} />,
   <Route key="timesheet-history-legacy" path="timesheet-history" element={<Navigate to="/timesheets/history" replace />} />,
-  <Route key="timesheet-manager-legacy" path="timesheet-manager" element={<Navigate to="/timesheets" replace />} />,
+  <Route key="timesheet-manager-legacy" path="timesheet-manager" element={<Navigate to="/timesheets" replace />} />
 ];
 
 export default timesheetRoutes;

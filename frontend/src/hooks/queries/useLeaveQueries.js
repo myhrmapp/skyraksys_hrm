@@ -14,7 +14,7 @@ export const leaveKeys = {
   detail: (id) => [...leaveKeys.details(), id],
   balances: (employeeId) => [...leaveKeys.all, 'balances', employeeId],
   pendingApprovals: () => [...leaveKeys.all, 'pending-approvals'],
-  types: () => [...leaveKeys.all, 'types'],
+  types: () => [...leaveKeys.all, 'types']
 };
 
 /**
@@ -24,7 +24,7 @@ export const useLeaveRequests = (filters = {}, options = {}) => {
   return useQuery({
     queryKey: leaveKeys.list(filters),
     queryFn: () => leaveService.getAll(filters),
-    ...options,
+    ...options
   });
 };
 
@@ -36,7 +36,7 @@ export const useLeaveRequest = (id, options = {}) => {
     queryKey: leaveKeys.detail(id),
     queryFn: () => leaveService.getById(id),
     enabled: !!id,
-    ...options,
+    ...options
   });
 };
 
@@ -48,13 +48,13 @@ export const useLeaveBalances = (employeeId, options = {}) => {
   const resolvedOptions = {
     ...options,
     enabled: options.enabled ?? (isAllBalancesMode ? true : !!employeeId),
-    staleTime: options.staleTime ?? 2 * 60 * 1000, // 2 minutes
+    staleTime: options.staleTime ?? 2 * 60 * 1000 // 2 minutes
   };
 
   return useQuery({
     queryKey: isAllBalancesMode ? leaveKeys.balances('all') : leaveKeys.balances(employeeId),
     queryFn: () => (isAllBalancesMode ? leaveService.getAllBalances() : leaveService.getBalances(employeeId)),
-    ...resolvedOptions,
+    ...resolvedOptions
   });
 };
 
@@ -65,7 +65,7 @@ export const usePendingLeaveApprovals = (options = {}) => {
   return useQuery({
     queryKey: leaveKeys.pendingApprovals(),
     queryFn: () => leaveService.getPendingApprovals(),
-    ...options,
+    ...options
   });
 };
 
@@ -77,7 +77,7 @@ export const useLeaveTypes = (options = {}) => {
     queryKey: leaveKeys.types(),
     queryFn: () => leaveService.getLeaveTypes(),
     staleTime: 10 * 60 * 1000, // 10 minutes - types rarely change
-    ...options,
+    ...options
   });
 };
 
@@ -92,10 +92,10 @@ export const useCreateLeaveRequest = () => {
     mutationFn: (leaveData) => leaveService.create(leaveData),
     onSuccess: (newLeave) => {
       queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
-      queryClient.invalidateQueries({ 
-        queryKey: leaveKeys.balances(newLeave.employeeId) 
+      queryClient.invalidateQueries({
+        queryKey: leaveKeys.balances(newLeave.employeeId)
       });
-    },
+    }
   });
 };
 
@@ -112,7 +112,7 @@ export const useApproveLeaveRequest = () => {
       queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
       queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: leaveKeys.pendingApprovals() });
-    },
+    }
   });
 };
 
@@ -129,7 +129,7 @@ export const useRejectLeaveRequest = () => {
       queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
       queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: leaveKeys.pendingApprovals() });
-    },
+    }
   });
 };
 
@@ -145,7 +145,7 @@ export const useApproveLeaveCancellation = () => {
       queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
       queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: leaveKeys.pendingApprovals() });
-    },
+    }
   });
 };
 
@@ -161,7 +161,7 @@ export const useRejectLeaveCancellation = () => {
       queryClient.invalidateQueries({ queryKey: leaveKeys.lists() });
       queryClient.invalidateQueries({ queryKey: leaveKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: leaveKeys.pendingApprovals() });
-    },
+    }
   });
 };
 
@@ -186,9 +186,9 @@ export const useCancelLeaveRequest = () => {
       enqueueSnackbar('Leave request cancelled', { variant: 'success' });
     },
     onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to cancel leave request', { 
-        variant: 'error' 
+      enqueueSnackbar(error.message || 'Failed to cancel leave request', {
+        variant: 'error'
       });
-    },
+    }
   });
 };

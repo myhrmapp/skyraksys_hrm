@@ -23,7 +23,7 @@ describe('AdminDashboard Component', () => {
     employees: { total: 150, active: 145, onLeave: 3, newHires: 5 },
     leaves: { pending: 12, approved: 45, rejected: 5 },
     timesheets: { pending: 4, submitted: 8, approved: 20 },
-    payroll: { processed: 10, pending: 2, total: 12 },
+    payroll: { processed: 10, pending: 2, total: 12 }
   };
 
   const adminUser = createMockUser('admin');
@@ -36,7 +36,7 @@ describe('AdminDashboard Component', () => {
     // Mock returns shape the queryFn expects: { success, data: { data: { stats } } }
     dashboardService.getStats = jest.fn().mockResolvedValue({
       success: true,
-      data: { data: { stats: mockStats } },
+      data: { data: { stats: mockStats } }
     });
   });
 
@@ -266,10 +266,10 @@ describe('AdminDashboard Component', () => {
               employees: { total: 10, active: 10, onLeave: 0, newHires: 0 },
               leaves: { pending: 0, approved: 5, rejected: 0 },
               timesheets: { pending: 0, submitted: 0, approved: 5 },
-              payroll: { processed: 5, pending: 0, total: 5 },
-            },
-          },
-        },
+              payroll: { processed: 5, pending: 0, total: 5 }
+            }
+          }
+        }
       });
 
       render(<AdminDashboard />, { authValue: { user: adminUser } });

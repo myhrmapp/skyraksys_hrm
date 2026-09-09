@@ -25,7 +25,7 @@ jest.mock('../../../common/ConfirmDialog', () => {
 
 jest.mock('../../../../hooks/useConfirmDialog', () => () => ({
   dialogProps: { open: false },
-  confirm: jest.fn(),
+  confirm: jest.fn()
 }));
 
 // Mock form components
@@ -76,7 +76,7 @@ describe('ProjectTaskConfiguration Component', () => {
       clientName: 'Client A',
       status: 'Active',
       startDate: '2026-01-01',
-      endDate: '2026-12-31',
+      endDate: '2026-12-31'
     },
     {
       id: 2,
@@ -85,8 +85,8 @@ describe('ProjectTaskConfiguration Component', () => {
       clientName: 'Client B',
       status: 'Planning',
       startDate: '2026-02-01',
-      endDate: '2026-11-30',
-    },
+      endDate: '2026-11-30'
+    }
   ];
 
   const mockTasks = [
@@ -97,7 +97,7 @@ describe('ProjectTaskConfiguration Component', () => {
       project: { id: 1, name: 'Project Alpha' },
       status: 'In Progress',
       priority: 'High',
-      dueDate: '2026-03-01',
+      dueDate: '2026-03-01'
     },
     {
       id: 2,
@@ -106,8 +106,8 @@ describe('ProjectTaskConfiguration Component', () => {
       project: { id: 1, name: 'Project Alpha' },
       status: 'Not Started',
       priority: 'Medium',
-      dueDate: '2026-06-01',
-    },
+      dueDate: '2026-06-01'
+    }
   ];
 
   beforeEach(() => {
@@ -115,26 +115,26 @@ describe('ProjectTaskConfiguration Component', () => {
 
     // Default mock implementations
     ProjectService.getAll.mockResolvedValue({
-      data: { success: true, data: mockProjects },
+      data: { success: true, data: mockProjects }
     });
 
     TaskService.getAll.mockResolvedValue({
-      data: { success: true, data: mockTasks },
+      data: { success: true, data: mockTasks }
     });
 
     ProjectService.delete.mockResolvedValue({
-      data: { success: true },
+      data: { success: true }
     });
 
     TaskService.delete.mockResolvedValue({
-      data: { success: true },
+      data: { success: true }
     });
   });
 
   // Test 1: Renders component with tabs
   test('should render component with Projects and Tasks tabs', async () => {
     renderWithTheme(<ProjectTaskConfiguration />);
-    
+
     expect(screen.getByText(/project.*task.*configuration/i)).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /projects/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /tasks/i })).toBeInTheDocument();
@@ -143,7 +143,7 @@ describe('ProjectTaskConfiguration Component', () => {
   // Test 2: Displays list of projects
   test('should display list of projects', async () => {
     renderWithTheme(<ProjectTaskConfiguration />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Project Alpha')).toBeInTheDocument();
       expect(screen.getByText('Project Beta')).toBeInTheDocument();
@@ -154,23 +154,23 @@ describe('ProjectTaskConfiguration Component', () => {
   test('should show loading state while fetching data', () => {
     ProjectService.getAll.mockReturnValue(new Promise(() => {}));
     TaskService.getAll.mockReturnValue(new Promise(() => {}));
-    
+
     renderWithTheme(<ProjectTaskConfiguration />);
-    
+
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   // Test 4: Opens create project dialog
   test('should open create project dialog when New Project button clicked', async () => {
     renderWithTheme(<ProjectTaskConfiguration />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Project Alpha')).toBeInTheDocument();
     });
-    
+
     const newProjectButton = screen.getByRole('button', { name: /new project/i });
     fireEvent.click(newProjectButton);
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('project-form')).toBeInTheDocument();
     });
@@ -179,18 +179,18 @@ describe('ProjectTaskConfiguration Component', () => {
   // Test 5: Switches between card and table view
   test('should switch between card and table view for projects', async () => {
     renderWithTheme(<ProjectTaskConfiguration />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Project Alpha')).toBeInTheDocument();
     });
-    
+
     // Find view toggle buttons
     const viewToggleButtons = screen.getAllByRole('button');
-    const tableViewButton = viewToggleButtons.find(btn => 
-      btn.getAttribute('aria-label')?.includes('table') || 
+    const tableViewButton = viewToggleButtons.find(btn =>
+      btn.getAttribute('aria-label')?.includes('table') ||
       btn.textContent?.toLowerCase().includes('table')
     );
-    
+
     if (tableViewButton) {
       fireEvent.click(tableViewButton);
       // View should switch (hard to test without specific markers)
@@ -200,15 +200,15 @@ describe('ProjectTaskConfiguration Component', () => {
   // Test 6: Filters projects by search term
   test('should filter projects by search term', async () => {
     renderWithTheme(<ProjectTaskConfiguration />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Project Alpha')).toBeInTheDocument();
       expect(screen.getByText('Project Beta')).toBeInTheDocument();
     });
-    
+
     const searchInput = screen.getByPlaceholderText(/search/i);
     fireEvent.change(searchInput, { target: { value: 'Alpha' } });
-    
+
     await waitFor(() => {
       expect(screen.getByText('Project Alpha')).toBeInTheDocument();
     });
@@ -217,14 +217,14 @@ describe('ProjectTaskConfiguration Component', () => {
   // Test 7: Opens delete confirmation dialog
   test('should open delete confirmation when delete button clicked', async () => {
     renderWithTheme(<ProjectTaskConfiguration />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Project Alpha')).toBeInTheDocument();
     });
-    
+
     const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
     fireEvent.click(deleteButtons[0]);
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument();
     });
@@ -233,14 +233,14 @@ describe('ProjectTaskConfiguration Component', () => {
   // Test 8: Switches to Tasks tab and displays tasks
   test('should switch to Tasks tab and display tasks', async () => {
     renderWithTheme(<ProjectTaskConfiguration />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Project Alpha')).toBeInTheDocument();
     });
-    
+
     const tasksTab = screen.getByRole('tab', { name: /tasks/i });
     fireEvent.click(tasksTab);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Design Phase')).toBeInTheDocument();
       expect(screen.getByText('Development')).toBeInTheDocument();
@@ -250,18 +250,18 @@ describe('ProjectTaskConfiguration Component', () => {
   // Test 9: Opens create task dialog
   test('should open create task dialog when New Task button clicked', async () => {
     renderWithTheme(<ProjectTaskConfiguration />);
-    
+
     // Switch to Tasks tab
     const tasksTab = screen.getByRole('tab', { name: /tasks/i });
     fireEvent.click(tasksTab);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Design Phase')).toBeInTheDocument();
     });
-    
+
     const newTaskButton = screen.getByRole('button', { name: /new task/i });
     fireEvent.click(newTaskButton);
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('task-form')).toBeInTheDocument();
     });
@@ -273,15 +273,15 @@ describe('ProjectTaskConfiguration Component', () => {
       id: i + 1,
       name: `Project ${i + 1}`,
       clientName: `Client ${i + 1}`,
-      status: 'Active',
+      status: 'Active'
     }));
 
     ProjectService.getAll.mockResolvedValue({
-      data: { success: true, data: manyProjects },
+      data: { success: true, data: manyProjects }
     });
 
     renderWithTheme(<ProjectTaskConfiguration />);
-    
+
     await waitFor(() => {
       const pagination = screen.getByRole('navigation', { name: /pagination/i });
       expect(pagination).toBeInTheDocument();

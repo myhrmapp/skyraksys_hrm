@@ -47,7 +47,7 @@ const ManagerDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  
+
   // State management
   const [activeTab, setActiveTab] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -136,7 +136,7 @@ const ManagerDashboard = () => {
 
   const handleApproval = () => {
     if (!selectedItem || !approvalAction) return;
-    
+
     const mutationData = {
       id: selectedItem.id,
       action: approvalAction,
@@ -157,8 +157,8 @@ const ManagerDashboard = () => {
   };
 
   const StatCard = ({ title, value, icon, color, subtitle }) => (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         height: '100%',
         boxShadow: 1,
         border: `1px solid ${alpha(color, 0.1)}`,
@@ -287,9 +287,9 @@ const ManagerDashboard = () => {
           >
             Leave Approvals
             {stats.pendingLeaveApprovals > 0 && (
-              <Badge 
-                badgeContent={stats.pendingLeaveApprovals} 
-                color="error" 
+              <Badge
+                badgeContent={stats.pendingLeaveApprovals}
+                color="error"
                 sx={{ ml: 1 }}
               />
             )}
@@ -307,9 +307,9 @@ const ManagerDashboard = () => {
           >
             Timesheet Approvals
             {stats.pendingTimesheetApprovals > 0 && (
-              <Badge 
-                badgeContent={stats.pendingTimesheetApprovals} 
-                color="error" 
+              <Badge
+                badgeContent={stats.pendingTimesheetApprovals}
+                color="error"
                 sx={{ ml: 1 }}
               />
             )}
@@ -388,7 +388,7 @@ const ManagerDashboard = () => {
                           {member.isOnLeave && (
                             <Chip label="On Leave" color="warning" size="small" />
                           )}
-                          <IconButton 
+                          <IconButton
                             size="small"
                             onClick={() => navigate(`/employees/${member.id}`)}
                           >
@@ -531,8 +531,8 @@ const ManagerDashboard = () => {
       </Paper>
 
       {/* Approval Dialog */}
-      <Dialog 
-        open={approvalDialog} 
+      <Dialog
+        open={approvalDialog}
         onClose={() => setApprovalDialog(false)}
         maxWidth="sm"
         fullWidth
@@ -558,14 +558,14 @@ const ManagerDashboard = () => {
           <Button onClick={() => setApprovalDialog(false)}>
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleApproval}
             variant="contained"
             color={approvalAction === 'approved' ? 'success' : 'error'}
             disabled={leaveApprovalMutation.isPending || timesheetApprovalMutation.isPending}
             startIcon={
-              (leaveApprovalMutation.isPending || timesheetApprovalMutation.isPending) 
-                ? <CircularProgress size={20} /> 
+              (leaveApprovalMutation.isPending || timesheetApprovalMutation.isPending)
+                ? <CircularProgress size={20} />
                 : null
             }
           >

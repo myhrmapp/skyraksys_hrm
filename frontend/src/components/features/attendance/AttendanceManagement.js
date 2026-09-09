@@ -24,7 +24,7 @@ import {
 } from '@mui/x-data-grid';
 import {
   Edit as EditIcon,
-  Groups as TeamIcon,
+  Groups as TeamIcon
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import { useSnackbar } from 'notistack';
@@ -133,9 +133,9 @@ export default function AttendanceManagement() {
       const payload = {
         ...markForm,
         checkIn: markForm.checkIn ? new Date(markForm.checkIn).toISOString() : markForm.checkIn,
-        checkOut: markForm.checkOut ? new Date(markForm.checkOut).toISOString() : markForm.checkOut,
+        checkOut: markForm.checkOut ? new Date(markForm.checkOut).toISOString() : markForm.checkOut
       };
-      
+
       // Use PUT for editing existing record, POST for creating new
       if (editRecordId) {
         await attendanceService.updateAttendance(editRecordId, payload);
@@ -144,7 +144,7 @@ export default function AttendanceManagement() {
         await attendanceService.markAttendance(payload);
         enqueueSnackbar('Attendance marked successfully', { variant: 'success' });
       }
-      
+
       setMarkDialogOpen(false);
       setEditRecordId(null);
       fetchDailyAttendance();

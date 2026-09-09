@@ -85,7 +85,7 @@ class ErrorBoundary extends React.Component {
 
       // Example: Send to error tracking service
       // errorTrackingService.logError(errorData);
-      
+
       console.error('Error logged to service:', errorData);
     } catch (loggingError) {
       console.error('Failed to log error to service:', loggingError);
@@ -314,7 +314,7 @@ export const withErrorBoundary = (Component, options = {}) => {
   );
 
   WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
-  
+
   return WrappedComponent;
 };
 
@@ -382,11 +382,11 @@ const AsyncErrorProvider = ({ children, onError }) => {
  */
 export const useAsyncError = () => {
   const context = React.useContext(AsyncErrorContext);
-  
+
   if (!context) {
     throw new Error('useAsyncError must be used within an AsyncErrorProvider');
   }
-  
+
   return context.handleAsyncError;
 };
 

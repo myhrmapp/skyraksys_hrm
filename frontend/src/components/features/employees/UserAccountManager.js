@@ -54,17 +54,17 @@ const generateSecureDefaultPassword = () => {
   return password.sort(() => Math.random() - 0.5).join('');
 };
 
-const UserAccountManager = ({ 
-  open, 
-  onClose, 
-  employee, 
-  onUpdate, 
+const UserAccountManager = ({
+  open,
+  onClose,
+  employee,
+  onUpdate,
   mode = 'create' // 'create' or 'edit'
 }) => {
   const { showNotification } = useNotifications();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const [userData, setUserData] = useState({
     enableLogin: false,
     role: 'employee',
@@ -77,7 +77,7 @@ const UserAccountManager = ({
   useEffect(() => {
     if (employee) {
       const employeeEmail = employee.email || '';
-      
+
       setUserData({
         enableLogin: !!employee.user,
         role: employee.user?.role || 'employee',
@@ -99,7 +99,7 @@ const UserAccountManager = ({
   const handleEnableLoginChange = (event) => {
     const isEnabled = event.target.checked;
     const employeeEmail = employee?.email || '';
-    
+
     setUserData(prev => {
       const generatedPassword = isEnabled && !employee?.user ? generateSecureDefaultPassword() : null;
       const newState = {
@@ -111,7 +111,7 @@ const UserAccountManager = ({
         password: generatedPassword || prev.password,
         confirmPassword: generatedPassword || prev.confirmPassword
       };
-      
+
       return newState;
     });
   };
@@ -128,19 +128,19 @@ const UserAccountManager = ({
 
   const handleResetPassword = async () => {
     if (!employee?.user) return;
-    
+
     try {
       setLoading(true);
       const newPassword = generateSecureDefaultPassword();
-      
+
       await authService.resetUserPassword(employee.user.id, newPassword);
-      setUserData(prev => ({ 
-        ...prev, 
-        password: newPassword, 
+      setUserData(prev => ({
+        ...prev,
+        password: newPassword,
         confirmPassword: newPassword,
-        forcePasswordChange: true 
+        forcePasswordChange: true
       }));
-      
+
       showNotification('Password reset successfully', 'success');
     } catch (error) {
       showNotification('Failed to reset password: ' + error.message, 'error');
@@ -175,7 +175,7 @@ const UserAccountManager = ({
 
     try {
       setLoading(true);
-      
+
       const updateData = {
         role: userData.role,
         enableLogin: userData.enableLogin,
@@ -200,7 +200,7 @@ const UserAccountManager = ({
         showNotification('User account updated successfully', 'success');
         onUpdate(updateData);
       }
-      
+
       onClose();
     } catch (error) {
       showNotification('Failed to update user account: ' + error.message, 'error');
@@ -219,7 +219,7 @@ const UserAccountManager = ({
           </Typography>
         </Box>
       </DialogTitle>
-      
+
       <DialogContent>
         <Box sx={{ mt: 2 }}>
           {/* Employee Information Card */}
@@ -261,8 +261,8 @@ const UserAccountManager = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="caption" color="text.secondary">Status</Typography>
-                  <Chip 
-                    label={employee?.status || 'N/A'} 
+                  <Chip
+                    label={employee?.status || 'N/A'}
                     size="small"
                     color={employee?.status === 'Active' ? 'success' : 'default'}
                   />
@@ -329,29 +329,29 @@ const UserAccountManager = ({
                       onChange={handleRoleChange}
                       row
                     >
-                      <FormControlLabel 
-                        value="employee" 
-                        control={<Radio />} 
-                        label="Employee" 
+                      <FormControlLabel
+                        value="employee"
+                        control={<Radio />}
+                        label="Employee"
                       />
-                      <FormControlLabel 
-                        value="manager" 
-                        control={<Radio />} 
-                        label="Manager" 
+                      <FormControlLabel
+                        value="manager"
+                        control={<Radio />}
+                        label="Manager"
                       />
-                      <FormControlLabel 
-                        value="hr" 
-                        control={<Radio />} 
-                        label="HR" 
+                      <FormControlLabel
+                        value="hr"
+                        control={<Radio />}
+                        label="HR"
                       />
-                      <FormControlLabel 
-                        value="admin" 
-                        control={<Radio />} 
-                        label="Admin" 
+                      <FormControlLabel
+                        value="admin"
+                        control={<Radio />}
+                        label="Admin"
                       />
                     </RadioGroup>
                   </FormControl>
-                  
+
                   <Box sx={{ mt: 2 }}>
                     <Typography variant="body2" color="text.secondary">
                       {userData.role === 'employee' && 'Basic access to personal information and requests'}
@@ -372,9 +372,9 @@ const UserAccountManager = ({
                     type="email"
                     value={userData.email}
                     onChange={(e) => setUserData(prev => ({ ...prev, email: e.target.value }))}
-                    helperText={userData.email ? "This email will be used for login" : "Employee email will be used automatically"}
+                    helperText={userData.email ? 'This email will be used for login' : 'Employee email will be used automatically'}
                     required
-                    placeholder={employee?.email || "Enter email address"}
+                    placeholder={employee?.email || 'Enter email address'}
                   />
                   {userData.email && (
                     <Typography variant="caption" color="success.main" sx={{ mt: 1, display: 'block' }}>
@@ -474,9 +474,9 @@ const UserAccountManager = ({
 
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button 
-          onClick={handleSave} 
-          variant="contained" 
+        <Button
+          onClick={handleSave}
+          variant="contained"
           disabled={loading}
           startIcon={loading ? <CircularProgress size={20} /> : <KeyIcon />}
         >

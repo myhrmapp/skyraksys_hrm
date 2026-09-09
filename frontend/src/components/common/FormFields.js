@@ -38,7 +38,7 @@ import {
 } from '@mui/icons-material';
 // Temporarily comment out date picker imports until compatibility is resolved
 // import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-// import { TimePicker } from '@mui/x-date-pickers/TimePicker'; 
+// import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 // import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 // import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 // import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -75,20 +75,20 @@ export const StandardTextField = forwardRef(({
 }, ref) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  
+
   const handleChange = useCallback((event) => {
     let newValue = event.target.value;
-    
+
     // Apply formatting if provided
     if (formatValue) {
       newValue = formatValue(newValue);
     }
-    
+
     // Apply max length
     if (maxLength && newValue.length > maxLength) {
       newValue = newValue.slice(0, maxLength);
     }
-    
+
     if (onChange) {
       if (typeof onChange === 'function') {
         onChange(newValue);
@@ -119,7 +119,7 @@ export const StandardTextField = forwardRef(({
   // Build adornments
   const buildStartAdornment = () => {
     const elements = [];
-    
+
     if (prefix) {
       elements.push(
         <Typography key="prefix" variant="body2" color="text.secondary" sx={{ mr: 1 }}>
@@ -127,11 +127,11 @@ export const StandardTextField = forwardRef(({
         </Typography>
       );
     }
-    
+
     if (startAdornment) {
       elements.push(startAdornment);
     }
-    
+
     return elements.length > 0 ? (
       <InputAdornment position="start">
         {elements}
@@ -141,7 +141,7 @@ export const StandardTextField = forwardRef(({
 
   const buildEndAdornment = () => {
     const elements = [];
-    
+
     if (suffix) {
       elements.push(
         <Typography key="suffix" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
@@ -149,7 +149,7 @@ export const StandardTextField = forwardRef(({
         </Typography>
       );
     }
-    
+
     if (clearable && value && !disabled) {
       elements.push(
         <IconButton key="clear" onClick={handleClear} edge="end" size="small">
@@ -157,7 +157,7 @@ export const StandardTextField = forwardRef(({
         </IconButton>
       );
     }
-    
+
     if (type === 'password' && showPasswordToggle) {
       elements.push(
         <IconButton
@@ -170,11 +170,11 @@ export const StandardTextField = forwardRef(({
         </IconButton>
       );
     }
-    
+
     if (endAdornment) {
       elements.push(endAdornment);
     }
-    
+
     return elements.length > 0 ? (
       <InputAdornment position="end">
         {elements}
@@ -210,7 +210,7 @@ export const StandardTextField = forwardRef(({
         }}
         {...props}
       />
-      
+
       {/* Character count for text areas */}
       {multiline && maxLength && (
         <Typography
@@ -245,7 +245,7 @@ export const StandardSelectField = forwardRef(({
   helperText,
   disabled = false,
   multiple = false,
-  placeholder = "Select an option",
+  placeholder = 'Select an option',
   searchable = false,
   loading = false,
   clearable = false,
@@ -260,7 +260,7 @@ export const StandardSelectField = forwardRef(({
 
   const filteredOptions = React.useMemo(() => {
     if (!searchable || !searchTerm) return options;
-    
+
     return options.filter(option => {
       const label = option.label || option.name || option.toString();
       return label.toLowerCase().includes(searchTerm.toLowerCase());
@@ -280,7 +280,7 @@ export const StandardSelectField = forwardRef(({
     if (!selected || (Array.isArray(selected) && selected.length === 0)) {
       return <em style={{ color: 'rgba(0, 0, 0, 0.6)' }}>{placeholder}</em>;
     }
-    
+
     if (multiple) {
       return (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -294,15 +294,15 @@ export const StandardSelectField = forwardRef(({
         </Box>
       );
     }
-    
+
     const option = options.find(opt => (opt.value || opt) === selected);
     return option?.label || option?.name || selected;
   }, [multiple, options, placeholder]);
 
   return (
-    <FormControl 
-      fullWidth={fullWidth} 
-      error={!!error} 
+    <FormControl
+      fullWidth={fullWidth}
+      error={!!error}
       disabled={disabled}
       variant={variant}
       size={size}
@@ -347,24 +347,24 @@ export const StandardSelectField = forwardRef(({
             />
           </MenuItem>
         )}
-        
+
         {!multiple && (
           <MenuItem value="">
             <em>{placeholder}</em>
           </MenuItem>
         )}
-        
+
         {filteredOptions.map((option, index) => {
           const optionValue = option.value !== undefined ? option.value : option;
           const optionLabel = option.label || option.name || option.toString();
-          
+
           return (
             <MenuItem key={`${optionValue}-${index}`} value={optionValue}>
               {renderOption ? renderOption(option, index) : optionLabel}
             </MenuItem>
           );
         })}
-        
+
         {loading && (
           <MenuItem disabled>
             <Typography variant="body2" color="text.secondary">
@@ -484,7 +484,7 @@ export const StandardAutocompleteField = forwardRef(({
   multiple = false,
   loading = false,
   onSearch,
-  placeholder = "Search and select...",
+  placeholder = 'Search and select...',
   clearable = true,
   variant = 'outlined',
   size = 'medium',
@@ -601,7 +601,7 @@ export const StandardFileField = forwardRef(({
 
   const handleFileSelect = useCallback((files) => {
     const fileList = Array.from(files);
-    
+
     // Validate file size
     const validFiles = fileList.filter(file => {
       if (file.size > maxSize) {
@@ -626,7 +626,7 @@ export const StandardFileField = forwardRef(({
   const handleDrop = useCallback((event) => {
     event.preventDefault();
     setDragOver(false);
-    
+
     const files = event.dataTransfer.files;
     if (files && files.length > 0) {
       handleFileSelect(files);
@@ -655,7 +655,7 @@ export const StandardFileField = forwardRef(({
     if (!value) return null;
 
     const files = multiple ? value : [value];
-    
+
     return (
       <Stack spacing={1} sx={{ mt: 2 }}>
         {files.map((file, index) => (
@@ -698,7 +698,7 @@ export const StandardFileField = forwardRef(({
         style={{ display: 'none' }}
         {...props}
       />
-      
+
       <Box
         onDrop={handleDrop}
         onDragOver={handleDragOver}
@@ -729,9 +729,9 @@ export const StandardFileField = forwardRef(({
           </Typography>
         )}
       </Box>
-      
+
       {renderFileList()}
-      
+
       {(error || helperText) && (
         <FormHelperText>{error || helperText}</FormHelperText>
       )}

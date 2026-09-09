@@ -7,7 +7,7 @@ module.exports = {
     tabs:              tid('payroll-tabs'),
     generateBtn:       tid('payroll-generate-btn'),
     exportBtn:         tid('payroll-export-btn'),
-    refreshBtn:        tid('payroll-refresh-btn'),
+    refreshBtn:        '[aria-label=\"Refresh\"]',
     search:            tid('payroll-search'),
     bulkFinalizeBtn:   tid('payroll-bulk-finalize-btn'),
     bulkPaidBtn:       tid('payroll-bulk-paid-btn'),

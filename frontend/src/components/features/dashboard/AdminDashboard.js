@@ -40,7 +40,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { isEmployee, isAdmin, isHR, isManager } = useAuth();
   const { showNotification } = useNotification();
-  
+
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
@@ -91,15 +91,15 @@ const Dashboard = () => {
   }
 
   const StatCard = ({ title, value, subtitle, icon, color = 'primary', onClick }) => (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         height: '100%',
         cursor: onClick ? 'pointer' : 'default',
         transition: 'all 0.15s ease',
         boxShadow: 1,
         border: `1px solid ${alpha(theme.palette[color].main, 0.1)}`,
         ...(onClick && {
-          '&:hover': { 
+          '&:hover': {
             transform: 'translateY(-2px)',
             boxShadow: theme.shadows[4]
           }
@@ -133,18 +133,18 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box 
-          sx={{ 
-            display: 'flex', 
+        <Box
+          sx={{
+            display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center', 
-            alignItems: 'center', 
+            justifyContent: 'center',
+            alignItems: 'center',
             minHeight: 400,
             gap: 2
           }}
         >
-          <CircularProgress 
-            size={48} 
+          <CircularProgress
+            size={48}
             thickness={4}
             sx={{
               color: theme.palette.primary.main,
@@ -153,8 +153,8 @@ const Dashboard = () => {
               }
             }}
           />
-          <Typography 
-            variant="body1" 
+          <Typography
+            variant="body1"
             color="text.secondary"
             sx={{ fontWeight: 500 }}
           >
@@ -193,9 +193,9 @@ const Dashboard = () => {
 
       {/* Error Alert */}
       {error && (
-        <Alert 
+        <Alert
           data-testid="admin-dashboard-error-alert"
-          severity="error" 
+          severity="error"
           sx={{ mb: 3 }}
           action={
             <Button data-testid="admin-dashboard-retry-btn" color="inherit" size="small" onClick={() => refetch()}>
@@ -264,8 +264,8 @@ const Dashboard = () => {
 
       {/* Simple Alerts */}
       {!isLoading && !error && (stats.leaves.pending > 0 || stats.timesheets.submitted > 0) && (
-        <Alert 
-          severity="info" 
+        <Alert
+          severity="info"
           sx={{ mb: 2 }}
           action={
             <Stack direction="row" spacing={1}>

@@ -13,8 +13,8 @@ jest.mock('../../../../services/leave.service', () => {
   return {
     leaveService: {
       getAll: jest.fn(),
-      getBalance: jest.fn(),
-    },
+      getBalance: jest.fn()
+    }
   };
 });
 const { leaveService } = require('../../../../services/leave.service');
@@ -22,7 +22,7 @@ const { leaveService } = require('../../../../services/leave.service');
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
+  useNavigate: () => mockNavigate
 }));
 
 // ─── Test Data ───────────────────────────────────────────────────────────────
@@ -38,7 +38,7 @@ const mockLeaveRequests = [
     status: 'approved',
     reason: 'Family vacation',
     createdAt: '2026-01-15',
-    approverComments: null,
+    approverComments: null
   },
   {
     id: 2,
@@ -49,7 +49,7 @@ const mockLeaveRequests = [
     status: 'pending',
     reason: 'Not feeling well',
     createdAt: '2026-02-09',
-    approverComments: null,
+    approverComments: null
   },
   {
     id: 3,
@@ -60,8 +60,8 @@ const mockLeaveRequests = [
     status: 'rejected',
     reason: 'Personal work',
     createdAt: '2026-02-20',
-    approverComments: 'Short notice',
-  },
+    approverComments: 'Short notice'
+  }
 ];
 
 // The component transforms an array of balance items with leaveType.name
@@ -69,7 +69,7 @@ const mockLeaveRequests = [
 const mockLeaveBalanceApi = [
   { leaveType: { name: 'Annual Leave' }, totalEntitled: 20, used: 5, remaining: 15 },
   { leaveType: { name: 'Sick Leave' }, totalEntitled: 7, used: 1, remaining: 6 },
-  { leaveType: { name: 'Personal Leave' }, totalEntitled: 5, used: 2, remaining: 3 },
+  { leaveType: { name: 'Personal Leave' }, totalEntitled: 5, used: 2, remaining: 3 }
 ];
 
 const authOptions = { authValue: { user: createMockUser('employee') } };
@@ -392,7 +392,7 @@ describe('EmployeeLeaveRequests', () => {
 
   it('uses totalDays when available instead of days', async () => {
     const requestWithTotalDays = [
-      { ...mockLeaveRequests[0], totalDays: 7, days: 5 },
+      { ...mockLeaveRequests[0], totalDays: 7, days: 5 }
     ];
     leaveService.getAll.mockResolvedValue({ data: requestWithTotalDays });
     leaveService.getBalance.mockResolvedValue({ data: mockLeaveBalanceApi });
@@ -409,7 +409,7 @@ describe('EmployeeLeaveRequests', () => {
 
   it('handles leaveType as an object with name property', async () => {
     const requestWithObjectType = [
-      { ...mockLeaveRequests[0], leaveType: { name: 'Annual Leave' } },
+      { ...mockLeaveRequests[0], leaveType: { name: 'Annual Leave' } }
     ];
     leaveService.getAll.mockResolvedValue({ data: requestWithObjectType });
     leaveService.getBalance.mockResolvedValue({ data: mockLeaveBalanceApi });
@@ -425,7 +425,7 @@ describe('EmployeeLeaveRequests', () => {
 
   it('renders cancelled status correctly', async () => {
     const cancelledRequest = [
-      { ...mockLeaveRequests[0], status: 'cancelled' },
+      { ...mockLeaveRequests[0], status: 'cancelled' }
     ];
     leaveService.getAll.mockResolvedValue({ data: cancelledRequest });
     leaveService.getBalance.mockResolvedValue({ data: mockLeaveBalanceApi });

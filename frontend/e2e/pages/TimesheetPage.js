@@ -782,17 +782,51 @@ class TimesheetPage {
     }
     return true; // Not visible = effectively disabled
   }
+  async clickPrevWeek() {
+    const btn = this.page.locator(this.s.prevWeek);
+    if (await btn.isDisabled().catch(() => true)) return false;
+    await btn.click();
+    await waitForPageReady(this.page);
+    return true;
+  }
 
+  async clickNextWeek() {
+    const btn = this.page.locator(this.s.nextWeek);
+    if (await btn.isDisabled().catch(() => true)) return false;
+    await btn.click();
+    await waitForPageReady(this.page);
+    return true;
+  }
+
+  async clickToday() {
+    await this.page.locator(this.s.todayBtn).click();
+    await waitForPageReady(this.page);
+  }
+
+  async isPrevWeekVisible() {
+    return this.page.locator(this.s.prevWeek).isVisible({ timeout: 3000 }).catch(() => false);
+  }
+
+  async isNextWeekVisible() {
+    return this.page.locator(this.s.nextWeek).isVisible({ timeout: 3000 }).catch(() => false);
+  }
+
+  async isTodayBtnVisible() {
+    return this.page.locator(this.s.todayBtn).isVisible({ timeout: 3000 }).catch(() => false);
+  }
+
+  /** Navigate relative to current week. Negative = past, Positive = future */
   async navigateToWeek(offset = 0) {
     await this.goto();
     if (offset > 0) {
       for (let i = 0; i < offset; i++) {
         const ok = await this.clickNextWeek();
-        if (!ok) break; // next-week button disabled — future nav blocked by design
+        if (!ok) break;
       }
     } else if (offset < 0) {
       for (let i = 0; i < Math.abs(offset); i++) {
-        await this.clickPrevWeek();
+        const ok = await this.clickPrevWeek();
+        if (!ok) break;
       }
     }
     await waitForPageReady(this.page);
@@ -800,19 +834,20 @@ class TimesheetPage {
 
   /**
    * Navigate to a past week that has no submitted timesheet (editable/empty).
-   * Starts at `startOffset` weeks back and keeps going further if still locked.
+   * Safely tries to find an editable week up to the max allowed past weeks (frontend restricts to 2).
    */
-  async gotoEditableWeek(startOffset = 20) {
+  async gotoEditableWeek(startOffset = 0) {
     await this.goto();
     for (let i = 0; i < startOffset; i++) {
       await this.clickPrevWeek();
     }
     await waitForPageReady(this.page);
     // If still looks locked, go further until addTask is visible
-    for (let j = 0; j < 8; j++) {
+    for (let j = 0; j < 4; j++) {
       const addVisible = await this.isAddTaskVisible();
       if (addVisible) return;
-      await this.clickPrevWeek();
+      const ok = await this.clickPrevWeek();
+      if (!ok) break;
       await this.page.waitForTimeout(400);
     }
   }

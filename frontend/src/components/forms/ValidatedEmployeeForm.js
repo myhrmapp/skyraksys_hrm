@@ -64,7 +64,7 @@ const employeeValidationSchema = Yup.object({
     .max(100, 'Contact name must not exceed 100 characters'),
   emergencyContactPhone: Yup.string()
     .nullable()
-    .matches(/^[0-9]{10}$/, 'Phone number must be 10 digits'),
+    .matches(/^[0-9]{10}$/, 'Phone number must be 10 digits')
 });
 
 const employmentTypes = [
@@ -74,13 +74,13 @@ const employmentTypes = [
   { value: 'Intern', label: 'Intern' }
 ];
 
-const ValidatedEmployeeForm = ({ 
-  onSubmit, 
-  onCancel, 
+const ValidatedEmployeeForm = ({
+  onSubmit,
+  onCancel,
   initialValues,
   departments = [],
   positions = [],
-  isEditMode = false 
+  isEditMode = false
 }) => {
   const defaultValues = {
     firstName: '',
@@ -134,7 +134,7 @@ const ValidatedEmployeeForm = ({
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
               Personal Information
             </Typography>
-            
+
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -148,7 +148,7 @@ const ValidatedEmployeeForm = ({
                   disabled={isSubmitting}
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -353,7 +353,7 @@ const ValidatedEmployeeForm = ({
                   Please fix the following errors:
                 </Typography>
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
-                  {Object.entries(errors).map(([field, error]) => 
+                  {Object.entries(errors).map(([field, error]) =>
                     touched[field] && (
                       <li key={field}>
                         <Typography variant="caption">{error}</Typography>

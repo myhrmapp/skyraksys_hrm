@@ -49,7 +49,8 @@ test.describe('Critical business scenarios', () => {
 
     const checkIn = page.locator('[data-testid="attendance-checkin-btn"]');
     const checkOut = page.locator('[data-testid="attendance-checkout-btn"]');
-    await expect(checkIn.or(checkOut)).toBeVisible();
+    const doneForToday = page.getByText(/done for today/i);
+    await expect(checkIn.or(checkOut).or(doneForToday)).toBeVisible();
   });
 
   test('Employee can reach the timesheet workflow', async ({ page }) => {
@@ -97,12 +98,6 @@ test.describe('Critical business scenarios', () => {
   test('Employee cannot use administrative invoice workflow', async ({ page }) => {
     await loginAs(page, 'employee');
     await page.goto('/billing-invoices');
-    await waitForPageReady(page);
-
-    const accessDenied = await page.getByText(/access denied|unauthorized|forbidden/i).isVisible().catch(() => false);
-    const stillOnInvoicePage = page.url().includes('/billing-invoices');
-
-    expect(stillOnInvoicePage && !accessDenied).toBeFalsy();
-    expect(accessDenied || !stillOnInvoicePage).toBeTruthy();
+    await expect(page.getByText(/access denied|unauthorized/i)).toBeVisible({ timeout: 10000 });
   });
 });

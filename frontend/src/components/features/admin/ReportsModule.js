@@ -24,7 +24,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
+  ListItemIcon
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -59,7 +59,7 @@ const ReportsModule = () => {
   const theme = useTheme();
   const { isAdmin, isHR } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
-  
+
   // State management
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
@@ -109,10 +109,10 @@ const ReportsModule = () => {
   const loadReportData = async () => {
     try {
       setLoading(true);
-      
+
       // Load dashboard statistics
       const dashboardResponse = await dashboardService.getStats();
-      
+
       // Build server-side filter params to avoid fetching all records
       const employeeParams = { limit: 500 };
       if (filters.department !== 'all') {
@@ -208,7 +208,7 @@ const ReportsModule = () => {
       acc[dept] = (acc[dept] || 0) + 1;
       return acc;
     }, {});
-    
+
     const byPosition = employees.reduce((acc, emp) => {
       const pos = emp.position?.title || 'Unassigned';
       acc[pos] = (acc[pos] || 0) + 1;
@@ -356,8 +356,8 @@ const ReportsModule = () => {
   };
 
   const ReportCard = ({ title, value, subtitle, icon, color, onClick }) => (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         height: '100%',
         cursor: onClick ? 'pointer' : 'default',
         background: `linear-gradient(135deg, ${alpha(color, 0.1)} 0%, ${alpha(color, 0.05)} 100%)`,
@@ -497,42 +497,42 @@ const ReportsModule = () => {
       {/* Main Content Tabs */}
       <Paper sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs 
-            value={activeTab} 
+          <Tabs
+            value={activeTab}
             onChange={(e, newValue) => setActiveTab(newValue)}
             aria-label="report tabs"
           >
-            <Tab 
+            <Tab
               label={
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <PeopleIcon sx={{ mr: 1 }} />
                   Employee Reports
                 </Box>
-              } 
+              }
             />
-            <Tab 
+            <Tab
               label={
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <LeaveIcon sx={{ mr: 1 }} />
                   Leave Reports
                 </Box>
-              } 
+              }
             />
-            <Tab 
+            <Tab
               label={
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <TimesheetIcon sx={{ mr: 1 }} />
                   Timesheet Reports
                 </Box>
-              } 
+              }
             />
-            <Tab 
+            <Tab
               label={
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <PayrollIcon sx={{ mr: 1 }} />
                   Payroll Reports
                 </Box>
-              } 
+              }
             />
           </Tabs>
         </Box>
@@ -595,7 +595,7 @@ const ReportsModule = () => {
                           outerRadius={80}
                           fill="#8884d8"
                           dataKey="value"
-                          label={({name, percentage}) => `${name}: ${percentage}%`}
+                          label={({ name, percentage }) => `${name}: ${percentage}%`}
                         >
                           {reportData.employee.chartData?.map((entry, index) => {
                             const CHART_COLORS = [
@@ -626,13 +626,13 @@ const ReportsModule = () => {
                           <ListItemIcon>
                             <DepartmentIcon />
                           </ListItemIcon>
-                          <ListItemText 
-                            primary={dept} 
+                          <ListItemText
+                            primary={dept}
                             secondary={`${count} employees`}
                           />
-                          <Chip 
-                            label={((count / reportData.employee.total) * 100).toFixed(1) + '%'} 
-                            size="small" 
+                          <Chip
+                            label={((count / reportData.employee.total) * 100).toFixed(1) + '%'}
+                            size="small"
                           />
                         </ListItem>
                       ))}
@@ -699,7 +699,7 @@ const ReportsModule = () => {
                           cy="50%"
                           outerRadius={80}
                           dataKey="value"
-                          label={({name, value}) => `${name}: ${value}`}
+                          label={({ name, value }) => `${name}: ${value}`}
                         >
                           {reportData.leave.chartData?.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -721,13 +721,13 @@ const ReportsModule = () => {
                           <ListItemIcon>
                             <CalendarIcon />
                           </ListItemIcon>
-                          <ListItemText 
-                            primary={type} 
+                          <ListItemText
+                            primary={type}
                             secondary={`${count} requests`}
                           />
-                          <Chip 
-                            label={((count / reportData.leave.total) * 100).toFixed(1) + '%'} 
-                            size="small" 
+                          <Chip
+                            label={((count / reportData.leave.total) * 100).toFixed(1) + '%'}
+                            size="small"
                           />
                         </ListItem>
                       ))}
@@ -794,7 +794,7 @@ const ReportsModule = () => {
                           cy="50%"
                           outerRadius={80}
                           dataKey="value"
-                          label={({name, value}) => `${name}: ${value}`}
+                          label={({ name, value }) => `${name}: ${value}`}
                         >
                           {reportData.timesheet.chartData?.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -815,8 +815,8 @@ const ReportsModule = () => {
                         <ListItemIcon>
                           <ApprovedIcon color="success" />
                         </ListItemIcon>
-                        <ListItemText 
-                          primary="Approved Entries" 
+                        <ListItemText
+                          primary="Approved Entries"
                           secondary={`${reportData.timesheet.approved} entries`}
                         />
                       </ListItem>
@@ -824,8 +824,8 @@ const ReportsModule = () => {
                         <ListItemIcon>
                           <PendingIcon color="warning" />
                         </ListItemIcon>
-                        <ListItemText 
-                          primary="Pending Approval" 
+                        <ListItemText
+                          primary="Pending Approval"
                           secondary={`${reportData.timesheet.pending} entries`}
                         />
                       </ListItem>
@@ -833,8 +833,8 @@ const ReportsModule = () => {
                         <ListItemIcon>
                           <TimesheetIcon color="info" />
                         </ListItemIcon>
-                        <ListItemText 
-                          primary="Draft Entries" 
+                        <ListItemText
+                          primary="Draft Entries"
                           secondary={`${reportData.timesheet.draft} entries`}
                         />
                       </ListItem>

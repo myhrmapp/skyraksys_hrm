@@ -37,13 +37,13 @@ const StandardForm = ({
   onSubmit,
   onCancel,
   onAutoSave,
-  submitText = "Submit",
-  cancelText = "Cancel",
+  submitText = 'Submit',
+  cancelText = 'Cancel',
   showStepper = false,
   autoSave = false,
   autoSaveInterval = 30000,
   children,
-  maxWidth = "md",
+  maxWidth = 'md',
   elevation = 2,
   disabled = false,
   loading = false,
@@ -52,7 +52,7 @@ const StandardForm = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { showSuccess, showError, showWarning } = useNotification();
-  
+
   const [currentStep, setCurrentStep] = useState(0);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState('saved'); // 'saving', 'saved', 'error'
@@ -89,15 +89,15 @@ const StandardForm = ({
         await onAutoSave(values);
         setAutoSaveStatus('saved');
         setLastAutoSave(new Date());
-        
+
         if (process.env.NODE_ENV === 'development') {
           console.log('Form auto-saved at:', new Date().toLocaleTimeString());
         }
       } catch (error) {
         console.error('Auto-save failed:', error);
         setAutoSaveStatus('error');
-        showWarning('Auto-save failed. Your changes are saved locally.', { 
-          autoHideDuration: 3000 
+        showWarning('Auto-save failed. Your changes are saved locally.', {
+          autoHideDuration: 3000
         });
       }
     }, autoSaveInterval);
@@ -108,7 +108,7 @@ const StandardForm = ({
   // Step validation for multi-step forms
   const isStepValid = useCallback((stepIndex) => {
     if (!steps[stepIndex]?.fields) return true;
-    
+
     const stepFields = steps[stepIndex].fields;
     return stepFields.every(field => !errors[field]);
   }, [steps, errors]);
@@ -120,11 +120,11 @@ const StandardForm = ({
   // Calculate overall form progress
   const formProgress = useMemo(() => {
     if (!showStepper || steps.length === 0) return 100;
-    
-    const completedSteps = steps.filter((_, index) => 
+
+    const completedSteps = steps.filter((_, index) =>
       index < currentStep || isStepValid(index)
     ).length;
-    
+
     return Math.round((completedSteps / steps.length) * 100);
   }, [showStepper, steps, currentStep, isStepValid]);
 
@@ -132,24 +132,24 @@ const StandardForm = ({
   const handleNext = useCallback(() => {
     if (!canProceedToNextStep) {
       setSubmitAttempted(true);
-      
+
       // Validate current step fields and show errors
       const stepFields = steps[currentStep]?.fields || [];
       const stepErrors = {};
-      
+
       stepFields.forEach(field => {
         const error = errors[field];
         if (error) {
           stepErrors[field] = error;
         }
       });
-      
+
       if (Object.keys(stepErrors).length > 0) {
         showError('Please fix the errors before proceeding to the next step');
         return;
       }
     }
-    
+
     setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
     setSubmitAttempted(false);
   }, [canProceedToNextStep, currentStep, steps, errors, showError]);
@@ -171,11 +171,11 @@ const StandardForm = ({
   const handleFormSubmit = useCallback(async (event) => {
     event?.preventDefault();
     setSubmitAttempted(true);
-    
+
     try {
       await handleSubmit(async (formValues) => {
         const result = await onSubmit(formValues);
-        
+
         if (result?.success !== false) {
           showSuccess('Form submitted successfully');
           setSubmitAttempted(false);
@@ -183,12 +183,12 @@ const StandardForm = ({
         } else {
           throw new Error(result?.message || 'Submission failed');
         }
-        
+
         return result;
       });
     } catch (error) {
       console.error('Form submission error:', error);
-      
+
       // Handle different types of errors
       if (error.response?.status === 422) {
         // Validation errors from backend
@@ -219,7 +219,7 @@ const StandardForm = ({
   // Manual save handler
   const handleManualSave = useCallback(async () => {
     if (!onAutoSave || !isDirty) return;
-    
+
     try {
       setAutoSaveStatus('saving');
       await onAutoSave(values);
@@ -264,7 +264,7 @@ const StandardForm = ({
         case 'saving':
           return 'Saving...';
         case 'saved':
-          return lastAutoSave 
+          return lastAutoSave
             ? `Last saved at ${lastAutoSave.toLocaleTimeString()}`
             : 'All changes saved';
         case 'error':
@@ -288,14 +288,14 @@ const StandardForm = ({
     };
 
     return (
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
         gap: 1,
         mt: 1
       }}>
-        <Typography 
-          variant="caption" 
+        <Typography
+          variant="caption"
           color={getStatusColor()}
           sx={{ fontSize: '0.75rem' }}
         >
@@ -306,8 +306,8 @@ const StandardForm = ({
         )}
         {onAutoSave && isDirty && (
           <Tooltip title="Save changes now">
-            <IconButton 
-              size="small" 
+            <IconButton
+              size="small"
               onClick={handleManualSave}
               disabled={autoSaveStatus === 'saving'}
             >
@@ -321,10 +321,10 @@ const StandardForm = ({
 
   if (loading) {
     return (
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
           alignItems: 'center',
           minHeight: 200
         }}
@@ -335,9 +335,9 @@ const StandardForm = ({
   }
 
   return (
-    <Paper 
+    <Paper
       elevation={elevation}
-      sx={{ 
+      sx={{
         maxWidth: theme.breakpoints.values[maxWidth],
         mx: 'auto',
         p: { xs: 2, md: 4 },
@@ -360,7 +360,7 @@ const StandardForm = ({
               </Typography>
             )}
           </Box>
-          
+
           {onCancel && (
             <Tooltip title="Close">
               <IconButton onClick={onCancel} sx={{ mt: -1 }}>
@@ -369,7 +369,7 @@ const StandardForm = ({
             </Tooltip>
           )}
         </Box>
-        
+
         {renderAutoSaveStatus()}
       </Box>
 
@@ -389,22 +389,22 @@ const StandardForm = ({
               {formProgress}% Complete
             </Typography>
           </Box>
-          
-          <Stepper 
-            activeStep={currentStep} 
-            orientation={isMobile ? "vertical" : "horizontal"}
+
+          <Stepper
+            activeStep={currentStep}
+            orientation={isMobile ? 'vertical' : 'horizontal'}
             sx={{ mb: 2 }}
           >
             {steps.map((step, index) => (
-              <Step 
+              <Step
                 key={step.label}
                 completed={index < currentStep}
               >
-                <StepLabel 
+                <StepLabel
                   onClick={() => handleStepClick(index)}
-                  sx={{ 
-                    cursor: (index <= currentStep || (index === currentStep + 1 && canProceedToNextStep)) 
-                      ? 'pointer' 
+                  sx={{
+                    cursor: (index <= currentStep || (index === currentStep + 1 && canProceedToNextStep))
+                      ? 'pointer'
                       : 'default',
                     opacity: index <= currentStep ? 1 : 0.6
                   }}
@@ -443,8 +443,8 @@ const StandardForm = ({
         </Fade>
 
         {/* Form actions */}
-        <Box sx={{ 
-          display: 'flex', 
+        <Box sx={{
+          display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           mt: 4,

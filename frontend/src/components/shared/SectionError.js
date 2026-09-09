@@ -12,7 +12,7 @@ const SectionError = ({ message = 'Something went wrong.', onRetry }) => (
       justifyContent: 'center',
       py: 8,
       gap: 2,
-      color: 'text.secondary',
+      color: 'text.secondary'
     }}
   >
     <ErrorOutlineIcon sx={{ fontSize: 48, color: 'error.main' }} />

@@ -93,7 +93,7 @@ class PayslipService {
     }
   }
 
-  // NOTE: createPayslip and generateBulkPayslips removed — 
+  // NOTE: createPayslip and generateBulkPayslips removed —
   // they called non-existent backend routes (POST /payslips, POST /payslips/bulk-generate).
   // Use generatePayslip() and the bulk endpoints in ModernPayrollManagement instead.
 
@@ -193,7 +193,7 @@ class PayslipService {
     const exemptionLimit = 250000; // Basic exemption limit
 
     if (annualSalary <= exemptionLimit) return 0;
-    
+
     // Simplified TDS calculation (5% of excess over exemption)
     const taxableAmount = annualSalary - exemptionLimit;
     const annualTDS = taxableAmount * 0.05;
@@ -235,10 +235,10 @@ class PayslipService {
 
     let result = '';
     let scaleIndex = 0;
-    
+
     while (amount > 0) {
       let chunk = 0;
-      
+
       if (scaleIndex === 0) {
         chunk = amount % 1000; // First chunk (ones, tens, hundreds)
         amount = Math.floor(amount / 1000);
@@ -249,24 +249,24 @@ class PayslipService {
 
       if (chunk > 0) {
         let chunkText = '';
-        
+
         if (scaleIndex === 0 && chunk >= 100) {
           chunkText += ones[Math.floor(chunk / 100)] + ' Hundred ';
           chunk %= 100;
         }
-        
+
         if (chunk >= 20) {
           chunkText += tens[Math.floor(chunk / 10)] + ' ';
           chunk %= 10;
         }
-        
+
         if (chunk > 0) {
           chunkText += ones[chunk] + ' ';
         }
-        
+
         result = chunkText + scales[scaleIndex] + ' ' + result;
       }
-      
+
       scaleIndex++;
     }
 
@@ -280,7 +280,7 @@ class PayslipService {
   printPayslip(elementId = 'payslip-content') {
     const printWindow = window.open('', '_blank');
     const payslipContent = document.getElementById(elementId);
-    
+
     if (!payslipContent) {
       console.error('Payslip content not found');
       return;
@@ -311,7 +311,7 @@ class PayslipService {
 
     printWindow.document.close();
     printWindow.focus();
-    
+
     setTimeout(() => {
       printWindow.print();
       printWindow.close();

@@ -23,8 +23,8 @@ const createTestQueryClient = () =>
   new QueryClient({
     defaultOptions: {
       queries: { retry: false },
-      mutations: { retry: false },
-    },
+      mutations: { retry: false }
+    }
   });
 
 const renderWithProviders = (
@@ -52,7 +52,7 @@ describe('RestoreManagement Component', () => {
       reviewPeriod: '2026-Q1',
       reviewType: 'Performance Review',
       reviewerName: 'Manager Smith',
-      deletedAt: '2026-02-01T10:00:00Z',
+      deletedAt: '2026-02-01T10:00:00Z'
     },
     {
       id: 2,
@@ -60,8 +60,8 @@ describe('RestoreManagement Component', () => {
       reviewPeriod: '2026-Q1',
       reviewType: 'Annual Review',
       reviewerName: 'Manager Jones',
-      deletedAt: '2026-02-05T12:00:00Z',
-    },
+      deletedAt: '2026-02-05T12:00:00Z'
+    }
   ];
 
   const mockDeletedBalances = [
@@ -70,8 +70,8 @@ describe('RestoreManagement Component', () => {
       employeeName: 'Alice Johnson',
       leaveTypeName: 'Annual Leave',
       balance: 15,
-      deletedAt: '2026-01-20T09:00:00Z',
-    },
+      deletedAt: '2026-01-20T09:00:00Z'
+    }
   ];
 
   const mockDeletedUsers = [
@@ -80,8 +80,8 @@ describe('RestoreManagement Component', () => {
       fullName: 'Bob Williams',
       username: 'bwilliams',
       email: 'bob@example.com',
-      deletedAt: '2026-01-15T08:00:00Z',
-    },
+      deletedAt: '2026-01-15T08:00:00Z'
+    }
   ];
 
   beforeEach(() => {
@@ -89,27 +89,27 @@ describe('RestoreManagement Component', () => {
 
     // Default mock implementations
     restoreService.getDeletedReviews.mockResolvedValue({
-      data: { success: true, data: mockDeletedReviews },
+      data: { success: true, data: mockDeletedReviews }
     });
 
     restoreService.getDeletedBalances.mockResolvedValue({
-      data: { success: true, data: mockDeletedBalances },
+      data: { success: true, data: mockDeletedBalances }
     });
 
     restoreService.getDeletedUsers.mockResolvedValue({
-      data: { success: true, data: mockDeletedUsers },
+      data: { success: true, data: mockDeletedUsers }
     });
 
     restoreService.restoreReview.mockResolvedValue({
-      data: { success: true },
+      data: { success: true }
     });
 
     restoreService.restoreBalance.mockResolvedValue({
-      data: { success: true },
+      data: { success: true }
     });
 
     restoreService.restoreUser.mockResolvedValue({
-      data: { success: true },
+      data: { success: true }
     });
   });
 
@@ -129,7 +129,7 @@ describe('RestoreManagement Component', () => {
   // Test 2: Admin-only access control
   test('should redirect non-admin users', () => {
     renderWithProviders(<RestoreManagement />, {
-      user: { isAdmin: false },
+      user: { isAdmin: false }
     });
 
     // Component should redirect using Navigate

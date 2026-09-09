@@ -1,6 +1,6 @@
 /**
  * EmployeeIDCard.js
- * 
+ *
  * Renders a printable employee ID card matching the SKYRAKSYS brand design.
  * Uses a QR code API (no extra npm package needed).
  * Settings are passed as props from the admin customization panel.
@@ -17,7 +17,7 @@ const DEFAULT_SETTINGS = {
   showQrCode: true,
   showDepartment: true,
   showDesignation: true,
-  showWebsite: true,
+  showWebsite: true
 };
 
 const EmployeeIDCard = React.forwardRef(({ employee, settings = {} }, ref) => {
@@ -66,8 +66,8 @@ END:VCARD`;
           height: '6px',
           background: `linear-gradient(90deg, ${cfg.primaryColor}, ${cfg.accentColor})`,
           position: 'absolute',
-          top: 0, left: 0, right: 0,
-        },
+          top: 0, left: 0, right: 0
+        }
       }}
     >
       {/* ── Header: Company Logo ────────────────────────────── */}
@@ -93,7 +93,7 @@ END:VCARD`;
             justifyContent: 'center',
             py: 3,
             px: 2,
-            gap: 2,
+            gap: 2
           }}
         >
           <Typography
@@ -103,7 +103,7 @@ END:VCARD`;
               fontSize: '1.15rem',
               textAlign: 'center',
               lineHeight: 1.3,
-              textShadow: '0 1px 3px rgba(0,0,0,0.25)',
+              textShadow: '0 1px 3px rgba(0,0,0,0.25)'
             }}
           >
             {fullName || 'Employee Name'}
@@ -121,7 +121,7 @@ END:VCARD`;
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              flexShrink: 0,
+              flexShrink: 0
             }}
           >
             {photoSrc ? (
@@ -160,7 +160,7 @@ END:VCARD`;
             py: 3,
             px: 2,
             gap: 3,
-            position: 'relative',
+            position: 'relative'
           }}
         >
           {/* Website vertical text */}
@@ -175,7 +175,7 @@ END:VCARD`;
                 color: cfg.accentColor,
                 fontWeight: 700,
                 letterSpacing: '0.12em',
-                whiteSpace: 'nowrap',
+                whiteSpace: 'nowrap'
               }}
             >
               {cfg.websiteUrl}
@@ -192,7 +192,7 @@ END:VCARD`;
                 fontSize: '1.6rem',
                 fontWeight: 900,
                 color: cfg.primaryColor,
-                letterSpacing: '0.05em',
+                letterSpacing: '0.05em'
               }}
             >
               {employeeId}
@@ -211,7 +211,7 @@ END:VCARD`;
                   borderRadius: 2,
                   p: 0.5,
                   display: 'inline-block',
-                  bgcolor: '#fff',
+                  bgcolor: '#fff'
                 }}
               >
                 <img
@@ -233,7 +233,7 @@ END:VCARD`;
         sx={{
           py: 1.5,
           textAlign: 'center',
-          background: `linear-gradient(90deg, ${cfg.primaryColor}, ${cfg.accentColor})`,
+          background: `linear-gradient(90deg, ${cfg.primaryColor}, ${cfg.accentColor})`
         }}
       >
         <Typography
@@ -242,7 +242,7 @@ END:VCARD`;
             fontWeight: 900,
             fontSize: '0.9rem',
             letterSpacing: '0.25em',
-            textTransform: 'uppercase',
+            textTransform: 'uppercase'
           }}
         >
           {cfg.tagline}

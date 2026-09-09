@@ -16,8 +16,8 @@ jest.mock('../../services/auth.service', () => {
       register: jest.fn(),
       logout: jest.fn(),
       updateProfile: jest.fn(),
-      changePassword: jest.fn(),
-    },
+      changePassword: jest.fn()
+    }
   };
 });
 const { authService } = require('../../services/auth.service');

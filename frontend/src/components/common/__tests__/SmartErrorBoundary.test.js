@@ -54,7 +54,7 @@ describe('SmartErrorBoundary Component', () => {
         <ThrowError shouldThrow={false} />
       </SmartErrorBoundary>
     );
-    
+
     expect(screen.getByText('Normal content')).toBeInTheDocument();
     expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
   });
@@ -66,7 +66,7 @@ describe('SmartErrorBoundary Component', () => {
         <ThrowError shouldThrow={true} errorMessage="Custom error message" />
       </SmartErrorBoundary>
     );
-    
+
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /go home/i })).toBeInTheDocument();
@@ -80,14 +80,14 @@ describe('SmartErrorBoundary Component', () => {
         <ThrowError shouldThrow={true} errorMessage="Test error" />
       </SmartErrorBoundary>
     );
-    
+
     // Initially error details should not be visible
     expect(screen.queryByText('Error Message:')).not.toBeInTheDocument();
-    
+
     // Click show details button
     const toggleButton = screen.getByRole('button', { name: /show error details/i });
     fireEvent.click(toggleButton);
-    
+
     // Error details should now be visible
     expect(screen.getByText('Error Message:')).toBeInTheDocument();
     expect(screen.getByText('Test error')).toBeInTheDocument();
@@ -96,23 +96,23 @@ describe('SmartErrorBoundary Component', () => {
   // Test 4: Calls onRetry when Try Again button is clicked
   test('should reset error state when retry button is clicked', async () => {
     const onRetry = jest.fn();
-    
+
     renderWithTheme(
       <SmartErrorBoundary onRetry={onRetry}>
         <ThrowError shouldThrow={throwError} />
       </SmartErrorBoundary>
     );
-    
+
     // Error UI should be displayed
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
-    
+
     // Click retry button
     const retryButton = screen.getByRole('button', { name: /try again/i });
     fireEvent.click(retryButton);
-    
+
     // Wait for recovery process
     await new Promise(resolve => setTimeout(resolve, 1100));
-    
+
     // onRetry should have been called
     expect(onRetry).toHaveBeenCalledWith(1);
   });
@@ -125,13 +125,13 @@ describe('SmartErrorBoundary Component', () => {
         <button onClick={retry}>Custom Retry</button>
       </div>
     );
-    
+
     renderWithTheme(
       <SmartErrorBoundary fallback={customFallback}>
         <ThrowError shouldThrow={true} errorMessage="Test error" />
       </SmartErrorBoundary>
     );
-    
+
     expect(screen.getByTestId('custom-fallback')).toBeInTheDocument();
     expect(screen.getByText('Custom Error: Test error')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /custom retry/i })).toBeInTheDocument();
@@ -142,9 +142,9 @@ describe('SmartErrorBoundary Component', () => {
     const TestComponent = ({ message }) => <div>{message}</div>;
     TestComponent.propTypes = { message: PropTypes.string };
     const WrappedComponent = withErrorBoundary(TestComponent);
-    
+
     renderWithTheme(<WrappedComponent message="Test message" />);
-    
+
     expect(screen.getByText('Test message')).toBeInTheDocument();
   });
 });
@@ -161,21 +161,21 @@ describe('useErrorHandler Hook', () => {
   test('should throw error when throwError is called', () => {
     const TestComponentWithHook = () => {
       const { throwError } = useErrorHandler();
-      
+
       return (
         <button onClick={() => throwError('Test hook error')}>
           Throw Error
         </button>
       );
     };
-    
+
     expect(() => {
       renderWithTheme(
         <SmartErrorBoundary>
           <TestComponentWithHook />
         </SmartErrorBoundary>
       );
-      
+
       const button = screen.getByRole('button', { name: /throw error/i });
       fireEvent.click(button);
     }).not.toThrow(); // Error is caught by boundary, so no throw

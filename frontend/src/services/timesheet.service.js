@@ -41,7 +41,7 @@ class TimesheetService {
       if (mismatched.length > 0) {
         logger.warn('Week mismatch in getByWeek response', {
           requested: weekStartDate,
-          mismatched: mismatched.map((ts) => ({ id: ts.id, actualWeekStart: ts.weekStartDate })),
+          mismatched: mismatched.map((ts) => ({ id: ts.id, actualWeekStart: ts.weekStartDate }))
         });
       }
     }

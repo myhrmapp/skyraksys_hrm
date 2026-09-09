@@ -18,10 +18,10 @@ import {
 import InfoField from './InfoField';
 import { CURRENCY_SYMBOL } from '../../../../utils/formatCurrency';
 
-const SalaryInfoSection = ({ 
-  employee, 
-  editing, 
-  onChange, 
+const SalaryInfoSection = ({
+  employee,
+  editing,
+  onChange,
   canEditSensitive,
   showSalary,
   setShowSalary,
@@ -29,7 +29,7 @@ const SalaryInfoSection = ({
 }) => {
   // Map from the new flat salaryStructure
   const salary = employee.salaryStructure || {};
-  
+
   // Calculate totals for display
   const totalAllowances = (Number(salary.hra) || 0) + (Number(salary.allowances) || 0);
   const totalDeductions = (Number(salary.pfContribution) || 0) + (Number(salary.tds) || 0) + (Number(salary.professionalTax) || 0) + (Number(salary.esi) || 0) + (Number(salary.otherDeductions) || 0);
@@ -49,7 +49,7 @@ const SalaryInfoSection = ({
             {showSalary ? <VisibilityOffIcon /> : <VisibilityIcon />}
           </IconButton>
         </Box>
-        
+
         {showSalary ? (
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
@@ -61,7 +61,7 @@ const SalaryInfoSection = ({
                 testId="salary-basicSalary"
                 onChange={(val) => onChange('salaryStructure.basicSalary', val)}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>,
+                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>
                 }}
                 displayValue={formatCurrency(salary.basicSalary, salary.currency)}
               />
@@ -73,7 +73,7 @@ const SalaryInfoSection = ({
                 editing={false} // Calculated field
                 type="number"
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>,
+                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>
                 }}
                 displayValue={formatCurrency(totalAllowances, salary.currency)}
               />
@@ -85,7 +85,7 @@ const SalaryInfoSection = ({
                 editing={false} // Calculated field
                 type="number"
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>,
+                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>
                 }}
                 displayValue={formatCurrency(totalDeductions, salary.currency)}
               />
@@ -97,7 +97,7 @@ const SalaryInfoSection = ({
                 editing={false}
                 type="number"
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>,
+                  startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>
                 }}
                 displayValue={formatCurrency((Number(salary.basicSalary) || 0) + totalAllowances - totalDeductions, salary.currency)}
               />

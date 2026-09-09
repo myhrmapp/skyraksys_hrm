@@ -44,7 +44,7 @@ import PayslipViewer from '../../payslip/PayslipViewer';
 const EmployeePayslips = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [selectedPayslip, setSelectedPayslip] = useState(null);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [page, setPage] = useState(0);
@@ -143,7 +143,7 @@ const EmployeePayslips = () => {
               }
             ].map((stat, index) => (
               <Grid item xs={12} md={4} key={index}>
-                <Card sx={{ 
+                <Card sx={{
                   height: '100%',
                   background: 'rgba(255, 255, 255, 0.7)',
                   backdropFilter: 'blur(20px)',
@@ -156,7 +156,7 @@ const EmployeePayslips = () => {
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     transform: 'translateY(-4px)',
-                    boxShadow: '0 12px 40px rgba(0,0,0,0.08)',
+                    boxShadow: '0 12px 40px rgba(0,0,0,0.08)'
                   }
                 }}>
                   <Box sx={{
@@ -190,10 +190,10 @@ const EmployeePayslips = () => {
           </Grid>
 
           {/* Filters */}
-          <Card sx={{ 
-            mb: 4, 
-            borderRadius: 4, 
-            border: '1px solid', 
+          <Card sx={{
+            mb: 4,
+            borderRadius: 4,
+            border: '1px solid',
             borderColor: 'divider',
             boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
           }}>
@@ -225,9 +225,9 @@ const EmployeePayslips = () => {
           </Card>
 
           {/* Payslips Table */}
-          <Card sx={{ 
-            borderRadius: 4, 
-            border: '1px solid', 
+          <Card sx={{
+            borderRadius: 4,
+            border: '1px solid',
             borderColor: 'divider',
             boxShadow: '0 10px 40px rgba(0,0,0,0.04)',
             overflow: 'hidden'

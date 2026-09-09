@@ -36,7 +36,7 @@ export const queryClient = new QueryClient({
       // Don't refetch on mount if data is fresh
       refetchOnMount: false,
       // Global error handler
-      onError: handleQueryError,
+      onError: handleQueryError
     },
     mutations: {
       // Retry mutations once on network errors only
@@ -47,7 +47,7 @@ export const queryClient = new QueryClient({
         return failureCount < 1;
       },
       // Global mutation error handler
-      onError: handleMutationError,
-    },
-  },
+      onError: handleMutationError
+    }
+  }
 });

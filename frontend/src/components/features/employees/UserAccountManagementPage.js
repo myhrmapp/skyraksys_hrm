@@ -38,7 +38,7 @@ import {
   LockOpen as LockOpenIcon,
   Refresh as RefreshIcon,
   Send as SendIcon,
-  Logout as LogoutIcon,
+  Logout as LogoutIcon
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -81,7 +81,7 @@ const UserAccountManagementPage = () => {
     }
     return password.join('');
   };
-  
+
   const [loading, setLoading] = useState(true);
   const [employee, setEmployee] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -105,9 +105,9 @@ const UserAccountManagementPage = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await employeeService.getById(id);
-      
+
       // Handle different response structures
       let employeeData;
       if (response.data?.data) {
@@ -120,9 +120,9 @@ const UserAccountManagementPage = () => {
         // Direct: employee
         employeeData = response;
       }
-      
+
       setEmployee(employeeData);
-      
+
     } catch (err) {
       setError(err.message || 'Failed to load employee');
       showNotification('Failed to load employee', 'error');
@@ -147,7 +147,7 @@ const UserAccountManagementPage = () => {
       open: true,
       action: 'lockAccount',
       title: isLocked ? 'Unlock Account' : 'Lock Account',
-      message: isLocked 
+      message: isLocked
         ? 'Are you sure you want to unlock this account? The user will be able to log in again.'
         : 'Are you sure you want to lock this account? The user will be immediately logged out and cannot access the system.'
     });
@@ -174,7 +174,7 @@ const UserAccountManagementPage = () => {
   const handleConfirmAction = async () => {
     const { action } = confirmDialog;
     setActionLoading(true);
-    
+
     try {
       const userId = employee.user?.id;
       if (!userId) {
@@ -189,7 +189,7 @@ const UserAccountManagementPage = () => {
           showNotification('Password reset successfully. User must change password on next login.', 'success');
           await loadEmployee();
           break;
-          
+
         case 'lockAccount':
           // Toggle account lock status
           const newLockStatus = !employee.user?.isLocked;
@@ -197,7 +197,7 @@ const UserAccountManagementPage = () => {
           showNotification(`Account ${newLockStatus ? 'locked' : 'unlocked'} successfully`, 'success');
           await loadEmployee();
           break;
-          
+
         case 'sendWelcome':
           // Send welcome email with credentials
           const welcomePassword = generateSecurePassword(14);
@@ -209,17 +209,17 @@ const UserAccountManagementPage = () => {
             showNotification(emailResult.message || 'Failed to send welcome email', 'warning');
           }
           break;
-          
+
         case 'forceLogout':
           // Note: Session management requires backend implementation
           showNotification('Force logout feature requires backend session management', 'info');
           break;
-          
+
         case 'terminateSession':
           // Note: Session management requires backend implementation
           showNotification('Session termination requires backend session management', 'info');
           break;
-          
+
         default:
           break;
       }
@@ -244,23 +244,23 @@ const UserAccountManagementPage = () => {
     try {
       if (hasUserAccount) {
         const userId = employee.user?.id || employee.userId;
-        
+
         if (!userId) {
           throw new Error('User ID not found. Cannot update user account.');
         }
-        
+
         await authService.updateUserAccount(userId, updatedData);
         showNotification('User account updated successfully', 'success');
       } else {
         await authService.createUserAccount(employee.id, updatedData);
         showNotification('User account created successfully', 'success');
       }
-      
+
       // Reload employee data to get latest user account status
       await loadEmployee();
     } catch (error) {
       showNotification(
-        error.response?.data?.message || 'Failed to save user account', 
+        error.response?.data?.message || 'Failed to save user account',
         'error'
       );
     }
@@ -273,9 +273,9 @@ const UserAccountManagementPage = () => {
       manager: { label: 'Manager', color: 'info', icon: <BadgeIcon fontSize="small" /> },
       employee: { label: 'Employee', color: 'default', icon: <PersonIcon fontSize="small" /> }
     };
-    
+
     const config = roleConfig[role] || roleConfig.employee;
-    
+
     return (
       <Chip
         icon={config.icon}
@@ -322,9 +322,9 @@ const UserAccountManagementPage = () => {
             underline="hover"
             color="inherit"
             onClick={() => navigate('/employees')}
-            sx={{ 
-              cursor: 'pointer', 
-              display: 'flex', 
+            sx={{
+              cursor: 'pointer',
+              display: 'flex',
               alignItems: 'center',
               color: theme.palette.text.secondary,
               '&:hover': { color: theme.palette.primary.main },
@@ -338,7 +338,7 @@ const UserAccountManagementPage = () => {
             underline="hover"
             color="inherit"
             onClick={() => navigate(`/employees/${id}`)}
-            sx={{ 
+            sx={{
               cursor: 'pointer',
               color: theme.palette.text.secondary,
               '&:hover': { color: theme.palette.primary.main },
@@ -347,10 +347,10 @@ const UserAccountManagementPage = () => {
           >
             {employee.firstName} {employee.lastName}
           </Link>
-          <Typography 
-            color="text.primary" 
-            sx={{ 
-              display: 'flex', 
+          <Typography
+            color="text.primary"
+            sx={{
+              display: 'flex',
               alignItems: 'center',
               color: theme.palette.text.primary,
               fontWeight: 500
@@ -375,10 +375,10 @@ const UserAccountManagementPage = () => {
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar 
-                  sx={{ 
-                    width: 56, 
-                    height: 56, 
+                <Avatar
+                  sx={{
+                    width: 56,
+                    height: 56,
                     bgcolor: alpha(theme.palette.primary.main, 0.1),
                     color: theme.palette.primary.main
                   }}
@@ -386,7 +386,7 @@ const UserAccountManagementPage = () => {
                   <VpnKeyIcon sx={{ fontSize: 32 }} />
                 </Avatar>
                 <Box>
-                  <Typography 
+                  <Typography
                     variant="h4"
                     sx={{
                       fontWeight: 700,
@@ -437,12 +437,12 @@ const UserAccountManagementPage = () => {
               }}
             >
               <CardContent>
-                <Typography 
-                  variant="h6" 
-                  gutterBottom 
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: 1,
                     fontWeight: 600,
                     color: theme.palette.text.primary
@@ -452,12 +452,12 @@ const UserAccountManagementPage = () => {
                   Employee Information
                 </Typography>
                 <Divider sx={{ my: 2 }} />
-                
+
                 <Stack spacing={2}>
                   <Box display="flex" alignItems="center" gap={2}>
-                    <Avatar 
-                      sx={{ 
-                        width: 60, 
+                    <Avatar
+                      sx={{
+                        width: 60,
                         height: 60,
                         border: `3px solid ${theme.palette.divider}`,
                         boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.15)}`
@@ -512,13 +512,13 @@ const UserAccountManagementPage = () => {
                       size="small"
                       sx={{
                         fontWeight: 600,
-                        bgcolor: employee.status?.toLowerCase() === 'active' 
+                        bgcolor: employee.status?.toLowerCase() === 'active'
                           ? alpha(theme.palette.success.main, 0.1)
                           : alpha(theme.palette.text.secondary, 0.1),
                         color: employee.status?.toLowerCase() === 'active' ? theme.palette.success.main : theme.palette.text.secondary,
                         border: '1px solid',
-                        borderColor: employee.status?.toLowerCase() === 'active' 
-                          ? 'rgba(16, 185, 129, 0.3)' 
+                        borderColor: employee.status?.toLowerCase() === 'active'
+                          ? 'rgba(16, 185, 129, 0.3)'
                           : 'rgba(148, 163, 184, 0.3)'
                       }}
                     />
@@ -540,12 +540,12 @@ const UserAccountManagementPage = () => {
               }}
             >
               <CardContent>
-                <Typography 
-                  variant="h6" 
-                  gutterBottom 
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: 1,
                     fontWeight: 600,
                     color: theme.palette.text.primary
@@ -558,8 +558,8 @@ const UserAccountManagementPage = () => {
 
                 {hasUserAccount ? (
                   <Stack spacing={3}>
-                    <Alert 
-                      severity="success" 
+                    <Alert
+                      severity="success"
                       icon={<CheckCircleIcon />}
                       sx={{
                         borderRadius: 2,
@@ -576,9 +576,9 @@ const UserAccountManagementPage = () => {
 
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                      <Box 
-                        sx={{ 
-                          p: 2, 
+                      <Box
+                        sx={{
+                          p: 2,
                           bgcolor: alpha(theme.palette.primary.main, 0.05),
                           borderRadius: 2,
                           border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
@@ -594,9 +594,9 @@ const UserAccountManagementPage = () => {
                     </Grid>
 
                     <Grid item xs={12} sm={6}>
-                      <Box 
-                        sx={{ 
-                          p: 2, 
+                      <Box
+                        sx={{
+                          p: 2,
                           bgcolor: 'rgba(99, 102, 241, 0.05)',
                           borderRadius: 2,
                           border: '1px solid rgba(99, 102, 241, 0.1)'
@@ -612,9 +612,9 @@ const UserAccountManagementPage = () => {
                     </Grid>
 
                     <Grid item xs={12} sm={6}>
-                      <Box 
-                        sx={{ 
-                          p: 2, 
+                      <Box
+                        sx={{
+                          p: 2,
                           bgcolor: 'rgba(99, 102, 241, 0.05)',
                           borderRadius: 2,
                           border: '1px solid rgba(99, 102, 241, 0.1)'
@@ -629,12 +629,12 @@ const UserAccountManagementPage = () => {
                           sx={{
                             mt: 0.5,
                             fontWeight: 600,
-                            bgcolor: employee.user.isActive 
+                            bgcolor: employee.user.isActive
                               ? alpha(theme.palette.success.main, 0.1)
                               : alpha(theme.palette.text.secondary, 0.1),
                             color: employee.user.isActive ? theme.palette.success.main : theme.palette.text.secondary,
                             border: '1px solid',
-                            borderColor: employee.user.isActive 
+                            borderColor: employee.user.isActive
                               ? alpha(theme.palette.success.main, 0.3)
                               : alpha(theme.palette.text.secondary, 0.3)
                           }}
@@ -643,9 +643,9 @@ const UserAccountManagementPage = () => {
                     </Grid>
 
                     <Grid item xs={12} sm={6}>
-                      <Box 
-                        sx={{ 
-                          p: 2, 
+                      <Box
+                        sx={{
+                          p: 2,
                           bgcolor: alpha(theme.palette.primary.main, 0.05),
                           borderRadius: 2,
                           border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
@@ -656,8 +656,8 @@ const UserAccountManagementPage = () => {
                         </Typography>
                         <Typography variant="body2" sx={{ mt: 0.5 }}>
                           {employee.user.forcePasswordChange ? (
-                            <Chip 
-                              label="Must Change" 
+                            <Chip
+                              label="Must Change"
                               size="small"
                               sx={{
                                 fontWeight: 600,
@@ -667,8 +667,8 @@ const UserAccountManagementPage = () => {
                               }}
                             />
                           ) : (
-                            <Chip 
-                              label="Set" 
+                            <Chip
+                              label="Set"
                               size="small"
                               sx={{
                                 fontWeight: 600,
@@ -719,8 +719,8 @@ const UserAccountManagementPage = () => {
                 </Stack>
               ) : (
                 <Stack spacing={3}>
-                  <Alert 
-                    severity="warning" 
+                  <Alert
+                    severity="warning"
                     icon={<CancelIcon />}
                     sx={{
                       borderRadius: 2,
@@ -735,10 +735,10 @@ const UserAccountManagementPage = () => {
                     </Typography>
                   </Alert>
 
-                  <Box 
-                    sx={{ 
-                      p: 4, 
-                      textAlign: 'center', 
+                  <Box
+                    sx={{
+                      p: 4,
+                      textAlign: 'center',
                       bgcolor: 'rgba(99, 102, 241, 0.02)',
                       borderRadius: 3,
                       border: '2px dashed',
@@ -800,7 +800,7 @@ const UserAccountManagementPage = () => {
                 Security & Access Information
               </Typography>
               <Divider sx={{ my: 2 }} />
-              
+
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6} md={3}>
                   <Paper sx={{ p: 2, textAlign: 'center' }}>
@@ -812,7 +812,7 @@ const UserAccountManagementPage = () => {
                     </Typography>
                   </Paper>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6} md={3}>
                   <Paper sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h4" color={hasUserAccount ? 'success.main' : 'text.secondary'}>
@@ -823,7 +823,7 @@ const UserAccountManagementPage = () => {
                     </Typography>
                   </Paper>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6} md={3}>
                   <Paper sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h4" color="info.main">
@@ -834,7 +834,7 @@ const UserAccountManagementPage = () => {
                     </Typography>
                   </Paper>
                 </Grid>
-                
+
                 <Grid item xs={12} sm={6} md={3}>
                   <Paper sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h4" color={employee.user?.isActive ? 'success.main' : 'text.secondary'}>
@@ -850,7 +850,7 @@ const UserAccountManagementPage = () => {
               <Box sx={{ mt: 3 }}>
                 <Alert severity="info">
                   <Typography variant="body2">
-                    <strong>Note:</strong> User account changes take effect immediately. 
+                    <strong>Note:</strong> User account changes take effect immediately.
                     If you disable an account, the user will be logged out and cannot access the system until re-enabled.
                   </Typography>
                 </Alert>
@@ -868,7 +868,7 @@ const UserAccountManagementPage = () => {
                   ⚡ Quick Actions
                 </Typography>
                 <Divider sx={{ my: 2 }} />
-                
+
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6} md={3}>
                     <Tooltip title="Reset password and require change on next login">
@@ -886,11 +886,11 @@ const UserAccountManagementPage = () => {
                     </Tooltip>
                   </Grid>
                   <Grid item xs={12} sm={6} md={3}>
-                    <Tooltip title={employee.user?.isLocked ? "Unlock this account" : "Lock this account"}>
+                    <Tooltip title={employee.user?.isLocked ? 'Unlock this account' : 'Lock this account'}>
                       <Button
                         fullWidth
                         variant="outlined"
-                        color={employee.user?.isLocked ? "success" : "warning"}
+                        color={employee.user?.isLocked ? 'success' : 'warning'}
                         startIcon={employee.user?.isLocked ? <LockOpenIcon /> : <LockIcon />}
                         onClick={handleLockAccount}
                         disabled={actionLoading}
@@ -955,7 +955,7 @@ const UserAccountManagementPage = () => {
           <DialogContentText>{confirmDialog.message}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button 
+          <Button
             onClick={() => setConfirmDialog({ open: false, action: null, title: '', message: '' })}
             disabled={actionLoading}
             sx={{
@@ -967,8 +967,8 @@ const UserAccountManagementPage = () => {
           >
             Cancel
           </Button>
-          <Button 
-            onClick={handleConfirmAction} 
+          <Button
+            onClick={handleConfirmAction}
             variant="contained"
             disabled={actionLoading}
             startIcon={actionLoading ? <CircularProgress size={20} /> : null}

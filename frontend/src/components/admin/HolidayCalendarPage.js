@@ -451,5 +451,5 @@ export default function HolidayCalendarPage({ embedded } = {}) {
 }
 
 HolidayCalendarPage.propTypes = {
-  embedded: PropTypes.bool,
+  embedded: PropTypes.bool
 };

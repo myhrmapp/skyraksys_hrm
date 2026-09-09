@@ -16,6 +16,8 @@ import userEvent from '@testing-library/user-event';
 import { renderWithProviders as render, createMockUser } from '../../../../test-utils/testUtils';
 import TimesheetApproval from '../TimesheetApproval';
 
+import { timesheetService } from '../../../../services/timesheet.service';
+
 // Mock timesheetService
 jest.mock('../../../../services/timesheet.service', () => {
   if (process.env.REACT_APP_TEST_MODE === 'integration') {
@@ -27,8 +29,8 @@ jest.mock('../../../../services/timesheet.service', () => {
       getStats: jest.fn(),
       getAll: jest.fn(),
       bulkApprove: jest.fn(),
-      bulkReject: jest.fn(),
-    },
+      bulkReject: jest.fn()
+    }
   };
 });
 
@@ -53,8 +55,8 @@ jest.mock('../../../../hooks/useConfirmDialog', () => {
     __esModule: true,
     default: () => ({
       dialogProps: { open: false, title: '', message: '', onConfirm: jest.fn(), onCancel: jest.fn() },
-      confirm: jest.fn(({ onConfirm } = {}) => { if (typeof onConfirm === 'function') onConfirm(); }),
-    }),
+      confirm: jest.fn(({ onConfirm } = {}) => { if (typeof onConfirm === 'function') onConfirm(); })
+    })
   };
 });
 
@@ -70,8 +72,6 @@ jest.mock('dayjs', () => {
 globalThis.URL.createObjectURL = jest.fn(() => 'blob:test');
 globalThis.URL.revokeObjectURL = jest.fn();
 
-import { timesheetService } from '../../../../services/timesheet.service';
-
 const mockTimesheets = [
   {
     id: 1,
@@ -85,7 +85,7 @@ const mockTimesheets = [
     project: { id: 1, name: 'Project Alpha' },
     task: { id: 1, name: 'Development' },
     mondayHours: 8, tuesdayHours: 8, wednesdayHours: 8, thursdayHours: 8, fridayHours: 8,
-    saturdayHours: 0, sundayHours: 0,
+    saturdayHours: 0, sundayHours: 0
   },
   {
     id: 2,
@@ -99,7 +99,7 @@ const mockTimesheets = [
     project: { id: 2, name: 'Project Beta' },
     task: { id: 2, name: 'Testing' },
     mondayHours: 7, tuesdayHours: 7, wednesdayHours: 7, thursdayHours: 7, fridayHours: 7,
-    saturdayHours: 0, sundayHours: 0,
+    saturdayHours: 0, sundayHours: 0
   },
   {
     id: 3,
@@ -113,8 +113,8 @@ const mockTimesheets = [
     project: { id: 1, name: 'Project Alpha' },
     task: null,
     mondayHours: 8, tuesdayHours: 8, wednesdayHours: 6, thursdayHours: 8, fridayHours: 8,
-    saturdayHours: 0, sundayHours: 0,
-  },
+    saturdayHours: 0, sundayHours: 0
+  }
 ];
 
 describe('TimesheetApproval Component', () => {
@@ -403,7 +403,7 @@ describe('TimesheetApproval Component', () => {
       await waitFor(() => {
         expect(timesheetService.bulkReject).toHaveBeenCalledWith(
           expect.any(Array),
-          'Hours do not match project tracker',
+          'Hours do not match project tracker'
         );
       });
     });
@@ -421,7 +421,7 @@ describe('TimesheetApproval Component', () => {
 
       // Type "John" into the search input
       fireEvent.change(screen.getByTestId('ts-approval-search-input'), {
-        target: { value: 'John' },
+        target: { value: 'John' }
       });
 
       await waitFor(() => {

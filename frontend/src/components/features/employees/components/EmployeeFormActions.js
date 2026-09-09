@@ -9,7 +9,7 @@ const EmployeeFormActions = ({
   onSubmit,
   isLoading,
   isEditMode,
-  isCurrentTabValid,
+  isCurrentTabValid
 }) => {
   const isLastTab = activeTab === 3;
 
@@ -32,7 +32,7 @@ const EmployeeFormActions = ({
         justifyContent: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: 2,
+        gap: 2
       }}
     >
       {/* Left: Previous / Next */}
@@ -84,7 +84,7 @@ const EmployeeFormActions = ({
             textTransform: 'none',
             fontWeight: 700,
             boxShadow: 2,
-            '&:hover': { boxShadow: 4 },
+            '&:hover': { boxShadow: 4 }
           }}
         >
           {submitLabel}

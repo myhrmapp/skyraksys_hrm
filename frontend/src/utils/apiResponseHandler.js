@@ -42,26 +42,26 @@ class ApiResponseHandler {
   static async handleApiCall(apiCall) {
     try {
       const response = await apiCall;
-      
+
       // If response already has our standard format, return as-is
       if (response.data && typeof response.data.success === 'boolean') {
         return response.data;
       }
-      
+
       // Otherwise, wrap in standard format
       return this.success(response.data, 'Operation completed successfully');
     } catch (error) {
       console.error('API Error:', error);
-      
+
       // Handle different error types
       if (error.response) {
         // Server responded with error status
         const { status, data } = error.response;
-        
+
         if (data && data.message) {
           return this.error(data.message, data.errors || [], status);
         }
-        
+
         // Default error messages based on status
         const statusMessages = {
           400: 'Invalid request data',
@@ -72,7 +72,7 @@ class ApiResponseHandler {
           500: 'Internal server error',
           503: 'Service unavailable'
         };
-        
+
         return this.error(
           statusMessages[status] || 'Request failed',
           [],
@@ -105,12 +105,12 @@ class ApiResponseHandler {
     if (response.meta && response.meta.pagination) {
       return response.meta.pagination;
     }
-    
+
     // Legacy format support
     if (response.pagination) {
       return response.pagination;
     }
-    
+
     return null;
   }
 
@@ -130,13 +130,13 @@ class ApiResponseHandler {
    */
   static getErrorMessage(response) {
     if (!response) return 'Unknown error occurred';
-    
+
     if (response.message) return response.message;
-    
+
     if (response.errors && response.errors.length > 0) {
       return response.errors[0].message || response.errors[0];
     }
-    
+
     return 'An error occurred';
   }
 
@@ -147,8 +147,8 @@ class ApiResponseHandler {
    */
   static getValidationErrors(response) {
     if (!response || !response.errors) return [];
-    
-    return response.errors.filter(error => 
+
+    return response.errors.filter(error =>
       typeof error === 'object' && error.field
     );
   }

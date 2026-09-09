@@ -16,10 +16,10 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
   const { user: authUser } = useAuth();
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+
   // Tab state
   const [activeTab, setActiveTab] = useState(0);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     // Required fields
@@ -31,7 +31,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     status: 'Active',
     departmentId: '',
     positionId: '',
-    
+
     // Optional personal fields
     phone: '',
     dateOfBirth: '',
@@ -43,7 +43,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     nationality: 'Indian',
     maritalStatus: '',
     photoUrl: '',
-    
+
     // Optional employment fields
     employmentType: 'Full-time',
     workLocation: '',
@@ -54,26 +54,26 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     probationPeriod: 6,
     noticePeriod: 30,
     managerId: '',
-    
+
     // Optional emergency contact
     emergencyContactName: '',
     emergencyContactPhone: '',
     emergencyContactRelation: '',
-    
+
     // Optional statutory details
     aadhaarNumber: '',
     panNumber: '',
     uanNumber: '',
     pfNumber: '',
     esiNumber: '',
-    
+
     // Optional bank details
     bankName: '',
     bankAccountNumber: '',
     ifscCode: '',
     bankBranch: '',
     accountHolderName: '',
-    
+
     // Salary structure (Flat format matching DB model)
     salaryStructure: {
       basicSalary: '',
@@ -88,7 +88,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
       payFrequency: 'monthly',
       effectiveFrom: ''
     },
-    
+
     // User account details
     userAccount: {
       enableLogin: false,
@@ -98,38 +98,38 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
       forcePasswordChange: true
     }
   });
-  
+
   // UI state
   const [errors, setErrors] = useState({});
   const [touchedFields, setTouchedFields] = useState({});
   const [wasSubmitted, setWasSubmitted] = useState(false);
-  
+
   // 🚀 NEW: Loading state from React Query mutations
   const { data: employee, isLoading: isLoadingEmployee } = useEmployee(id);
   const createMutation = useCreateEmployee();
   const updateMutation = useUpdateEmployee();
-  
+
   // Combine all loading states
   const isLoading = isLoadingEmployee || createMutation.isPending || updateMutation.isPending;
-  
+
   const [submitError, setSubmitError] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState('');
-  
+
   // Reference data
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
   const [managers, setManagers] = useState([]);
   const [loadingRefData, setLoadingRefData] = useState(true);
-  
+
   // Photo upload state
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
-  
+
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState(null);
-  
+
   // Draft restore dialog state (replaces window.confirm)
   const [draftRestoreDialog, setDraftRestoreDialog] = useState({ open: false, draftData: null, minutesAgo: 0 });
 
@@ -158,16 +158,16 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
             })
           : Promise.resolve({ data: { data: [] } })
       ]);
-      
+
       setDepartments(Array.isArray(deptResponse) ? deptResponse : deptResponse?.data?.data || deptResponse?.data || []);
       setManagers(Array.isArray(mgrsResponse) ? mgrsResponse : mgrsResponse?.data?.data || mgrsResponse?.data || []);
-      
+
       const positionsResponse = await employeeService.getPositions().catch(err => {
         console.error('Error loading positions:', err);
         return { data: { data: [] } };
       });
       setPositions(Array.isArray(positionsResponse) ? positionsResponse : positionsResponse?.data?.data || positionsResponse?.data || []);
-      
+
     } catch (error) {
       console.error('Error loading reference data:', error);
       setSubmitError(`Failed to load form data: ${error.message}. Please check your connection and try again.`);
@@ -182,9 +182,9 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
       setCurrentUser(authUser);
       setIsAuthenticated(true);
       loadReferenceData();
-      
+
       // 🚀 NEW: No need to manually load employee data - React Query handles it
-      
+
       if (!isEditMode) {
         // Restore draft for new employee
         const savedDraft = localStorage.getItem('employeeFormDraft');
@@ -193,7 +193,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
             const draftData = JSON.parse(savedDraft);
             const savedTime = new Date(draftData.savedAt);
             const hoursSinceLastSave = (new Date() - savedTime) / (1000 * 60 * 60);
-            
+
             if (hoursSinceLastSave < 24) {
               // Show draft restore dialog instead of window.confirm
               setDraftRestoreDialog({
@@ -244,7 +244,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
           otherDeductions:  apiSalary.otherDeductions   ?? '',
           currency:         apiSalary.currency          || 'INR',
           payFrequency:     apiSalary.payFrequency      || 'monthly',
-          effectiveFrom:    apiSalary.effectiveFrom     ?? '',
+          effectiveFrom:    apiSalary.effectiveFrom     ?? ''
         },
         userAccount: {
           ...(formData.userAccount || {}),
@@ -265,17 +265,17 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
         return '';
       }
     };
-    
+
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
-  
+
   // Auto-save to localStorage
   useEffect(() => {
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
     }
-    
+
     if (hasUnsavedChanges && isAuthenticated) {
       autoSaveTimeoutRef.current = setTimeout(() => {
         setAutoSaving(true);
@@ -294,7 +294,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
         }
       }, 30000);
     }
-    
+
     return () => {
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
@@ -306,10 +306,10 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
   const handleFieldChange = useCallback((fieldName, value) => {
     setFormData(prev => {
       let newFormData = { ...prev };
-      
+
       if (fieldName.includes('.')) {
         const fieldPath = fieldName.split('.');
-        
+
         // Deep clone each level of the nested path to avoid mutating previous state
         let current = newFormData;
         for (let i = 0; i < fieldPath.length - 1; i++) {
@@ -319,23 +319,23 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
             : {};
           current = current[key];
         }
-        
+
         const finalKey = fieldPath[fieldPath.length - 1];
         current[finalKey] = value;
       } else {
         newFormData[fieldName] = value;
       }
-      
+
       return newFormData;
     });
-    
+
     setHasUnsavedChanges(true);
-    
+
     setErrors(prevErrors => ({
       ...prevErrors,
       [fieldName]: null
     }));
-    
+
     setSubmitError('');
     setSubmitSuccess('');
   }, []);
@@ -346,7 +346,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
       ...prev,
       [fieldName]: true
     }));
-    
+
     let fieldValue;
     if (fieldName.includes('.')) {
       const fieldPath = fieldName.split('.');
@@ -358,7 +358,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     } else {
       fieldValue = formData[fieldName];
     }
-    
+
     const fieldError = validateField(fieldName, fieldValue, formData);
     if (fieldError) {
       setErrors(prevErrors => ({
@@ -392,9 +392,9 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
   // Validate current tab
   const isCurrentTabValid = useMemo(() => {
     if (!wasSubmitted) return true;
-    
+
     const validation = validateEmployeeForm(formData);
-    
+
     switch (activeTab) {
       case 0:
         const personalFields = ['firstName', 'lastName', 'email'];
@@ -409,7 +409,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
         return validation.isValid;
     }
   }, [formData, activeTab, wasSubmitted]);
-  
+
   // Get validation status for all tabs
   const getTabValidationStatus = useMemo(() => {
     const validation = validateEmployeeForm(formData);
@@ -463,7 +463,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     setWasSubmitted(true);
     setSubmitError('');
     setSubmitSuccess('');
-    
+
     // Password validation for user account
     if (formData.userAccount.enableLogin) {
       if (formData.userAccount.password !== formData.userAccount.confirmPassword) {
@@ -484,22 +484,22 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
         return;
       }
     }
-    
+
     // Form validation
     const validation = validateEmployeeForm(formData);
     if (!validation.isValid) {
       setErrors(validation.errors);
-      
+
       const errorFields = Object.keys(validation.errors);
       const touchedErrorFields = errorFields.reduce((acc, field) => {
         acc[field] = true;
         return acc;
       }, {});
       setTouchedFields(prev => ({ ...prev, ...touchedErrorFields }));
-      
+
       const fieldLabels = {
         firstName: 'First Name',
-        lastName: 'Last Name', 
+        lastName: 'Last Name',
         email: 'Email',
         employeeId: 'Employee ID',
         hireDate: 'Hire Date',
@@ -520,28 +520,28 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
         noticePeriod: 'Notice Period',
         salaryStructure: 'Salary Structure'
       };
-      
+
       const errorList = errorFields.map(field => {
         const label = fieldLabels[field] || field;
         return `• ${label}: ${validation.errors[field]}`;
       }).join('\n');
-      
+
       setSubmitError(`Please fix the following validation errors:\n\n${errorList}`);
-      
+
       const firstErrorField = errorFields[0];
-      const element = document.getElementById(firstErrorField) || 
+      const element = document.getElementById(firstErrorField) ||
                       document.querySelector(`[name="${firstErrorField}"]`);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => element.focus(), 300);
       }
-      
+
       return;
     }
-    
+
     // Transform data for API
     const apiData = transformEmployeeDataForAPI(formData);
-    
+
     // Use React Query mutations for create/update
     if (isEditMode) {
       updateMutation.mutate(
@@ -559,7 +559,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
                 console.warn('Photo upload failed:', photoError);
               }
             }
-            
+
             // Handle user account creation if needed
             if (formData.userAccount.enableLogin && employeeData?.id) {
               try {
@@ -576,10 +576,10 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
                 setSubmitSuccess(prev => prev + ' User account update failed - you can set this up later.');
               }
             }
-            
+
             localStorage.removeItem('employeeFormDraft');
             setHasUnsavedChanges(false);
-            
+
             // Navigate back to profile after brief delay
             setTimeout(() => {
               const dest = mode === 'self' ? '/my-profile' : `/employees/${id}`;
@@ -588,17 +588,17 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
           },
           onError: (error) => {
             console.error('Error updating employee:', error);
-            
+
             if (error.response?.status === 401) {
               setSubmitError('Session expired. Please login again.');
               authService.logout();
               navigate('/login');
             } else {
               let errorMessage = 'Failed to update employee. Please check the form and try again.';
-              
+
               if (error.response?.data) {
                 const responseData = error.response.data;
-                
+
                 if (responseData.errors && Array.isArray(responseData.errors) && responseData.errors.length > 0) {
                   const fieldErrors = responseData.errors.map((err, index) => {
                     if (typeof err === 'object' && err.field && err.message) {
@@ -610,7 +610,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
                     }
                     return `Error ${index + 1}: ${JSON.stringify(err)}`;
                   });
-                  
+
                   errorMessage = `Please fix the following issues:\n\n${fieldErrors.join('\n')}`;
                 } else if (responseData.message) {
                   errorMessage = responseData.message;
@@ -618,7 +618,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
                   errorMessage = responseData.error;
                 }
               }
-              
+
               setSubmitError(errorMessage);
             }
           }
@@ -626,21 +626,21 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
       );
     } else {
       // Create mode
-      const mutationData = selectedPhoto 
+      const mutationData = selectedPhoto
         ? { data: apiData, photo: selectedPhoto }
         : { data: apiData };
-      
+
       createMutation.mutate(mutationData, {
         onSuccess: async (employeeData) => {
           const created = employeeData;
           setSubmitSuccess(`Employee created successfully! Employee ID: ${created?.employeeId || 'Generated'}`);
-          
+
           // Note: User account is created atomically by the backend's createEmployee service.
           // No separate authService.createUserAccount() call needed here.
-          
+
           localStorage.removeItem('employeeFormDraft');
           setHasUnsavedChanges(false);
-          
+
           // Navigate to new employee profile
           if (created?.id) {
             navigate(`/employees/${created.id}`, { state: { snackbar: 'Employee created successfully.' } });
@@ -650,17 +650,17 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
         },
         onError: (error) => {
           console.error('Error creating employee:', error);
-          
+
           if (error.response?.status === 401) {
             setSubmitError('Session expired. Please login again.');
             authService.logout();
             navigate('/login');
           } else {
             let errorMessage = 'Failed to create employee. Please check the form and try again.';
-            
+
             if (error.response?.data) {
               const responseData = error.response.data;
-              
+
               if (responseData.errors && Array.isArray(responseData.errors) && responseData.errors.length > 0) {
                 const fieldErrors = responseData.errors.map((err, index) => {
                   if (typeof err === 'object' && err.field && err.message) {
@@ -672,7 +672,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
                   }
                   return `Error ${index + 1}: ${JSON.stringify(err)}`;
                 });
-                
+
                 errorMessage = `Please fix the following issues:\n\n${fieldErrors.join('\n')}`;
               } else if (responseData.message) {
                 errorMessage = responseData.message;
@@ -680,7 +680,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
                 errorMessage = responseData.error;
               }
             }
-            
+
             setSubmitError(errorMessage);
           }
         }
@@ -702,7 +702,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
   };
-  
+
   const handleConfirmNavigation = () => {
     setShowUnsavedDialog(false);
     setHasUnsavedChanges(false);
@@ -725,7 +725,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     setSelectedPhoto(null);
     setPhotoPreview(null);
   };
-  
+
 
 
   return {
@@ -749,11 +749,11 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     currentUser,
     isAuthenticated,
     isEditMode,
-    
+
     // Computed
     isCurrentTabValid,
     getTabValidationStatus,
-    
+
     // Actions
     setActiveTab,
     handleFieldChange,
@@ -765,7 +765,7 @@ export const useEmployeeForm = ({ mode = 'admin' } = {}) => {
     handlePhotoRemove,
     handleCancelNavigation,
     handleConfirmNavigation,
-    
+
     // Draft restore dialog
     draftRestoreDialog,
     handleRestoreDraft: useCallback(() => {

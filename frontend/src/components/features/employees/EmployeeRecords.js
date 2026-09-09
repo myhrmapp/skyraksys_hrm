@@ -51,7 +51,7 @@ const getStatusIcon = (status) => {
   switch (status?.toLowerCase()) {
     case 'approved': return <ApprovedIcon color="success" />;
     case 'rejected': return <RejectedIcon color="error" />;
-    case 'pending': 
+    case 'pending':
     case 'submitted': return <PendingIcon color="warning" />;
     default: return <PendingIcon />;
   }
@@ -61,7 +61,7 @@ const getStatusColor = (status) => {
   switch (status?.toLowerCase()) {
     case 'approved': return 'success';
     case 'rejected': return 'error';
-    case 'pending': 
+    case 'pending':
     case 'submitted': return 'warning';
     default: return 'default';
   }
@@ -98,7 +98,7 @@ const LeaveHistoryTab = ({ loading, leaveHistory, showEmployeeName, employees = 
         </Select>
       </FormControl>
     </Box>
-    
+
     <Card variant="outlined">
       <TableContainer>
         <Table>
@@ -158,8 +158,8 @@ const LeaveHistoryTab = ({ loading, leaveHistory, showEmployeeName, employees = 
                   <TableCell>
                     <Chip
                       label={
-                        (leave.type && typeof leave.type === 'object' ? leave.type.name : leave.type) || 
-                        (leave.leaveType && typeof leave.leaveType === 'object' ? leave.leaveType.name : leave.leaveType) || 
+                        (leave.type && typeof leave.type === 'object' ? leave.type.name : leave.type) ||
+                        (leave.leaveType && typeof leave.leaveType === 'object' ? leave.leaveType.name : leave.leaveType) ||
                         'Unknown'
                       }
                       color="primary"
@@ -174,7 +174,7 @@ const LeaveHistoryTab = ({ loading, leaveHistory, showEmployeeName, employees = 
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" fontWeight="bold">
-                      {leave.days || leave.duration || leave.numberOfDays || 
+                      {leave.days || leave.duration || leave.numberOfDays ||
                        (Math.ceil((new Date(leave.endDate) - new Date(leave.startDate)) / (1000 * 60 * 60 * 24)) + 1) || 0} days
                     </Typography>
                   </TableCell>
@@ -198,7 +198,7 @@ const LeaveHistoryTab = ({ loading, leaveHistory, showEmployeeName, employees = 
                     </Typography>
                   </TableCell>
                 </TableRow>
-              )})
+              );})
             )}
           </TableBody>
         </Table>
@@ -248,7 +248,7 @@ const TimesheetHistoryTab = ({ loading, timesheetHistory, showEmployeeName, empl
         </Select>
       </FormControl>
     </Box>
-    
+
     <Card variant="outlined">
       <TableContainer>
         <Table>
@@ -339,7 +339,7 @@ const TimesheetHistoryTab = ({ loading, timesheetHistory, showEmployeeName, empl
                     {timesheet.submittedDate}
                   </TableCell>
                 </TableRow>
-              )})
+              );})
             )}
           </TableBody>
         </Table>
@@ -368,7 +368,7 @@ const AttendanceHistoryTab = ({ loading, attendanceHistory }) => {
     <Typography variant="h6" gutterBottom>
       Monthly Attendance Summary
     </Typography>
-    
+
     <Grid container spacing={3}>
       {loading ? (
         Array.from({ length: 4 }).map((_, index) => (
@@ -402,7 +402,7 @@ const AttendanceHistoryTab = ({ loading, attendanceHistory }) => {
                     </Typography>
                   </Box>
                 </Box>
-                
+
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Typography variant="h4" color="primary.main" fontWeight="bold">
                     {attendance.percentage.toFixed(1)}%
@@ -457,7 +457,7 @@ const EmployeeRecords = () => {
   const [employees, setEmployees] = useState([ALL_EMPLOYEES_OPTION]);
   const [searchLoading, setSearchLoading] = useState(false);
   const searchTimerRef = React.useRef(null);
-  
+
   // Check if user has permission to view other employees' records
   const canViewOthers = ['admin', 'hr', 'manager'].includes(user?.role);
 
@@ -490,11 +490,11 @@ const EmployeeRecords = () => {
     return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
   }, [canViewOthers, handleSearchInput]);
 
-  const { 
-    loading, 
-    leaveHistory, 
-    timesheetHistory, 
-    attendanceHistory 
+  const {
+    loading,
+    leaveHistory,
+    timesheetHistory,
+    attendanceHistory
   } = useEmployeeRecords(selectedEmployee?.id);
 
   const calculateAverageAttendance = () => {
@@ -554,7 +554,7 @@ const EmployeeRecords = () => {
                             {searchLoading ? <Skeleton variant="circular" width={20} height={20} /> : null}
                             {params.InputProps.endAdornment}
                           </React.Fragment>
-                        ),
+                        )
                       }}
                     />
                   )}
@@ -582,27 +582,27 @@ const EmployeeRecords = () => {
           {/* Summary Cards */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid item xs={12} md={4}>
-              <SummaryCard 
-                icon={LeaveIcon} 
-                count={loading ? '-' : leaveHistory.length} 
-                label="Leave Requests" 
-                color="primary" 
+              <SummaryCard
+                icon={LeaveIcon}
+                count={loading ? '-' : leaveHistory.length}
+                label="Leave Requests"
+                color="primary"
               />
             </Grid>
             <Grid item xs={12} md={4}>
-              <SummaryCard 
-                icon={TimesheetIcon} 
-                count={loading ? '-' : timesheetHistory.length} 
-                label="Timesheets Submitted" 
-                color="success" 
+              <SummaryCard
+                icon={TimesheetIcon}
+                count={loading ? '-' : timesheetHistory.length}
+                label="Timesheets Submitted"
+                color="success"
               />
             </Grid>
             <Grid item xs={12} md={4}>
-              <SummaryCard 
-                icon={StatsIcon} 
-                count={loading ? '-' : `${calculateAverageAttendance()}%`} 
-                label="Average Attendance" 
-                color="info" 
+              <SummaryCard
+                icon={StatsIcon}
+                count={loading ? '-' : `${calculateAverageAttendance()}%`}
+                label="Average Attendance"
+                color="info"
               />
             </Grid>
           </Grid>
@@ -617,23 +617,23 @@ const EmployeeRecords = () => {
                 textColor="primary"
                 indicatorColor="primary"
               >
-                <Tab 
-                  icon={<LeaveIcon />} 
-                  label="Leave History" 
+                <Tab
+                  icon={<LeaveIcon />}
+                  label="Leave History"
                   iconPosition="start"
                   sx={{ minHeight: 64 }}
                   data-testid="records-tab-leave"
                 />
-                <Tab 
-                  icon={<TimesheetIcon />} 
-                  label="Timesheet History" 
+                <Tab
+                  icon={<TimesheetIcon />}
+                  label="Timesheet History"
                   iconPosition="start"
                   sx={{ minHeight: 64 }}
                   data-testid="records-tab-timesheet"
                 />
-                <Tab 
-                  icon={<CalendarIcon />} 
-                  label="Attendance Summary" 
+                <Tab
+                  icon={<CalendarIcon />}
+                  label="Attendance Summary"
                   iconPosition="start"
                   sx={{ minHeight: 64 }}
                   data-testid="records-tab-attendance"
@@ -643,17 +643,17 @@ const EmployeeRecords = () => {
 
             <Box sx={{ p: 3 }}>
               {activeTab === 0 && (
-                <LeaveHistoryTab 
-                  loading={loading} 
-                  leaveHistory={leaveHistory} 
+                <LeaveHistoryTab
+                  loading={loading}
+                  leaveHistory={leaveHistory}
                   showEmployeeName={selectedEmployee?.id === 'ALL'}
                   employees={employees}
                 />
               )}
               {activeTab === 1 && (
-                <TimesheetHistoryTab 
-                  loading={loading} 
-                  timesheetHistory={timesheetHistory} 
+                <TimesheetHistoryTab
+                  loading={loading}
+                  timesheetHistory={timesheetHistory}
                   showEmployeeName={selectedEmployee?.id === 'ALL'}
                   employees={employees}
                 />

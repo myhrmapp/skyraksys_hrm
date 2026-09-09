@@ -25,7 +25,7 @@ const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
-  useParams: () => ({}),
+  useParams: () => ({})
 }));
 
 // Default hook return value factory
@@ -62,7 +62,7 @@ const createHookDefaults = (overrides = {}) => ({
   handleSaveAsDraft: jest.fn(),
   handleCancelNavigation: jest.fn(),
   handleConfirmNavigation: jest.fn(),
-  ...overrides,
+  ...overrides
 });
 
 let mockHookReturn = createHookDefaults();
@@ -73,7 +73,7 @@ jest.mock('../hooks/useEmployeeForm', () => {
     return jest.requireActual('../hooks/useEmployeeForm');
   }
   return {
-    useEmployeeForm: () => mockHookReturn,
+    useEmployeeForm: () => mockHookReturn
   };
 });
 

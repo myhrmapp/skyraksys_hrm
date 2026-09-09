@@ -22,6 +22,11 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 import { renderWithProviders, createMockUser } from '../../../../test-utils/testUtils';
 import ModernWeeklyTimesheet from '../ModernWeeklyTimesheet';
 
+// Import mocked modules AFTER jest.mock declarations
+import { timesheetService } from '../../../../services/timesheet.service';
+import ProjectDataService from '../../../../services/ProjectService';
+import TaskDataService from '../../../../services/TaskService';
+
 dayjs.extend(isoWeek);
 dayjs.extend(weekday);
 dayjs.extend(weekOfYear);
@@ -53,13 +58,8 @@ jest.mock('../../../../utils/logger', () => ({
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),
-  debug: jest.fn(),
+  debug: jest.fn()
 }));
-
-// Import mocked modules AFTER jest.mock declarations
-import { timesheetService } from '../../../../services/timesheet.service';
-import ProjectDataService from '../../../../services/ProjectService';
-import TaskDataService from '../../../../services/TaskService';
 
 /* ------------------------------------------------------------------ */
 /*  Test data                                                          */
@@ -67,13 +67,13 @@ import TaskDataService from '../../../../services/TaskService';
 
 const mockProjects = [
   { id: '00000000-0000-4000-a000-000000000001', name: 'Project Alpha', code: 'PA', status: 'Active' },
-  { id: '00000000-0000-4000-a000-000000000002', name: 'Project Beta',  code: 'PB', status: 'Active' },
+  { id: '00000000-0000-4000-a000-000000000002', name: 'Project Beta',  code: 'PB', status: 'Active' }
 ];
 
 const mockTasks = [
   { id: '00000000-0000-4000-a000-000000000010', name: 'Development', projectId: '00000000-0000-4000-a000-000000000001' },
   { id: '00000000-0000-4000-a000-000000000011', name: 'Testing',     projectId: '00000000-0000-4000-a000-000000000001' },
-  { id: '00000000-0000-4000-a000-000000000012', name: 'Design',      projectId: '00000000-0000-4000-a000-000000000002' },
+  { id: '00000000-0000-4000-a000-000000000012', name: 'Design',      projectId: '00000000-0000-4000-a000-000000000002' }
 ];
 
 // Must match employee.id from createMockUser() which is 100
@@ -100,7 +100,7 @@ const mockWeeklyTimesheet = {
   sundayHours:    0,
   totalHours: 37,
   description: 'Sprint work',
-  status: 'Draft',
+  status: 'Draft'
 };
 
 /* ------------------------------------------------------------------ */
@@ -126,7 +126,7 @@ const setupDefaultMocks = () => {
 const renderTimesheet = (role = 'employee') => {
   const user = createMockUser(role);
   return renderWithProviders(<ModernWeeklyTimesheet />, {
-    authValue: { user },
+    authValue: { user }
   });
 };
 
@@ -329,7 +329,7 @@ describe('Action Buttons', () => {
   test('hides action buttons when timesheet is read-only (submitted)', async () => {
     const submittedTimesheet = {
       ...mockWeeklyTimesheet,
-      status: 'Submitted',
+      status: 'Submitted'
     };
     // H-03: getByWeek mock returns response.data shape
     timesheetService.getByWeek.mockResolvedValue({ data: [submittedTimesheet] });
@@ -451,8 +451,8 @@ describe('Submit for Approval Workflow', () => {
     timesheetService.getByWeek.mockResolvedValue({ data: [newEntryTimesheet] });
     timesheetService.createBatch.mockResolvedValue({ success: true, data: [
       { id: MOCK_TS_UUID, projectId: '00000000-0000-4000-a000-000000000001',
-        taskId: '00000000-0000-4000-a000-000000000010' },
-    ]});
+        taskId: '00000000-0000-4000-a000-000000000010' }
+    ] });
 
     const user = userEvent.setup();
     renderTimesheet();
@@ -490,8 +490,8 @@ describe('Delete Task', () => {
         id: '22222222-2222-4222-a222-222222222222',
         projectId: '00000000-0000-4000-a000-000000000002',
         taskId:    '00000000-0000-4000-a000-000000000012',
-        description: 'Design work',
-      },
+        description: 'Design work'
+      }
     ];
     // H-03: response.data shape
     timesheetService.getByWeek.mockResolvedValue({ data: twoTimesheets });
@@ -534,7 +534,7 @@ describe('Read-Only Status', () => {
   test('approved timesheet shows Approved status and hides actions', async () => {
     const approvedTimesheet = {
       ...mockWeeklyTimesheet,
-      status: 'Approved',
+      status: 'Approved'
     };
     // H-03: response.data shape
     timesheetService.getByWeek.mockResolvedValue({ data: [approvedTimesheet] });
@@ -573,7 +573,7 @@ describe('Rejected Status (M-01)', () => {
     const rejectedTimesheet = {
       ...mockWeeklyTimesheet,
       status: 'Rejected',
-      approverComments: 'Please add project codes for Tuesday',
+      approverComments: 'Please add project codes for Tuesday'
     };
     timesheetService.getByWeek.mockResolvedValue({ data: [rejectedTimesheet] });
 

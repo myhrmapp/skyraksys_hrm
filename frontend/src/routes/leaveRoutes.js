@@ -16,7 +16,7 @@ const leaveRoutes = [
   <Route key="add-leave-request" path="add-leave-request" element={withBoundary(<AddLeaveRequest />, 'Loading Leave Request Form...')} />,
   <Route key="admin-leave-balances" path="admin/leave-balances" element={withBoundary(<LeaveBalance />, 'Loading Leave Balance Admin...')} />,
   <Route key="admin-leave-accrual" path="admin/leave-accrual" element={withBoundary(<LeaveAccrualManagement />, 'Loading Leave Accrual...')} />,
-  <Route key="admin-leave-types" path="admin/leave-types" element={withBoundary(<LeaveTypeManagement />, 'Loading Leave Types...')} />,
+  <Route key="admin-leave-types" path="admin/leave-types" element={withBoundary(<LeaveTypeManagement />, 'Loading Leave Types...')} />
 ];
 
 export default leaveRoutes;

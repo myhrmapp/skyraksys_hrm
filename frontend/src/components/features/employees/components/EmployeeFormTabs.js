@@ -7,20 +7,20 @@ import {
   AccountBalance as BankIcon,
   CheckCircle as OkIcon,
   Error as ErrorIcon,
-  Warning as WarnIcon,
+  Warning as WarnIcon
 } from '@mui/icons-material';
 
 const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus, hideSensitiveTabs = false }) => {
   const theme = useTheme();
 
   return (
-    <Tabs 
-      value={activeTab} 
+    <Tabs
+      value={activeTab}
       onChange={handleTabChange}
       variant="scrollable"
       scrollButtons="auto"
       allowScrollButtonsMobile
-      sx={{ 
+      sx={{
         bgcolor: 'white',
         borderBottom: '2px solid #e2e8f0',
         '& .MuiTab-root': {
@@ -34,7 +34,7 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus, 
           transition: 'all 0.2s ease',
           '&:hover': {
             bgcolor: 'rgba(99, 102, 241, 0.04)',
-            color: theme.palette.primary.main,
+            color: theme.palette.primary.main
           },
           '&.Mui-selected': {
             color: theme.palette.primary.main,
@@ -61,8 +61,8 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus, 
         }
       }}
     >
-      <Tab 
-        icon={<PersonIcon />} 
+      <Tab
+        icon={<PersonIcon />}
         label={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <span>Personal Info</span>
@@ -74,7 +74,7 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus, 
             )}
             {!getTabValidationStatus[0].hasErrors && !getTabValidationStatus[0].isComplete && (
               <WarnIcon sx={{ fontSize: 16, color: '#d97706'
-                }} 
+                }}
               />
             )}
           </Box>
@@ -83,8 +83,8 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus, 
         data-testid="tab-personal"
         aria-controls="employee-tabpanel-0"
       />
-      <Tab 
-        icon={<WorkIcon />} 
+      <Tab
+        icon={<WorkIcon />}
         label={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <span>Employment & Compensation</span>
@@ -103,8 +103,8 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus, 
         data-testid="tab-employment"
         aria-controls="employee-tabpanel-1"
       />
-      <Tab 
-        icon={<ContactIcon />} 
+      <Tab
+        icon={<ContactIcon />}
         label={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <span>Contact & Emergency</span>
@@ -121,8 +121,8 @@ const EmployeeFormTabs = ({ activeTab, handleTabChange, getTabValidationStatus, 
         aria-controls="employee-tabpanel-2"
       />
       {!hideSensitiveTabs && (
-      <Tab 
-        icon={<BankIcon />} 
+      <Tab
+        icon={<BankIcon />}
         label={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <span>Statutory, Banking & Access</span>

@@ -48,13 +48,13 @@ const LeaveAccrualManagement = () => {
   // Queries
   const { data: statusData, isLoading: statusLoading, refetch: refetchStatus } = useQuery({
     queryKey: ['leave-accrual', 'status', year],
-    queryFn: () => leaveAccrualService.getStatus({ year }),
+    queryFn: () => leaveAccrualService.getStatus({ year })
   });
 
   const { data: previewData, isLoading: previewLoading, refetch: refetchPreview } = useQuery({
     queryKey: ['leave-accrual', 'preview', year, month],
     queryFn: () => leaveAccrualService.preview({ year, month }),
-    enabled: activeTab === 1,
+    enabled: activeTab === 1
   });
 
   // Mutations
@@ -66,12 +66,12 @@ const LeaveAccrualManagement = () => {
       setResultDialog({
         open: true,
         title: 'Accrual Results',
-        data: result.data || result,
+        data: result.data || result
       });
     },
     onError: (error) => {
       enqueueSnackbar(error?.response?.data?.message || 'Failed to run accrual', { variant: 'error' });
-    },
+    }
   });
 
   const carryForwardMutation = useMutation({
@@ -82,12 +82,12 @@ const LeaveAccrualManagement = () => {
       setResultDialog({
         open: true,
         title: 'Carry-Forward Results',
-        data: result.data || result,
+        data: result.data || result
       });
     },
     onError: (error) => {
       enqueueSnackbar(error?.response?.data?.message || 'Failed to run carry-forward', { variant: 'error' });
-    },
+    }
   });
 
   // Data
@@ -161,7 +161,7 @@ const LeaveAccrualManagement = () => {
                   onClick={() => setConfirmDialog({
                     open: true, action: 'run',
                     title: 'Run Monthly Accrual',
-                    message: `Run monthly leave accrual for ${MONTHS[month - 1]} ${year}? This will add accrued leave days to all active employees.`,
+                    message: `Run monthly leave accrual for ${MONTHS[month - 1]} ${year}? This will add accrued leave days to all active employees.`
                   })}
                   sx={{ bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }}
                   disabled={runAccrualMutation.isPending}
@@ -174,7 +174,7 @@ const LeaveAccrualManagement = () => {
                   onClick={() => setConfirmDialog({
                     open: true, action: 'carry-forward',
                     title: 'Year-End Carry Forward',
-                    message: `Carry forward unused balances from ${year} to ${year + 1}? This should typically be run once at year-end.`,
+                    message: `Carry forward unused balances from ${year} to ${year + 1}? This should typically be run once at year-end.`
                   })}
                   sx={{ bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }}
                   disabled={carryForwardMutation.isPending}

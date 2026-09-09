@@ -19,6 +19,15 @@ import userEvent from '@testing-library/user-event';
 import { renderWithProviders, createMockUser } from '../../../../test-utils/testUtils';
 import ModernLeaveManagement from '../LeaveManagement';
 
+// Import the mocked hooks
+import {
+  useLeaveRequests,
+  useLeaveBalances,
+  useLeaveTypes,
+  useApproveLeaveRequest,
+  useRejectLeaveRequest
+} from '../../../../hooks/queries';
+
 /* ------------------------------------------------------------------ */
 /*  Mocks                                                              */
 /* ------------------------------------------------------------------ */
@@ -27,7 +36,7 @@ import ModernLeaveManagement from '../LeaveManagement';
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
+  useNavigate: () => mockNavigate
 }));
 
 // Mock the React Query hooks (component imports these, not raw services)
@@ -40,18 +49,9 @@ jest.mock('../../../../hooks/queries', () => {
     useLeaveBalances: jest.fn(),
     useLeaveTypes: jest.fn(),
     useApproveLeaveRequest: jest.fn(),
-    useRejectLeaveRequest: jest.fn(),
+    useRejectLeaveRequest: jest.fn()
   };
 });
-
-// Import the mocked hooks
-import {
-  useLeaveRequests,
-  useLeaveBalances,
-  useLeaveTypes,
-  useApproveLeaveRequest,
-  useRejectLeaveRequest,
-} from '../../../../hooks/queries';
 
 /* ------------------------------------------------------------------ */
 /*  Test data                                                          */
@@ -68,7 +68,7 @@ const mockLeaveRequests = [
     reason: 'Family vacation',
     employee: { firstName: 'John', lastName: 'Doe', employeeId: 'EMP001' },
     employeeName: 'John Doe',
-    employeeId: 'EMP001',
+    employeeId: 'EMP001'
   },
   {
     id: 2,
@@ -80,7 +80,7 @@ const mockLeaveRequests = [
     reason: 'Medical appointment',
     employee: { firstName: 'Jane', lastName: 'Smith', employeeId: 'EMP002' },
     employeeName: 'Jane Smith',
-    employeeId: 'EMP002',
+    employeeId: 'EMP002'
   },
   {
     id: 3,
@@ -92,14 +92,14 @@ const mockLeaveRequests = [
     reason: 'Personal matters',
     employee: { firstName: 'Alice', lastName: 'Johnson', employeeId: 'EMP003' },
     employeeName: 'Alice Johnson',
-    employeeId: 'EMP003',
-  },
+    employeeId: 'EMP003'
+  }
 ];
 
 const mockLeaveTypes = [
   { id: 1, name: 'Annual' },
   { id: 2, name: 'Sick' },
-  { id: 3, name: 'Personal' },
+  { id: 3, name: 'Personal' }
 ];
 
 const mockLeaveBalances = [
@@ -111,8 +111,8 @@ const mockLeaveBalances = [
     totalTaken: 5,
     totalPending: 3,
     leaveType: { name: 'Annual' },
-    employee: { firstName: 'John', lastName: 'Doe', employeeId: 'EMP001', department: 'Engineering' },
-  },
+    employee: { firstName: 'John', lastName: 'Doe', employeeId: 'EMP001', department: 'Engineering' }
+  }
 ];
 
 /* ------------------------------------------------------------------ */
@@ -125,31 +125,31 @@ const setupDefaultMocks = () => {
   useLeaveRequests.mockReturnValue({
     data: { data: mockLeaveRequests },
     isLoading: false,
-    refetch: jest.fn(),
+    refetch: jest.fn()
   });
 
   useLeaveBalances.mockReturnValue({
     data: mockLeaveBalances,
-    isLoading: false,
+    isLoading: false
   });
 
   useLeaveTypes.mockReturnValue({
-    data: { data: mockLeaveTypes },
+    data: { data: mockLeaveTypes }
   });
 
   useApproveLeaveRequest.mockReturnValue({
-    mutate: mockMutate,
+    mutate: mockMutate
   });
 
   useRejectLeaveRequest.mockReturnValue({
-    mutate: mockMutate,
+    mutate: mockMutate
   });
 };
 
 const renderLeave = (role = 'admin') => {
   const user = createMockUser(role);
   return renderWithProviders(<ModernLeaveManagement />, {
-    authValue: { user },
+    authValue: { user }
   });
 };
 
@@ -345,7 +345,7 @@ describe('Leave Balances Tab', () => {
   test('shows info alert when no balances available', async () => {
     useLeaveBalances.mockReturnValue({
       data: [],
-      isLoading: false,
+      isLoading: false
     });
 
     const user = userEvent.setup();
@@ -381,11 +381,11 @@ describe('Approve / Reject Actions', () => {
       data: {
         data: [
           { ...mockLeaveRequests[1] }, // Approved
-          { ...mockLeaveRequests[2] }, // Rejected
-        ],
+          { ...mockLeaveRequests[2] } // Rejected
+        ]
       },
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: jest.fn()
     });
 
     renderLeave();
@@ -403,7 +403,7 @@ describe('Error Handling', () => {
     useLeaveRequests.mockReturnValue({
       data: { data: [] },
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: jest.fn()
     });
 
     renderLeave();
@@ -450,7 +450,7 @@ describe('Approve / Reject Click Actions', () => {
         { id: 1, comments: '' },
         expect.objectContaining({
           onSuccess: expect.any(Function),
-          onError: expect.any(Function),
+          onError: expect.any(Function)
         })
       );
     });
@@ -472,7 +472,7 @@ describe('Approve / Reject Click Actions', () => {
         { id: 1, comments: '' },
         expect.objectContaining({
           onSuccess: expect.any(Function),
-          onError: expect.any(Function),
+          onError: expect.any(Function)
         })
       );
     });
@@ -518,12 +518,12 @@ describe('Cancellation and Half-Day Chips', () => {
         data: [
           {
             ...mockLeaveRequests[0],
-            isCancellation: true,
-          },
-        ],
+            isCancellation: true
+          }
+        ]
       },
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: jest.fn()
     });
 
     renderLeave();
@@ -538,12 +538,12 @@ describe('Cancellation and Half-Day Chips', () => {
         data: [
           {
             ...mockLeaveRequests[0],
-            isHalfDay: true,
-          },
-        ],
+            isHalfDay: true
+          }
+        ]
       },
       isLoading: false,
-      refetch: jest.fn(),
+      refetch: jest.fn()
     });
 
     renderLeave();
@@ -559,11 +559,11 @@ describe('Loading State', () => {
     useLeaveRequests.mockReturnValue({
       data: null,
       isLoading: true,
-      refetch: jest.fn(),
+      refetch: jest.fn()
     });
     useLeaveBalances.mockReturnValue({
       data: null,
-      isLoading: true,
+      isLoading: true
     });
 
     renderLeave();

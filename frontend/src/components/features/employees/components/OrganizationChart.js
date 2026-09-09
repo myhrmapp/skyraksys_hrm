@@ -58,7 +58,7 @@ const TreeNode = ({ node, isRoot }) => {
       {node.children && node.children.length > 0 && (
         <Box sx={{ position: 'relative', pt: '20px', mt: 0, display: 'flex', justifyContent: 'center' }}>
           <Box sx={{ position: 'absolute', top: 0, left: '50%', width: '2px', height: '20px', bgcolor: '#ccc' }} />
-          
+
           {/* Horizontal Line for siblings */}
           {node.children.length > 1 && (
             <Box sx={{ position: 'absolute', top: '20px', left: 0, right: 0, height: '2px', bgcolor: '#ccc' }} />
@@ -97,7 +97,7 @@ export default function OrganizationChart({ employees }) {
       }
     });
 
-    // If there is only one root (e.g. CEO), return it. 
+    // If there is only one root (e.g. CEO), return it.
     // If multiple roots (e.g. department heads), we create a fake company root.
     if (roots.length === 1) {
       return roots[0];

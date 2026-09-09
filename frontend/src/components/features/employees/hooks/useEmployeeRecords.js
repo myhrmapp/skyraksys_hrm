@@ -11,18 +11,18 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
   // Determine query parameters based on targetEmployeeId
   const queryParams = useMemo(() => {
     const myId = user?.employeeId || user?.employee?.id;
-    
+
     // For admins/HR/managers, if "ALL" is selected, we want to fetch all records.
     // The services interpret an empty object `{}` as "no filter".
     if (canViewAll && targetEmployeeId === 'ALL') {
       return {};
     }
-    
+
     // If a specific employee is targeted (from search), use their ID.
     if (targetEmployeeId) {
       return { employeeId: targetEmployeeId };
     }
-    
+
     // Default: any logged-in user fetching their own records.
     if (myId) {
       return { employeeId: myId };
@@ -39,19 +39,19 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
         queryKey: ['timesheets', 'history', queryParams],
         queryFn: () => timesheetService.getHistory(queryParams),
         enabled: !!queryParams,
-        staleTime: 2 * 60 * 1000, // 2 minutes
+        staleTime: 2 * 60 * 1000 // 2 minutes
       },
       {
         queryKey: ['leaves', 'history', queryParams],
         queryFn: () => leaveService.getAll({ ...queryParams, limit: 500 }),
         enabled: !!queryParams,
-        staleTime: 2 * 60 * 1000, // 2 minutes
+        staleTime: 2 * 60 * 1000 // 2 minutes
       }
     ]
   });
 
   const [timesheetQuery, leaveQuery] = queries;
-  
+
   // Derive loading and error states
   const loading = timesheetQuery.isLoading || leaveQuery.isLoading;
   const error = timesheetQuery.error || leaveQuery.error;
@@ -179,7 +179,7 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
   const calculateAttendance = (timesheets) => {
     // Group by Month (YYYY-MM)
     const monthlyGroups = {};
-    
+
     // Use weekStartDate (the model field) instead of workDate which doesn't exist.
     // Each timesheet row covers Mon–Sun; count that week's Mon–Fri days as worked.
     timesheets.forEach(ts => {
@@ -216,11 +216,11 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
         monthlyGroups[monthKey].hoursWorked += hours;
       }
     });
-    
+
     return Object.values(monthlyGroups).map(group => {
       const daysWorkedCount = group.daysWorked.size;
       const percentage = group.totalDays > 0 ? (daysWorkedCount / group.totalDays) * 100 : 0;
-      
+
       return {
         month: group.month,
         daysWorked: daysWorkedCount,
@@ -237,7 +237,7 @@ export const useEmployeeRecords = (targetEmployeeId = null) => {
     if (timesheetQuery.data?.data) {
       const timesheets = timesheetQuery.data.data;
       setTimesheetHistory(processTimesheets(timesheets));
-      
+
       // Calculate attendance from timesheets (only for single employee view)
       if (targetEmployeeId !== 'ALL') {
         setAttendanceHistory(calculateAttendance(timesheets));

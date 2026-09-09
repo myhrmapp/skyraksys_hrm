@@ -10,7 +10,7 @@ import HolidayCalendarPage from '../../admin/HolidayCalendarPage';
 import {
   Business as BusinessIcon,
   Work as WorkIcon,
-  CalendarToday as CalendarIcon,
+  CalendarToday as CalendarIcon
 } from '@mui/icons-material';
 
 const OrganizationSettings = () => (
@@ -22,7 +22,7 @@ const OrganizationSettings = () => (
     tabs={[
       { label: 'Departments', icon: <BusinessIcon fontSize="small" />, render: () => <DepartmentManagement embedded /> },
       { label: 'Positions',   icon: <WorkIcon fontSize="small" />,     render: () => <PositionManagement embedded /> },
-      { label: 'Holidays',    icon: <CalendarIcon fontSize="small" />, render: () => <HolidayCalendarPage embedded /> },
+      { label: 'Holidays',    icon: <CalendarIcon fontSize="small" />, render: () => <HolidayCalendarPage embedded /> }
     ]}
   />
   </div>

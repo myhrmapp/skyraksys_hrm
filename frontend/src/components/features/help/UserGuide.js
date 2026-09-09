@@ -25,7 +25,7 @@ import {
   Tab,
   ToggleButtonGroup,
   ToggleButton,
-  Tooltip,
+  Tooltip
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -51,27 +51,27 @@ import {
   AdminPanelSettings,
   SupervisorAccount,
   Person,
-  FilterList,
+  FilterList
 } from '@mui/icons-material';
 
 const ICON_MAP = {
   PersonAdd, EventBusy, AccessTime, Schedule, Payment,
   Assignment, RateReview, Business, ManageAccounts,
-  Security, Explore, Assessment, Hub, People, Help,
+  Security, Explore, Assessment, Hub, People, Help
 };
 
 const ROLE_ICONS = {
   admin: <AdminPanelSettings fontSize="small" />,
   hr: <SupervisorAccount fontSize="small" />,
   manager: <SupervisorAccount fontSize="small" />,
-  employee: <Person fontSize="small" />,
+  employee: <Person fontSize="small" />
 };
 
 const ROLE_COLORS = {
   admin: 'error',
   hr: 'secondary',
   manager: 'warning',
-  employee: 'info',
+  employee: 'info'
 };
 
 /**
@@ -126,7 +126,7 @@ export default function UserGuide() {
             );
           }
           return true;
-        }),
+        })
       }))
       .filter(m => m.guides.length > 0);
   }, [manifest, search, tabIndex, roleFilter]);
@@ -197,7 +197,7 @@ export default function UserGuide() {
               <InputAdornment position="start">
                 <SearchIcon />
               </InputAdornment>
-            ),
+            )
           }}
         />
       </Box>
@@ -385,7 +385,7 @@ function GuideDetail({ guide, onBack }) {
         display: 'flex',
         flexDirection: hasVideo && hasSteps ? { xs: 'column', md: 'row' } : 'column',
         gap: 3,
-        mb: 3,
+        mb: 3
       }}>
         {/* Video player */}
         <Box sx={{ flex: hasSteps ? '1 1 55%' : '1 1 100%', minWidth: 0 }}>

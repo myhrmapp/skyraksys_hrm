@@ -30,8 +30,8 @@ jest.mock('../../../../http-common', () => {
       get: jest.fn(),
       post: jest.fn(),
       put: jest.fn(),
-      delete: jest.fn(),
-    },
+      delete: jest.fn()
+    }
   };
 });
 // Get reference to the mocked axios instance for assertions
@@ -62,8 +62,8 @@ jest.mock('../../../../hooks/useConfirmDialog', () => ({
       lastConfirmArgs = args;
       // Auto-confirm for tests
       if (args.onConfirm) args.onConfirm();
-    },
-  }),
+    }
+  })
 }));
 
 // Mock notistack — enqueueSnackbar is already in SnackbarProvider from renderWithProviders
@@ -80,7 +80,7 @@ const mockTemplates = [
     createdAt: '2026-01-01T00:00:00Z',
     earningsFields: [],
     deductionsFields: [],
-    styling: {},
+    styling: {}
   },
   {
     id: 2,
@@ -92,7 +92,7 @@ const mockTemplates = [
     createdAt: '2026-01-15T00:00:00Z',
     earningsFields: [],
     deductionsFields: [],
-    styling: {},
+    styling: {}
   },
   {
     id: 3,
@@ -104,8 +104,8 @@ const mockTemplates = [
     createdAt: '2026-02-01T00:00:00Z',
     earningsFields: [],
     deductionsFields: [],
-    styling: {},
-  },
+    styling: {}
+  }
 ];
 
 describe('PayslipTemplateManager Component', () => {
@@ -117,16 +117,16 @@ describe('PayslipTemplateManager Component', () => {
     lastConfirmArgs = null;
 
     mockHttp.get.mockResolvedValue({
-      data: { success: true, data: { templates: mockTemplates } },
+      data: { success: true, data: { templates: mockTemplates } }
     });
     mockHttp.post.mockResolvedValue({
-      data: { success: true, message: 'Operation successful' },
+      data: { success: true, message: 'Operation successful' }
     });
     mockHttp.put.mockResolvedValue({
-      data: { success: true, message: 'Template updated successfully' },
+      data: { success: true, message: 'Template updated successfully' }
     });
     mockHttp.delete.mockResolvedValue({
-      data: { success: true, message: 'Template deleted' },
+      data: { success: true, message: 'Template deleted' }
     });
   });
 
@@ -263,7 +263,7 @@ describe('PayslipTemplateManager Component', () => {
   describe('Empty State', () => {
     it('should show empty state when no templates exist', async () => {
       mockHttp.get.mockResolvedValue({
-        data: { success: true, data: { templates: [] } },
+        data: { success: true, data: { templates: [] } }
       });
 
       render(<PayslipTemplateManager />, { authValue: { user: adminUser } });
@@ -292,7 +292,7 @@ describe('PayslipTemplateManager Component', () => {
   describe('Duplicate Template', () => {
     it('should call duplicate API when duplicate action is triggered', async () => {
       mockHttp.post.mockResolvedValue({
-        data: { success: true, message: 'Template duplicated' },
+        data: { success: true, message: 'Template duplicated' }
       });
 
       render(<PayslipTemplateManager />, { authValue: { user: adminUser } });

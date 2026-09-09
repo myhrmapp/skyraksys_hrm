@@ -42,7 +42,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
   const [managers, setManagers] = useState([]);
   const [loadingRefData, setLoadingRefData] = useState(true);
   const [loadingSelf, setLoadingSelf] = useState(mode === 'self');
-  
+
   // Photo upload state
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
@@ -53,7 +53,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
   // If mode is 'self', user can edit if they are the owner (which they are) but usually self-edit is limited.
   // For now, let's assume 'self' mode implies read-only for most fields unless we implement self-service edit.
   // The original MyProfile had an "Edit Profile" button that went to /employees/:id/edit.
-  
+
   const canEditSensitive = isAdmin || isHR;
   const canEdit = isAdmin || isHR || user?.role === 'manager';
   // Self-service: Employees cannot edit their own profile in this system (per EMP-090)
@@ -160,7 +160,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
           pinCode: employee.pinCode,
           emergencyContactName: employee.emergencyContactName,
           emergencyContactPhone: employee.emergencyContactPhone,
-          emergencyContactRelation: employee.emergencyContactRelation,
+          emergencyContactRelation: employee.emergencyContactRelation
         }
       : employee;
 
@@ -182,7 +182,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
               showNotification('Employee data saved, but photo upload failed', 'warning');
             }
           }
-          
+
           setEmployee(updated);
           setOriginalEmployee({ ...updated });
           setEditing(false);
@@ -248,7 +248,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
         const child = path.slice(dotIdx + 1);
         salary[parent] = {
           ...(salary[parent] || {}),
-          [child]: value === '' ? 0 : (parseFloat(value) || 0),
+          [child]: value === '' ? 0 : (parseFloat(value) || 0)
         };
       } else {
         // e.g. 'basicSalary', 'currency'
@@ -297,12 +297,12 @@ export const useEmployeeProfile = (mode = 'admin') => {
     managers,
     selectedPhoto,
     photoPreview,
-    
+
     // Permissions
     canEditSensitive,
     canEdit,
     canSelfEdit,
-    
+
     // Helpers
     formatDate,
     formatCurrency,
@@ -312,7 +312,7 @@ export const useEmployeeProfile = (mode = 'admin') => {
     setShowSensitive,
     setShowStatutory,
     setShowPayslipViewer,
-    
+
     // Actions
     handleSave,
     handleCancel,

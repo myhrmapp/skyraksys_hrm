@@ -36,25 +36,25 @@ const BroadcastPopup = () => {
   if (!currentBroadcast) return null;
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose} 
-      maxWidth="sm" 
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
           borderRadius: 4,
           overflow: 'hidden',
           boxShadow: '0 24px 60px rgba(0,0,0,0.12)',
-          bgcolor: 'background.paper',
+          bgcolor: 'background.paper'
         }
       }}
     >
       {currentBroadcast.imageUrl && (
-        <Box 
-          sx={{ 
-            width: '100%', 
-            height: 200, 
+        <Box
+          sx={{
+            width: '100%',
+            height: 200,
             backgroundImage: `url(${currentBroadcast.imageUrl})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -65,18 +65,18 @@ const BroadcastPopup = () => {
           <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)' }} />
         </Box>
       )}
-      
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: 1.5, 
+
+      <DialogTitle sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
         color: 'primary.main',
         pt: currentBroadcast.imageUrl ? 3 : 4,
         px: 4
       }}>
-        <Box sx={{ 
-          p: 1, 
-          borderRadius: 2, 
+        <Box sx={{
+          p: 1,
+          borderRadius: 2,
           bgcolor: 'primary.50',
           display: 'flex',
           alignItems: 'center',
@@ -88,12 +88,12 @@ const BroadcastPopup = () => {
           {currentBroadcast.title || 'New Announcement'}
         </Typography>
       </DialogTitle>
-      
+
       <DialogContent sx={{ px: 4, pb: 2 }}>
-        <Typography 
+        <Typography
           variant="body1"
-          sx={{ 
-            whiteSpace: 'pre-line', 
+          sx={{
+            whiteSpace: 'pre-line',
             color: 'text.secondary',
             lineHeight: 1.7,
             fontSize: '1.05rem'
@@ -101,30 +101,30 @@ const BroadcastPopup = () => {
         >
           {currentBroadcast.message}
         </Typography>
-        <Box sx={{ 
-          mt: 4, 
-          pt: 2, 
-          borderTop: '1px solid', 
-          borderColor: 'divider', 
+        <Box sx={{
+          mt: 4,
+          pt: 2,
+          borderTop: '1px solid',
+          borderColor: 'divider',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          typography: 'caption', 
-          color: 'text.disabled' 
+          typography: 'caption',
+          color: 'text.disabled'
         }}>
           <span>Posted on {new Date(currentBroadcast.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
           <span>SKYRAKSYS Internal</span>
         </Box>
       </DialogContent>
-      
+
       <DialogActions sx={{ p: 3, px: 4, pt: 1 }}>
-        <Button 
-          onClick={handleClose} 
-          variant="contained" 
+        <Button
+          onClick={handleClose}
+          variant="contained"
           color="primary"
           size="large"
           fullWidth
-          sx={{ 
+          sx={{
             borderRadius: 2,
             py: 1.2,
             fontWeight: 600,
@@ -132,7 +132,7 @@ const BroadcastPopup = () => {
             fontSize: '1rem',
             boxShadow: '0 8px 16px rgba(99, 102, 241, 0.2)',
             '&:hover': {
-              boxShadow: '0 12px 20px rgba(99, 102, 241, 0.3)',
+              boxShadow: '0 12px 20px rgba(99, 102, 241, 0.3)'
             }
           }}
         >

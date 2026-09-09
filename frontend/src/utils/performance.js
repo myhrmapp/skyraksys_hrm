@@ -10,11 +10,13 @@ export const withMemoization = (Component, compareProps) => {
 
 // Custom hook for optimized callbacks
 export const useOptimizedCallback = (callback, dependencies) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useCallback(callback, dependencies);
 };
 
 // Custom hook for expensive calculations
 export const useOptimizedMemo = (computation, dependencies) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(computation, dependencies);
 };
 
@@ -32,22 +34,22 @@ export const usePerformanceMonitor = (componentName) => {
 };
 
 // List virtualization helper
-export const VirtualizedList = memo(({ 
-  items, 
-  renderItem, 
+export const VirtualizedList = memo(({
+  items,
+  renderItem,
   itemHeight = 50,
-  containerHeight = 400 
+  containerHeight = 400
 }) => {
   const [scrollTop, setScrollTop] = React.useState(0);
-  
+
   const visibleStart = Math.floor(scrollTop / itemHeight);
   const visibleEnd = Math.min(
     visibleStart + Math.ceil(containerHeight / itemHeight),
     items.length - 1
   );
-  
+
   const visibleItems = items.slice(visibleStart, visibleEnd + 1);
-  
+
   return (
     <div
       style={{ height: containerHeight, overflow: 'auto' }}

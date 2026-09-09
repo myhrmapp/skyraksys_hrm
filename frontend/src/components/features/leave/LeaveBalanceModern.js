@@ -161,7 +161,7 @@ const LeaveBalanceModern = () => {
 
       const { created = 0, updated = 0 } = response.data || {};
       let message = 'Leave balances initialized successfully!';
-      
+
       if (created > 0 && updated > 0) {
         message = `Created ${created} new balances and updated ${updated} existing balances`;
       } else if (created > 0) {
@@ -965,10 +965,10 @@ const LeaveBalanceModern = () => {
                     setCreateData({ ...createData, year: val });
                   }}
                   id="createLeaveYear"
-                  inputProps={{ 
+                  inputProps={{
                     'data-testid': 'create-leave-year-input',
-                    min: 2020, 
-                    max: 2030 
+                    min: 2020,
+                    max: 2030
                   }}
                 />
               </Grid>
@@ -1035,8 +1035,8 @@ const LeaveBalanceModern = () => {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog 
-        open={deleteConfirmOpen} 
+      <Dialog
+        open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
         maxWidth="xs"
         fullWidth
@@ -1054,7 +1054,7 @@ const LeaveBalanceModern = () => {
           </Typography>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button 
+          <Button
             onClick={() => {
               setDeleteConfirmOpen(false);
               setBalanceToDelete(null);
@@ -1063,7 +1063,7 @@ const LeaveBalanceModern = () => {
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={confirmDelete}
             variant="outlined"
             color="error"

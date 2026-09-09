@@ -50,7 +50,7 @@ import {
   PendingActions as PendingIcon,
   AccessTime as TimeIcon,
   CheckCircleOutline as ApprovedIcon,
-  HighlightOff as RejectedIcon,
+  HighlightOff as RejectedIcon
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { timesheetService } from '../../../services/timesheet.service';
@@ -66,7 +66,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
   const theme = useTheme();
   const queryClient = useQueryClient();
   const { dialogProps, confirm } = useConfirmDialog();
-  
+
   // 🚀 React Query for pending timesheets (team-scoped via /approval/pending)
   const { data: timesheetsData, isLoading: loading, refetch } = useQuery({
     queryKey: ['timesheets', 'pending'],
@@ -81,11 +81,11 @@ const TimesheetApproval = ({ embedded } = {}) => {
   const { data: statsData, refetch: refetchStats } = useQuery({
     queryKey: ['timesheets', 'stats'],
     queryFn: () => timesheetService.getStats(),
-    select: (response) => response?.data || response || {},
+    select: (response) => response?.data || response || {}
   });
-  
+
   const timesheets = useMemo(() => timesheetsData || [], [timesheetsData]);
-  
+
   // 🚀 Mutations for approve/reject
   const approveMutation = useMutation({
     mutationFn: ({ ids, comments }) => timesheetService.bulkApprove(ids, comments),
@@ -97,7 +97,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
       showAlert('error', error.message || 'Failed to approve timesheets');
     }
   });
-  
+
   const rejectMutation = useMutation({
     mutationFn: ({ ids, comments }) => timesheetService.bulkReject(ids, comments),
     onSuccess: () => {
@@ -176,7 +176,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
       employees: new Set(submitted.map((ts) => ts.employeeId)).size,
       approved: statsData?.approved ?? 0,
       rejected: statsData?.rejected ?? 0,
-      draft:    statsData?.draft    ?? 0,
+      draft:    statsData?.draft    ?? 0
     };
   }, [timesheets, statsData]);
 
@@ -201,7 +201,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
   const handleApprovalSubmit = async () => {
     const mutation = approvalAction === 'approve' ? approveMutation : rejectMutation;
     const ids = selectedTimesheet ? [selectedTimesheet.id] : selectedIds;
-    
+
     mutation.mutate({ ids, comments }, {
       onSuccess: () => {
         setApprovalDialogOpen(false);
@@ -252,7 +252,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
   };
 
   const handleSelectOne = (id) => {
-    setSelectedIds(prev => 
+    setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
   };
@@ -301,19 +301,19 @@ const TimesheetApproval = ({ embedded } = {}) => {
 
   const handleViewDetails = (timesheet) => {
     setSelectedTimesheet(timesheet);
-    
+
     // Find all timesheets for this employee for this week
-    const weekTimesheets = timesheets.filter(ts => 
+    const weekTimesheets = timesheets.filter(ts =>
       ts.employeeId === timesheet.employeeId &&
       ts.weekStartDate === timesheet.weekStartDate
     );
-    
+
     // Store the week timesheets for display
     setSelectedTimesheet({
       ...timesheet,
       weekTimesheets: weekTimesheets
     });
-    
+
     setViewDialogOpen(true);
   };
 
@@ -358,8 +358,8 @@ const TimesheetApproval = ({ embedded } = {}) => {
   );
 
   const renderSummaryCard = (title, value, icon, color, subtitle) => (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         height: '100%',
         background: 'rgba(255, 255, 255, 0.7)',
         backdropFilter: 'blur(20px)',
@@ -372,7 +372,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
         transition: 'all 0.3s ease',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: '0 12px 40px rgba(0,0,0,0.08)',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.08)'
         }
       }}
     >
@@ -413,10 +413,10 @@ const TimesheetApproval = ({ embedded } = {}) => {
     <Box sx={{ p: embedded ? 0 : 3, bgcolor: embedded ? 'transparent' : theme.palette.background.default, minHeight: embedded ? 'auto' : '100vh' }}>
       {/* Header */}
       {!embedded && (
-      <Paper 
+      <Paper
         elevation={0}
-        sx={{ 
-          p: 4, 
+        sx={{
+          p: 4,
           mb: 4,
           background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%)',
           borderRadius: 4,
@@ -442,10 +442,10 @@ const TimesheetApproval = ({ embedded } = {}) => {
                   color="success"
                   startIcon={<ApproveIcon />}
                   onClick={() => handleBulkAction('approve')}
-                  sx={{ 
-                    borderRadius: 2, 
+                  sx={{
+                    borderRadius: 2,
                     fontWeight: 600,
-                    boxShadow: '0 4px 14px 0 rgba(76, 175, 80, 0.39)',
+                    boxShadow: '0 4px 14px 0 rgba(76, 175, 80, 0.39)'
                   }}
                 >
                   Approve ({selectedIds.length})
@@ -455,10 +455,10 @@ const TimesheetApproval = ({ embedded } = {}) => {
                   color="error"
                   startIcon={<RejectIcon />}
                   onClick={() => handleBulkAction('reject')}
-                  sx={{ 
-                    borderRadius: 2, 
+                  sx={{
+                    borderRadius: 2,
                     fontWeight: 600,
-                    boxShadow: '0 4px 14px 0 rgba(244, 67, 54, 0.39)',
+                    boxShadow: '0 4px 14px 0 rgba(244, 67, 54, 0.39)'
                   }}
                 >
                   Reject ({selectedIds.length})
@@ -488,9 +488,9 @@ const TimesheetApproval = ({ embedded } = {}) => {
 
       {/* Alert */}
       <Collapse in={alert.show}>
-        <Alert 
-          severity={alert.type} 
-          sx={{ mb: 2, borderRadius: 2 }} 
+        <Alert
+          severity={alert.type}
+          sx={{ mb: 2, borderRadius: 2 }}
           onClose={() => setAlert({ ...alert, show: false })}
         >
           {alert.message}
@@ -554,7 +554,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
                   <InputAdornment position="start">
                     <SearchIcon color="action" />
                   </InputAdornment>
-                ),
+                )
               }}
             />
             <Button
@@ -636,8 +636,8 @@ const TimesheetApproval = ({ embedded } = {}) => {
               </Grid>
             </Grid>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-              <Button 
-                variant="text" 
+              <Button
+                variant="text"
                 onClick={clearFilters}
                 disabled={!statusFilter && !searchQuery && !projectFilter && !dateRange.start && !dateRange.end}
               >
@@ -656,8 +656,8 @@ const TimesheetApproval = ({ embedded } = {}) => {
         </Typography>
         <Stack direction="row" spacing={1}>
           {statusFilter && (
-            <Chip 
-              label={`Status: ${statusFilter}`} 
+            <Chip
+              label={`Status: ${statusFilter}`}
               onDelete={() => setStatusFilter('')}
               size="small"
               color="primary"
@@ -665,8 +665,8 @@ const TimesheetApproval = ({ embedded } = {}) => {
             />
           )}
           {searchQuery && (
-            <Chip 
-              label={`Search: ${searchQuery}`} 
+            <Chip
+              label={`Search: ${searchQuery}`}
               onDelete={() => setSearchQuery('')}
               size="small"
               color="primary"
@@ -674,8 +674,8 @@ const TimesheetApproval = ({ embedded } = {}) => {
             />
           )}
           {projectFilter && (
-            <Chip 
-              label="Project filtered" 
+            <Chip
+              label="Project filtered"
               onDelete={() => setProjectFilter('')}
               size="small"
               color="primary"
@@ -686,9 +686,9 @@ const TimesheetApproval = ({ embedded } = {}) => {
       </Box>
 
       {/* Timesheets Table */}
-      <Card sx={{ 
-        borderRadius: 4, 
-        border: '1px solid', 
+      <Card sx={{
+        borderRadius: 4,
+        border: '1px solid',
         borderColor: 'divider',
         boxShadow: '0 10px 40px rgba(0,0,0,0.04)',
         overflow: 'hidden'
@@ -783,10 +783,10 @@ const TimesheetApproval = ({ embedded } = {}) => {
               </TableRow>
             ) : (
               paginatedTimesheets.map((timesheet, index) => (
-                <TableRow 
-                  key={timesheet.id} 
+                <TableRow
+                  key={timesheet.id}
                   hover
-                  sx={{ 
+                  sx={{
                     bgcolor: index % 2 === 0 ? 'white' : alpha(theme.palette.background.default, 0.3),
                     '&:hover': { bgcolor: `${alpha(theme.palette.primary.main, 0.05)} !important` }
                   }}
@@ -835,12 +835,12 @@ const TimesheetApproval = ({ embedded } = {}) => {
                       <Typography variant="body2" fontWeight="bold" color="primary">
                         {getTotalHours(timesheet).toFixed(1)}h
                       </Typography>
-                      <LinearProgress 
-                        variant="determinate" 
+                      <LinearProgress
+                        variant="determinate"
                         value={Math.min(getTotalHours(timesheet) / 40 * 100, 100)}
-                        sx={{ 
-                          mt: 0.5, 
-                          height: 4, 
+                        sx={{
+                          mt: 0.5,
+                          height: 4,
                           borderRadius: 2,
                           bgcolor: theme.palette.action.hover
                         }}
@@ -848,9 +848,9 @@ const TimesheetApproval = ({ embedded } = {}) => {
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Chip 
-                      label={timesheet.status} 
-                      color={getStatusColor(timesheet.status)} 
+                    <Chip
+                      label={timesheet.status}
+                      color={getStatusColor(timesheet.status)}
                       variant="outlined"
                       size="small"
                       sx={{ fontWeight: 500, minWidth: 90 }}
@@ -873,16 +873,16 @@ const TimesheetApproval = ({ embedded } = {}) => {
                   <TableCell align="center">
                     <Stack direction="row" spacing={0.5} justifyContent="center">
                       <Tooltip title="View Details">
-                        <IconButton 
-                          size="small" 
+                        <IconButton
+                          size="small"
                           aria-label="View details"
                           data-testid="ts-approval-view-btn"
                           onClick={() => handleViewDetails(timesheet)}
-                          sx={{ 
+                          sx={{
                             color: 'primary.main',
                             border: '1px solid',
                             borderColor: 'primary.main',
-                            '&:hover': { 
+                            '&:hover': {
                               bgcolor: alpha(theme.palette.primary.main, 0.1),
                               borderColor: 'primary.dark'
                             }
@@ -894,16 +894,16 @@ const TimesheetApproval = ({ embedded } = {}) => {
                       {timesheet.status === 'Submitted' && (
                         <>
                           <Tooltip title="Approve">
-                            <IconButton 
-                              size="small" 
+                            <IconButton
+                              size="small"
                               aria-label="Approve timesheet"
                               data-testid="ts-approval-approve-btn"
                               onClick={() => handleApprovalClick(timesheet, 'approve')}
-                              sx={{ 
+                              sx={{
                                 color: 'success.main',
                                 border: '1px solid',
                                 borderColor: 'success.main',
-                                '&:hover': { 
+                                '&:hover': {
                                   bgcolor: alpha(theme.palette.success.main, 0.1),
                                   borderColor: 'success.dark'
                                 }
@@ -913,16 +913,16 @@ const TimesheetApproval = ({ embedded } = {}) => {
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Reject">
-                            <IconButton 
-                              size="small" 
+                            <IconButton
+                              size="small"
                               aria-label="Reject timesheet"
                               data-testid="ts-approval-reject-btn"
                               onClick={() => handleApprovalClick(timesheet, 'reject')}
-                              sx={{ 
+                              sx={{
                                 color: 'error.main',
                                 border: '1px solid',
                                 borderColor: 'error.main',
-                                '&:hover': { 
+                                '&:hover': {
                                   bgcolor: alpha(theme.palette.error.main, 0.1),
                                   borderColor: 'error.dark'
                                 }
@@ -954,8 +954,8 @@ const TimesheetApproval = ({ embedded } = {}) => {
       </Card>
 
       {/* Approval Dialog */}
-      <Dialog 
-        open={approvalDialogOpen} 
+      <Dialog
+        open={approvalDialogOpen}
         onClose={() => setApprovalDialogOpen(false)}
         maxWidth="sm"
         fullWidth
@@ -963,7 +963,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
           sx: { borderRadius: 2 }
         }}
       >
-        <DialogTitle sx={{ 
+        <DialogTitle sx={{
           borderBottom: '1px solid',
           borderColor: 'divider',
           display: 'flex',
@@ -1030,7 +1030,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
           <Button onClick={() => setApprovalDialogOpen(false)} variant="outlined">
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleApprovalSubmit}
             variant="outlined"
             color={approvalAction === 'approve' ? 'success' : 'error'}
@@ -1043,8 +1043,8 @@ const TimesheetApproval = ({ embedded } = {}) => {
       </Dialog>
 
       {/* View Details Dialog */}
-      <Dialog 
-        open={viewDialogOpen} 
+      <Dialog
+        open={viewDialogOpen}
         onClose={() => setViewDialogOpen(false)}
         maxWidth="md"
         fullWidth
@@ -1052,7 +1052,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
           sx: { borderRadius: 2 }
         }}
       >
-        <DialogTitle sx={{ 
+        <DialogTitle sx={{
           borderBottom: '1px solid',
           borderColor: 'divider',
           display: 'flex',
@@ -1108,9 +1108,9 @@ const TimesheetApproval = ({ embedded } = {}) => {
                       Status
                     </Typography>
                     <Box sx={{ mt: 0.5 }}>
-                      <Chip 
-                        label={selectedTimesheet.status} 
-                        color={getStatusColor(selectedTimesheet.status)} 
+                      <Chip
+                        label={selectedTimesheet.status}
+                        color={getStatusColor(selectedTimesheet.status)}
                         variant="outlined"
                         size="small"
                         sx={{ fontWeight: 500 }}
@@ -1138,9 +1138,9 @@ const TimesheetApproval = ({ embedded } = {}) => {
                           <Typography variant="body2" fontWeight={500}>
                             {ts.project?.name || 'N/A'} / {ts.task?.name || 'N/A'}
                           </Typography>
-                          <Chip 
-                            label={ts.status} 
-                            color={getStatusColor(ts.status)} 
+                          <Chip
+                            label={ts.status}
+                            color={getStatusColor(ts.status)}
                             variant="outlined"
                             size="small"
                           />
@@ -1176,13 +1176,13 @@ const TimesheetApproval = ({ embedded } = {}) => {
                   Hours Breakdown by Project/Task
                 </Typography>
                 <Divider sx={{ my: 1.5 }} />
-                
+
                 {selectedTimesheet.weekTimesheets && selectedTimesheet.weekTimesheets.length > 1 && (
                   <Alert severity="info" sx={{ mb: 2 }}>
                     This employee has {selectedTimesheet.weekTimesheets.length} timesheet entries for this week
                   </Alert>
                 )}
-                
+
                 <TableContainer>
                   <Table size="small">
                     <TableHead>
@@ -1223,15 +1223,15 @@ const TimesheetApproval = ({ embedded } = {}) => {
                             </Typography>
                           </TableCell>
                           <TableCell align="center">
-                            <Chip 
-                              label={ts.status} 
-                              color={getStatusColor(ts.status)} 
+                            <Chip
+                              label={ts.status}
+                              color={getStatusColor(ts.status)}
                               size="small"
                             />
                           </TableCell>
                         </TableRow>
                       ))}
-                      
+
                       {/* Weekly Total Row - Only show if multiple timesheets */}
                       {selectedTimesheet.weekTimesheets && selectedTimesheet.weekTimesheets.length > 1 && (
                         <TableRow sx={{ bgcolor: 'grey.50', borderTop: '2px solid', borderColor: 'divider' }}>
@@ -1299,8 +1299,8 @@ const TimesheetApproval = ({ embedded } = {}) => {
 
               {/* Approval Info */}
               {(selectedTimesheet.status === 'Approved' || selectedTimesheet.status === 'Rejected') && (
-                <Paper sx={{ 
-                  p: 2.5, 
+                <Paper sx={{
+                  p: 2.5,
                   bgcolor: selectedTimesheet.status === 'Approved' ? 'success.light' : 'error.light',
                   border: 1,
                   borderColor: selectedTimesheet.status === 'Approved' ? 'success.main' : 'error.main'
@@ -1333,7 +1333,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
         <DialogActions sx={{ p: 2 }}>
           {selectedTimesheet?.status === 'Submitted' && (
             <>
-              <Button 
+              <Button
                 onClick={() => {
                   setViewDialogOpen(false);
                   handleApprovalClick(selectedTimesheet, 'approve');
@@ -1344,7 +1344,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
               >
                 Approve
               </Button>
-              <Button 
+              <Button
                 onClick={() => {
                   setViewDialogOpen(false);
                   handleApprovalClick(selectedTimesheet, 'reject');
@@ -1368,7 +1368,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
 };
 
 TimesheetApproval.propTypes = {
-  embedded: PropTypes.bool,
+  embedded: PropTypes.bool
 };
 
 export default TimesheetApproval;

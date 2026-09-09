@@ -21,7 +21,7 @@ const employeeRoutes = [
   <Route key="my-profile-edit" path="my-profile/edit/:id" element={withBoundary(<EmployeeForm mode="self" />, 'Loading Profile Edit...')} />,
   <Route key="employee-records" path="employee-records" element={withBoundary(<EmployeeRecords />, 'Loading Employee Records...')} />,
   <Route key="employee-reviews" path="employee-reviews" element={withBoundary(<EmployeeReviewManagement />, 'Loading Employee Reviews...')} />,
-  <Route key="employee-goals" path="goals" element={withBoundary(<MyGoals />, 'Loading My Goals...')} />,
+  <Route key="employee-goals" path="goals" element={withBoundary(<MyGoals />, 'Loading My Goals...')} />
 ];
 
 export default employeeRoutes;

@@ -27,7 +27,7 @@ const SystemSettingsHub = () => (
       { label: 'Broadcasts',     icon: <CampaignIcon fontSize="small" />, render: () => <AdminBroadcast embedded /> },
       { label: 'ID Card',        icon: <BadgeIcon fontSize="small" />,    render: () => <IDCardCustomizer /> },
       { label: 'Preferences',    icon: <SettingsIcon fontSize="small" />, render: () => <SystemSettings embedded /> },
-      { label: 'Advanced',       icon: <AdminIcon fontSize="small" />,    render: () => <SystemConfigPage embedded /> },
+      { label: 'Advanced',       icon: <AdminIcon fontSize="small" />,    render: () => <SystemConfigPage embedded /> }
     ]}
     testId="settings-hub"
   />

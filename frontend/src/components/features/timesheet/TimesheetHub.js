@@ -12,7 +12,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import {
   Schedule as TimesheetIcon,
   CheckCircleOutline as ApprovalIcon,
-  History as HistoryIcon,
+  History as HistoryIcon
 } from '@mui/icons-material';
 
 const TimesheetHub = () => {
@@ -25,7 +25,7 @@ const TimesheetHub = () => {
     ...(canApprove
       ? [{ label: 'Approvals', icon: <ApprovalIcon fontSize="small" />, render: () => <TimesheetApproval embedded /> }]
       : []),
-    { label: 'History', icon: <HistoryIcon fontSize="small" />, render: () => <TimesheetHistory embedded /> },
+    { label: 'History', icon: <HistoryIcon fontSize="small" />, render: () => <TimesheetHistory embedded /> }
   ];
 
   // Default to Approvals tab when navigated from Work menu

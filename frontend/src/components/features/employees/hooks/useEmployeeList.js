@@ -1,6 +1,6 @@
 /**
  * useEmployeeList Hook - Refactored with React Query
- * 
+ *
  * MIGRATION CHANGES:
  * ✅ Removed manual useState for employees, loading, error
  * ✅ Removed manual useEffect for data fetching
@@ -8,7 +8,7 @@
  * ✅ Replaced with useDeleteEmployee mutation
  * ✅ Auto-retry on error
  * ✅ Background refetching
- * 
+ *
  * RESULT: 274 lines → 240 lines (12% reduction + better performance)
  */
 
@@ -35,25 +35,25 @@ export const useEmployeeList = () => {
   const { user } = useAuth();
   const { showSuccess, showError } = useNotification();
   const { setLoading } = useLoading();
-  
+
   // Filter & Search state
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [employmentTypeFilter, setEmploymentTypeFilter] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
-  
+
   // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
-  
+
   // View state
   const [viewMode, setViewMode] = useState('list');
-  
+
   // Dialog states
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
-  
+
   const [userAccountDialogOpen, setUserAccountDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [userAccountData, setUserAccountData] = useState({
@@ -63,7 +63,7 @@ export const useEmployeeList = () => {
     role: 'employee'
   });
   const [creatingUser, setCreatingUser] = useState(false);
-  
+
   // Departments state (still manual as it's simpler)
   const [departments, setDepartments] = useState([]);
 
@@ -83,41 +83,41 @@ export const useEmployeeList = () => {
     ...(locationFilter && { workLocation: locationFilter })
   }), [page, rowsPerPage, searchTerm, statusFilter, departmentFilter, employmentTypeFilter, locationFilter]);
 
-  const { 
-    data: employeeResponse, 
-    isLoading: loading, 
+  const {
+    data: employeeResponse,
+    isLoading: loading,
     error: queryError,
-    refetch: loadEmployees 
+    refetch: loadEmployees
   } = useEmployees(filters, {
     keepPreviousData: true, // Smooth pagination without loading flicker
     refetchOnWindowFocus: false,
-    staleTime: 2 * 60 * 1000, // 2 minutes cache
+    staleTime: 2 * 60 * 1000 // 2 minutes cache
   });
 
   // 🚀 FIXED: Extract data from normalized response
   // normalizeResponse now returns: { data: [...], pagination: {...}, total: N }
   const employees = useMemo(() => {
     if (!employeeResponse) return [];
-    
+
     // Paginated response with data array
     if (employeeResponse.data && Array.isArray(employeeResponse.data)) {
       return employeeResponse.data;
     }
-    
+
     // Direct array (non-paginated)
     if (Array.isArray(employeeResponse)) {
       return employeeResponse;
     }
-    
+
     return [];
   }, [employeeResponse]);
 
   const totalRecords = useMemo(() => {
     if (!employeeResponse) return 0;
-    
+
     // Use total from pagination metadata
-    return employeeResponse.total || 
-           employeeResponse.totalItems || 
+    return employeeResponse.total ||
+           employeeResponse.totalItems ||
            employeeResponse.pagination?.totalItems ||
            employees.length;
   }, [employeeResponse, employees.length]);
@@ -183,9 +183,9 @@ export const useEmployeeList = () => {
 
   const handleDeleteConfirm = async () => {
     if (!employeeToDelete) return;
-    
+
     setDeleteDialogOpen(false);
-    
+
     // 🚀 NEW: Use React Query mutation (auto-updates cache, shows snackbar)
     deleteEmployeeMutation(employeeToDelete.id, {
       onSuccess: () => {
@@ -312,7 +312,7 @@ export const useEmployeeList = () => {
     setLocationFilter,
     setViewMode,
     setDeleteDialogOpen,
-    
+
     // Actions
     loadEmployees,
     handleAddEmployee,

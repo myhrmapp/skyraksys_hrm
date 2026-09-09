@@ -8,8 +8,8 @@ const authConfig = require('../../config/auth.config');
 // (avoids random collisions that intermittently violate the unique constraint).
 let employeeIdCounter = 0;
 function nextEmployeeId() {
-  employeeIdCounter = (employeeIdCounter % 900) + 1;
-  return `SK${String(employeeIdCounter).padStart(3, '0')}`;
+  employeeIdCounter = (employeeIdCounter % 90000) + 1;
+  return `SK${String(employeeIdCounter).padStart(5, '0')}`;
 }
 
 /**

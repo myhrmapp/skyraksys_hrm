@@ -112,7 +112,7 @@ export default function InvoiceTemplateManagement() {
             <List>
               {templates.map(t => (
                 <ListItem key={t.id} button onClick={() => handleOpen(t)} sx={{ border: '1px solid #eee', mb: 1, borderRadius: 1 }}>
-                  <ListItemText 
+                  <ListItemText
                     primary={
                       <Box display="flex" alignItems="center" gap={1}>
                         {t.name}
@@ -139,34 +139,34 @@ export default function InvoiceTemplateManagement() {
                 <Typography variant="h6" mb={3}>Edit Template: {form.name}</Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Template Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+                    <TextField fullWidth label="Template Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Currency" value={form.currency} onChange={e => setForm({...form, currency: e.target.value})} />
+                    <TextField fullWidth label="Currency" value={form.currency} onChange={e => setForm({ ...form, currency: e.target.value })} />
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField fullWidth label="Description" value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
+                    <TextField fullWidth label="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
                   </Grid>
                   <Grid item xs={12}>
-                    <FormControlLabel control={<Switch checked={form.isDefault} onChange={e => setForm({...form, isDefault: e.target.checked})} />} label="Set as Default Template" />
+                    <FormControlLabel control={<Switch checked={form.isDefault} onChange={e => setForm({ ...form, isDefault: e.target.checked })} />} label="Set as Default Template" />
                   </Grid>
-                  
+
                   <Grid item xs={12}><Typography variant="subtitle2" mt={2} mb={1}>Invoice Details</Typography></Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Invoice Title" value={form.templateData.title} onChange={e => setForm({...form, templateData: {...form.templateData, title: e.target.value}})} />
+                    <TextField fullWidth label="Invoice Title" value={form.templateData.title} onChange={e => setForm({ ...form, templateData: { ...form.templateData, title: e.target.value } })} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Footer Note" value={form.templateData.footerNote} onChange={e => setForm({...form, templateData: {...form.templateData, footerNote: e.target.value}})} />
+                    <TextField fullWidth label="Footer Note" value={form.templateData.footerNote} onChange={e => setForm({ ...form, templateData: { ...form.templateData, footerNote: e.target.value } })} />
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField fullWidth multiline rows={3} label="Terms and Conditions" value={form.templateData.termsAndConditions} onChange={e => setForm({...form, templateData: {...form.templateData, termsAndConditions: e.target.value}})} />
+                    <TextField fullWidth multiline rows={3} label="Terms and Conditions" value={form.templateData.termsAndConditions} onChange={e => setForm({ ...form, templateData: { ...form.templateData, termsAndConditions: e.target.value } })} />
                   </Grid>
-                  
+
                   <Grid item xs={12} sm={6}>
-                    <FormControlLabel control={<Switch checked={form.templateData.companySection?.showAddress} onChange={e => setForm({...form, templateData: {...form.templateData, companySection: {...form.templateData.companySection, showAddress: e.target.checked}}})} />} label="Show Company Address" />
+                    <FormControlLabel control={<Switch checked={form.templateData.companySection?.showAddress} onChange={e => setForm({ ...form, templateData: { ...form.templateData, companySection: { ...form.templateData.companySection, showAddress: e.target.checked } } })} />} label="Show Company Address" />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <FormControlLabel control={<Switch checked={form.templateData.clientSection?.showAddress} onChange={e => setForm({...form, templateData: {...form.templateData, clientSection: {...form.templateData.clientSection, showAddress: e.target.checked}}})} />} label="Show Client Address" />
+                    <FormControlLabel control={<Switch checked={form.templateData.clientSection?.showAddress} onChange={e => setForm({ ...form, templateData: { ...form.templateData, clientSection: { ...form.templateData.clientSection, showAddress: e.target.checked } } })} />} label="Show Client Address" />
                   </Grid>
 
                   <Grid item xs={12} display="flex" justifyContent="flex-end" mt={2}>
@@ -186,9 +186,9 @@ export default function InvoiceTemplateManagement() {
       <Dialog open={open && !form.id} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>New Invoice Template</DialogTitle>
         <DialogContent dividers>
-          <TextField fullWidth label="Template Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} margin="normal" />
-          <TextField fullWidth label="Description" value={form.description} onChange={e => setForm({...form, description: e.target.value})} margin="normal" />
-          <FormControlLabel control={<Switch checked={form.isDefault} onChange={e => setForm({...form, isDefault: e.target.checked})} />} label="Set as Default Template" />
+          <TextField fullWidth label="Template Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} margin="normal" />
+          <TextField fullWidth label="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} margin="normal" />
+          <FormControlLabel control={<Switch checked={form.isDefault} onChange={e => setForm({ ...form, isDefault: e.target.checked })} />} label="Set as Default Template" />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>

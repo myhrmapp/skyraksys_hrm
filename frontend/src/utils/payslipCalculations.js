@@ -12,7 +12,7 @@ export class PayslipCalculationEngine {
     const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
     const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
     const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    
+
     const convertHundreds = (num) => {
       let result = '';
       if (num > 99) {
@@ -33,18 +33,18 @@ export class PayslipCalculationEngine {
     };
 
     if (amount === 0) return 'Zero Rupees Only';
-    
+
     const crores = Math.floor(amount / 10000000);
     const lakhs = Math.floor((amount % 10000000) / 100000);
     const thousands = Math.floor((amount % 100000) / 1000);
     const hundreds = amount % 1000;
-    
+
     let result = '';
     if (crores > 0) result += convertHundreds(crores) + 'Crore ';
     if (lakhs > 0) result += convertHundreds(lakhs) + 'Lakh ';
     if (thousands > 0) result += convertHundreds(thousands) + 'Thousand ';
     if (hundreds > 0) result += convertHundreds(hundreds);
-    
+
     return result.trim() + ' Rupees Only';
   }
 
@@ -52,7 +52,7 @@ export class PayslipCalculationEngine {
   calculateProfessionalTax(grossSalary) {
     const slabs = this.template.structure.deductions.fields
       .find(field => field.key === 'professionalTax')?.slabs || [];
-    
+
     for (const slab of slabs) {
       if (grossSalary >= slab.min && grossSalary <= slab.max) {
         return slab.amount;
@@ -65,7 +65,7 @@ export class PayslipCalculationEngine {
   calculateESIC(grossSalary) {
     const esicField = this.template.structure.deductions.fields
       .find(field => field.key === 'esic');
-    
+
     if (esicField && grossSalary <= esicField.maxAmount) {
       return grossSalary * (esicField.percentage / 100);
     }
@@ -76,7 +76,7 @@ export class PayslipCalculationEngine {
   calculatePF(basicSalary) {
     const pfField = this.template.structure.deductions.fields
       .find(field => field.key === 'providentFund');
-    
+
     if (pfField) {
       const pfAmount = basicSalary * (pfField.percentage / 100);
       return Math.min(pfAmount, pfField.maxAmount || pfAmount);
@@ -88,7 +88,7 @@ export class PayslipCalculationEngine {
   calculateHRA(basicSalary) {
     const hraField = this.template.structure.earnings.fields
       .find(field => field.key === 'houseRentAllowance');
-    
+
     if (hraField && hraField.calculation === 'percentage') {
       return basicSalary * (hraField.percentage / 100);
     }
@@ -98,11 +98,11 @@ export class PayslipCalculationEngine {
   // Overtime calculation
   calculateOvertime(overtimeHours, basicSalary, totalWorkingDays = 21) {
     if (!overtimeHours || overtimeHours <= 0) return 0;
-    
+
     const workingHoursPerDay = 8;
     const totalWorkingHours = totalWorkingDays * workingHoursPerDay;
     const hourlyRate = basicSalary / totalWorkingHours;
-    
+
     // Overtime is typically paid at 2x rate
     return overtimeHours * hourlyRate * 2;
   }
@@ -116,7 +116,7 @@ export class PayslipCalculationEngine {
   // Main calculation method
   calculatePayslip(employeeData, payrollData, salaryStructure = {}) {
     const calculated = { ...payrollData };
-    
+
     // Extract values with defaults
     const basicSalary = salaryStructure.basicSalary || payrollData.basicSalary || 0;
     const totalWorkingDays = payrollData.totalWorkingDays || 21;
@@ -131,29 +131,29 @@ export class PayslipCalculationEngine {
 
     // Calculate earnings
     const earnings = {};
-    
+
     // Basic salary (prorated if needed)
     earnings.basicSalary = this.calculateProratedSalary(basicSalary, paidDays, totalWorkingDays);
 
     // HRA calculation
     if (salaryStructure.houseRentAllowance !== undefined) {
       earnings.houseRentAllowance = this.calculateProratedSalary(
-        salaryStructure.houseRentAllowance, 
-        paidDays, 
+        salaryStructure.houseRentAllowance,
+        paidDays,
         totalWorkingDays
       );
     } else {
       earnings.houseRentAllowance = this.calculateProratedSalary(
-        this.calculateHRA(basicSalary), 
-        paidDays, 
+        this.calculateHRA(basicSalary),
+        paidDays,
         totalWorkingDays
       );
     }
 
     // Other allowances (prorated)
-    const allowanceFields = ['conveyanceAllowance', 'medicalAllowance', 'specialAllowance', 
+    const allowanceFields = ['conveyanceAllowance', 'medicalAllowance', 'specialAllowance',
                            'lta', 'shiftAllowance', 'internetAllowance'];
-    
+
     allowanceFields.forEach(field => {
       const amount = salaryStructure[field] || payrollData[field] || 0;
       earnings[field] = this.calculateProratedSalary(amount, paidDays, totalWorkingDays);
@@ -170,7 +170,7 @@ export class PayslipCalculationEngine {
 
     // Calculate gross salary
     const grossSalary = Object.values(earnings).reduce((sum, amount) => sum + (amount || 0), 0);
-    
+
     // Calculate deductions
     const deductions = {};
 
@@ -184,9 +184,9 @@ export class PayslipCalculationEngine {
     deductions.professionalTax = this.calculateProfessionalTax(grossSalary);
 
     // Other deductions
-    const deductionFields = ['voluntaryPF', 'tds', 'medicalPremium', 'nps', 'loanEmi', 
+    const deductionFields = ['voluntaryPF', 'tds', 'medicalPremium', 'nps', 'loanEmi',
                            'advances', 'canteenCharges', 'otherDeductions'];
-    
+
     deductionFields.forEach(field => {
       deductions[field] = payrollData[field] || 0;
     });
@@ -205,12 +205,12 @@ export class PayslipCalculationEngine {
       totalDeductions,
       netSalary,
       netSalaryWords: this.numberToWords(Math.round(netSalary)),
-      
+
       // Payment information
       paymentMode: payrollData.paymentMode || 'Online Transfer',
       disbursementDate: payrollData.disbursementDate || new Date().toLocaleDateString('en-GB'),
       payPeriod: payrollData.payPeriod || this.getCurrentPayPeriod(),
-      
+
       // Additional metadata
       generatedDate: new Date().toISOString(),
       template: this.template.id,
@@ -266,13 +266,13 @@ export class PayslipCalculationEngine {
   // Generate multiple payslips for bulk processing
   calculateBulkPayslips(employeesData, payrollDataArray, salaryStructures = {}) {
     const results = [];
-    
+
     payrollDataArray.forEach((payrollData, index) => {
       try {
-        const employeeData = employeesData.find(emp => 
+        const employeeData = employeesData.find(emp =>
           emp.employeeId === payrollData.employeeId || emp.id === payrollData.employeeId
         );
-        
+
         if (!employeeData) {
           results.push({
             employeeId: payrollData.employeeId,
@@ -284,16 +284,16 @@ export class PayslipCalculationEngine {
 
         const salaryStructure = salaryStructures[employeeData.id] || {};
         const payslipData = this.calculatePayslip(employeeData, payrollData, salaryStructure);
-        
+
         const validationErrors = this.validateCalculations(payslipData);
-        
+
         results.push({
           employeeId: employeeData.employeeId,
           payslipData,
           validationErrors,
           success: validationErrors.length === 0
         });
-        
+
       } catch (error) {
         results.push({
           employeeId: payrollData.employeeId,
@@ -302,7 +302,7 @@ export class PayslipCalculationEngine {
         });
       }
     });
-    
+
     return results;
   }
 
@@ -310,7 +310,7 @@ export class PayslipCalculationEngine {
   exportToCSV(payslipData) {
     const csvMapping = this.template.csvMapping;
     const csvData = {};
-    
+
     Object.entries(csvMapping).forEach(([key, csvKey]) => {
       if (payslipData.earnings && payslipData.earnings[key] !== undefined) {
         csvData[csvKey] = payslipData.earnings[key];
@@ -320,7 +320,7 @@ export class PayslipCalculationEngine {
         csvData[csvKey] = payslipData[key];
       }
     });
-    
+
     return csvData;
   }
 
@@ -343,7 +343,7 @@ export class PayslipCalculationEngine {
 
     // Calculate PF and other statutory deductions
     const grossEstimate = Object.values(structure).reduce((sum, amount) => sum + amount, 0);
-    
+
     return {
       earnings: structure,
       deductions: {

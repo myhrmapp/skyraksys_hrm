@@ -86,7 +86,7 @@ const defaultTemplateForm = () => ({
 const InvoiceManagementPage = () => {
   // Get API base URL from environment or use http instance baseURL
   const API_BASE_URL = process.env.REACT_APP_API_URL || http.defaults.baseURL || '/api';
-  
+
   const { enqueueSnackbar } = useSnackbar();
   const { dialogProps, confirm } = useConfirmDialog();
   const [tab, setTab] = useState(0);

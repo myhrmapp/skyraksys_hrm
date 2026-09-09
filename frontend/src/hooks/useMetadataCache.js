@@ -13,7 +13,7 @@ const extractListData = (response) => {
 const cache = {
   departments: null,
   positions: null,
-  managers: null,
+  managers: null
 };
 
 export function useMetadataCache(options = { includeManagers: true }) {
@@ -42,7 +42,7 @@ export function useMetadataCache(options = { includeManagers: true }) {
         const [deptRes, posRes, mgrRes] = await Promise.all([
           needDepts ? employeeService.getDepartments().catch(() => []) : Promise.resolve(cache.departments || []),
           needPositions ? employeeService.getPositions().catch(() => []) : Promise.resolve(cache.positions || []),
-          needManagers ? employeeService.getManagers().catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: [] } }),
+          needManagers ? employeeService.getManagers().catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: [] } })
         ]);
 
         const d = extractListData(deptRes);

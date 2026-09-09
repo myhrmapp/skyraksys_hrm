@@ -72,11 +72,11 @@ const SystemConfigPage = ({ embedded } = {}) => {
 
       // Then fetch system config
       const response = await http.post('/system-config/view', { password });
-      
+
       setSystemConfig(response.data.data);
       setIsAuthenticated(true);
       setPasswordDialogOpen(false);
-      
+
       // Fetch audit trail
       fetchAuditTrail();
     } catch (err) {
@@ -385,7 +385,7 @@ const SystemConfigPage = ({ embedded } = {}) => {
 };
 
 SystemConfigPage.propTypes = {
-  embedded: PropTypes.bool,
+  embedded: PropTypes.bool
 };
 
 export default SystemConfigPage;

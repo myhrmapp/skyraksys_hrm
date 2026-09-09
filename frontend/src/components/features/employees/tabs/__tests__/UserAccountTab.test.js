@@ -21,9 +21,9 @@ const createFormData = (overrides = {}) => ({
     password: '',
     confirmPassword: '',
     forcePasswordChange: true,
-    ...(overrides.userAccount || {}),
+    ...(overrides.userAccount || {})
   },
-  ...overrides,
+  ...overrides
 });
 
 const createProps = (overrides = {}) => ({
@@ -31,7 +31,7 @@ const createProps = (overrides = {}) => ({
   errors: overrides.errors || {},
   touchedFields: overrides.touchedFields || {},
   onChange: overrides.onChange || jest.fn(),
-  onBlur: overrides.onBlur || jest.fn(),
+  onBlur: overrides.onBlur || jest.fn()
 });
 
 const renderTab = (overrides = {}) => {
@@ -145,7 +145,7 @@ describe('UserAccountTab', () => {
 
     it('should show "not provided" when email is empty', () => {
       renderTab({
-        formData: { email: '', userAccount: { enableLogin: true } },
+        formData: { email: '', userAccount: { enableLogin: true } }
       });
       expect(screen.getByRole('alert')).toHaveTextContent('not provided');
     });
@@ -186,7 +186,7 @@ describe('UserAccountTab', () => {
     it('should show error when error exists', () => {
       renderTab({
         ...enabledOverrides,
-        errors: { 'userAccount.role': 'Please select a valid user role' },
+        errors: { 'userAccount.role': 'Please select a valid user role' }
       });
       expect(screen.getByText('Please select a valid user role')).toBeInTheDocument();
     });
@@ -205,7 +205,7 @@ describe('UserAccountTab', () => {
       const onChange = jest.fn();
       renderTab({
         formData: { userAccount: { enableLogin: true, forcePasswordChange: true } },
-        onChange,
+        onChange
       });
       const checkbox = screen.getByRole('checkbox', { name: /require password change/i });
       await userEvent.setup().click(checkbox);
@@ -239,7 +239,7 @@ describe('UserAccountTab', () => {
     it('should show error when error exists', () => {
       renderTab({
         ...enabledOverrides,
-        errors: { 'userAccount.password': 'Password must be at least 6 characters' },
+        errors: { 'userAccount.password': 'Password must be at least 6 characters' }
       });
       expect(screen.getByText('Password must be at least 6 characters')).toBeInTheDocument();
     });
@@ -280,7 +280,7 @@ describe('UserAccountTab', () => {
     it('should show mismatch error', () => {
       renderTab({
         ...enabledOverrides,
-        errors: { 'userAccount.confirmPassword': 'Passwords do not match' },
+        errors: { 'userAccount.confirmPassword': 'Passwords do not match' }
       });
       expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
     });
@@ -299,9 +299,9 @@ describe('UserAccountTab', () => {
             role: 'manager',
             password: 'SecureP@ss1',
             confirmPassword: 'SecureP@ss1',
-            forcePasswordChange: true,
-          },
-        },
+            forcePasswordChange: true
+          }
+        }
       });
 
       // Switch should be on

@@ -18,7 +18,7 @@ import {
  * Used in EmployeeForm for new employee creation
  * Just handles file selection and preview
  */
-const PhotoUploadSimple = ({ 
+const PhotoUploadSimple = ({
   photo,           // File object
   photoPreview,    // Base64 preview URL
   onPhotoSelect,   // (file) => void

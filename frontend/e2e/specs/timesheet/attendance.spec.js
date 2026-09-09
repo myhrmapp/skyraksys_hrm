@@ -14,7 +14,7 @@ test.describe('Attendance Module', () => {
     test(`${row.testId}: ${row.description}`, async ({ page }) => {
       await loginAs(page, row.role);
       const attendance = new AttendancePage(page);
-      const route = ADMIN_ACTIONS.includes(row.action) ? 'attendance-management' : 'my-attendance';
+      const route = ADMIN_ACTIONS.includes(row.action) ? '/attendance?view=management' : '/attendance';
 
       switch (row.action) {
         case 'pageLoad': {

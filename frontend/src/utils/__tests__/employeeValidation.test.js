@@ -8,7 +8,7 @@
 import {
   validateEmployeeForm,
   validateField,
-  transformEmployeeDataForAPI,
+  transformEmployeeDataForAPI
 } from '../employeeValidation';
 
 // Base valid form data for happy-path testing
@@ -49,15 +49,15 @@ const createValidFormData = (overrides = {}) => ({
     allowances: { hra: 15000, transport: 5000 },
     deductions: { pf: 6000 },
     benefits: { bonus: 10000 },
-    taxInformation: { taxRegime: 'old', ctc: 120000, takeHome: 85000 },
+    taxInformation: { taxRegime: 'old', ctc: 120000, takeHome: 85000 }
   },
   userAccount: {
     enableLogin: false,
     role: 'employee',
     password: '',
-    confirmPassword: '',
+    confirmPassword: ''
   },
-  ...overrides,
+  ...overrides
 });
 
 describe('validateEmployeeForm', () => {
@@ -77,7 +77,7 @@ describe('validateEmployeeForm', () => {
         email: 'john@example.com',
         hireDate: '2024-01-01',
         departmentId: 'dept-1',
-        positionId: 'pos-1',
+        positionId: 'pos-1'
       });
       expect(result.isValid).toBe(true);
     });
@@ -206,7 +206,7 @@ describe('validateEmployeeForm', () => {
       futureDate.setFullYear(futureDate.getFullYear() + 1);
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        hireDate: futureDate.toISOString().split('T')[0],
+        hireDate: futureDate.toISOString().split('T')[0]
       });
       expect(result.errors.hireDate).toBe('Hire date cannot be in the future');
     });
@@ -245,7 +245,7 @@ describe('validateEmployeeForm', () => {
       futureDate.setFullYear(futureDate.getFullYear() + 1);
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        dateOfBirth: futureDate.toISOString().split('T')[0],
+        dateOfBirth: futureDate.toISOString().split('T')[0]
       });
       expect(result.errors.dateOfBirth).toBe('Date of birth must be in the past');
     });
@@ -255,7 +255,7 @@ describe('validateEmployeeForm', () => {
       recentDate.setFullYear(recentDate.getFullYear() - 15);
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        dateOfBirth: recentDate.toISOString().split('T')[0],
+        dateOfBirth: recentDate.toISOString().split('T')[0]
       });
       expect(result.errors.dateOfBirth).toBe('Employee must be at least 18 years old');
     });
@@ -265,7 +265,7 @@ describe('validateEmployeeForm', () => {
       validDob.setFullYear(validDob.getFullYear() - 25);
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        dateOfBirth: validDob.toISOString().split('T')[0],
+        dateOfBirth: validDob.toISOString().split('T')[0]
       });
       expect(result.errors.dateOfBirth).toBeUndefined();
     });
@@ -449,7 +449,7 @@ describe('validateEmployeeForm', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
         hireDate: '2024-03-01',
-        joiningDate: '2024-02-01',
+        joiningDate: '2024-02-01'
       });
       expect(result.errors.joiningDate).toContain('before hire date');
     });
@@ -458,7 +458,7 @@ describe('validateEmployeeForm', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
         hireDate: '2024-01-01',
-        joiningDate: '2024-01-15',
+        joiningDate: '2024-01-15'
       });
       expect(result.errors.joiningDate).toBeUndefined();
     });
@@ -467,7 +467,7 @@ describe('validateEmployeeForm', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
         hireDate: '2024-03-01',
-        confirmationDate: '2024-02-01',
+        confirmationDate: '2024-02-01'
       });
       expect(result.errors.confirmationDate).toContain('before joining/hire date');
     });
@@ -484,7 +484,7 @@ describe('validateEmployeeForm', () => {
     it('should reject negative basic salary', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        salary: { ...createValidFormData().salary, basicSalary: -1000 },
+        salary: { ...createValidFormData().salary, basicSalary: -1000 }
       });
       expect(result.errors['salary.basicSalary']).toContain('positive number');
     });
@@ -492,7 +492,7 @@ describe('validateEmployeeForm', () => {
     it('should require currency when salary provided', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        salary: { ...createValidFormData().salary, currency: '' },
+        salary: { ...createValidFormData().salary, currency: '' }
       });
       expect(result.errors['salary.currency']).toBeDefined();
     });
@@ -500,7 +500,7 @@ describe('validateEmployeeForm', () => {
     it('should require payFrequency when salary provided', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        salary: { ...createValidFormData().salary, payFrequency: '' },
+        salary: { ...createValidFormData().salary, payFrequency: '' }
       });
       expect(result.errors['salary.payFrequency']).toBeDefined();
     });
@@ -508,7 +508,7 @@ describe('validateEmployeeForm', () => {
     it('should skip salary validation when basicSalary empty', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        salary: { basicSalary: '', currency: '', payFrequency: '' },
+        salary: { basicSalary: '', currency: '', payFrequency: '' }
       });
       expect(result.errors['salary.currency']).toBeUndefined();
     });
@@ -518,8 +518,8 @@ describe('validateEmployeeForm', () => {
         ...createValidFormData(),
         salary: {
           ...createValidFormData().salary,
-          allowances: { hra: -100 },
-        },
+          allowances: { hra: -100 }
+        }
       });
       expect(result.errors['salary.allowances.hra']).toContain('positive number');
     });
@@ -529,8 +529,8 @@ describe('validateEmployeeForm', () => {
         ...createValidFormData(),
         salary: {
           ...createValidFormData().salary,
-          deductions: { pf: -100 },
-        },
+          deductions: { pf: -100 }
+        }
       });
       expect(result.errors['salary.deductions.pf']).toContain('positive number');
     });
@@ -542,7 +542,7 @@ describe('validateEmployeeForm', () => {
     it('should skip validation when enableLogin is false', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        userAccount: { enableLogin: false, password: '' },
+        userAccount: { enableLogin: false, password: '' }
       });
       expect(result.errors['userAccount.password']).toBeUndefined();
     });
@@ -550,7 +550,7 @@ describe('validateEmployeeForm', () => {
     it('should require password when login enabled', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        userAccount: { enableLogin: true, password: '', role: 'employee' },
+        userAccount: { enableLogin: true, password: '', role: 'employee' }
       });
       expect(result.errors['userAccount.password']).toContain('required');
     });
@@ -558,7 +558,7 @@ describe('validateEmployeeForm', () => {
     it('should reject short password', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        userAccount: { enableLogin: true, password: '12345', confirmPassword: '12345', role: 'employee' },
+        userAccount: { enableLogin: true, password: '12345', confirmPassword: '12345', role: 'employee' }
       });
       expect(result.errors['userAccount.password']).toContain('6 characters');
     });
@@ -566,7 +566,7 @@ describe('validateEmployeeForm', () => {
     it('should require confirmPassword when login enabled', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        userAccount: { enableLogin: true, password: 'Test@123', confirmPassword: '', role: 'employee' },
+        userAccount: { enableLogin: true, password: 'Test@123', confirmPassword: '', role: 'employee' }
       });
       expect(result.errors['userAccount.confirmPassword']).toBeDefined();
     });
@@ -574,7 +574,7 @@ describe('validateEmployeeForm', () => {
     it('should reject mismatching passwords', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        userAccount: { enableLogin: true, password: 'Test@123', confirmPassword: 'Different', role: 'employee' },
+        userAccount: { enableLogin: true, password: 'Test@123', confirmPassword: 'Different', role: 'employee' }
       });
       expect(result.errors['userAccount.confirmPassword']).toContain('do not match');
     });
@@ -582,7 +582,7 @@ describe('validateEmployeeForm', () => {
     it('should require valid role when login enabled', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        userAccount: { enableLogin: true, password: 'Test@123', confirmPassword: 'Test@123', role: 'invalid' },
+        userAccount: { enableLogin: true, password: 'Test@123', confirmPassword: 'Test@123', role: 'invalid' }
       });
       expect(result.errors['userAccount.role']).toBeDefined();
     });
@@ -590,7 +590,7 @@ describe('validateEmployeeForm', () => {
     it('should accept valid login setup', () => {
       const result = validateEmployeeForm({
         ...createValidFormData(),
-        userAccount: { enableLogin: true, password: 'Test@123', confirmPassword: 'Test@123', role: 'employee' },
+        userAccount: { enableLogin: true, password: 'Test@123', confirmPassword: 'Test@123', role: 'employee' }
       });
       expect(result.errors['userAccount.password']).toBeUndefined();
       expect(result.errors['userAccount.confirmPassword']).toBeUndefined();
@@ -614,14 +614,14 @@ describe('validateField', () => {
 
   it('should handle nested field paths', () => {
     const error = validateField('salary.basicSalary', -100, {
-      salary: { basicSalary: -100, currency: 'INR', payFrequency: 'monthly' },
+      salary: { basicSalary: -100, currency: 'INR', payFrequency: 'monthly' }
     });
     expect(error).toContain('positive number');
   });
 
   it('should return null for valid nested field', () => {
     const error = validateField('salary.basicSalary', '50000', {
-      salary: { basicSalary: '50000', currency: 'INR', payFrequency: 'monthly' },
+      salary: { basicSalary: '50000', currency: 'INR', payFrequency: 'monthly' }
     });
     expect(error).toBeNull();
   });
@@ -641,7 +641,7 @@ describe('transformEmployeeDataForAPI', () => {
     const result = transformEmployeeDataForAPI({
       ...createValidFormData(),
       firstName: '  Rahul  ',
-      lastName: '  Sharma  ',
+      lastName: '  Sharma  '
     });
     expect(result.firstName).toBe('Rahul');
     expect(result.lastName).toBe('Sharma');
@@ -651,7 +651,7 @@ describe('transformEmployeeDataForAPI', () => {
     const result = transformEmployeeDataForAPI({
       ...createValidFormData(),
       address: '',
-      city: '',
+      city: ''
     });
     expect(result.address).toBeUndefined();
     expect(result.city).toBeUndefined();
@@ -668,7 +668,7 @@ describe('transformEmployeeDataForAPI', () => {
   it('should exclude salary when basicSalary empty', () => {
     const result = transformEmployeeDataForAPI({
       ...createValidFormData(),
-      salary: { basicSalary: '' },
+      salary: { basicSalary: '' }
     });
     expect(result.salary).toBeUndefined();
   });
@@ -682,7 +682,7 @@ describe('transformEmployeeDataForAPI', () => {
   it('should map Internship to Intern', () => {
     const result = transformEmployeeDataForAPI({
       ...createValidFormData(),
-      employmentType: 'Internship',
+      employmentType: 'Internship'
     });
     expect(result.employmentType).toBe('Intern');
   });
@@ -691,7 +691,7 @@ describe('transformEmployeeDataForAPI', () => {
     const result = transformEmployeeDataForAPI({
       ...createValidFormData(),
       panNumber: 'abcde1234f',
-      ifscCode: 'sbin0000123',
+      ifscCode: 'sbin0000123'
     });
     expect(result.panNumber).toBe('ABCDE1234F');
     expect(result.ifscCode).toBe('SBIN0000123');
@@ -700,7 +700,7 @@ describe('transformEmployeeDataForAPI', () => {
   it('should set nationality default to Indian', () => {
     const result = transformEmployeeDataForAPI({
       ...createValidFormData(),
-      nationality: '',
+      nationality: ''
     });
     expect(result.nationality).toBe('Indian');
   });

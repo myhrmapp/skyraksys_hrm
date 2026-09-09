@@ -63,7 +63,7 @@ const AdminDebugPanel = () => {
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
   const { dialogProps, confirm } = useConfirmDialog();
-  
+
   // Environment State
   const [selectedEnvironment, setSelectedEnvironment] = useState(() => {
     return localStorage.getItem('admin_selected_environment') || 'LOCAL';
@@ -89,7 +89,7 @@ const AdminDebugPanel = () => {
   useEffect(() => {
     loadInitialData();
   }, []);
-  
+
   const handleEnvironmentChange = (envName, envApiUrl) => {
     setSelectedEnvironment(envName);
     localStorage.setItem('admin_selected_environment', envName);
@@ -256,7 +256,7 @@ const AdminDebugPanel = () => {
         offset: logOffset,
         search: logSearch
       });
-      
+
       const response = await http.get(`/debug/logs/${selectedLogType}?${params}`);
       if (response.data.success) {
         setLogs(response.data.data.logs);
@@ -728,15 +728,15 @@ const AdminDebugPanel = () => {
                 Internal tool for system management, configuration, and monitoring
               </Typography>
             </Box>
-            <EnvironmentSelector 
+            <EnvironmentSelector
               selectedEnvironment={selectedEnvironment}
               onEnvironmentChange={handleEnvironmentChange}
             />
           </Box>
-          
+
           {selectedEnvironment === 'PROD' && (
             <Alert severity="error" sx={{ mt: 2 }}>
-              <strong>⚠️ PRODUCTION MODE:</strong> You are connected to the production environment. 
+              <strong>⚠️ PRODUCTION MODE:</strong> You are connected to the production environment.
               All changes will affect live data!
             </Alert>
           )}

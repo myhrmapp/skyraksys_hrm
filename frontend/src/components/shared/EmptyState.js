@@ -20,7 +20,7 @@ const EmptyState = ({ icon, title, description, action }) => (
       py: 8,
       px: 3,
       textAlign: 'center',
-      color: 'text.secondary',
+      color: 'text.secondary'
     }}
   >
     {icon && (

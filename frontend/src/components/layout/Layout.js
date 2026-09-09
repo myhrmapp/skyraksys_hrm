@@ -64,7 +64,7 @@ const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const unreadCount = notifications.filter((notification) => !notification.read).length;
-  
+
   // State management
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -251,7 +251,7 @@ const Layout = () => {
 
   // Auto-expand group based on active route
   React.useEffect(() => {
-    const activeGroup = menuStructure.find(g => 
+    const activeGroup = menuStructure.find(g =>
       g.items.some(item => location.pathname.startsWith(item.path.split('?')[0]))
     );
     if (activeGroup && !expandedGroups[activeGroup.id]) {
@@ -302,7 +302,7 @@ const Layout = () => {
                     </Typography>
                   </Box>
                 )}
-                
+
                 {/* Accordion Header */}
                 <ListItemButton
                   onClick={() => toggleGroup(group.id)}
@@ -322,13 +322,13 @@ const Layout = () => {
                   <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
                     {group.icon}
                   </ListItemIcon>
-                  <ListItemText 
-                    primary={group.label} 
-                    primaryTypographyProps={{ fontWeight: expandedGroups[group.id] ? 600 : 500, fontSize: '0.875rem' }} 
+                  <ListItemText
+                    primary={group.label}
+                    primaryTypographyProps={{ fontWeight: expandedGroups[group.id] ? 600 : 500, fontSize: '0.875rem' }}
                   />
                   {expandedGroups[group.id] ? <ExpandLess sx={{ fontSize: 18 }} /> : <ChevronRight sx={{ fontSize: 18 }} />}
                 </ListItemButton>
-                
+
                 {/* Group Items */}
                 <Collapse in={expandedGroups[group.id]} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
@@ -359,7 +359,7 @@ const Layout = () => {
                           }
                         }}
                       >
-                        <ListItemText 
+                        <ListItemText
                           primary={item.label}
                           primaryTypographyProps={{
                             fontSize: '0.85rem',
@@ -378,7 +378,7 @@ const Layout = () => {
                     ))}
                   </List>
                 </Collapse>
-                
+
                 {/* Subtle divider between groups */}
                 <Box sx={{ height: 4 }} />
               </React.Fragment>
@@ -420,7 +420,7 @@ const Layout = () => {
             zIndex: 9999,
             borderRadius: 1,
             textDecoration: 'none',
-            fontWeight: 600,
+            fontWeight: 600
           }
         }}
       >
@@ -452,7 +452,7 @@ const Layout = () => {
           >
             <MenuIcon />
           </IconButton>
-          
+
           {/* Logo and Title */}
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
             <img
@@ -464,18 +464,18 @@ const Layout = () => {
 
           {/* User Profile Section */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Chip 
-              label={user?.role?.toUpperCase() || 'USER'} 
+            <Chip
+              label={user?.role?.toUpperCase() || 'USER'}
               size="small"
               data-testid="layout-role-chip"
-              sx={{ 
-                bgcolor: 'primary.main', 
+              sx={{
+                bgcolor: 'primary.main',
                 color: 'white',
                 fontWeight: 'bold',
                 fontSize: '0.75rem'
-              }} 
+              }}
             />
-            
+
             <IconButton
               size="large"
               edge="end"
@@ -493,7 +493,7 @@ const Layout = () => {
             <Button
               onClick={handleProfileMenuOpen}
               data-testid="layout-profile-menu-trigger"
-              sx={{ 
+              sx={{
                 color: 'text.primary',
                 textTransform: 'none',
                 borderRadius: 2,
@@ -501,10 +501,10 @@ const Layout = () => {
                 '&:hover': { bgcolor: 'action.hover' }
               }}
               startIcon={
-                <Avatar 
+                <Avatar
                   src={(user?.photoUrl || user?.employee?.photoUrl) ? buildPhotoUrl(user?.photoUrl || user?.employee?.photoUrl) : undefined}
-                  sx={{ 
-                    width: 32, 
+                  sx={{
+                    width: 32,
                     height: 32,
                     bgcolor: 'primary.main',
                     border: '2px solid rgba(255,255,255,0.8)'
@@ -541,8 +541,8 @@ const Layout = () => {
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
               width: drawerWidth,
               background: 'transparent',
               borderRight: 'none'
@@ -557,8 +557,8 @@ const Layout = () => {
           variant="permanent"
           sx={{
             display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
               width: drawerWidth,
               background: 'transparent',
               borderRight: 'none',
@@ -595,23 +595,23 @@ const Layout = () => {
                 height: 10,
                 bgcolor: 'background.paper',
                 transform: 'translateY(-50%) rotate(45deg)',
-                zIndex: 0,
-              },
-            },
+                zIndex: 0
+              }
+            }
           }
         }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem 
+        <MenuItem
           onClick={() => {
             handleProfileMenuClose();
             navigate('/my-profile');
-          }} 
+          }}
           data-testid="layout-menu-view-profile"
           sx={{ py: 1.5 }}
         >
-          <Avatar 
+          <Avatar
             src={(user?.photoUrl || user?.employee?.photoUrl) ? buildPhotoUrl(user?.photoUrl || user?.employee?.photoUrl) : undefined}
             sx={{ width: 32, height: 32, mr: 2, bgcolor: 'primary.main' }}
           >
@@ -626,9 +626,9 @@ const Layout = () => {
             </Typography>
           </Box>
         </MenuItem>
-        
+
         <Divider />
-        
+
         <MenuItem onClick={() => {
             handleProfileMenuClose();
             navigate('/notifications');
@@ -640,7 +640,7 @@ const Layout = () => {
           </ListItemIcon>
           Notifications
         </MenuItem>
-        
+
         <MenuItem onClick={() => {
             handleProfileMenuClose();
             navigate('/admin/settings-hub');
@@ -652,9 +652,9 @@ const Layout = () => {
           </ListItemIcon>
           Account Settings
         </MenuItem>
-        
 
-        
+
+
         <MenuItem onClick={() => {
             handleProfileMenuClose();
             navigate('/user-guide');
@@ -664,13 +664,13 @@ const Layout = () => {
           </ListItemIcon>
           Help & User Guide
         </MenuItem>
-        
+
         <Divider />
-        
-        <MenuItem 
+
+        <MenuItem
           onClick={handleLogout}
           data-testid="layout-menu-logout"
-          sx={{ 
+          sx={{
             color: 'error.main',
             '&:hover': { bgcolor: 'error.light', color: 'error.contrastText' }
           }}
@@ -698,7 +698,7 @@ const Layout = () => {
           width: { md: `calc(100% - ${drawerWidth}px)` },
           mt: { xs: 7, md: 8 },
           minHeight: 'calc(100vh - 64px)',
-          backgroundColor: theme.palette.background.default,
+          backgroundColor: theme.palette.background.default
         }}
       >
         <Outlet />

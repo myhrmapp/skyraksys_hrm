@@ -18,8 +18,8 @@ jest.mock('../../../../services/leave-balance-admin.service', () => {
       bulkInitialize: jest.fn(),
       getSummary: jest.fn(),
       getEmployees: jest.fn(),
-      getLeaveTypes: jest.fn(),
-    },
+      getLeaveTypes: jest.fn()
+    }
   };
 });
 const { leaveBalanceAdminService } = require('../../../../services/leave-balance-admin.service');
@@ -29,12 +29,12 @@ const adminAuth = { authValue: { user: createMockUser('admin') } };
 
 const mockEmployees = [
   { id: 1, firstName: 'John', lastName: 'Doe', employeeId: 'EMP001' },
-  { id: 2, firstName: 'Jane', lastName: 'Smith', employeeId: 'EMP002' },
+  { id: 2, firstName: 'Jane', lastName: 'Smith', employeeId: 'EMP002' }
 ];
 
 const mockLeaveTypes = [
   { id: 10, name: 'Annual Leave', maxDaysPerYear: 20 },
-  { id: 11, name: 'Sick Leave', maxDaysPerYear: 14 },
+  { id: 11, name: 'Sick Leave', maxDaysPerYear: 14 }
 ];
 
 const mockBalances = [
@@ -46,7 +46,7 @@ const mockBalances = [
     carryForward: 3,
     totalTaken: 5,
     totalPending: 2,
-    balance: 16,
+    balance: 16
   },
   {
     id: 101,
@@ -56,8 +56,8 @@ const mockBalances = [
     carryForward: 0,
     totalTaken: 1,
     totalPending: 0,
-    balance: 13,
-  },
+    balance: 13
+  }
 ];
 
 const mockPagination = { currentPage: 1, pages: 1, total: 2 };
@@ -73,8 +73,8 @@ const setupMocks = (overrides = {}) => {
     overrides.getAll ?? {
       data: {
         balances: overrides.balances ?? mockBalances,
-        pagination: overrides.pagination ?? mockPagination,
-      },
+        pagination: overrides.pagination ?? mockPagination
+      }
     }
   );
   leaveBalanceAdminService.create.mockResolvedValue(overrides.create ?? { data: {} });
@@ -168,8 +168,8 @@ describe('LeaveBalanceModern', () => {
       await renderComponent({
         mocks: {
           getAll: { data: { balances: [], pagination: { currentPage: 1, pages: 1, total: 0 } } },
-          balances: [],
-        },
+          balances: []
+        }
       });
       await waitFor(() => {
         expect(screen.getByText('No Leave Balances Found')).toBeInTheDocument();
@@ -180,8 +180,8 @@ describe('LeaveBalanceModern', () => {
       await renderComponent({
         mocks: {
           getAll: { data: { balances: [], pagination: { currentPage: 1, pages: 1, total: 0 } } },
-          balances: [],
-        },
+          balances: []
+        }
       });
       await waitFor(() => {
         const emptyMsg = screen.getByText('No Leave Balances Found');
@@ -193,7 +193,7 @@ describe('LeaveBalanceModern', () => {
   describe('Search & Filters', () => {
     it('filters balances by search query', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const searchInput = screen.getByTestId('leave-search-input');
       await userEvent.type(searchInput, 'Jane');
@@ -206,7 +206,7 @@ describe('LeaveBalanceModern', () => {
 
     it('filters by employee ID in search', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const searchInput = screen.getByTestId('leave-search-input');
       await userEvent.type(searchInput, 'EMP002');
@@ -219,7 +219,7 @@ describe('LeaveBalanceModern', () => {
 
     it('shows no-results message when search matches nothing', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const searchInput = screen.getByTestId('leave-search-input');
       await userEvent.type(searchInput, 'NONEXISTENT');
@@ -231,7 +231,7 @@ describe('LeaveBalanceModern', () => {
 
     it('reloads data when Refresh button is clicked', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const refreshBtn = screen.getByRole('button', { name: /Refresh/i });
       await userEvent.click(refreshBtn);
@@ -242,7 +242,7 @@ describe('LeaveBalanceModern', () => {
 
     it('clears filters when Clear Filters is clicked', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const searchInput = screen.getByTestId('leave-search-input');
       await userEvent.type(searchInput, 'Jane');
@@ -264,7 +264,7 @@ describe('LeaveBalanceModern', () => {
   describe('Create Balance Dialog', () => {
     it('opens the create dialog when Add Balance is clicked', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       // Find the header Add Balance button (Tooltip sets aria-label="Add Individual Leave Balance")
       const addBtn = screen.getByRole('button', { name: /Add.*Balance/i });
@@ -277,7 +277,7 @@ describe('LeaveBalanceModern', () => {
 
     it('calls create service on submit', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const addBtn = screen.getByRole('button', { name: /Add.*Balance/i });
       await userEvent.click(addBtn);
@@ -313,7 +313,7 @@ describe('LeaveBalanceModern', () => {
 
     it('closes create dialog on Cancel', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const addBtn = screen.getByRole('button', { name: /Add.*Balance/i });
       await userEvent.click(addBtn);
@@ -332,12 +332,12 @@ describe('LeaveBalanceModern', () => {
 
     it('shows success message after creation', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const addBtn = screen.getByRole('button', { name: /Add.*Balance/i });
       await userEvent.click(addBtn);
 
-      await waitFor(() => expect(screen.getByText('Create Leave Balance')).toBeInTheDocument());
+      await screen.findByText('Create Leave Balance');
 
       // Select employee via MUI Select dropdown
       const dialog = screen.getByRole('dialog');
@@ -362,12 +362,12 @@ describe('LeaveBalanceModern', () => {
     it('shows error on creation failure', async () => {
       leaveBalanceAdminService.create.mockRejectedValueOnce(new Error('Duplicate balance'));
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const addBtn = screen.getByRole('button', { name: /Add.*Balance/i });
       await userEvent.click(addBtn);
 
-      await waitFor(() => expect(screen.getByText('Create Leave Balance')).toBeInTheDocument());
+      await screen.findByText('Create Leave Balance');
 
       // Select employee via MUI Select dropdown
       const dialog = screen.getByRole('dialog');
@@ -393,7 +393,7 @@ describe('LeaveBalanceModern', () => {
   describe('Bulk Initialize Dialog', () => {
     it('opens bulk init dialog', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const bulkBtn = screen.getAllByRole('button', { name: /Bulk Initialize/i });
       await userEvent.click(bulkBtn[0]);
@@ -405,7 +405,7 @@ describe('LeaveBalanceModern', () => {
 
     it('shows leave type allocation fields in bulk dialog', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const bulkBtn = screen.getAllByRole('button', { name: /Bulk Initialize/i });
       await userEvent.click(bulkBtn[0]);
@@ -418,7 +418,7 @@ describe('LeaveBalanceModern', () => {
 
     it('validates at least one allocation before submit', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const bulkBtn = screen.getAllByRole('button', { name: /Bulk Initialize/i });
       await userEvent.click(bulkBtn[0]);
@@ -432,7 +432,7 @@ describe('LeaveBalanceModern', () => {
 
     it('calls bulkInitialize on submit', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const bulkBtn = screen.getAllByRole('button', { name: /Bulk Initialize/i });
       await userEvent.click(bulkBtn[0]);
@@ -454,7 +454,7 @@ describe('LeaveBalanceModern', () => {
 
     it('shows success message after bulk init', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const bulkBtn = screen.getAllByRole('button', { name: /Bulk Initialize/i });
       await userEvent.click(bulkBtn[0]);
@@ -477,7 +477,7 @@ describe('LeaveBalanceModern', () => {
     it('shows error on bulk init failure', async () => {
       leaveBalanceAdminService.bulkInitialize.mockRejectedValueOnce(new Error('Server error'));
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const bulkBtn = screen.getAllByRole('button', { name: /Bulk Initialize/i });
       await userEvent.click(bulkBtn[0]);
@@ -501,7 +501,7 @@ describe('LeaveBalanceModern', () => {
   describe('Inline Editing', () => {
     it('enters edit mode when Edit button is clicked', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       // Click edit on first row
       const editButtons = screen.getAllByLabelText('Edit');
@@ -516,7 +516,7 @@ describe('LeaveBalanceModern', () => {
 
     it('shows Save and Cancel buttons in edit mode', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const editButtons = screen.getAllByLabelText('Edit');
       await userEvent.click(editButtons[0]);
@@ -529,12 +529,12 @@ describe('LeaveBalanceModern', () => {
 
     it('cancels edit mode', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const editButtons = screen.getAllByLabelText('Edit');
       await userEvent.click(editButtons[0]);
 
-      await waitFor(() => expect(screen.getByLabelText('Cancel')).toBeInTheDocument());
+      await screen.findByLabelText('Cancel');
 
       await userEvent.click(screen.getByLabelText('Cancel'));
 
@@ -545,12 +545,12 @@ describe('LeaveBalanceModern', () => {
 
     it('calls update service on Save', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const editButtons = screen.getAllByLabelText('Edit');
       await userEvent.click(editButtons[0]);
 
-      await waitFor(() => expect(screen.getByLabelText('Save')).toBeInTheDocument());
+      await screen.findByLabelText('Save');
 
       await userEvent.click(screen.getByLabelText('Save'));
 
@@ -561,12 +561,12 @@ describe('LeaveBalanceModern', () => {
 
     it('shows success message after update', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const editButtons = screen.getAllByLabelText('Edit');
       await userEvent.click(editButtons[0]);
 
-      await waitFor(() => expect(screen.getByLabelText('Save')).toBeInTheDocument());
+      await screen.findByLabelText('Save');
       await userEvent.click(screen.getByLabelText('Save'));
 
       await waitFor(() => {
@@ -578,7 +578,7 @@ describe('LeaveBalanceModern', () => {
   describe('Delete', () => {
     it('opens delete confirmation dialog', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const deleteButtons = screen.getAllByLabelText('Delete');
       await userEvent.click(deleteButtons[0]);
@@ -591,12 +591,12 @@ describe('LeaveBalanceModern', () => {
 
     it('calls delete service on confirm', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const deleteButtons = screen.getAllByLabelText('Delete');
       await userEvent.click(deleteButtons[0]);
 
-      await waitFor(() => expect(screen.getByText('Confirm Deletion')).toBeInTheDocument());
+      await screen.findByText('Confirm Deletion');
 
       const confirmBtn = screen.getByRole('button', { name: /^Delete$/i });
       await userEvent.click(confirmBtn);
@@ -608,12 +608,12 @@ describe('LeaveBalanceModern', () => {
 
     it('shows success after delete', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const deleteButtons = screen.getAllByLabelText('Delete');
       await userEvent.click(deleteButtons[0]);
 
-      await waitFor(() => expect(screen.getByText('Confirm Deletion')).toBeInTheDocument());
+      await screen.findByText('Confirm Deletion');
 
       const confirmBtn = screen.getByRole('button', { name: /^Delete$/i });
       await userEvent.click(confirmBtn);
@@ -625,12 +625,12 @@ describe('LeaveBalanceModern', () => {
 
     it('cancels delete dialog', async () => {
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const deleteButtons = screen.getAllByLabelText('Delete');
       await userEvent.click(deleteButtons[0]);
 
-      await waitFor(() => expect(screen.getByText('Confirm Deletion')).toBeInTheDocument());
+      await screen.findByText('Confirm Deletion');
 
       const cancelBtn = screen.getAllByRole('button', { name: /Cancel/i });
       await userEvent.click(cancelBtn[cancelBtn.length - 1]);
@@ -654,7 +654,7 @@ describe('LeaveBalanceModern', () => {
       });
 
       await renderComponent();
-      await waitFor(() => expect(screen.getByText('John Doe')).toBeInTheDocument());
+      await screen.findByText('John Doe');
 
       const exportBtn = screen.getByRole('button', { name: /Export CSV/i });
       await userEvent.click(exportBtn);
@@ -671,8 +671,8 @@ describe('LeaveBalanceModern', () => {
       await renderComponent({
         mocks: {
           getAll: { data: { balances: [], pagination: { currentPage: 1, pages: 1, total: 0 } } },
-          balances: [],
-        },
+          balances: []
+        }
       });
 
       await waitFor(() => {
@@ -687,7 +687,7 @@ describe('LeaveBalanceModern', () => {
       leaveBalanceAdminService.getEmployees.mockRejectedValueOnce(new Error('Network error'));
       leaveBalanceAdminService.getLeaveTypes.mockResolvedValue({ data: mockLeaveTypes });
       leaveBalanceAdminService.getAll.mockResolvedValue({
-        data: { balances: [], pagination: { currentPage: 1, pages: 1, total: 0 } },
+        data: { balances: [], pagination: { currentPage: 1, pages: 1, total: 0 } }
       });
 
       render(

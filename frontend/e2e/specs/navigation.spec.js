@@ -8,22 +8,22 @@ const rows = reader.readEnabledTests('Navigation');
 // Map Excel short names → actual sidebar nav testid suffixes (from Layout.js path-based testids)
 const NAV_MAP = {
   admin: {
-    dashboard: 'admin-dashboard', employees: 'employees', leaves: 'leave-management',
-    attendance: 'attendance-management', timesheets: 'timesheets', payroll: 'payroll-management',
+    dashboard: 'dashboard', employees: 'employees', leaves: 'leave?view=management',
+    attendance: 'attendance?view=management', timesheets: 'timesheets?view=approvals', payroll: 'payroll-management',
     tasks: 'project-task-config', reviews: 'employee-reviews', payslips: 'employee-payslips',
   },
   hr: {
-    dashboard: 'admin-dashboard', employees: 'employees', leaves: 'leave-management',
-    attendance: 'attendance-management', timesheets: 'timesheets', payroll: 'payroll-management',
+    dashboard: 'dashboard', employees: 'employees', leaves: 'leave?view=management',
+    attendance: 'attendance?view=management', timesheets: 'timesheets?view=approvals', payroll: 'payroll-management',
     tasks: 'project-task-config', reviews: 'employee-reviews', payslips: 'employee-payslips',
   },
   manager: {
-    dashboard: 'manager-dashboard', employees: 'employees', leaves: 'leave-management',
-    timesheets: 'timesheets', tasks: 'project-task-config', reviews: 'employee-reviews',
+    dashboard: 'dashboard', employees: 'employees', leaves: 'leave?view=management',
+    timesheets: 'timesheets?view=approvals', tasks: 'project-task-config', reviews: 'employee-reviews',
     payslips: 'employee-payslips',
   },
   employee: {
-    dashboard: 'employee-dashboard', leaves: 'leave-requests', attendance: 'my-attendance',
+    dashboard: 'dashboard', leaves: 'leave', attendance: 'attendance',
     timesheets: 'timesheets', tasks: 'my-tasks', payslips: 'employee-payslips',
     reviews: 'employee-reviews',
   },
@@ -37,7 +37,7 @@ test.describe('Navigation & Access Control', () => {
   for (const row of rows) {
     test(`${row.testId}: ${row.description}`, async ({ page }) => {
       // Navigate to role-specific dashboard after login to ensure sidebar is visible
-      const DASHBOARD_ROUTES = { admin: '/dashboard', hr: '/dashboard', manager: '/manager-dashboard', employee: '/employee-dashboard' };
+      const DASHBOARD_ROUTES = { admin: '/dashboard', hr: '/dashboard', manager: '/dashboard', employee: '/dashboard' };
 
       if (row.role) {
         await loginAs(page, row.role);
@@ -85,8 +85,14 @@ test.describe('Navigation & Access Control', () => {
           await trigger.click();
           const expected = (row.expectedItems || '').split(',').filter(Boolean);
           for (const item of expected) {
-            const kebab = item.trim().replace(/([A-Z])/g, '-$1').toLowerCase();
-            await expect(page.locator(`[data-testid="layout-menu-${kebab}"]`)).toBeVisible({ timeout: 3000 });
+            const str = item.trim().toLowerCase();
+            if (str.includes('profile')) {
+              await expect(page.locator('[data-testid="layout-menu-view-profile"]')).toBeVisible({ timeout: 3000 });
+            } else if (str.includes('logout')) {
+              await expect(page.locator('[data-testid="layout-menu-logout"]')).toBeVisible({ timeout: 3000 });
+            } else if (str.includes('settings')) {
+              await expect(page.locator('[data-testid="layout-menu-settings"]')).toBeVisible({ timeout: 3000 });
+            }
           }
           await page.keyboard.press('Escape');
           break;

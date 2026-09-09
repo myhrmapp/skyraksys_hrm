@@ -33,17 +33,17 @@ const RestoreManagement = () => {
   // Queries
   const { data: reviewsData, isLoading: reviewsLoading } = useQuery({
     queryKey: ['restore', 'reviews'],
-    queryFn: () => restoreService.getDeletedReviews(),
+    queryFn: () => restoreService.getDeletedReviews()
   });
 
   const { data: balancesData, isLoading: balancesLoading } = useQuery({
     queryKey: ['restore', 'balances'],
-    queryFn: () => restoreService.getDeletedBalances(),
+    queryFn: () => restoreService.getDeletedBalances()
   });
 
   const { data: usersData, isLoading: usersLoading } = useQuery({
     queryKey: ['restore', 'users'],
-    queryFn: () => restoreService.getDeletedUsers(),
+    queryFn: () => restoreService.getDeletedUsers()
   });
 
   // Mutations
@@ -55,7 +55,7 @@ const RestoreManagement = () => {
     },
     onError: (error) => {
       enqueueSnackbar(error?.response?.data?.message || 'Failed to restore review', { variant: 'error' });
-    },
+    }
   });
 
   const restoreBalanceMutation = useMutation({
@@ -66,7 +66,7 @@ const RestoreManagement = () => {
     },
     onError: (error) => {
       enqueueSnackbar(error?.response?.data?.message || 'Failed to restore balance', { variant: 'error' });
-    },
+    }
   });
 
   const restoreUserMutation = useMutation({
@@ -77,7 +77,7 @@ const RestoreManagement = () => {
     },
     onError: (error) => {
       enqueueSnackbar(error?.response?.data?.message || 'Failed to restore user', { variant: 'error' });
-    },
+    }
   });
 
   const deletedReviews = reviewsData?.data || [];
@@ -198,7 +198,7 @@ const RestoreManagement = () => {
                           disabled={isMutating}
                           onClick={() => setConfirmDialog({
                             open: true, type: 'review', id: review.id,
-                            label: `${review.employee?.firstName} ${review.employee?.lastName} — ${review.reviewPeriod}`,
+                            label: `${review.employee?.firstName} ${review.employee?.lastName} — ${review.reviewPeriod}`
                           })}
                           aria-label={`Restore review for ${review.employee?.firstName} ${review.employee?.lastName}`}
                         >
@@ -267,7 +267,7 @@ const RestoreManagement = () => {
                           disabled={isMutating}
                           onClick={() => setConfirmDialog({
                             open: true, type: 'balance', id: bal.id,
-                            label: `${bal.employee?.firstName} ${bal.employee?.lastName} — ${bal.leaveType?.name || 'Unknown'}`,
+                            label: `${bal.employee?.firstName} ${bal.employee?.lastName} — ${bal.leaveType?.name || 'Unknown'}`
                           })}
                           aria-label={`Restore balance for ${bal.employee?.firstName} ${bal.employee?.lastName}`}
                         >
@@ -329,7 +329,7 @@ const RestoreManagement = () => {
                           disabled={isMutating}
                           onClick={() => setConfirmDialog({
                             open: true, type: 'user', id: user.id,
-                            label: `${user.firstName} ${user.lastName} (${user.email})`,
+                            label: `${user.firstName} ${user.lastName} (${user.email})`
                           })}
                           aria-label={`Restore user ${user.firstName} ${user.lastName}`}
                         >

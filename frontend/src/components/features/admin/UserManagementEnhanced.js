@@ -70,10 +70,10 @@ const UserManagementEnhanced = () => {
   const theme = useTheme();
   const { user: currentUser } = useAuth();
   const { dialogProps, confirm } = useConfirmDialog();
-  
+
   // Tab state
   const [activeTab, setActiveTab] = useState(0);
-  
+
   // Create user form state
   const [formData, setFormData] = useState({
     email: '',
@@ -83,7 +83,7 @@ const UserManagementEnhanced = () => {
     lastName: '',
     role: 'employee'
   });
-  
+
   // Users list state
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -93,24 +93,24 @@ const UserManagementEnhanced = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  
+
   // UI state
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // Dialog states
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
   const [userToReset, setUserToReset] = useState(null);
   const [newPassword, setNewPassword] = useState('');
-  
+
   // Quick actions menu state
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
-  
+
   // Bulk selection state
   const [selectedUsers, setSelectedUsers] = useState([]);
 
@@ -130,7 +130,7 @@ const UserManagementEnhanced = () => {
   const loadUsers = async () => {
     setLoading(true);
     setError('');
-    
+
     try {
       const params = {
         page: page + 1,
@@ -139,9 +139,9 @@ const UserManagementEnhanced = () => {
         ...(filterRole && { role: filterRole }),
         ...(filterStatus && { status: filterStatus })
       };
-      
+
       const response = await authService.getAllUsers(params);
-      
+
       if (response.success) {
         setUsers(response.data.users || []);
         setTotalUsers(response.data.pagination?.total || 0);
@@ -196,7 +196,7 @@ const UserManagementEnhanced = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setLoading(true);
@@ -254,10 +254,10 @@ const UserManagementEnhanced = () => {
 
     setLoading(true);
     setError('');
-    
+
     try {
       const result = await authService.toggleUserStatus(userId, !currentStatus);
-      
+
       if (result.success) {
         setSuccess(`User ${!currentStatus ? 'activated' : 'deactivated'} successfully!`);
         loadUsers();
@@ -276,10 +276,10 @@ const UserManagementEnhanced = () => {
   const handleRoleChange = async (userId, newRole) => {
     setLoading(true);
     setError('');
-    
+
     try {
       const result = await authService.updateUserRole(userId, newRole);
-      
+
       if (result.success) {
         setSuccess('User role updated successfully!');
         loadUsers();
@@ -301,13 +301,13 @@ const UserManagementEnhanced = () => {
 
   const handleDeleteConfirm = async () => {
     if (!userToDelete) return;
-    
+
     setLoading(true);
     setError('');
-    
+
     try {
       const result = await authService.deleteUser(userToDelete.id);
-      
+
       if (result.success) {
         setSuccess('User terminated successfully (account deactivated)');
         setDeleteDialogOpen(false);
@@ -345,13 +345,13 @@ const UserManagementEnhanced = () => {
       setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)');
       return;
     }
-    
+
     setLoading(true);
     setError('');
-    
+
     try {
       const result = await authService.resetUserPassword(userToReset.id, newPassword);
-      
+
       if (result.success) {
         setSuccess('Password reset successfully!');
         setResetPasswordDialogOpen(false);
@@ -378,7 +378,7 @@ const UserManagementEnhanced = () => {
     setFilterStatus('');
     setPage(0);
   };
-  
+
   // Quick Actions Menu Handlers
   const handleQuickActionsClick = (event, user) => {
     setAnchorEl(event.currentTarget);
@@ -392,8 +392,8 @@ const UserManagementEnhanced = () => {
 
   const handleQuickAction = (action) => {
     handleQuickActionsClose();
-    
-    switch(action) {
+
+    switch (action) {
       case 'reset-password':
         handleResetPasswordClick(selectedUser);
         break;
@@ -416,7 +416,7 @@ const UserManagementEnhanced = () => {
         break;
     }
   };
-  
+
   // Bulk Actions Handlers
   const handleSelectAll = (event) => {
     if (event.target.checked) {
@@ -428,8 +428,8 @@ const UserManagementEnhanced = () => {
   };
 
   const handleSelectUser = (userId) => {
-    setSelectedUsers(prev => 
-      prev.includes(userId) 
+    setSelectedUsers(prev =>
+      prev.includes(userId)
         ? prev.filter(id => id !== userId)
         : [...prev, userId]
     );
@@ -437,7 +437,7 @@ const UserManagementEnhanced = () => {
 
   const handleBulkActivate = async () => {
     if (selectedUsers.length === 0) return;
-    
+
     setLoading(true);
     try {
       for (const userId of selectedUsers) {
@@ -458,7 +458,7 @@ const UserManagementEnhanced = () => {
 
   const handleBulkDeactivate = async () => {
     if (selectedUsers.length === 0) return;
-    
+
     setLoading(true);
     try {
       for (const userId of selectedUsers) {
@@ -476,10 +476,10 @@ const UserManagementEnhanced = () => {
       setLoading(false);
     }
   };
-  
+
   // Quick Filter Handlers
   const applyQuickFilter = (type) => {
-    switch(type) {
+    switch (type) {
       case 'active-admins':
         setFilterRole('admin');
         setFilterStatus('active');
@@ -501,12 +501,12 @@ const UserManagementEnhanced = () => {
     }
     setPage(0);
   };
-  
+
   // Lock/Unlock Account Handler
   const handleLockAccount = (user) => {
     const isCurrentlyLocked = user.isLocked || false;
     const action = isCurrentlyLocked ? 'unlock' : 'lock';
-    
+
     confirm({
       title: `${isCurrentlyLocked ? 'Unlock' : 'Lock'} Account`,
       message: `Are you sure you want to ${action} ${user.email}'s account?`,
@@ -517,7 +517,7 @@ const UserManagementEnhanced = () => {
         try {
           const reason = isCurrentlyLocked ? '' : 'Security';
           const result = await authService.lockUserAccount(user.id, !isCurrentlyLocked, reason);
-          
+
           if (result.success) {
             setSuccess(`User account ${action}ed successfully`);
             loadUsers();
@@ -532,7 +532,7 @@ const UserManagementEnhanced = () => {
       }
     });
   };
-  
+
   // Send Welcome Email Handler
   const handleSendEmail = (user) => {
     confirm({
@@ -544,7 +544,7 @@ const UserManagementEnhanced = () => {
         setLoading(true);
         try {
           const result = await authService.sendWelcomeEmail(user.id, false);
-          
+
           if (result.success) {
             setSuccess('Welcome email sent successfully');
           } else {
@@ -586,7 +586,7 @@ const UserManagementEnhanced = () => {
                   </Typography>
                 </Box>
               </Box>
-              
+
               <Button
                 startIcon={<RefreshIcon />}
                 onClick={() => activeTab === 1 && loadUsers()}
@@ -621,15 +621,15 @@ const UserManagementEnhanced = () => {
           <Card elevation={3} sx={{ borderRadius: 3 }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
-                <Tab 
-                  icon={<PersonAddIcon />} 
-                  label="Create User" 
+                <Tab
+                  icon={<PersonAddIcon />}
+                  label="Create User"
                   iconPosition="start"
                   sx={{ textTransform: 'none', fontWeight: 'medium', fontSize: '1rem' }}
                   data-testid="usermgmt-tab-create"
                 />
-                <Tab 
-                  icon={<PeopleIcon />} 
+                <Tab
+                  icon={<PeopleIcon />}
                   label={`Manage Users (${totalUsers})`}
                   iconPosition="start"
                   sx={{ textTransform: 'none', fontWeight: 'medium', fontSize: '1rem' }}
@@ -660,7 +660,7 @@ const UserManagementEnhanced = () => {
                             <InputAdornment position="start">
                               <EmailIcon color="action" />
                             </InputAdornment>
-                          ),
+                          )
                         }}
                       />
                     </Grid>
@@ -756,7 +756,7 @@ const UserManagementEnhanced = () => {
                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                               </IconButton>
                             </InputAdornment>
-                          ),
+                          )
                         }}
                       />
                     </Grid>
@@ -788,7 +788,7 @@ const UserManagementEnhanced = () => {
                                 {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                               </IconButton>
                             </InputAdornment>
-                          ),
+                          )
                         }}
                       />
                     </Grid>
@@ -883,7 +883,7 @@ const UserManagementEnhanced = () => {
                             <InputAdornment position="start">
                               <SearchIcon />
                             </InputAdornment>
-                          ),
+                          )
                         }}
                       />
                     </Grid>
@@ -933,10 +933,10 @@ const UserManagementEnhanced = () => {
 
                   {/* Bulk Actions Toolbar */}
                   {selectedUsers.length > 0 && (
-                    <Paper 
-                      sx={{ 
-                        mb: 2, 
-                        p: 2, 
+                    <Paper
+                      sx={{
+                        mb: 2,
+                        p: 2,
                         bgcolor: 'primary.50',
                         border: '1px solid',
                         borderColor: 'primary.200',
@@ -1030,8 +1030,8 @@ const UserManagementEnhanced = () => {
                                 <Typography variant="body2">{user.email}</Typography>
                               </TableCell>
                               <TableCell align="center">
-                                <Chip 
-                                  label={user.role?.toUpperCase() || 'UNKNOWN'} 
+                                <Chip
+                                  label={user.role?.toUpperCase() || 'UNKNOWN'}
                                   color={getRoleColor(user.role)}
                                   size="small"
                                   sx={{ fontWeight: 'bold' }}
@@ -1057,8 +1057,8 @@ const UserManagementEnhanced = () => {
                               </TableCell>
                               <TableCell>
                                 <Typography variant="caption">
-                                  {user.lastLoginAt 
-                                    ? new Date(user.lastLoginAt).toLocaleString() 
+                                  {user.lastLoginAt
+                                    ? new Date(user.lastLoginAt).toLocaleString()
                                     : 'Never'}
                                 </Typography>
                               </TableCell>
@@ -1068,7 +1068,7 @@ const UserManagementEnhanced = () => {
                                     size="small"
                                     onClick={(e) => handleQuickActionsClick(e, user)}
                                     disabled={user.id === currentUser?.id}
-                                    sx={{ 
+                                    sx={{
                                       bgcolor: 'action.hover',
                                       '&:hover': { bgcolor: 'primary.light' }
                                     }}
@@ -1225,7 +1225,7 @@ const UserManagementEnhanced = () => {
                       <InputAdornment position="start">
                         <LockIcon color="action" />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
               </Box>

@@ -24,17 +24,17 @@ const createTestQueryClient = () =>
   new QueryClient({
     defaultOptions: {
       queries: { retry: false },
-      mutations: { retry: false },
-    },
+      mutations: { retry: false }
+    }
   });
 
 const renderWithProviders = (component, { queryClient = createTestQueryClient(), user = {} } = {}) => {
-  useAuth.mockReturnValue({ 
-    user: { 
-      id: 1, 
+  useAuth.mockReturnValue({
+    user: {
+      id: 1,
       employee: { id: 1 },
-      ...user 
-    } 
+      ...user
+    }
   });
 
   return render(
@@ -50,7 +50,7 @@ describe('ManagerDashboard Component', () => {
   const mockTeamMembers = [
     { id: 1, firstName: 'John', lastName: 'Doe', employeeId: 'EMP001', isOnLeave: false },
     { id: 2, firstName: 'Jane', lastName: 'Smith', employeeId: 'EMP002', isOnLeave: true },
-    { id: 3, firstName: 'Bob', lastName: 'Wilson', employeeId: 'EMP003', isOnLeave: false },
+    { id: 3, firstName: 'Bob', lastName: 'Wilson', employeeId: 'EMP003', isOnLeave: false }
   ];
 
   const mockPendingLeaves = [
@@ -61,7 +61,7 @@ describe('ManagerDashboard Component', () => {
       startDate: '2026-03-01',
       endDate: '2026-03-05',
       days: 5,
-      status: 'pending',
+      status: 'pending'
     },
     {
       id: 2,
@@ -70,8 +70,8 @@ describe('ManagerDashboard Component', () => {
       startDate: '2026-03-10',
       endDate: '2026-03-12',
       days: 3,
-      status: 'pending',
-    },
+      status: 'pending'
+    }
   ];
 
   const mockPendingTimesheets = [
@@ -81,21 +81,21 @@ describe('ManagerDashboard Component', () => {
       weekStartDate: '2026-02-10',
       weekEndDate: '2026-02-16',
       totalHours: 40,
-      status: 'submitted',
-    },
+      status: 'submitted'
+    }
   ];
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     employeeService.getTeamMembers.mockResolvedValue({
-      data: mockTeamMembers,
+      data: mockTeamMembers
     });
 
     leaveService.getPendingForManager.mockResolvedValue(mockPendingLeaves);
 
     timesheetService.getPendingApprovals.mockResolvedValue({
-      data: mockPendingTimesheets,
+      data: mockPendingTimesheets
     });
 
     leaveService.approveLeave.mockResolvedValue({ success: true });

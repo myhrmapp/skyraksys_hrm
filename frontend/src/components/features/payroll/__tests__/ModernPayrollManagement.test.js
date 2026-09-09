@@ -37,8 +37,8 @@ jest.mock('../../../../http-common', () => {
       get: (...args) => mockGet(...args),
       post: (...args) => mockPost(...args),
       put: (...args) => mockPut(...args),
-      delete: (...args) => mockDelete(...args),
-    },
+      delete: (...args) => mockDelete(...args)
+    }
   };
 });
 
@@ -59,8 +59,8 @@ jest.mock('../../../../hooks/useConfirmDialog', () => ({
   __esModule: true,
   default: () => ({
     dialogProps: {},
-    confirm: jest.fn(),
-  }),
+    confirm: jest.fn()
+  })
 }));
 
 /* ------------------------------------------------------------------ */
@@ -78,7 +78,7 @@ const mockPayslips = [
     netPay: '40000',
     employee: { employeeId: 'EMP001', firstName: 'John', lastName: 'Doe' },
     earnings: { basicSalary: 30000, hra: 15000, transport: 5000 },
-    deductions: { pf: 6000, tax: 4000 },
+    deductions: { pf: 6000, tax: 4000 }
   },
   {
     id: 2,
@@ -90,7 +90,7 @@ const mockPayslips = [
     netPay: '48000',
     employee: { employeeId: 'EMP002', firstName: 'Jane', lastName: 'Smith' },
     earnings: { basicSalary: 40000, hra: 15000, transport: 5000 },
-    deductions: { pf: 7000, tax: 5000 },
+    deductions: { pf: 7000, tax: 5000 }
   },
   {
     id: 3,
@@ -102,24 +102,24 @@ const mockPayslips = [
     netPay: '44000',
     employee: { employeeId: 'EMP003', firstName: 'Alice', lastName: 'Johnson' },
     earnings: { basicSalary: 35000, hra: 15000, transport: 5000 },
-    deductions: { pf: 6500, tax: 4500 },
-  },
+    deductions: { pf: 6500, tax: 4500 }
+  }
 ];
 
 const mockEmployees = [
   { id: 1, employeeId: 'EMP001', firstName: 'John', lastName: 'Doe', status: 'Active' },
   { id: 2, employeeId: 'EMP002', firstName: 'Jane', lastName: 'Smith', status: 'Active' },
-  { id: 3, employeeId: 'EMP003', firstName: 'Alice', lastName: 'Johnson', status: 'Active' },
+  { id: 3, employeeId: 'EMP003', firstName: 'Alice', lastName: 'Johnson', status: 'Active' }
 ];
 
 const mockDepartments = [
   { id: 1, name: 'Engineering' },
-  { id: 2, name: 'Finance' },
+  { id: 2, name: 'Finance' }
 ];
 
 const mockTemplates = [
   { id: 1, name: 'Standard Template', isDefault: true },
-  { id: 2, name: 'Custom Template', isDefault: false },
+  { id: 2, name: 'Custom Template', isDefault: false }
 ];
 
 /* ------------------------------------------------------------------ */
@@ -139,27 +139,27 @@ const setupMockGet = (overrides = {}) => {
           success: true,
           data: {
             payslips: mockPayslips,
-            pagination: { totalRecords: mockPayslips.length },
-          },
-        },
+            pagination: { totalRecords: mockPayslips.length }
+          }
+        }
       });
     }
     if (url === '/employees') {
       if (overrides['/employees']) return overrides['/employees']();
       return Promise.resolve({
-        data: { success: true, data: mockEmployees },
+        data: { success: true, data: mockEmployees }
       });
     }
     if (url === '/departments') {
       if (overrides['/departments']) return overrides['/departments']();
       return Promise.resolve({
-        data: { success: true, data: mockDepartments },
+        data: { success: true, data: mockDepartments }
       });
     }
     if (url === '/payslip-templates/active') {
       if (overrides['/payslip-templates/active']) return overrides['/payslip-templates/active']();
       return Promise.resolve({
-        data: { success: true, data: mockTemplates },
+        data: { success: true, data: mockTemplates }
       });
     }
     // Fallback
@@ -170,7 +170,7 @@ const setupMockGet = (overrides = {}) => {
 const renderPayroll = (authOverrides = {}) => {
   const defaultUser = createMockUser('admin');
   return renderWithProviders(<ModernPayrollManagement />, {
-    authValue: { user: defaultUser, ...authOverrides },
+    authValue: { user: defaultUser, ...authOverrides }
   });
 };
 
@@ -188,7 +188,7 @@ describe('Access Control', () => {
   test('denies access for non-admin/non-HR users', () => {
     const empUser = createMockUser('employee');
     renderWithProviders(<ModernPayrollManagement />, {
-      authValue: { user: empUser },
+      authValue: { user: empUser }
     });
 
     expect(screen.getByText(/access denied/i)).toBeInTheDocument();
@@ -206,7 +206,7 @@ describe('Access Control', () => {
   test('grants access for HR users', async () => {
     const hrUser = createMockUser('hr');
     renderWithProviders(<ModernPayrollManagement />, {
-      authValue: { user: hrUser },
+      authValue: { user: hrUser }
     });
 
     expect(
@@ -308,8 +308,8 @@ describe('Overview Tab', () => {
     setupMockGet({
       '/payslips': () =>
         Promise.resolve({
-          data: { success: true, data: { payslips: [], pagination: { totalRecords: 0 } } },
-        }),
+          data: { success: true, data: { payslips: [], pagination: { totalRecords: 0 } } }
+        })
     });
 
     renderPayroll();
@@ -445,7 +445,7 @@ describe('Filters', () => {
 describe('Error Handling', () => {
   test('handles payslips fetch error gracefully', async () => {
     setupMockGet({
-      '/payslips': () => Promise.reject(new Error('Network Error')),
+      '/payslips': () => Promise.reject(new Error('Network Error'))
     });
 
     renderPayroll();
@@ -502,9 +502,9 @@ describe('Finalize Payslip', () => {
         Promise.resolve({
           data: {
             success: true,
-            data: { payslips: [mockPayslips[1]], pagination: { totalRecords: 1 } }, // finalized only
-          },
-        }),
+            data: { payslips: [mockPayslips[1]], pagination: { totalRecords: 1 } } // finalized only
+          }
+        })
     });
 
     renderPayroll();
@@ -548,9 +548,9 @@ describe('Mark as Paid', () => {
         Promise.resolve({
           data: {
             success: true,
-            data: { payslips: [mockPayslips[0]], pagination: { totalRecords: 1 } }, // draft
-          },
-        }),
+            data: { payslips: [mockPayslips[0]], pagination: { totalRecords: 1 } } // draft
+          }
+        })
     });
 
     renderPayroll();
@@ -574,7 +574,7 @@ describe('Export Excel', () => {
       }
       if (url.startsWith('/payslips')) {
         return Promise.resolve({
-            data: { success: true, data: { payslips: mockPayslips, pagination: { totalRecords: mockPayslips.length } } },
+            data: { success: true, data: { payslips: mockPayslips, pagination: { totalRecords: mockPayslips.length } } }
           });
       }
       if (url === '/employees') {

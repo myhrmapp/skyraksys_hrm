@@ -23,7 +23,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
+  DialogActions
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -32,7 +32,7 @@ import {
   Send as SendIcon,
   NavigateBefore as PrevIcon,
   NavigateNext as NextIcon,
-  Today as TodayIcon,
+  Today as TodayIcon
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import weekday from 'dayjs/plugin/weekday';
@@ -72,14 +72,14 @@ const emptyTask = () => ({
   projectId: '',
   taskId: '',
   hours: { monday: '', tuesday: '', wednesday: '', thursday: '', friday: '', saturday: '', sunday: '' },
-  notes: '',
+  notes: ''
 });
 
 const STATUS_CONFIG = {
   draft:     { color: 'default', label: 'Draft' },
   submitted: { color: 'warning', label: 'Pending Approval' },
   approved:  { color: 'success', label: 'Approved' },
-  rejected:  { color: 'error',   label: 'Rejected' },
+  rejected:  { color: 'error',   label: 'Rejected' }
 };
 
 // ---------------------------------------------------------------------------
@@ -149,7 +149,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
   // M-02: Block navigation when there are unsaved changes (React Router v6 useBlocker)
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname,
+      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
   );
 
   // ---- Reference data (React Query) ----------------------------------------
@@ -166,7 +166,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
     onError: (error) => {
       logger.error('Error loading projects:', error);
       showError('Unable to load your project list. Please refresh the page.');
-    },
+    }
   });
 
   const { data: tasksData, isLoading: isLoadingTasks } = useQuery({
@@ -181,7 +181,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
     onError: (error) => {
       logger.error('Error loading tasks:', error);
       showError('Unable to load tasks. Please refresh the page.');
-    },
+    }
   });
 
   const projects = projectsData || [];
@@ -204,7 +204,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
         const weekTimesheets = responseData.data.filter(
           (ts) =>
             dayjs(ts.weekStartDate).format('YYYY-MM-DD') === weekStart &&
-            ts.employeeId === employeeId,
+            ts.employeeId === employeeId
         );
 
         if (weekTimesheets.length > 0) {
@@ -220,17 +220,17 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                 thursday:  ts.thursdayHours  || '',
                 friday:    ts.fridayHours    || '',
                 saturday:  ts.saturdayHours  || '',
-                sunday:    ts.sundayHours    || '',
+                sunday:    ts.sundayHours    || ''
               },
-              notes: ts.description || '',
-            })),
+              notes: ts.description || ''
+            }))
           );
           const status = weekTimesheets[0]?.status?.toLowerCase() || 'draft';
           setTimesheetStatus(status);
           setIsReadOnly(status !== 'draft' && status !== 'rejected');
           // M-01: surface rejection comments so employee sees why it was rejected
           setApproverComments(
-            status === 'rejected' ? (weekTimesheets[0]?.approverComments || '') : '',
+            status === 'rejected' ? (weekTimesheets[0]?.approverComments || '') : ''
           );
           setHasUnsavedChanges(false);
           return;
@@ -283,7 +283,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
           return { ...task, hours: { ...task.hours, [day]: value } };
         }
         return { ...task, [field]: value };
-      }),
+      })
     );
     setHasUnsavedChanges(true);
   };
@@ -362,7 +362,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
       saturdayHours:  sat,
       sundayHours:    sun,
       totalHours:     mon + tue + wed + thu + fri + sat + sun,
-      description:    task.notes || '',
+      description:    task.notes || ''
     };
 
     if (isExisting) {
@@ -427,10 +427,10 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
             setTasks((prev) =>
               prev.map((task) => {
                 const match = responseData.data.find(
-                  (s) => s.projectId === task.projectId && s.taskId === task.taskId,
+                  (s) => s.projectId === task.projectId && s.taskId === task.taskId
                 );
                 return match ? { ...task, id: match.id } : task;
-              }),
+              })
             );
           }
         } catch (createError) {
@@ -462,7 +462,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
       setSubmitting(true);
       if (!validateTimesheet()) {
         showError(
-          'Please complete all required fields: select a project and task, and enter hours for at least one day.',
+          'Please complete all required fields: select a project and task, and enter hours for at least one day.'
         );
         return;
       }
@@ -530,7 +530,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
   const weekDates = DAYS.map((day, idx) => ({
     day,
     shortLabel: day.substring(0, 3).toUpperCase(),
-    date: currentWeek.add(idx, 'day'),
+    date: currentWeek.add(idx, 'day')
   }));
 
   const statusConfig  = STATUS_CONFIG[timesheetStatus] || STATUS_CONFIG.draft;
@@ -555,9 +555,9 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
         </Dialog>
       )}
       {/* Week navigator */}
-      <Box sx={{ 
-        mb: 3, 
-        p: 2, 
+      <Box sx={{
+        mb: 3,
+        p: 2,
         borderRadius: 4,
         background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
         border: '1px solid',
@@ -659,10 +659,10 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
           <TableContainer
             component={Paper}
             elevation={0}
-            sx={{ 
-              borderRadius: 4, 
-              border: '1px solid', 
-              borderColor: 'divider', 
+            sx={{
+              borderRadius: 4,
+              border: '1px solid',
+              borderColor: 'divider',
               overflowX: 'auto',
               boxShadow: '0 10px 40px rgba(0,0,0,0.04)'
             }}
@@ -746,7 +746,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                             min: 0,
                             max: 24,
                             step: 0.25,
-                            style: { textAlign: 'center', padding: '10px 8px', fontSize: '14px', width: '60px' },
+                            style: { textAlign: 'center', padding: '10px 8px', fontSize: '14px', width: '60px' }
                           }}
                           sx={{
                             width: '80px',
@@ -756,9 +756,9 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                               transition: 'all 0.2s',
                               '& fieldset': { borderColor: 'divider', borderWidth: '1px' },
                               '&:hover fieldset': { borderColor: 'primary.main', boxShadow: '0 2px 8px rgba(99,102,241,0.1)' },
-                              '&.Mui-focused fieldset': { borderColor: 'primary.main', borderWidth: '2px', boxShadow: '0 4px 12px rgba(99,102,241,0.15)' },
+                              '&.Mui-focused fieldset': { borderColor: 'primary.main', borderWidth: '2px', boxShadow: '0 4px 12px rgba(99,102,241,0.15)' }
                             },
-                            '& .MuiOutlinedInput-input': { padding: '10px 8px' },
+                            '& .MuiOutlinedInput-input': { padding: '10px 8px' }
                           }}
                         />
                       </TableCell>
@@ -785,7 +785,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2,
-                            backgroundColor: isReadOnly ? 'grey.50' : 'white',
+                            backgroundColor: isReadOnly ? 'grey.50' : 'white'
                           }
                         }}
                       />
@@ -858,15 +858,15 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
                 startIcon={<SendIcon />}
                 onClick={submitTimesheet}
                 disabled={saving || submitting}
-                sx={{ 
-                  borderRadius: 2, 
-                  fontWeight: 600, 
+                sx={{
+                  borderRadius: 2,
+                  fontWeight: 600,
                   px: 4,
                   background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                   boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
                   '&:hover': {
                     background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                    boxShadow: '0 6px 20px 0 rgba(99, 102, 241, 0.39)',
+                    boxShadow: '0 6px 20px 0 rgba(99, 102, 241, 0.39)'
                   }
                 }}
                 data-testid="timesheet-submit"
@@ -882,7 +882,7 @@ const ModernWeeklyTimesheet = ({ embedded } = {}) => {
 };
 
 ModernWeeklyTimesheet.propTypes = {
-  embedded: PropTypes.bool,
+  embedded: PropTypes.bool
 };
 
 export default ModernWeeklyTimesheet;

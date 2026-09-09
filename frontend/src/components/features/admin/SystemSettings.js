@@ -28,7 +28,7 @@ const SystemSettings = ({ embedded } = {}) => {
     showEarningsBreakdown: true,
     showDeductionsBreakdown: true,
     showLeaveBalance: true,
-    showEmployeeDetails: true,
+    showEmployeeDetails: true
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -60,7 +60,7 @@ const SystemSettings = ({ embedded } = {}) => {
     const { name, value, type, checked } = e.target;
     setSettings(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === 'checkbox' ? checked : value
     }));
     // Clear validation error for this field
     if (validationErrors[name]) {
@@ -100,9 +100,9 @@ const SystemSettings = ({ embedded } = {}) => {
       setSaving(true);
       setError('');
       setSuccess('');
-      
+
       const response = await settingsService.updatePayslipTemplate(settings, selectedLogo);
-      
+
       setSettings(response.data.data);
       if (response.data.data?.companyLogo) {
         setLogoPreview(response.data.data.companyLogo);
@@ -245,7 +245,7 @@ const SystemSettings = ({ embedded } = {}) => {
 };
 
 SystemSettings.propTypes = {
-  embedded: PropTypes.bool,
+  embedded: PropTypes.bool
 };
 
 export default SystemSettings;

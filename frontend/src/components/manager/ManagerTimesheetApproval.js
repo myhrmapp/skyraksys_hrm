@@ -23,7 +23,7 @@ import {
   Stack,
   Tooltip,
   IconButton,
-  Checkbox,
+  Checkbox
 } from '@mui/material';
 import {
   CheckCircle as ApproveIcon,
@@ -54,7 +54,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
   const [rejectionDialog, setRejectionDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [approvalComment, setApprovalComment] = useState('');
-  
+
   // Bulk operations state
   const [selectedTimesheets, setSelectedTimesheets] = useState(new Set());
   const [bulkApprovalDialog, setBulkApprovalDialog] = useState(false);
@@ -75,22 +75,22 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
   const handleApprove = useCallback(async (timesheet) => {
     setLoading('approve-timesheet', true);
     try {
-      
+
       // Use the correct API format that matches the backend
       await timesheetService.approve(timesheet.id, {
         action: 'approve',
         approverComments: approvalComment.trim() || 'Approved'
       });
-      
+
       showNotification(
         `Timesheet for ${timesheet.employee?.firstName} ${timesheet.employee?.lastName} approved successfully`,
         'success'
       );
-      
+
       setApprovalDialog(false);
       setApprovalComment('');
       onApprovalUpdate?.();
-      
+
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to approve timesheet';
       showNotification(errorMessage, 'error');
@@ -107,19 +107,19 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
 
     setLoading('reject-timesheet', true);
     try {
-      
+
       // Use the dedicated reject endpoint from the service
       await timesheetService.updateStatus(timesheet.id, 'rejected', rejectionReason);
-      
+
       showNotification(
         `Timesheet for ${timesheet.employee?.firstName} ${timesheet.employee?.lastName} rejected`,
         'info'
       );
-      
+
       setRejectionDialog(false);
       setRejectionReason('');
       onApprovalUpdate?.();
-      
+
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to reject timesheet';
       showNotification(errorMessage, 'error');
@@ -172,7 +172,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
   const handleSelectAll = (timesheets) => {
     const timesheetIds = timesheets.map(ts => ts.id);
     const allSelected = timesheetIds.every(id => selectedTimesheets.has(id));
-    
+
     if (allSelected) {
       // Deselect all
       const newSelected = new Set(selectedTimesheets);
@@ -193,20 +193,20 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
     setLoading('bulk-approve', true);
     try {
       const result = await timesheetService.bulkApprove(selectedIds, bulkComments);
-      
+
       if (result.success) {
         showNotification(
           `Successfully approved ${result.data.summary.successful} timesheet(s)`,
           'success'
         );
-        
+
         if (result.data.summary.failed > 0) {
           showNotification(
             `${result.data.summary.failed} timesheet(s) could not be approved`,
             'warning'
           );
         }
-        
+
         setSelectedTimesheets(new Set());
         setBulkApprovalDialog(false);
         setBulkComments('');
@@ -231,20 +231,20 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
     setLoading('bulk-reject', true);
     try {
       const result = await timesheetService.bulkReject(selectedIds, bulkComments);
-      
+
       if (result.success) {
         showNotification(
           `Successfully rejected ${result.data.summary.successful} timesheet(s)`,
           'info'
         );
-        
+
         if (result.data.summary.failed > 0) {
           showNotification(
             `${result.data.summary.failed} timesheet(s) could not be rejected`,
             'warning'
           );
         }
-        
+
         setSelectedTimesheets(new Set());
         setBulkRejectionDialog(false);
         setBulkComments('');
@@ -290,12 +290,12 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
         <Typography variant="h6">
           Pending Timesheets ({pendingTimesheets.length})
         </Typography>
-        
+
         {selectedTimesheets.size > 0 && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Chip 
-              label={`${selectedTimesheets.size} selected`} 
-              color="primary" 
+            <Chip
+              label={`${selectedTimesheets.size} selected`}
+              color="primary"
               size="small"
             />
             <Button
@@ -321,7 +321,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
           </Box>
         )}
       </Box>
-      
+
       <Grid container spacing={3}>
         {groupedTimesheets.map((group, index) => (
           <Grid item xs={12} key={index}>
@@ -386,18 +386,18 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
                       </Stack>
                     </Box>
                   )}
-                  
+
                   <Table size="small">
                     <TableHead>
                       <TableRow>
                         <TableCell padding="checkbox">
                           <Checkbox
                             indeterminate={
-                              selectedTimesheets.size > 0 && 
+                              selectedTimesheets.size > 0 &&
                               selectedTimesheets.size < group.timesheets.length
                             }
                             checked={
-                              group.timesheets.length > 0 && 
+                              group.timesheets.length > 0 &&
                               group.timesheets.every(ts => selectedTimesheets.has(ts.id))
                             }
                             onChange={() => handleSelectAll(group.timesheets)}
@@ -414,7 +414,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
                     </TableHead>
                     <TableBody>
                       {group.timesheets.map((timesheet) => (
-                        <TableRow 
+                        <TableRow
                           key={timesheet.id}
                           selected={selectedTimesheets.has(timesheet.id)}
                         >
@@ -426,9 +426,9 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
                             />
                           </TableCell>
                           <TableCell>
-                            {timesheet.weekStartDate 
+                            {timesheet.weekStartDate
                               ? dayjs(timesheet.weekStartDate).format('MMM DD, YYYY')
-                              : timesheet.workDate 
+                              : timesheet.workDate
                                 ? dayjs(timesheet.workDate).format('MMM DD, YYYY')
                                 : 'N/A'
                             }
@@ -534,13 +534,13 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
                   {selectedTimesheet.project?.name || 'No Project'} - {selectedTimesheet.task?.name || 'No Task'}
                 </Typography>
               </Box>
-              
+
               <Box>
                 <Typography variant="subtitle2" gutterBottom>Hours Worked</Typography>
                 <Typography variant="body2" sx={{ mb: 1, fontWeight: 'bold', color: 'primary.main' }}>
                   {parseFloat(selectedTimesheet.totalHoursWorked || 0).toFixed(1)} hours total
                 </Typography>
-                
+
                 {/* Daily breakdown for weekly timesheets */}
                 <Box sx={{ ml: 2 }}>
                   <Typography variant="caption" color="text.secondary" gutterBottom>Daily Breakdown:</Typography>
@@ -569,12 +569,12 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
                   </Box>
                 </Box>
               </Box>
-              
+
               <Box>
                 <Typography variant="subtitle2" gutterBottom>Description</Typography>
                 <Typography variant="body2">{selectedTimesheet.description || 'No description provided'}</Typography>
               </Box>
-              
+
               <Box>
                 <Typography variant="subtitle2" gutterBottom>Status</Typography>
                 <Chip
@@ -625,7 +625,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
                 <Box>
                   <Typography variant="subtitle2" gutterBottom>Period</Typography>
                   <Typography variant="body2">
-                    {selectedTimesheet.year && `Year ${selectedTimesheet.year}`} 
+                    {selectedTimesheet.year && `Year ${selectedTimesheet.year}`}
                     {selectedTimesheet.weekNumber && `, Week ${selectedTimesheet.weekNumber}`}
                   </Typography>
                 </Box>
@@ -708,7 +708,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
                   {(selectedTimesheet.year || selectedTimesheet.weekNumber) && (
                     <Grid item xs={12}>
                       <Typography variant="body2">
-                        <strong>Period:</strong> {selectedTimesheet.year && `Year ${selectedTimesheet.year}`} 
+                        <strong>Period:</strong> {selectedTimesheet.year && `Year ${selectedTimesheet.year}`}
                         {selectedTimesheet.weekNumber && `, Week ${selectedTimesheet.weekNumber}`}
                       </Typography>
                     </Grid>
@@ -778,7 +778,7 @@ const ManagerTimesheetApproval = ({ pendingTimesheets, onApprovalUpdate }) => {
                   {(selectedTimesheet.year || selectedTimesheet.weekNumber) && (
                     <Grid item xs={12}>
                       <Typography variant="body2">
-                        <strong>Period:</strong> {selectedTimesheet.year && `Year ${selectedTimesheet.year}`} 
+                        <strong>Period:</strong> {selectedTimesheet.year && `Year ${selectedTimesheet.year}`}
                         {selectedTimesheet.weekNumber && `, Week ${selectedTimesheet.weekNumber}`}
                       </Typography>
                     </Grid>

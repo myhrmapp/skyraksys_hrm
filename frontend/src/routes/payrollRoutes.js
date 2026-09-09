@@ -7,7 +7,7 @@ const EmployeePayslips = lazy(() => import('../components/features/payroll/Emplo
 
 const payrollRoutes = [
   <Route key="payroll-management" path="payroll-management" element={withBoundary(<PayrollManagement />, 'Loading Payroll Management...')} />,
-  <Route key="employee-payslips" path="employee-payslips" element={withBoundary(<EmployeePayslips />, 'Loading Employee Payslips...')} />,
+  <Route key="employee-payslips" path="employee-payslips" element={withBoundary(<EmployeePayslips />, 'Loading Employee Payslips...')} />
 ];
 
 export default payrollRoutes;

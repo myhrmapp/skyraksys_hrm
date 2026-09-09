@@ -24,7 +24,7 @@ import {
   Warning,
   Error as ErrorIcon,
   Info,
-  ContentCopy,
+  ContentCopy
 } from '@mui/icons-material';
 
 /**
@@ -55,7 +55,7 @@ class SmartErrorBoundary extends Component {
 
   static getDerivedStateFromError(error) {
     // Update state to trigger error UI
-    return { 
+    return {
       hasError: true,
       errorId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     };
@@ -137,7 +137,7 @@ class SmartErrorBoundary extends Component {
     try {
       const existingErrors = JSON.parse(localStorage.getItem('errorLog') || '[]');
       existingErrors.push(errorData);
-      
+
       // Keep only last 10 errors to prevent storage bloat
       const recentErrors = existingErrors.slice(-10);
       localStorage.setItem('errorLog', JSON.stringify(recentErrors));
@@ -208,7 +208,7 @@ class SmartErrorBoundary extends Component {
    */
   handleReportBug() {
     const errorReport = this.generateErrorReport();
-    
+
     if (this.props.onReportBug) {
       this.props.onReportBug(errorReport);
     } else {
@@ -219,7 +219,7 @@ class SmartErrorBoundary extends Component {
         `Please describe what you were doing when this error occurred:\n\n\n` +
         `Error Details:\n${JSON.stringify(errorReport, null, 2)}`
       );
-      
+
       window.location.href = `mailto:support@skyraksys.com?subject=${subject}&body=${body}`;
     }
   }
@@ -231,7 +231,7 @@ class SmartErrorBoundary extends Component {
     try {
       const errorReport = this.generateErrorReport();
       const errorText = JSON.stringify(errorReport, null, 2);
-      
+
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(errorText);
       } else {
@@ -243,7 +243,7 @@ class SmartErrorBoundary extends Component {
         document.execCommand('copy');
         document.body.removeChild(textArea);
       }
-      
+
       // Show feedback (could use notification service)
       // Clipboard copy succeeded silently
     } catch (error) {
@@ -290,7 +290,7 @@ class SmartErrorBoundary extends Component {
   getSafeLocalStorage() {
     const safe = {};
     const sensitiveKeys = ['accessToken', 'refreshToken', 'password', 'token', 'secret', 'email', 'userId', 'userRole', 'sessionId'];
-    
+
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -301,7 +301,7 @@ class SmartErrorBoundary extends Component {
     } catch (error) {
       safe.error = 'Unable to access localStorage';
     }
-    
+
     return safe;
   }
 
@@ -311,7 +311,7 @@ class SmartErrorBoundary extends Component {
   getSafeSessionStorage() {
     const safe = {};
     const sensitiveKeys = ['accessToken', 'refreshToken', 'password', 'token', 'secret', 'email', 'userId', 'userRole', 'sessionId'];
-    
+
     try {
       for (let i = 0; i < sessionStorage.length; i++) {
         const key = sessionStorage.key(i);
@@ -322,7 +322,7 @@ class SmartErrorBoundary extends Component {
     } catch (error) {
       safe.error = 'Unable to access sessionStorage';
     }
-    
+
     return safe;
   }
 
@@ -349,26 +349,26 @@ class SmartErrorBoundary extends Component {
    */
   getErrorSeverity() {
     const error = this.state.error;
-    
+
     if (!error) return 'medium';
-    
+
     // High severity indicators
-    if (error.message?.includes('ChunkLoadError') || 
+    if (error.message?.includes('ChunkLoadError') ||
         error.message?.includes('Loading chunk') ||
         error.name === 'ChunkLoadError') {
       return 'low'; // Usually just needs a refresh
     }
-    
+
     if (error.stack?.includes('Authentication') ||
         error.message?.includes('auth')) {
       return 'medium';
     }
-    
-    if (error.name === 'TypeError' || 
+
+    if (error.name === 'TypeError' ||
         error.name === 'ReferenceError') {
       return 'high';
     }
-    
+
     return 'medium';
   }
 
@@ -378,23 +378,23 @@ class SmartErrorBoundary extends Component {
   getUserFriendlyMessage() {
     const error = this.state.error;
     const { level = 'page' } = this.props;
-    
+
     if (!error) return 'An unexpected error occurred.';
-    
+
     // Specific error type handling
-    if (error.message?.includes('ChunkLoadError') || 
+    if (error.message?.includes('ChunkLoadError') ||
         error.message?.includes('Loading chunk')) {
       return 'There was an issue loading part of the application. A page refresh should fix this.';
     }
-    
+
     if (error.message?.includes('Network Error')) {
       return 'Unable to connect to the server. Please check your internet connection.';
     }
-    
+
     if (error.message?.includes('Permission denied')) {
       return 'You don\'t have permission to access this resource.';
     }
-    
+
     // Generic messages based on component level
     if (level === 'page') {
       return 'We\'re sorry, but something unexpected happened while loading this page.';
@@ -459,12 +459,12 @@ class SmartErrorBoundary extends Component {
                     Something went wrong
                   </Typography>
                 </Box>
-                
+
                 <Typography variant="body1" color="text.secondary" paragraph>
                   {this.getUserFriendlyMessage()}
                 </Typography>
 
-                <Chip 
+                <Chip
                   label={`Error ID: ${this.state.errorId}`}
                   size="small"
                   variant="outlined"
@@ -500,7 +500,7 @@ class SmartErrorBoundary extends Component {
                     {isRecovering ? 'Recovering...' : 'Try Again'}
                   </Button>
                 )}
-                
+
                 {showHome && level === 'page' && (
                   <Button
                     variant="outlined"
@@ -511,7 +511,7 @@ class SmartErrorBoundary extends Component {
                     Go Home
                   </Button>
                 )}
-                
+
                 {showReport && (
                   <Button
                     variant="outlined"
@@ -562,7 +562,7 @@ class SmartErrorBoundary extends Component {
                             <Typography variant="caption" color="text.secondary" gutterBottom>
                               Stack Trace:
                             </Typography>
-                            <pre style={{ 
+                            <pre style={{
                               fontSize: '0.75rem',
                               backgroundColor: '#f5f5f5',
                               padding: '8px',
@@ -574,13 +574,13 @@ class SmartErrorBoundary extends Component {
                               {this.state.error?.stack || 'No stack trace available'}
                             </pre>
                           </Box>
-                          
+
                           {this.state.errorInfo?.componentStack && (
                             <Box>
                               <Typography variant="caption" color="text.secondary" gutterBottom>
                                 Component Stack:
                               </Typography>
-                              <pre style={{ 
+                              <pre style={{
                                 fontSize: '0.75rem',
                                 backgroundColor: '#f5f5f5',
                                 padding: '8px',
@@ -616,16 +616,16 @@ class SmartErrorBoundary extends Component {
               <Box textAlign="center">
                 <Typography variant="body2" color="text.secondary">
                   Need help? Contact our{' '}
-                  <Link 
-                    href="mailto:support@skyraksys.com" 
+                  <Link
+                    href="mailto:support@skyraksys.com"
                     underline="hover"
                     onClick={() => this.handleReportBug()}
                   >
                     support team
                   </Link>
                   {' '}or check our{' '}
-                  <Link 
-                    href="/help" 
+                  <Link
+                    href="/help"
                     underline="hover"
                     onClick={(e) => {
                       e.preventDefault();

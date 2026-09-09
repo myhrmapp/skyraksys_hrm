@@ -24,7 +24,7 @@ const GradientText = ({ children, sx = {} }) => (
     backgroundClip: 'text',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
-    ...sx,
+    ...sx
   }}>
     {children}
   </Typography>
@@ -36,7 +36,7 @@ const SectionTitle = ({ icon, title, subtitle, theme }) => (
     <Avatar sx={{
       width: 56, height: 56, mx: 'auto', mb: 2,
       bgcolor: alpha(theme.palette.primary.main, 0.1),
-      color: 'primary.main',
+      color: 'primary.main'
     }}>
       {icon}
     </Avatar>
@@ -99,7 +99,7 @@ const RevealSection = ({ children, delay = 0 }) => {
     <Box ref={ref} sx={{
       opacity: visible ? 1 : 0,
       transform: visible ? 'translateY(0)' : 'translateY(40px)',
-      transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+      transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
     }}>
       {children}
     </Box>
@@ -108,14 +108,14 @@ const RevealSection = ({ children, delay = 0 }) => {
 
 // ── Narration data ──
 const NARRATION_STEPS = [
-  { section: 0, text: "Welcome to SkyrakSys HRM — a cloud-ready, full-stack Human Resource Management System designed for small-to-mid enterprises." },
-  { section: 1, text: "The platform manages 7 core HR modules — from employee lifecycle and leave management to payroll processing and performance reviews." },
-  { section: 2, text: "Built on a layered monolithic architecture with 4 clean tiers — Presentation, API, Service, and Data — ensuring maintainability and clear separation of concerns." },
-  { section: 3, text: "Powered by a modern tech stack: React 18 with Material-UI on the frontend, Node.js with Express on the backend, and PostgreSQL for reliable data storage." },
-  { section: 4, text: "The data model spans 22 tables with UUID primary keys, soft deletes for compliance, and 238 REST endpoints across 27 route files." },
-  { section: 5, text: "Security is built into every layer — JWT authentication with httpOnly cookies, 4-level role-based access control, field-level permissions, and account lockout protection." },
-  { section: 6, text: "Deployment is fully containerized with Docker Compose — 6 services including Nginx reverse proxy with TLS, automated health checks, and zero-downtime redeploy." },
-  { section: 7, text: "Thank you for exploring SkyrakSys HRM. This system is production-ready, tested with 79 Playwright E2E scenarios, and designed to scale with your organization." },
+  { section: 0, text: 'Welcome to SkyrakSys HRM — a cloud-ready, full-stack Human Resource Management System designed for small-to-mid enterprises.' },
+  { section: 1, text: 'The platform manages 7 core HR modules — from employee lifecycle and leave management to payroll processing and performance reviews.' },
+  { section: 2, text: 'Built on a layered monolithic architecture with 4 clean tiers — Presentation, API, Service, and Data — ensuring maintainability and clear separation of concerns.' },
+  { section: 3, text: 'Powered by a modern tech stack: React 18 with Material-UI on the frontend, Node.js with Express on the backend, and PostgreSQL for reliable data storage.' },
+  { section: 4, text: 'The data model spans 22 tables with UUID primary keys, soft deletes for compliance, and 238 REST endpoints across 27 route files.' },
+  { section: 5, text: 'Security is built into every layer — JWT authentication with httpOnly cookies, 4-level role-based access control, field-level permissions, and account lockout protection.' },
+  { section: 6, text: 'Deployment is fully containerized with Docker Compose — 6 services including Nginx reverse proxy with TLS, automated health checks, and zero-downtime redeploy.' },
+  { section: 7, text: 'Thank you for exploring SkyrakSys HRM. This system is production-ready, tested with 79 Playwright E2E scenarios, and designed to scale with your organization.' }
 ];
 
 // ── Module data ──
@@ -140,7 +140,7 @@ const MODULES = [
     stats: 'Rating scales · Feedback · Cycles' },
   { icon: <Business />, name: 'Organization Setup', color: '#607D8B',
     desc: 'Department hierarchy, position catalog with salary bands, holiday calendar, and system configuration.',
-    stats: 'Dept tree · Salary bands · Holidays' },
+    stats: 'Dept tree · Salary bands · Holidays' }
 ];
 
 // ── Architecture layers ──
@@ -148,7 +148,7 @@ const ARCH_LAYERS = [
   { name: 'Presentation Layer', sub: 'React 18 · MUI 5 · TanStack Query · Axios', color: '#2196F3', icon: <Dashboard /> },
   { name: 'API Layer', sub: 'Express 4.18 · 27 Route Files · Joi Validation · JWT Auth', color: '#4CAF50', icon: <Api /> },
   { name: 'Service Layer', sub: 'Business + Data + Root Services · Workflow Engines', color: '#FF9800', icon: <AccountTree /> },
-  { name: 'Data Layer', sub: 'PostgreSQL 15+ · Sequelize ORM · 22 Tables · UUID PKs', color: '#9C27B0', icon: <Storage /> },
+  { name: 'Data Layer', sub: 'PostgreSQL 15+ · Sequelize ORM · 22 Tables · UUID PKs', color: '#9C27B0', icon: <Storage /> }
 ];
 
 // ── Tech stack ──
@@ -161,7 +161,7 @@ const TECH_STACK = {
     { name: 'JWT', version: '9.x', color: '#D63AFF' },
     { name: 'Joi', version: '17.x', color: '#0080FF' },
     { name: 'Nodemailer', version: '6.x', color: '#22B573' },
-    { name: 'Winston', version: 'Latest', color: '#FF6B00' },
+    { name: 'Winston', version: 'Latest', color: '#FF6B00' }
   ],
   Frontend: [
     { name: 'React', version: '18.3', color: '#61DAFB' },
@@ -171,7 +171,7 @@ const TECH_STACK = {
     { name: 'React Hook Form', version: '7.48', color: '#EC5990' },
     { name: 'Recharts', version: '2.8', color: '#8884D8' },
     { name: 'Axios', version: '1.11', color: '#5A29E4' },
-    { name: 'Notistack', version: '3.0', color: '#4DB6AC' },
+    { name: 'Notistack', version: '3.0', color: '#4DB6AC' }
   ],
   Infrastructure: [
     { name: 'Docker', version: 'Compose', color: '#2496ED' },
@@ -179,8 +179,8 @@ const TECH_STACK = {
     { name: 'GitHub Actions', version: 'CI/CD', color: '#2088FF' },
     { name: 'Playwright', version: '1.58', color: '#45BA4B' },
     { name: 'Jest', version: 'Latest', color: '#C21325' },
-    { name: 'Ubuntu', version: '24.04', color: '#E95420' },
-  ],
+    { name: 'Ubuntu', version: '24.04', color: '#E95420' }
+  ]
 };
 
 // ── Roles ──
@@ -192,7 +192,7 @@ const ROLES = [
   { name: 'Manager', color: '#2196F3', access: 'Team scope',
     caps: ['Approve team leave', 'Approve timesheets', 'View team data', 'Performance reviews', 'Project oversight'] },
   { name: 'Employee', color: '#4CAF50', access: 'Self-service',
-    caps: ['View own profile', 'Submit leave/timesheets', 'Check-in/out', 'View payslips', 'My tasks'] },
+    caps: ['View own profile', 'Submit leave/timesheets', 'Check-in/out', 'View payslips', 'My tasks'] }
 ];
 
 // ── Chart data ──
@@ -206,7 +206,7 @@ const ENDPOINT_DATA = [
   { name: 'Attendance', endpoints: 16, color: '#607D8B' },
   { name: 'Admin', endpoints: 42, color: '#795548' },
   { name: 'Dashboard', endpoints: 12, color: '#E91E63' },
-  { name: 'Other', endpoints: 22, color: '#9E9E9E' },
+  { name: 'Other', endpoints: 22, color: '#9E9E9E' }
 ];
 
 const TABLE_DATA = [
@@ -215,7 +215,7 @@ const TABLE_DATA = [
   { name: 'Payroll', value: 5, color: '#9C27B0' },
   { name: 'Time', value: 3, color: '#FF9800' },
   { name: 'Projects', value: 2, color: '#00BCD4' },
-  { name: 'System', value: 3, color: '#607D8B' },
+  { name: 'System', value: 3, color: '#607D8B' }
 ];
 
 const DOCKER_SERVICES = [
@@ -224,7 +224,7 @@ const DOCKER_SERVICES = [
   { name: 'mobile', port: '3001', desc: 'Expo Web (Nginx serving)', color: '#4630EB', icon: <Speed /> },
   { name: 'backend', port: '5000', desc: 'Express API server', color: '#68A063', icon: <Api /> },
   { name: 'postgres', port: '5432', desc: 'PostgreSQL 17 database', color: '#336791', icon: <Storage /> },
-  { name: 'pgadmin', port: '5050', desc: 'Database admin (tools profile)', color: '#336791', icon: <TableChart /> },
+  { name: 'pgadmin', port: '5050', desc: 'Database admin (tools profile)', color: '#336791', icon: <TableChart /> }
 ];
 
 // ── Security features ──
@@ -232,7 +232,7 @@ const SECURITY_FEATURES = [
   { icon: <Lock />, title: 'JWT httpOnly Cookies', desc: 'Tokens stored in httpOnly cookies, immune to XSS attacks. Short-lived access + long-lived refresh tokens.' },
   { icon: <Shield />, title: '4-Level RBAC', desc: 'Admin → HR → Manager → Employee. Field-level access control restricts salary/bank visibility.' },
   { icon: <Verified />, title: 'Account Protection', desc: 'Failed login lockout, password change tracking, token blacklisting on logout.' },
-  { icon: <Security />, title: 'Security Middleware', desc: 'Helmet, HPP, XSS-clean, rate limiting per route, CORS with strict origin policy.' },
+  { icon: <Security />, title: 'Security Middleware', desc: 'Helmet, HPP, XSS-clean, rate limiting per route, CORS with strict origin policy.' }
 ];
 
 // ════════════════════════════════════════════════════════════════
@@ -298,7 +298,7 @@ export default function SystemShowcase() {
       <Paper elevation={3} sx={{
         position: 'sticky', top: 0, zIndex: 1100,
         background: `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0.95)} 0%, ${alpha('#1a1a2e', 0.97)} 100%)`,
-        color: '#fff', borderRadius: 0,
+        color: '#fff', borderRadius: 0
       }}>
         <Container maxWidth="lg">
           <Box sx={{ py: 1.5, display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -332,7 +332,7 @@ export default function SystemShowcase() {
           <LinearProgress variant="determinate" value={progress} sx={{
             height: 3, bgcolor: alpha('#fff', 0.1),
             '& .MuiLinearProgress-bar': {
-              background: 'linear-gradient(90deg, #4CAF50, #2196F3, #9C27B0)',
+              background: 'linear-gradient(90deg, #4CAF50, #2196F3, #9C27B0)'
             }
           }} />
         </Container>
@@ -348,7 +348,7 @@ export default function SystemShowcase() {
             <Box sx={{
               textAlign: 'center', py: 8,
               background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha('#9C27B0', 0.05)} 100%)`,
-              borderRadius: 4, mb: 5,
+              borderRadius: 4, mb: 5
             }}>
               <Typography variant="overline" sx={{ letterSpacing: 4, color: 'primary.main', fontWeight: 600 }}>
                 CLOUD-READY FULL-STACK PLATFORM
@@ -366,7 +366,7 @@ export default function SystemShowcase() {
                   { label: 'REST Endpoints', value: 238, suffix: '+', icon: <Api /> },
                   { label: 'Database Tables', value: 22, icon: <TableChart /> },
                   { label: 'Route Files', value: 27, icon: <FolderOpen /> },
-                  { label: 'E2E Test Cases', value: 79, icon: <Verified /> },
+                  { label: 'E2E Test Cases', value: 79, icon: <Verified /> }
                 ].map((stat, i) => (
                   <Grid item xs={6} sm={3} key={stat.label}>
                     <RevealSection delay={i * 150}>
@@ -379,7 +379,7 @@ export default function SystemShowcase() {
                         <Avatar sx={{
                           width: 40, height: 40, mx: 'auto', mb: 1,
                           bgcolor: alpha(theme.palette.primary.main, 0.1),
-                          color: 'primary.main',
+                          color: 'primary.main'
                         }}>
                           {stat.icon}
                         </Avatar>
@@ -422,8 +422,8 @@ export default function SystemShowcase() {
                     '&:hover': {
                       transform: 'translateY(-6px)',
                       boxShadow: `0 12px 24px ${alpha(mod.color, 0.15)}`,
-                      borderColor: mod.color,
-                    },
+                      borderColor: mod.color
+                    }
                   }}>
                     <CardContent sx={{ p: 3 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
@@ -442,7 +442,7 @@ export default function SystemShowcase() {
                           bgcolor: alpha(mod.color, 0.08),
                           color: mod.color,
                           fontWeight: 500,
-                          fontSize: '0.7rem',
+                          fontSize: '0.7rem'
                         }}
                       />
                     </CardContent>
@@ -479,7 +479,7 @@ export default function SystemShowcase() {
                   borderLeftColor: layer.color,
                   background: alpha(layer.color, 0.03),
                   transition: 'all 0.3s',
-                  '&:hover': { background: alpha(layer.color, 0.08), transform: 'scale(1.01)' },
+                  '&:hover': { background: alpha(layer.color, 0.08), transform: 'scale(1.01)' }
                 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Avatar sx={{ bgcolor: alpha(layer.color, 0.15), color: layer.color, width: 48, height: 48 }}>
@@ -505,7 +505,7 @@ export default function SystemShowcase() {
             <Paper elevation={0} sx={{
               mt: 4, p: 3, borderRadius: 3,
               border: '1px solid', borderColor: 'divider',
-              bgcolor: alpha(theme.palette.info.main, 0.03),
+              bgcolor: alpha(theme.palette.info.main, 0.03)
             }}>
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
                 Request Flow Example: "Employee submits leave request"
@@ -523,7 +523,7 @@ export default function SystemShowcase() {
                   'PostgreSQL',
                   '201 Response',
                   'React Query Cache Update',
-                  'Success Snackbar',
+                  'Success Snackbar'
                 ].map((step, i, arr) => (
                   <React.Fragment key={step}>
                     <Chip
@@ -561,7 +561,7 @@ export default function SystemShowcase() {
                 <RevealSection delay={ci * 200}>
                   <Paper elevation={0} sx={{
                     p: 3, borderRadius: 3, height: '100%',
-                    border: '1px solid', borderColor: 'divider',
+                    border: '1px solid', borderColor: 'divider'
                   }}>
                     <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
                       {category === 'Backend' && <Terminal sx={{ mr: 1, verticalAlign: 'middle', fontSize: 20 }} />}
@@ -573,12 +573,12 @@ export default function SystemShowcase() {
                       {techs.map(tech => (
                         <Box key={tech.name} sx={{
                           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                          py: 0.5,
+                          py: 0.5
                         }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Box sx={{
                               width: 8, height: 8, borderRadius: '50%',
-                              bgcolor: tech.color, flexShrink: 0,
+                              bgcolor: tech.color, flexShrink: 0
                             }} />
                             <Typography variant="body2" fontWeight={500}>{tech.name}</Typography>
                           </Box>
@@ -588,7 +588,7 @@ export default function SystemShowcase() {
                             sx={{
                               height: 22, fontSize: '0.65rem', fontWeight: 600,
                               bgcolor: alpha(tech.color, 0.1),
-                              color: tech.color,
+                              color: tech.color
                             }}
                           />
                         </Box>
@@ -620,7 +620,7 @@ export default function SystemShowcase() {
               <RevealSection>
                 <Paper elevation={0} sx={{
                   p: 3, borderRadius: 3, height: '100%',
-                  border: '1px solid', borderColor: 'divider',
+                  border: '1px solid', borderColor: 'divider'
                 }}>
                   <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
                     API Endpoints by Module
@@ -646,7 +646,7 @@ export default function SystemShowcase() {
               <RevealSection delay={200}>
                 <Paper elevation={0} sx={{
                   p: 3, borderRadius: 3, height: '100%',
-                  border: '1px solid', borderColor: 'divider',
+                  border: '1px solid', borderColor: 'divider'
                 }}>
                   <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
                     Database Tables by Domain
@@ -680,14 +680,14 @@ export default function SystemShowcase() {
                 { icon: <DataObject />, label: 'UUID Primary Keys', desc: 'Globally unique, merge-safe, no sequential leaks' },
                 { icon: <Build />, label: 'Soft Deletes', desc: 'Data recovery + audit compliance on all tables' },
                 { icon: <AccountTree />, label: 'Service Layer', desc: 'Business ↔ Data separation for testability' },
-                { icon: <Speed />, label: 'TanStack Query', desc: 'Auto caching, dedup, background refresh' },
+                { icon: <Speed />, label: 'TanStack Query', desc: 'Auto caching, dedup, background refresh' }
               ].map((item, i) => (
                 <Grid item xs={12} sm={6} md={3} key={item.label}>
                   <Paper elevation={0} sx={{
                     p: 2, borderRadius: 2, textAlign: 'center',
                     border: '1px solid', borderColor: 'divider',
                     transition: 'all 0.3s',
-                    '&:hover': { transform: 'translateY(-3px)', boxShadow: 2 },
+                    '&:hover': { transform: 'translateY(-3px)', boxShadow: 2 }
                   }}>
                     <Box sx={{ color: 'primary.main', mb: 1 }}>{item.icon}</Box>
                     <Typography variant="subtitle2" fontWeight={600}>{item.label}</Typography>
@@ -720,7 +720,7 @@ export default function SystemShowcase() {
                   <Paper elevation={0} sx={{
                     p: 3, borderRadius: 3, height: '100%',
                     border: '1px solid', borderColor: 'divider',
-                    display: 'flex', gap: 2,
+                    display: 'flex', gap: 2
                   }}>
                     <Avatar sx={{ bgcolor: alpha('#F44336', 0.1), color: '#F44336' }}>
                       {feat.icon}
@@ -749,7 +749,7 @@ export default function SystemShowcase() {
                     borderRadius: 3, overflow: 'hidden', height: '100%',
                     border: '1px solid', borderColor: 'divider',
                     transition: 'all 0.3s',
-                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 },
+                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 }
                   }}>
                     <Box sx={{ bgcolor: role.color, py: 2, textAlign: 'center' }}>
                       <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700 }}>
@@ -794,7 +794,7 @@ export default function SystemShowcase() {
             <Paper elevation={0} sx={{
               p: 4, borderRadius: 3,
               border: '1px solid', borderColor: 'divider',
-              background: `linear-gradient(135deg, ${alpha('#1a1a2e', 0.03)} 0%, ${alpha('#2196F3', 0.03)} 100%)`,
+              background: `linear-gradient(135deg, ${alpha('#1a1a2e', 0.03)} 0%, ${alpha('#2196F3', 0.03)} 100%)`
             }}>
               <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Dns sx={{ color: 'primary.main' }} /> Docker Compose Services
@@ -809,12 +809,12 @@ export default function SystemShowcase() {
                         border: '1px solid', borderColor: 'divider',
                         borderLeft: `4px solid ${svc.color}`,
                         transition: 'all 0.3s',
-                        '&:hover': { bgcolor: alpha(svc.color, 0.04) },
+                        '&:hover': { bgcolor: alpha(svc.color, 0.04) }
                       }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
                           <Avatar sx={{
                             width: 36, height: 36,
-                            bgcolor: alpha(svc.color, 0.1), color: svc.color,
+                            bgcolor: alpha(svc.color, 0.1), color: svc.color
                           }}>
                             {svc.icon}
                           </Avatar>
@@ -822,7 +822,7 @@ export default function SystemShowcase() {
                             <Typography variant="subtitle2" fontWeight={600}>{svc.name}</Typography>
                             <Chip label={`:${svc.port}`} size="small" sx={{
                               height: 18, fontSize: '0.6rem', fontWeight: 600,
-                              bgcolor: alpha(svc.color, 0.1), color: svc.color,
+                              bgcolor: alpha(svc.color, 0.1), color: svc.color
                             }} />
                           </Box>
                         </Box>
@@ -861,12 +861,12 @@ export default function SystemShowcase() {
                 { label: 'TLS 1.2/1.3', desc: "Let's Encrypt auto-renewal" },
                 { label: 'Rate Limiting', desc: 'Per-route limits (login, bulk)' },
                 { label: 'User-Agent Routing', desc: 'Desktop → :3000, Mobile → :4000' },
-                { label: 'Health Checks', desc: 'All services report readiness' },
+                { label: 'Health Checks', desc: 'All services report readiness' }
               ].map((item, i) => (
                 <Grid item xs={6} sm={3} key={item.label}>
                   <Paper elevation={0} sx={{
                     p: 2, borderRadius: 2, textAlign: 'center',
-                    border: '1px solid', borderColor: 'divider',
+                    border: '1px solid', borderColor: 'divider'
                   }}>
                     <CheckCircle sx={{ color: '#4CAF50', fontSize: 24, mb: 0.5 }} />
                     <Typography variant="subtitle2" fontWeight={600}>{item.label}</Typography>
@@ -886,7 +886,7 @@ export default function SystemShowcase() {
             <Box sx={{
               textAlign: 'center', py: 8,
               background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha('#4CAF50', 0.05)} 100%)`,
-              borderRadius: 4,
+              borderRadius: 4
             }}>
               <Verified sx={{ fontSize: 56, color: '#4CAF50', mb: 2 }} />
               <Typography variant="h4" fontWeight={700} gutterBottom>
@@ -902,14 +902,14 @@ export default function SystemShowcase() {
                   { label: 'Migrations', value: '25 versioned', icon: <Storage /> },
                   { label: 'Middleware', value: '19-step pipeline', icon: <Shield /> },
                   { label: 'Services', value: '24 business + data', icon: <AccountTree /> },
-                  { label: 'Test Coverage', value: '79 E2E scenarios', icon: <Verified /> },
+                  { label: 'Test Coverage', value: '79 E2E scenarios', icon: <Verified /> }
                 ].map((stat, i) => (
                   <Grid item xs={6} sm={3} key={stat.label}>
                     <RevealSection delay={i * 150}>
                       <Box sx={{ textAlign: 'center' }}>
                         <Avatar sx={{
                           width: 48, height: 48, mx: 'auto', mb: 1,
-                          bgcolor: alpha('#4CAF50', 0.1), color: '#4CAF50',
+                          bgcolor: alpha('#4CAF50', 0.1), color: '#4CAF50'
                         }}>
                           {stat.icon}
                         </Avatar>

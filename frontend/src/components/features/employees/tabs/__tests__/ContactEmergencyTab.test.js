@@ -14,7 +14,7 @@ const createFormData = (overrides = {}) => ({
   emergencyContactName: '',
   emergencyContactPhone: '',
   emergencyContactRelation: '',
-  ...overrides,
+  ...overrides
 });
 
 const createProps = (overrides = {}) => ({
@@ -22,7 +22,7 @@ const createProps = (overrides = {}) => ({
   errors: overrides.errors || {},
   touchedFields: overrides.touchedFields || {},
   onChange: overrides.onChange || jest.fn(),
-  onBlur: overrides.onBlur || jest.fn(),
+  onBlur: overrides.onBlur || jest.fn()
 });
 
 const renderTab = (overrides = {}) => {
@@ -117,7 +117,7 @@ describe('ContactEmergencyTab', () => {
     it('should show error when touched and error exists', () => {
       renderTab({
         errors: { emergencyContactPhone: 'Emergency contact phone must be 10-15 digits only' },
-        touchedFields: { emergencyContactPhone: true },
+        touchedFields: { emergencyContactPhone: true }
       });
       expect(screen.getByText('Emergency contact phone must be 10-15 digits only')).toBeInTheDocument();
     });
@@ -125,7 +125,7 @@ describe('ContactEmergencyTab', () => {
     it('should NOT show error when NOT touched', () => {
       renderTab({
         errors: { emergencyContactPhone: 'Emergency contact phone must be 10-15 digits only' },
-        touchedFields: {},
+        touchedFields: {}
       });
       expect(screen.queryByText('Emergency contact phone must be 10-15 digits only')).not.toBeInTheDocument();
     });
@@ -176,7 +176,7 @@ describe('ContactEmergencyTab', () => {
     it('should show error when touched and error exists', () => {
       renderTab({
         errors: { emergencyContactRelation: 'Please select a valid emergency contact relation' },
-        touchedFields: { emergencyContactRelation: true },
+        touchedFields: { emergencyContactRelation: true }
       });
       expect(screen.getByText('Please select a valid emergency contact relation')).toBeInTheDocument();
     });
@@ -190,8 +190,8 @@ describe('ContactEmergencyTab', () => {
         formData: {
           emergencyContactName: 'Priya Sharma',
           emergencyContactPhone: '9876543210',
-          emergencyContactRelation: 'Spouse',
-        },
+          emergencyContactRelation: 'Spouse'
+        }
       });
 
       expect(screen.getByDisplayValue('Priya Sharma')).toBeInTheDocument();

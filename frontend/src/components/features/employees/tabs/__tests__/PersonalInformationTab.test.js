@@ -1,6 +1,6 @@
 /**
  * PersonalInformationTab.test.js
- * 
+ *
  * Comprehensive field-level tests for PersonalInformationTab component.
  * Tests all 14 fields, input masks, dropdown options, error display, and photo section.
  */
@@ -41,7 +41,7 @@ const createFormData = (overrides = {}) => ({
   city: '',
   state: '',
   pinCode: '',
-  ...overrides,
+  ...overrides
 });
 
 // Default props factory
@@ -54,7 +54,7 @@ const createProps = (overrides = {}) => ({
   selectedPhoto: overrides.selectedPhoto || null,
   photoPreview: overrides.photoPreview || '',
   onPhotoSelect: overrides.onPhotoSelect || jest.fn(),
-  onPhotoRemove: overrides.onPhotoRemove || jest.fn(),
+  onPhotoRemove: overrides.onPhotoRemove || jest.fn()
 });
 
 const renderTab = (overrides = {}) => {
@@ -161,7 +161,7 @@ describe('PersonalInformationTab', () => {
     it('should show error when touched and error exists', () => {
       renderTab({
         errors: { firstName: 'First name is required' },
-        touchedFields: { firstName: true },
+        touchedFields: { firstName: true }
       });
       expect(screen.getByText('First name is required')).toBeInTheDocument();
     });
@@ -169,7 +169,7 @@ describe('PersonalInformationTab', () => {
     it('should NOT show error when NOT touched', () => {
       renderTab({
         errors: { firstName: 'First name is required' },
-        touchedFields: {},
+        touchedFields: {}
       });
       expect(screen.queryByText('First name is required')).not.toBeInTheDocument();
     });
@@ -196,7 +196,7 @@ describe('PersonalInformationTab', () => {
     it('should show error when touched', () => {
       renderTab({
         errors: { lastName: 'Last name is required' },
-        touchedFields: { lastName: true },
+        touchedFields: { lastName: true }
       });
       expect(screen.getByText('Last name is required')).toBeInTheDocument();
     });
@@ -221,7 +221,7 @@ describe('PersonalInformationTab', () => {
     it('should show error instead of helper when touched and error exists', () => {
       renderTab({
         errors: { employeeId: 'Employee ID must be in SKYT#### format' },
-        touchedFields: { employeeId: true },
+        touchedFields: { employeeId: true }
       });
       expect(screen.getByText(/Employee ID must be in SKYT#### format/)).toBeInTheDocument();
     });
@@ -250,7 +250,7 @@ describe('PersonalInformationTab', () => {
     it('should show email error when touched', () => {
       renderTab({
         errors: { email: 'Please enter a valid email address' },
-        touchedFields: { email: true },
+        touchedFields: { email: true }
       });
       expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
     });
@@ -479,7 +479,7 @@ describe('PersonalInformationTab', () => {
 
     it('should show error when error exists', () => {
       renderTab({
-        errors: { pinCode: 'PIN code must be exactly 6 digits' },
+        errors: { pinCode: 'PIN code must be exactly 6 digits' }
       });
       expect(screen.getByText('PIN code must be exactly 6 digits')).toBeInTheDocument();
     });
@@ -503,8 +503,8 @@ describe('PersonalInformationTab', () => {
           address: '123 MG Road',
           city: 'Bangalore',
           state: 'Karnataka',
-          pinCode: '560001',
-        },
+          pinCode: '560001'
+        }
       });
 
       expect(screen.getByDisplayValue('Rahul')).toBeInTheDocument();

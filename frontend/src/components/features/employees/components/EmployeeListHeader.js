@@ -1,23 +1,23 @@
 import React from 'react';
 import { Box, Typography, Button, Stack } from '@mui/material';
-import { 
+import {
   Add as AddIcon,
-  Download as DownloadIcon,
+  Download as DownloadIcon
 } from '@mui/icons-material';
 
 const EmployeeListHeader = ({ canEdit, onAddEmployee, onExport }) => {
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      alignItems: 'center', 
+    <Box sx={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
       mb: 4,
       flexWrap: 'wrap',
       gap: 2
     }}>
       <Box>
-        <Typography 
-          variant="h4" 
+        <Typography
+          variant="h4"
           component="h1"
           sx={{
             fontWeight: 700,
@@ -32,7 +32,7 @@ const EmployeeListHeader = ({ canEdit, onAddEmployee, onExport }) => {
           Manage your workforce, track status, and organize teams.
         </Typography>
       </Box>
-      
+
       <Stack direction="row" spacing={2}>
         <Button
           variant="outlined"
@@ -54,7 +54,7 @@ const EmployeeListHeader = ({ canEdit, onAddEmployee, onExport }) => {
         >
           Export
         </Button>
-        
+
         {canEdit && (
           <Button
             variant="contained"

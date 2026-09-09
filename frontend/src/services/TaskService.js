@@ -1,4 +1,4 @@
-import http from "../http-common";
+import http from '../http-common';
 
 class TaskService {
   getAll(params = {}) {
@@ -21,8 +21,8 @@ class TaskService {
       priority: data.priority || 'Medium',
       estimatedHours: data.estimatedHours || null
     };
-    
-    return http.post("/tasks", payload);
+
+    return http.post('/tasks', payload);
   }
 
   update(id, data) {
@@ -40,7 +40,7 @@ class TaskService {
 
   // Bulk create tasks
   bulkCreate(tasks) {
-    return http.post("/tasks/bulk", { tasks });
+    return http.post('/tasks/bulk', { tasks });
   }
 
   // Update task status (for quick status changes)

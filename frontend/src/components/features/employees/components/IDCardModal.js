@@ -5,13 +5,13 @@
  * Print approach: builds a fully self-contained HTML page with INLINE styles
  * (not MUI CSS-in-JS) so photo (base64 data URI) and QR (external API image)
  * both render perfectly in the popup window.
- * 
+ *
  * Waits for ALL images (photo + QR) to finish loading before triggering print.
  */
 import React, { useEffect, useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, Box, IconButton, Tooltip, Typography, CircularProgress,
+  Button, Box, IconButton, Tooltip, Typography, CircularProgress
 } from '@mui/material';
 import { Close as CloseIcon, Print as PrintIcon, Badge as BadgeIcon } from '@mui/icons-material';
 import { buildPhotoUrl } from '../../../../utils/photoUrl';
@@ -26,7 +26,7 @@ const DEFAULT_SETTINGS = {
   showQrCode:      true,
   showDepartment:  true,
   showDesignation: true,
-  showWebsite:     true,
+  showWebsite:     true
 };
 
 /** Generate the self-contained inline-CSS HTML for the ID card. No MUI needed. */
@@ -180,7 +180,7 @@ END:VCARD`;
       width: 340, minHeight: 520, background: '#EEF6FB', borderRadius: 4,
       overflow: 'hidden', display: 'flex', flexDirection: 'column',
       fontFamily: '"Inter","Segoe UI",sans-serif',
-      boxShadow: '0 8px 40px rgba(0,0,0,0.18)', position: 'relative',
+      boxShadow: '0 8px 40px rgba(0,0,0,0.18)', position: 'relative'
     }}>
       {/* Top stripe */}
       <Box sx={{ height: 6, background: `linear-gradient(90deg, ${cfg.primaryColor}, ${cfg.accentColor})` }} />
@@ -198,7 +198,7 @@ END:VCARD`;
           width: '42%',
           background: `linear-gradient(175deg, ${cfg.primaryColor} 0%, ${cfg.accentColor} 100%)`,
           display: 'flex', flexDirection: 'column', alignItems: 'center',
-          justifyContent: 'center', py: 3, px: 1.5, gap: 2,
+          justifyContent: 'center', py: 3, px: 1.5, gap: 2
         }}>
           <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '1.1rem', textAlign: 'center', lineHeight: 1.3 }}>
             {fullName || 'Employee Name'}
@@ -207,7 +207,7 @@ END:VCARD`;
             width: 110, height: 110, borderRadius: '50%',
             border: '3px solid rgba(255,255,255,0.8)', overflow: 'hidden',
             bgcolor: 'rgba(255,255,255,0.15)', display: 'flex',
-            alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            alignItems: 'center', justifyContent: 'center', flexShrink: 0
           }}>
             {photoSrc
               ? <img src={photoSrc} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -378,7 +378,7 @@ const IDCardModal = ({ open, onClose, employee }) => {
               minWidth: 160,
               background: 'linear-gradient(135deg, #1A4B8C, #0099D4)',
               fontWeight: 700,
-              '&:hover': { background: 'linear-gradient(135deg, #0D3361, #006FA3)' },
+              '&:hover': { background: 'linear-gradient(135deg, #0D3361, #006FA3)' }
             }}
           >
             {printing ? 'Preparing...' : 'Print / Save PDF'}

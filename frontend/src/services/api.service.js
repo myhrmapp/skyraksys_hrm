@@ -99,10 +99,10 @@ class ApiService {
     try {
       const config = {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          'Content-Type': 'multipart/form-data'
+        }
       };
-      
+
       if (onUploadProgress) {
         config.onUploadProgress = onUploadProgress;
       }
@@ -123,9 +123,9 @@ class ApiService {
   async download(endpoint, filename) {
     try {
       const response = await http.get(endpoint, {
-        responseType: 'blob',
+        responseType: 'blob'
       });
-      
+
       // Create download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -135,7 +135,7 @@ class ApiService {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
+
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -150,7 +150,7 @@ class ApiService {
    */
   normalizeResponse(response) {
     const { data } = response;
-    
+
     // If backend returns standardized format
     if (data && typeof data === 'object' && 'success' in data) {
       return {
@@ -158,14 +158,14 @@ class ApiService {
         data: data.data,
         message: data.message,
         meta: data.meta,
-        pagination: data.pagination,
+        pagination: data.pagination
       };
     }
-    
+
     // Otherwise return as-is
     return {
       success: true,
-      data: data,
+      data: data
     };
   }
 
@@ -178,15 +178,15 @@ class ApiService {
     if (error.response) {
       // Server responded with error
       const { data, status } = error.response;
-      
+
       const normalizedError = new Error(
         data?.message || data?.error || `Request failed with status ${status}`
       );
-      
+
       normalizedError.status = status;
       normalizedError.data = data;
       normalizedError.isServerError = true;
-      
+
       return normalizedError;
     } else if (error.request) {
       // Request made but no response

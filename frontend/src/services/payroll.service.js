@@ -53,8 +53,8 @@ class PayrollService {
     formData.append('csvFile', file);
     return http.post('/payroll-data/import-csv', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+        'Content-Type': 'multipart/form-data'
+      }
     });
   }
 
@@ -64,7 +64,7 @@ class PayrollService {
       employeeId,
       salaryStructure,
       attendance,
-      options,
+      options
     });
   }
 

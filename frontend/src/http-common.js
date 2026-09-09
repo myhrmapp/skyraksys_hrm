@@ -1,13 +1,13 @@
-import axios from "axios";
+import axios from 'axios';
 
 // Resolve API base URL from environment (fallback to same-origin /api)
-const BASE_URL = process.env.REACT_APP_API_URL || "/api";
+const BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 // Create axios instance
 const http = axios.create({
   baseURL: BASE_URL,
   headers: {
-    "Content-type": "application/json"
+    'Content-type': 'application/json'
   },
   withCredentials: true // Send httpOnly cookies with every request
 });

@@ -31,13 +31,13 @@ import {
 } from '@mui/icons-material';
 import { buildPhotoUrl } from '../../../../utils/photoUrl';
 
-const EmployeeCardView = ({ 
-  employees, 
-  searchTerm, 
-  onView, 
-  onEdit, 
-  onDelete, 
-  onCreateUserAccount, 
+const EmployeeCardView = ({
+  employees,
+  searchTerm,
+  onView,
+  onEdit,
+  onDelete,
+  onCreateUserAccount,
   onManageUserAccount,
   onAddEmployee
 }) => {
@@ -78,7 +78,7 @@ const EmployeeCardView = ({
                     >
                       {employee.firstName?.charAt(0)}{employee.lastName?.charAt(0)}
                     </Avatar>
-                    
+
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="h6" fontWeight="700">
                         {employee.firstName} {employee.lastName}
@@ -87,7 +87,7 @@ const EmployeeCardView = ({
                         {employee.employeeId}
                       </Typography>
                     </Box>
-                    
+
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'flex-end' }}>
                       <Chip
                         label={employee.status}
@@ -107,9 +107,9 @@ const EmployeeCardView = ({
                       )}
                     </Box>
                   </Box>
-                  
+
                   <Divider />
-                  
+
                   {/* Details */}
                   <Stack spacing={1}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -118,21 +118,21 @@ const EmployeeCardView = ({
                         {employee.position?.title || 'No Position'}
                       </Typography>
                     </Box>
-                    
+
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <BusinessIcon fontSize="small" color="action" />
                       <Typography variant="body2">
                         {employee.department?.name || 'No Department'}
                       </Typography>
                     </Box>
-                    
+
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <EmailIcon fontSize="small" color="action" />
                       <Typography variant="body2" noWrap>
                         {employee.email}
                       </Typography>
                     </Box>
-                    
+
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <CalendarTodayIcon fontSize="small" color="action" />
                       <Typography variant="body2">
@@ -140,7 +140,7 @@ const EmployeeCardView = ({
                       </Typography>
                     </Box>
                   </Stack>
-                  
+
                   {/* Actions */}
                   <Box sx={{ display: 'flex', gap: 1, pt: 1 }}>
                     {!employee.userId ? (
@@ -171,33 +171,33 @@ const EmployeeCardView = ({
                           }}
                           sx={{
                             bgcolor: alpha(
-                              employee.user?.isActive 
-                                ? theme.palette.primary.main 
-                                : theme.palette.warning.main, 
+                              employee.user?.isActive
+                                ? theme.palette.primary.main
+                                : theme.palette.warning.main,
                               0.1
                             ),
-                            '&:hover': { 
+                            '&:hover': {
                               bgcolor: alpha(
-                                employee.user?.isActive 
-                                  ? theme.palette.primary.main 
-                                  : theme.palette.warning.main, 
+                                employee.user?.isActive
+                                  ? theme.palette.primary.main
+                                  : theme.palette.warning.main,
                                 0.2
-                              ) 
+                              )
                             }
                           }}
                         >
-                          <VpnKeyIcon 
-                            fontSize="small" 
-                            sx={{ 
-                              color: employee.user?.isActive 
-                                ? 'primary.main' 
-                                : 'warning.main' 
-                            }} 
+                          <VpnKeyIcon
+                            fontSize="small"
+                            sx={{
+                              color: employee.user?.isActive
+                                ? 'primary.main'
+                                : 'warning.main'
+                            }}
                           />
                         </IconButton>
                       </Tooltip>
                     )}
-                    
+
                     <Tooltip title="View Profile">
                       <IconButton
                         size="small"
@@ -214,7 +214,7 @@ const EmployeeCardView = ({
                         <VisibilityIcon fontSize="small" color="info" />
                       </IconButton>
                     </Tooltip>
-                    
+
                     <Tooltip title="Edit Employee">
                       <IconButton
                         size="small"
@@ -231,7 +231,7 @@ const EmployeeCardView = ({
                         <EditIcon fontSize="small" color="primary" />
                       </IconButton>
                     </Tooltip>
-                    
+
                     <Tooltip title="Terminate Employee">
                       <IconButton
                         size="small"
@@ -255,7 +255,7 @@ const EmployeeCardView = ({
           </Grid>
         </Grow>
       ))}
-      
+
       {/* Empty State */}
       {employees.length === 0 && (
         <Grid item xs={12}>

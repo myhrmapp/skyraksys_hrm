@@ -51,7 +51,7 @@ const PositionManagement = ({ embedded } = {}) => {
   const { enqueueSnackbar } = useSnackbar();
   const { setLoading } = useLoading();
   const { dialogProps, confirm } = useConfirmDialog();
-  
+
   // State
   const [positions, setPositions] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -182,15 +182,15 @@ const PositionManagement = ({ embedded } = {}) => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.title.trim()) {
       newErrors.title = 'Position title is required';
     }
-    
+
     if (!formData.departmentId) {
       newErrors.departmentId = 'Department is required';
     }
-    
+
     if (!formData.level) {
       newErrors.level = 'Level is required';
     }
@@ -200,7 +200,7 @@ const PositionManagement = ({ embedded } = {}) => {
         newErrors.maxSalary = 'Maximum salary must be greater than minimum salary';
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -226,13 +226,13 @@ const PositionManagement = ({ embedded } = {}) => {
         isActive: true
       });
       enqueueSnackbar('Department created successfully', { variant: 'success' });
-      
+
       // Refresh departments
       const deptResponse = await http.get('/departments');
       const newDepartments = deptResponse.data.data || [];
       setDepartments(newDepartments);
-      
-      // Select the new department if possible. 
+
+      // Select the new department if possible.
       // Assuming the created department is in the response or we can find it by name.
       const createdDept = response.data.data || response.data;
       if (createdDept && createdDept.id) {
@@ -242,7 +242,7 @@ const PositionManagement = ({ embedded } = {}) => {
         const found = newDepartments.find(d => d.name === deptFormData.name);
         if (found) handleInputChange('departmentId', found.id);
       }
-      
+
       handleCloseDeptDialog();
     } catch (error) {
       console.error('Error creating department:', error);
@@ -260,7 +260,7 @@ const PositionManagement = ({ embedded } = {}) => {
 
     try {
       setLoading(true);
-      
+
       const submitData = {
         ...formData,
         minSalary: formData.minSalary ? parseFloat(formData.minSalary) : null,
@@ -272,7 +272,7 @@ const PositionManagement = ({ embedded } = {}) => {
       } else {
         await http.post('/positions', submitData);
       }
-      
+
       handleCloseDialog();
       loadPositions();
     } catch (error) {
@@ -397,7 +397,7 @@ const PositionManagement = ({ embedded } = {}) => {
                 <InputAdornment position="start">
                   <SearchIcon />
                 </InputAdornment>
-              ),
+              )
             }}
             sx={{ flexGrow: 1, minWidth: 300 }}
           />
@@ -540,8 +540,8 @@ const PositionManagement = ({ embedded } = {}) => {
                       </Typography>
                     )}
                   </FormControl>
-                  <IconButton 
-                    color="primary" 
+                  <IconButton
+                    color="primary"
                     onClick={handleOpenDeptDialog}
                     sx={{ mt: 1 }}
                     title="Create New Department"
@@ -604,7 +604,7 @@ const PositionManagement = ({ embedded } = {}) => {
                   value={formData.minSalary}
                   onChange={(e) => handleInputChange('minSalary', e.target.value)}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                    startAdornment: <InputAdornment position="start">₹</InputAdornment>
                   }}
                 />
               </Grid>
@@ -618,7 +618,7 @@ const PositionManagement = ({ embedded } = {}) => {
                   error={!!errors.maxSalary}
                   helperText={errors.maxSalary}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                    startAdornment: <InputAdornment position="start">₹</InputAdornment>
                   }}
                 />
               </Grid>
@@ -706,7 +706,7 @@ const PositionManagement = ({ embedded } = {}) => {
 };
 
 PositionManagement.propTypes = {
-  embedded: PropTypes.bool,
+  embedded: PropTypes.bool
 };
 
 export default PositionManagement;

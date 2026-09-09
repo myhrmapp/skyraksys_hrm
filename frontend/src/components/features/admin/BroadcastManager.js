@@ -53,8 +53,8 @@ const BroadcastManager = () => {
 
   return (
     <Card sx={{ mt: 3, mb: 3 }}>
-      <CardHeader 
-        title="Send Global Broadcast" 
+      <CardHeader
+        title="Send Global Broadcast"
         subheader="Send an announcement to all employees (e.g., Holidays, Birthdays)"
       />
       <Divider />
@@ -104,7 +104,7 @@ const BroadcastManager = () => {
             control={<Checkbox checked={isPopup} onChange={(e) => setIsPopup(e.target.checked)} />}
             label="Show as Center Popup (instead of side notification)"
           />
-          
+
           <Button
             variant="contained"
             color="primary"

@@ -39,7 +39,7 @@ export async function loginAs(role = 'admin') {
       { email: creds.email, password: creds.password },
       {
         withCredentials: true,
-        timeout: INTEGRATION_CONFIG.apiTimeout,
+        timeout: INTEGRATION_CONFIG.apiTimeout
       }
     );
 
@@ -100,7 +100,7 @@ export async function logoutIntegration() {
         {
           withCredentials: true,
           timeout: INTEGRATION_CONFIG.apiTimeout,
-          headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+          headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
         }
       );
     }
@@ -162,6 +162,6 @@ export function buildIntegrationAuthValue() {
     login: jest.fn(),
     logout: jest.fn(),
     hasRole: jest.fn((r) => r === role),
-    hasAnyRole: jest.fn((roles) => roles.includes(role)),
+    hasAnyRole: jest.fn((roles) => roles.includes(role))
   };
 }

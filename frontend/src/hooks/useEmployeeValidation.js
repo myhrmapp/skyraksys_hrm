@@ -18,12 +18,12 @@ export const useEmployeeValidation = (initialData = {}, mode = 'create') => {
    */
   const validateSingleField = useCallback((fieldName, value, formData) => {
     const error = validateField(fieldName, value, formData, { mode });
-    
+
     setFieldErrors(prev => ({
       ...prev,
       [fieldName]: error
     }));
-    
+
     return error;
   }, [mode]);
 
@@ -34,13 +34,13 @@ export const useEmployeeValidation = (initialData = {}, mode = 'create') => {
    */
   const validateForm = useCallback((formData) => {
     setIsValidating(true);
-    
+
     try {
       const validation = validateEmployeeForm(formData, { mode });
-      
+
       setValidationErrors(validation.errors);
       setFieldErrors(validation.errors);
-      
+
       return validation;
     } finally {
       setIsValidating(false);
@@ -65,7 +65,7 @@ export const useEmployeeValidation = (initialData = {}, mode = 'create') => {
       delete newErrors[fieldName];
       return newErrors;
     });
-    
+
     setFieldErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors[fieldName];
@@ -119,13 +119,13 @@ export const useEmployeeValidation = (initialData = {}, mode = 'create') => {
   const validateRequiredFields = useCallback((formData) => {
     const requiredFields = [
       'firstName',
-      'lastName', 
+      'lastName',
       'email',
       'hireDate',
       'departmentId',
       'positionId'
     ];
-    
+
     // For create mode, employeeId is also required
     if (mode === 'create') {
       requiredFields.push('employeeId');
@@ -147,38 +147,38 @@ export const useEmployeeValidation = (initialData = {}, mode = 'create') => {
   const validateWithBusinessLogic = useCallback((formData) => {
     const basicValidation = validateForm(formData);
     const missingRequired = validateRequiredFields(formData);
-    
+
     const businessErrors = {};
-    
+
     // Additional business logic validations
     if (formData.joiningDate && formData.confirmationDate) {
       const joining = new Date(formData.joiningDate);
       const confirmation = new Date(formData.confirmationDate);
-      
+
       if (confirmation < joining) {
         businessErrors.confirmationDate = 'Confirmation date cannot be before joining date';
       }
     }
-    
+
     // Validate probation period logic
     if (formData.probationPeriod && formData.confirmationDate && formData.joiningDate) {
       const joining = new Date(formData.joiningDate);
       const confirmation = new Date(formData.confirmationDate);
       const probationMonths = parseInt(formData.probationPeriod);
-      
+
       const expectedConfirmation = new Date(joining);
       expectedConfirmation.setMonth(expectedConfirmation.getMonth() + probationMonths);
-      
+
       if (confirmation < expectedConfirmation) {
         businessErrors.confirmationDate = `Confirmation date should be at least ${probationMonths} months after joining date`;
       }
     }
-    
+
     const allErrors = {
       ...basicValidation.errors,
       ...businessErrors
     };
-    
+
     return {
       isValid: Object.keys(allErrors).length === 0 && missingRequired.length === 0,
       errors: allErrors,
@@ -204,20 +204,20 @@ export const useEmployeeValidation = (initialData = {}, mode = 'create') => {
     isValidating,
     hasErrors,
     errorCount,
-    
+
     // Validation functions
     validateSingleField,
     validateForm,
     validateSection,
     validateRequiredFields,
     validateWithBusinessLogic,
-    
+
     // Error management
     clearValidationErrors,
     clearFieldError,
     getFieldError,
     hasFieldError,
-    
+
     // Utility functions
     prepareDataForSubmission
   };

@@ -22,7 +22,7 @@ const createSalaryData = (overrides = {}) => ({
   benefits: { bonus: '', incentive: '', overtime: '' },
   taxInformation: { taxRegime: 'old', ctc: '', takeHome: '' },
   salaryNotes: '',
-  ...overrides,
+  ...overrides
 });
 
 const createProps = (overrides = {}) => ({
@@ -30,7 +30,7 @@ const createProps = (overrides = {}) => ({
   errors: overrides.errors || {},
   touchedFields: overrides.touchedFields || {},
   onChange: overrides.onChange || jest.fn(),
-  onBlur: overrides.onBlur || jest.fn(),
+  onBlur: overrides.onBlur || jest.fn()
 });
 
 const renderTab = (overrides = {}) => {
@@ -110,7 +110,7 @@ describe('SalaryStructureTab', () => {
     it('should show error when touched and error exists', () => {
       renderTab({
         errors: { 'salary.basicSalary': 'Basic salary must be a positive number' },
-        touchedFields: { 'salary.basicSalary': true },
+        touchedFields: { 'salary.basicSalary': true }
       });
       expect(screen.getByText('Basic salary must be a positive number')).toBeInTheDocument();
     });
@@ -208,7 +208,7 @@ describe('SalaryStructureTab', () => {
       { label: /food allowance/i, path: 'salary.allowances.food' },
       { label: /communication allowance/i, path: 'salary.allowances.communication' },
       { label: /special allowance/i, path: 'salary.allowances.special' },
-      { label: /other allowance/i, path: 'salary.allowances.other' },
+      { label: /other allowance/i, path: 'salary.allowances.other' }
     ];
 
     it.each(allowanceFields)('should render $path field', ({ label }) => {
@@ -239,7 +239,7 @@ describe('SalaryStructureTab', () => {
       { label: /professional tax/i, path: 'salary.deductions.professionalTax' },
       { label: /income tax/i, path: 'salary.deductions.incomeTax' },
       { label: /ESI.*employee state/i, path: 'salary.deductions.esi' },
-      { label: /other deductions/i, path: 'salary.deductions.other' },
+      { label: /other deductions/i, path: 'salary.deductions.other' }
     ];
 
     it.each(deductionFields)('should render $path field', ({ label }) => {
@@ -261,7 +261,7 @@ describe('SalaryStructureTab', () => {
     const benefitFields = [
       { label: /^bonus$/i, path: 'salary.benefits.bonus' },
       { label: /incentive/i, path: 'salary.benefits.incentive' },
-      { label: /overtime/i, path: 'salary.benefits.overtime' },
+      { label: /overtime/i, path: 'salary.benefits.overtime' }
     ];
 
     it.each(benefitFields)('should render $path field', ({ label }) => {
@@ -361,8 +361,8 @@ describe('SalaryStructureTab', () => {
           deductions: { pf: '6000', professionalTax: '200', incomeTax: '5000', esi: '175', other: '100' },
           benefits: { bonus: '10000', incentive: '5000', overtime: '2000' },
           taxInformation: { taxRegime: 'old', ctc: '120000', takeHome: '85000' },
-          salaryNotes: 'Annual review pending',
-        },
+          salaryNotes: 'Annual review pending'
+        }
       });
 
       expect(screen.getByDisplayValue('50000')).toBeInTheDocument();

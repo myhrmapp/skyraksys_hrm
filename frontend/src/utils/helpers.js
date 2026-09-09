@@ -13,17 +13,17 @@ export { displayDate, displayDateTime, displayTime, toAPIDate, toAPIDateTime } f
  */
 export const formatDate = (date, format = 'short') => {
   if (!date) return 'N/A';
-  
+
   const dateObj = new Date(date);
   if (isNaN(dateObj.getTime())) return 'Invalid Date';
-  
+
   const tz = 'Asia/Kolkata';
   const options = {
     short: { year: 'numeric', month: 'short', day: 'numeric', timeZone: tz },
     long: { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', timeZone: tz },
     time: { hour: '2-digit', minute: '2-digit', timeZone: tz }
   };
-  
+
   return dateObj.toLocaleDateString('en-IN', options[format] || options.short);
 };
 
@@ -35,15 +35,15 @@ export const formatDate = (date, format = 'short') => {
  */
 export const calculateDaysBetween = (startDate, endDate) => {
   if (!startDate || !endDate) return 0;
-  
+
   const start = new Date(startDate);
   const end = new Date(endDate);
-  
+
   if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0;
-  
+
   const diffTime = Math.abs(end - start);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   return diffDays + 1; // Include both start and end dates
 };
 
@@ -155,7 +155,7 @@ export const getStatusBadgeClass = (status) => {
     processed: 'badge-info',
     draft: 'badge-secondary'
   };
-  
+
   return statusMap[status?.toLowerCase()] || 'badge-secondary';
 };
 
@@ -168,17 +168,17 @@ export const getStatusBadgeClass = (status) => {
  */
 export const sortByProperty = (array, property, direction = 'asc') => {
   if (!Array.isArray(array)) return [];
-  
+
   return [...array].sort((a, b) => {
     const aVal = a[property];
     const bVal = b[property];
-    
+
     if (typeof aVal === 'string' && typeof bVal === 'string') {
-      return direction === 'asc' 
+      return direction === 'asc'
         ? aVal.localeCompare(bVal)
         : bVal.localeCompare(aVal);
     }
-    
+
     if (direction === 'asc') {
       return aVal > bVal ? 1 : -1;
     } else {
@@ -196,9 +196,9 @@ export const sortByProperty = (array, property, direction = 'asc') => {
  */
 export const filterBySearch = (array, searchTerm, searchFields) => {
   if (!Array.isArray(array) || !searchTerm) return array;
-  
+
   const term = searchTerm.toLowerCase();
-  
+
   return array.filter(item => {
     return searchFields.some(field => {
       const value = item[field];

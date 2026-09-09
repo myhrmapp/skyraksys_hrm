@@ -119,7 +119,7 @@ base.describe('Payroll Module — admin', () => {
     await expect(pg.locator('[data-testid="payroll-management-page"]')).toBeVisible();
     await p.selectTab(3);
     await pg.waitForTimeout(400);
-    const rep = pg.locator('text=Reports & Analytics');
+    const rep = pg.locator('text=Reports').first();
     expect(await rep.isVisible({ timeout: 3000 }).catch(() => false)).toBeTruthy();
   });
 

@@ -11,8 +11,8 @@ jest.mock('../../../../services/timesheet.service', () => {
   }
   return {
     timesheetService: {
-      getAll: jest.fn(),
-    },
+      getAll: jest.fn()
+    }
   };
 });
 const { timesheetService } = require('../../../../services/timesheet.service');
@@ -48,7 +48,7 @@ const mockTimesheets = [
     description: 'Sprint 42 work',
     project: { name: 'Project A' },
     task: { name: 'Development' },
-    entries: [{ day: 'Monday', hours: 8, project: 'Project A', task: 'Development' }],
+    entries: [{ day: 'Monday', hours: 8, project: 'Project A', task: 'Development' }]
   },
   {
     id: 2,
@@ -66,7 +66,7 @@ const mockTimesheets = [
     approverComments: null,
     project: { name: 'Project B' },
     task: { name: 'Testing' },
-    entries: [],
+    entries: []
   },
   {
     id: 3,
@@ -84,7 +84,7 @@ const mockTimesheets = [
     approverComments: 'Missing entries',
     project: { name: 'Project C' },
     task: { name: 'Design' },
-    entries: [],
+    entries: []
   },
   {
     id: 4,
@@ -98,8 +98,8 @@ const mockTimesheets = [
     totalHoursWorked: 20,
     project: { name: 'Project D' },
     task: { name: 'Research' },
-    entries: [],
-  },
+    entries: []
+  }
 ];
 
 // Timesheet belonging to a different user — should be filtered out
@@ -116,7 +116,7 @@ const otherUserTimesheet = {
   submittedAt: '2026-02-03T08:00:00Z',
   project: { name: 'Project X' },
   task: { name: 'Admin' },
-  entries: [],
+  entries: []
 };
 
 const allTimesheets = [...mockTimesheets, otherUserTimesheet];
@@ -366,7 +366,7 @@ describe('TimesheetHistory', () => {
       const selectElement = screen.getByTestId('ts-history-status-select');
       const selectButton = selectElement.closest('[role="combobox"]') || selectElement.parentElement.querySelector('[role="combobox"]');
       fireEvent.mouseDown(selectButton || selectElement);
-      await waitFor(() => expect(screen.getByRole('listbox')).toBeInTheDocument());
+      await screen.findByRole('listbox');
       await userEvent.click(within(screen.getByRole('listbox')).getByText('Draft'));
 
       await waitFor(() => {

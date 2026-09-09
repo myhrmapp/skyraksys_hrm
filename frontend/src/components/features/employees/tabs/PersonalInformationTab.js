@@ -14,13 +14,13 @@ import {
   Tooltip,
   IconButton,
   InputAdornment,
-  CircularProgress,
+  CircularProgress
 } from '@mui/material';
 import {
   AutoAwesome as AutoIcon,
   Edit as EditIcon,
   Lock as LockIcon,
-  Refresh as RefreshIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import PhotoUploadSimple from '../../../common/PhotoUploadSimple';
 import { employeeService } from '../../../../services/employee.service';
@@ -35,7 +35,7 @@ const PersonalInformationTab = ({
   photoPreview,
   onPhotoSelect,
   onPhotoRemove,
-  isEditMode = false,
+  isEditMode = false
 }) => {
   const [overrideId, setOverrideId] = useState(false);
   const [loadingNextId, setLoadingNextId] = useState(false);
@@ -65,21 +65,21 @@ const PersonalInformationTab = ({
   return (
   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
     {/* Profile Photo Section */}
-    <Card 
-      elevation={0} 
-      sx={{ 
-        p: 3, 
-        bgcolor: 'primary.50', 
-        border: '1px solid', 
+    <Card
+      elevation={0}
+      sx={{
+        p: 3,
+        bgcolor: 'primary.50',
+        border: '1px solid',
         borderColor: 'primary.100',
         borderRadius: 2
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
         <Avatar
-          sx={{ 
-            width: 80, 
-            height: 80, 
+          sx={{
+            width: 80,
+            height: 80,
             bgcolor: 'primary.main',
             fontSize: '2rem',
             fontWeight: 'bold'
@@ -202,7 +202,7 @@ const PersonalInformationTab = ({
                     </Tooltip>
                   )}
                 </InputAdornment>
-              ),
+              )
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
@@ -211,9 +211,9 @@ const PersonalInformationTab = ({
                   ? 'action.hover'
                   : overrideId
                     ? 'warning.50'
-                    : 'success.50',
+                    : 'success.50'
               },
-              '& .MuiInputLabel-root': { fontWeight: 600 },
+              '& .MuiInputLabel-root': { fontWeight: 600 }
             }}
           />
           {/* Status chip below field */}

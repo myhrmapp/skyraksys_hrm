@@ -61,7 +61,7 @@ import TaskForm from '../../../pages/Tasks/TaskForm';
 const ProjectTaskConfiguration = () => {
   const theme = useTheme();
   const { dialogProps, confirm } = useConfirmDialog();
-  
+
   useEffect(() => {
     // Component loaded
   }, []);
@@ -72,7 +72,7 @@ const ProjectTaskConfiguration = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  
+
   // Dialogs
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
@@ -80,7 +80,7 @@ const ProjectTaskConfiguration = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [statsDialogOpen, setStatsDialogOpen] = useState(false);
   const [projectStats, setProjectStats] = useState(null);
-  
+
   // ✅ VIEW STATE
   const [projectView, setProjectView] = useState('table'); // 'cards' or 'table'
   const [taskView, setTaskView] = useState('table'); // 'cards' or 'table'
@@ -104,13 +104,13 @@ const ProjectTaskConfiguration = () => {
   }, []);
 
   // Filter logic
-  const filteredProjects = projects.filter(p => 
+  const filteredProjects = projects.filter(p =>
     p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.clientName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredTasks = tasks.filter(t => 
+  const filteredTasks = tasks.filter(t =>
     t.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     t.project?.name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -121,7 +121,7 @@ const ProjectTaskConfiguration = () => {
       setLoading(true);
       setError(null);
       const response = await ProjectService.getAll();
-      
+
       // More robust check: accept if success is true OR if data is an array
       if (response.data && (response.data.success || Array.isArray(response.data.data))) {
         setProjects(response.data.data || []);
@@ -149,7 +149,7 @@ const ProjectTaskConfiguration = () => {
       setLoading(true);
       setError(null);
       const response = await TaskService.getAll();
-      
+
       if (response.data && (response.data.success || Array.isArray(response.data.data))) {
         setTasks(response.data.data || []);
       } else {
@@ -309,7 +309,7 @@ const ProjectTaskConfiguration = () => {
               <Typography variant="h6" fontWeight="700">
                 Projects ({projects.length})
               </Typography>
-              
+
               {/* View Toggle */}
               <ToggleButtonGroup
                 value={projectView}
@@ -335,7 +335,7 @@ const ProjectTaskConfiguration = () => {
                 </ToggleButton>
               </ToggleButtonGroup>
             </Box>
-            
+
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -410,7 +410,7 @@ const ProjectTaskConfiguration = () => {
                                     sx={{ fontWeight: 600, fontSize: '0.7rem' }}
                                   />
                                 </Box>
-                                <Chip 
+                                <Chip
                                   label={`${project.tasks?.length || 0} tasks`}
                                   size="small"
                                   variant="outlined"
@@ -419,8 +419,8 @@ const ProjectTaskConfiguration = () => {
                               </Box>
 
                               {/* Description */}
-                              <Typography 
-                                variant="body2" 
+                              <Typography
+                                variant="body2"
                                 color="text.secondary"
                                 sx={{
                                   overflow: 'hidden',
@@ -569,8 +569,8 @@ const ProjectTaskConfiguration = () => {
                             </Typography>
                           </TableCell>
                           <TableCell>
-                            <Typography 
-                              variant="body2" 
+                            <Typography
+                              variant="body2"
                               color="text.secondary"
                               sx={{
                                 maxWidth: 200,
@@ -597,13 +597,13 @@ const ProjectTaskConfiguration = () => {
                             {project.endDate ? new Date(project.endDate).toLocaleDateString() : '-'}
                           </TableCell>
                           <TableCell>
-                            {project.manager 
+                            {project.manager
                               ? `${project.manager.firstName} ${project.manager.lastName}`
                               : '-'
                             }
                           </TableCell>
                           <TableCell align="center">
-                            <Chip 
+                            <Chip
                               label={project.tasks?.length || 0}
                               size="small"
                               color={project.tasks?.length > 0 ? 'primary' : 'default'}
@@ -671,7 +671,7 @@ const ProjectTaskConfiguration = () => {
               <Typography variant="h6" fontWeight="700">
                 Tasks ({tasks.length})
               </Typography>
-              
+
               {/* View Toggle */}
               <ToggleButtonGroup
                 value={taskView}
@@ -689,7 +689,7 @@ const ProjectTaskConfiguration = () => {
                 </ToggleButton>
               </ToggleButtonGroup>
             </Box>
-            
+
             <Button
               variant="contained"
               startIcon={<AddIcon />}

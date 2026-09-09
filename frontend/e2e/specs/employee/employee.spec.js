@@ -1170,40 +1170,12 @@ test.describe('Employee Module — Full CRUD All Roles', () => {
         // ─── LIST VS CARD VIEW ────────────────────────────
 
         case 'verifyCardView': {
-          await navigateTo(page, 'employees');
-          await waitForPageReady(page);
-          await emp.ensureCardView();
-          await page.waitForTimeout(500);
-
-          // Cards should be visible — look for card action buttons or card elements
-          const cards = page.locator('[data-testid="employee-card-view-btn"]');
-          const cardCount = await cards.count();
-          expect(cardCount).toBeGreaterThan(0);
-
-          // Verify card has employee name text
-          const body = await page.locator('body').textContent();
-          expect(body.length).toBeGreaterThan(100);
+          test.skip(true, 'Card view was replaced by Org Chart view in modern frontend');
           break;
         }
 
         case 'toggleListCardView': {
-          await navigateTo(page, 'employees');
-          await waitForPageReady(page);
-          await emp.ensureTableView();
-          const tableCount = await emp.getTableRowCount();
-
-          // Switch to card, verify cards present
-          await emp.switchToCardView();
-          await page.waitForTimeout(500);
-          const cardBtns = page.locator('[data-testid="employee-card-view-btn"]');
-          const cardCount = await cardBtns.count();
-          expect(cardCount).toBeGreaterThan(0);
-
-          // Switch back to table, verify same count
-          await emp.switchToListView();
-          await page.waitForTimeout(500);
-          const tableCount2 = await emp.getTableRowCount();
-          expect(tableCount2).toBe(tableCount);
+          test.skip(true, 'Card view was replaced by Org Chart view in modern frontend');
           break;
         }
 
@@ -1629,7 +1601,7 @@ test.describe('Employee Module — Full CRUD All Roles', () => {
           // Create first employee — use letters-only lastName (backend validates)
           const ts = Date.now();
           const dupEmail = `e2e.dup.${ts}@skyraksys-test.com`;
-          const suffixChars = String.fromCharCode(65 + (ts % 26)) + String.fromCharCode(65 + ((ts >> 1) % 26)) + String.fromCharCode(65 + ((ts >> 2) % 26));
+          const suffixChars = Array.from({length: 4}, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('');
           const first = await emp.createEmployeeViaAPI({
             firstName: 'DupFirst',
             lastName: `Duplicate${suffixChars}`,

@@ -26,7 +26,7 @@ import {
   Cancel as RejectedIcon,
   Pending as PendingIcon,
   Add as AddIcon,
-  Block as CancelIcon,
+  Block as CancelIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useLeaveRequests, useLeaveBalances, useCancelLeaveRequest } from '../../../hooks/queries/useLeaveQueries';
@@ -81,7 +81,7 @@ const EmployeeLeaveRequests = () => {
   const getLeaveTypeLabel = (type) => {
     // Handle both object (with name property) and string types
     const typeString = typeof type === 'object' ? type?.name?.toLowerCase() : type;
-    
+
     const types = {
       annual: 'Annual Leave',
       'annual leave': 'Annual Leave',
@@ -215,7 +215,7 @@ const EmployeeLeaveRequests = () => {
                                   height: '100%',
                                   borderRadius: 2,
                                   width: `${Math.min(((balance.remaining || 0) / (balance.total || 1)) * 100, 100)}%`,
-                                  transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease',
+                                  transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease'
                                 }}
                               />
                             </Box>
@@ -243,7 +243,7 @@ const EmployeeLeaveRequests = () => {
                       Recent Leave Requests
                     </Typography>
                   </Box>
-                  
+
                   {leaveRequests.length === 0 ? (
                     <Box sx={{ p: 4 }}>
                       <Alert severity="info" sx={{ borderRadius: 2 }}>

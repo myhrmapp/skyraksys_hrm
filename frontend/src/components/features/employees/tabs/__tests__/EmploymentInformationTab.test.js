@@ -31,7 +31,7 @@ const createFormData = (overrides = {}) => ({
   confirmationDate: '',
   resignationDate: '',
   lastWorkingDate: '',
-  ...overrides,
+  ...overrides
 });
 
 const createProps = (overrides = {}) => ({
@@ -43,7 +43,7 @@ const createProps = (overrides = {}) => ({
   departments: overrides.departments || [dept1, dept2],
   positions: overrides.positions || [pos1, pos2, pos3],
   managers: overrides.managers || [mgr1],
-  loadingRefData: overrides.loadingRefData || false,
+  loadingRefData: overrides.loadingRefData || false
 });
 
 const renderTab = (overrides = {}) => {
@@ -80,7 +80,7 @@ describe('EmploymentInformationTab', () => {
     it('should show error when touched and error exists', () => {
       renderTab({
         errors: { hireDate: 'Hire date is required' },
-        touchedFields: { hireDate: true },
+        touchedFields: { hireDate: true }
       });
       expect(screen.getByText('Hire date is required')).toBeInTheDocument();
     });
@@ -131,7 +131,7 @@ describe('EmploymentInformationTab', () => {
     it('should show error text when touched and error exists', () => {
       renderTab({
         errors: { departmentId: 'Department is required' },
-        touchedFields: { departmentId: true },
+        touchedFields: { departmentId: true }
       });
       expect(screen.getByText('Department is required')).toBeInTheDocument();
     });
@@ -182,7 +182,7 @@ describe('EmploymentInformationTab', () => {
       const onChange = jest.fn();
       renderTab({
         onChange,
-        formData: { departmentId: 'dept-1', positionId: 'pos-1' },
+        formData: { departmentId: 'dept-1', positionId: 'pos-1' }
       });
       // Simulate changing department to dept-2
       fireEvent.mouseDown(document.getElementById('departmentId'));
@@ -198,7 +198,7 @@ describe('EmploymentInformationTab', () => {
       // pos-3 belongs to dept-2 (HR Manager)
       renderTab({
         onChange,
-        formData: { departmentId: 'dept-1', positionId: 'pos-3' },
+        formData: { departmentId: 'dept-1', positionId: 'pos-3' }
       });
       // Change department from dept-1 to dept-2 where pos-3 belongs
       fireEvent.mouseDown(document.getElementById('departmentId'));
@@ -338,7 +338,7 @@ describe('EmploymentInformationTab', () => {
     it('should show error when touched and error exists', () => {
       renderTab({
         errors: { probationPeriod: 'Probation period must be between 0-24 months' },
-        touchedFields: { probationPeriod: true },
+        touchedFields: { probationPeriod: true }
       });
       expect(screen.getByText('Probation period must be between 0-24 months')).toBeInTheDocument();
     });
@@ -379,7 +379,7 @@ describe('EmploymentInformationTab', () => {
       ['Joining Date', 'joiningDate'],
       ['Confirmation Date', 'confirmationDate'],
       ['Resignation Date', 'resignationDate'],
-      ['Last Working Date', 'lastWorkingDate'],
+      ['Last Working Date', 'lastWorkingDate']
     ])('should render %s as date type', (label, _fieldName) => {
       renderTab();
       const input = screen.getByLabelText(new RegExp(label, 'i'));
@@ -413,8 +413,8 @@ describe('EmploymentInformationTab', () => {
           joiningDate: '2024-01-20',
           confirmationDate: '2024-07-20',
           resignationDate: '',
-          lastWorkingDate: '',
-        },
+          lastWorkingDate: ''
+        }
       });
 
       expect(screen.getByDisplayValue('2024-01-15')).toBeInTheDocument();

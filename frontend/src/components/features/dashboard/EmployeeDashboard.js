@@ -78,34 +78,34 @@ const EmployeeDashboard = () => {
     if (!balances || Object.keys(balances).length === 0) {
       return { total: 0, subtitle: 'No leave types' };
     }
-    
+
     const leaveTypes = Object.entries(balances).map(([type, data]) => ({
       type: type.charAt(0).toUpperCase() + type.slice(1),
       remaining: Number(data.remaining || 0),
       total: Number(data.total || 0)
     }));
-    
+
     const totalRemaining = leaveTypes.reduce((sum, lt) => sum + lt.remaining, 0);
     const totalAccrued = leaveTypes.reduce((sum, lt) => sum + lt.total, 0);
-    
+
     // Create compact subtitle showing all leave types
     const subtitle = leaveTypes.map(lt => `${lt.type}: ${formatLeaveValue(lt.remaining)}/${formatLeaveValue(lt.total)}`).join(' • ');
-    
-    return { 
-      total: formatLeaveValue(totalRemaining), 
-      totalAccrued: formatLeaveValue(totalAccrued), 
-      subtitle 
+
+    return {
+      total: formatLeaveValue(totalRemaining),
+      totalAccrued: formatLeaveValue(totalAccrued),
+      subtitle
     };
   };
 
   const leaveBalanceSummary = getLeaveBalanceSummary();
 
   const QuickActionCard = ({ icon, title, description, onClick, color = 'primary' }) => (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         cursor: 'pointer',
         transition: 'all 0.15s ease',
-        '&:hover': { 
+        '&:hover': {
           transform: 'translateY(-2px)',
           boxShadow: theme.shadows[4]
         },
@@ -130,10 +130,10 @@ const EmployeeDashboard = () => {
   );
 
   const StatCard = ({ title, value, subtitle, icon, color = 'primary' }) => (
-    <Card sx={{ 
-      height: '100%', 
+    <Card sx={{
+      height: '100%',
       boxShadow: 1,
-      border: `1px solid ${alpha(theme.palette[color].main, 0.1)}` 
+      border: `1px solid ${alpha(theme.palette[color].main, 0.1)}`
     }}>
       <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -280,8 +280,8 @@ const EmployeeDashboard = () => {
                 <React.Fragment key={index}>
                   <ListItem sx={{ py: 1 }}>
                     <ListItemIcon sx={{ minWidth: 36 }}>
-                      {activity.type === 'leave' ? 
-                        <LeaveIcon sx={{ fontSize: 20 }} /> : 
+                      {activity.type === 'leave' ?
+                        <LeaveIcon sx={{ fontSize: 20 }} /> :
                         <TimesheetIcon sx={{ fontSize: 20 }} />
                       }
                     </ListItemIcon>
@@ -297,9 +297,9 @@ const EmployeeDashboard = () => {
                         </Typography>
                       }
                     />
-                    <Chip 
-                      label={activity.status} 
-                      size="small" 
+                    <Chip
+                      label={activity.status}
+                      size="small"
                       variant="outlined"
                       color={activity.status === 'approved' ? 'success' : 'default'}
                       sx={{ fontSize: '0.75rem' }}

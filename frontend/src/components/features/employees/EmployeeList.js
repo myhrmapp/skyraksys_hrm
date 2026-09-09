@@ -52,7 +52,7 @@ const EmployeeList = () => {
     setEmploymentTypeFilter,
     setLocationFilter,
     setDeleteDialogOpen,
-    
+
     // Actions
     loadEmployees,
     handleAddEmployee,
@@ -64,7 +64,7 @@ const EmployeeList = () => {
     handleCloseUserAccountDialog,
     handleUserAccountDataChange,
     handleCreateUserSubmit,
-    handleChangePage,
+    handleChangePage
   } = useEmployeeList();
 
   const [displayMode, setDisplayMode] = React.useState('list');
@@ -94,7 +94,7 @@ const EmployeeList = () => {
 
     const ws = XLSX.utils.json_to_sheet(dataToExport);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Employees");
+    XLSX.utils.book_append_sheet(wb, ws, 'Employees');
     const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     const data = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
     saveAs(data, `employees_export_${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -103,8 +103,8 @@ const EmployeeList = () => {
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <EmployeeListHeader 
-          canEdit={canEdit} 
+        <EmployeeListHeader
+          canEdit={canEdit}
           onAddEmployee={handleAddEmployee}
           onExport={handleExport}
         />
@@ -130,9 +130,9 @@ const EmployeeList = () => {
           <CardContent>
             <Typography variant="h6">⚠️ Error</Typography>
             <Typography>{error}</Typography>
-            <Button 
-              variant="contained" 
-              onClick={loadEmployees} 
+            <Button
+              variant="contained"
+              onClick={loadEmployees}
               sx={{ mt: 2 }}
               color="inherit"
               data-testid="employee-list-retry-btn"
@@ -164,10 +164,10 @@ const EmployeeList = () => {
       {/* Pagination */}
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         {displayMode === 'list' && (
-          <Pagination 
-            count={Math.ceil(totalRecords / rowsPerPage)} 
-            page={page + 1} 
-            onChange={(e, p) => handleChangePage(e, p - 1)} 
+          <Pagination
+            count={Math.ceil(totalRecords / rowsPerPage)}
+            page={page + 1}
+            onChange={(e, p) => handleChangePage(e, p - 1)}
             color="primary"
             shape="rounded"
             data-testid="employee-list-pagination"
@@ -181,7 +181,7 @@ const EmployeeList = () => {
            <OrganizationChart employees={employees} />
         </Card>
       ) : (
-        <EmployeeTableView 
+        <EmployeeTableView
           employees={employees}
           onView={handleViewEmployee}
           onEdit={handleEditEmployee}

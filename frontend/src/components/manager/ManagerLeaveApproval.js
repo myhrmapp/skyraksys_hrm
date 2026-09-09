@@ -49,15 +49,15 @@ const ManagerLeaveApproval = ({ pendingLeaves, onApprovalUpdate }) => {
         approvedBy: 'manager',
         comments: 'Approved by manager'
       });
-      
+
       showNotification(
         `Leave request for ${leaveRequest.employee?.firstName} ${leaveRequest.employee?.lastName} approved successfully`,
         'success'
       );
-      
+
       setApprovalDialog(false);
       onApprovalUpdate?.();
-      
+
     } catch (error) {
       console.error('Failed to approve leave:', error);
       showNotification('Failed to approve leave request', 'error');
@@ -78,16 +78,16 @@ const ManagerLeaveApproval = ({ pendingLeaves, onApprovalUpdate }) => {
         rejectedBy: 'manager',
         comments: rejectionReason
       });
-      
+
       showNotification(
         `Leave request for ${leaveRequest.employee?.firstName} ${leaveRequest.employee?.lastName} rejected`,
         'info'
       );
-      
+
       setRejectionDialog(false);
       setRejectionReason('');
       onApprovalUpdate?.();
-      
+
     } catch (error) {
       console.error('Failed to reject leave:', error);
       showNotification('Failed to reject leave request', 'error');
@@ -140,7 +140,7 @@ const ManagerLeaveApproval = ({ pendingLeaves, onApprovalUpdate }) => {
       <Typography variant="h6" gutterBottom>
         Pending Leave Requests ({pendingLeaves.length})
       </Typography>
-      
+
       <Grid container spacing={3}>
         {pendingLeaves.map((leave) => (
           <Grid item xs={12} md={6} key={leave.id}>
@@ -176,7 +176,7 @@ const ManagerLeaveApproval = ({ pendingLeaves, onApprovalUpdate }) => {
                       <strong>Duration:</strong> {dayjs(leave.startDate).format('MMM DD, YYYY')} - {dayjs(leave.endDate).format('MMM DD, YYYY')}
                     </Typography>
                   </Box>
-                  
+
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <ScheduleIcon sx={{ mr: 1, fontSize: 20, color: 'text.secondary' }} />
                     <Typography variant="body2">

@@ -47,7 +47,7 @@ export const useForm = (initialValues, validationSchema = null) => {
 
   const setValue = (name, value) => {
     setValues(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
@@ -60,7 +60,7 @@ export const useForm = (initialValues, validationSchema = null) => {
 
   const validate = () => {
     if (!validationSchema) return true;
-    
+
     const validationErrors = validationSchema(values);
     setErrors(validationErrors);
     return Object.keys(validationErrors).length === 0;
@@ -68,7 +68,7 @@ export const useForm = (initialValues, validationSchema = null) => {
 
   const handleSubmit = async (onSubmit) => {
     setIsSubmitting(true);
-    
+
     if (validate()) {
       try {
         await onSubmit(values);

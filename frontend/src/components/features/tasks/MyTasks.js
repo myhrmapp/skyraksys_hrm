@@ -29,11 +29,11 @@ import {
   Stack,
   LinearProgress,
   useTheme,
-  alpha,
+  alpha
 } from '@mui/material';
 import {
   Assignment as TaskIcon,
-  Search as SearchIcon,
+  Search as SearchIcon
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -46,14 +46,14 @@ const STATUS_COLORS = {
   'Not Started': 'default',
   'In Progress': 'info',
   'Completed': 'success',
-  'On Hold': 'warning',
+  'On Hold': 'warning'
 };
 
 const PRIORITY_COLORS = {
   Low: 'success',
   Medium: 'info',
   High: 'warning',
-  Critical: 'error',
+  Critical: 'error'
 };
 
 const MyTasks = () => {
@@ -78,7 +78,7 @@ const MyTasks = () => {
     select: (response) => {
       const tasks = response.data?.data || response.data || [];
       return Array.isArray(tasks) ? tasks : [];
-    },
+    }
   });
 
   // Status update mutation
@@ -90,7 +90,7 @@ const MyTasks = () => {
     },
     onError: (error) => {
       showError(error.response?.data?.message || 'Failed to update task status');
-    },
+    }
   });
 
   const tasks = useMemo(() => tasksData || [], [tasksData]);
@@ -150,7 +150,7 @@ const MyTasks = () => {
           py: 3,
           borderRadius: 0,
           bgcolor: 'background.paper',
-          borderBottom: `1px solid ${theme.palette.divider}`,
+          borderBottom: `1px solid ${theme.palette.divider}`
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
@@ -163,7 +163,7 @@ const MyTasks = () => {
               height: 40,
               borderRadius: 1.5,
               bgcolor: alpha(theme.palette.primary.main, 0.1),
-              color: 'primary.main',
+              color: 'primary.main'
             }}
           >
             <TaskIcon />
@@ -186,7 +186,7 @@ const MyTasks = () => {
             { label: 'Total', value: stats.total, color: 'primary' },
             { label: 'In Progress', value: stats.inProgress, color: 'info' },
             { label: 'Not Started', value: stats.pending, color: 'warning' },
-            { label: 'Completed', value: stats.completed, color: 'success' },
+            { label: 'Completed', value: stats.completed, color: 'success' }
           ].map((stat) => (
             <Grid item xs={6} md={3} key={stat.label}>
               <Card sx={{ border: '1px solid', borderColor: 'divider' }}>
@@ -235,7 +235,7 @@ const MyTasks = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   InputProps={{
-                    startAdornment: <SearchIcon sx={{ mr: 1, color: 'action.active' }} />,
+                    startAdornment: <SearchIcon sx={{ mr: 1, color: 'action.active' }} />
                   }}
                 />
               </Grid>
@@ -316,7 +316,7 @@ const MyTasks = () => {
                                 maxWidth: 300,
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
+                                whiteSpace: 'nowrap'
                               }}
                             >
                               {task.description}

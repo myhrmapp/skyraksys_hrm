@@ -93,15 +93,15 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
   }
 
   // In 'self' mode, we might want to restrict editing even if the user has a role that usually allows it (like manager)
-  // But for now, we'll trust the hook's permission logic. 
+  // But for now, we'll trust the hook's permission logic.
   // If mode is 'self', the 'id' might be undefined in the hook if we didn't pass it, but the hook fetches 'me'.
-  
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : 'grey.50', py: 4, pb: editing ? 12 : 4 }}>
       <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3 }}>
-        
+
         {/* Header with Actions */}
-        <EmployeeProfileHeader 
+        <EmployeeProfileHeader
           onBack={() => mode === 'self' ? navigate('/') : navigate('/employees')}
           editing={editing}
           onEdit={() => {
@@ -124,7 +124,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
         />
 
         {/* Profile Card (Avatar & Basic Info) */}
-        <EmployeeProfileCard 
+        <EmployeeProfileCard
           employee={employee}
           editing={editing && mode === 'self'}
           selectedPhoto={selectedPhoto}
@@ -137,7 +137,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 3 }}>
           {/* Left Column */}
           <Box>
-            <PersonalInfoSection 
+            <PersonalInfoSection
               employee={employee}
               editing={editing}
               onChange={handleChange}
@@ -147,7 +147,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
 
           {/* Right Column */}
           <Box>
-            <EmploymentInfoSection 
+            <EmploymentInfoSection
               employee={employee}
               editing={editing}
               onChange={handleChange}
@@ -157,7 +157,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
               managers={managersData}
             />
 
-            <SalaryInfoSection 
+            <SalaryInfoSection
               employee={employee}
               editing={editing}
               onChange={handleSalaryChange}
@@ -167,7 +167,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
               formatCurrency={formatCurrency}
             />
 
-            <StatutoryInfoSection 
+            <StatutoryInfoSection
               employee={employee}
               editing={editing}
               onChange={handleChange}
@@ -208,17 +208,17 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Chip 
+              <Chip
                 icon={<EditIcon />}
-                label="Edit Mode Active" 
-                color="warning" 
+                label="Edit Mode Active"
+                color="warning"
                 sx={{ fontWeight: 600 }}
               />
               <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
                 Make your changes and click Save to update the profile
               </Typography>
             </Box>
-            
+
             <Box sx={{ display: 'flex', gap: 1.5 }}>
               <Button
                 variant="outlined"
@@ -263,7 +263,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
           </Box>
         </Box>
       )}
-      
+
       {/* Payslip Viewer Dialog */}
       <PayslipViewer
         open={showPayslipViewer}

@@ -59,7 +59,7 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
       <Typography variant="h6" gutterBottom>
         Your Team ({teamMembers.length} members)
       </Typography>
-      
+
       <Grid container spacing={3}>
         {teamMembers.map((member) => (
           <Grid item xs={12} sm={6} md={4} key={member.id}>
@@ -93,14 +93,14 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
                       {member.position?.title || 'No position assigned'}
                     </Typography>
                   </Box>
-                  
+
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <EmailIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
                     <Typography variant="body2" noWrap>
                       {member.email}
                     </Typography>
                   </Box>
-                  
+
                   {member.phone && (
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <PhoneIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
@@ -109,7 +109,7 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
                       </Typography>
                     </Box>
                   )}
-                  
+
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <CalendarIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
                     <Typography variant="body2">
@@ -124,10 +124,10 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
       </Grid>
 
       {/* Member Details Dialog */}
-      <Dialog 
-        open={detailsDialog} 
-        onClose={() => setDetailsDialog(false)} 
-        maxWidth="md" 
+      <Dialog
+        open={detailsDialog}
+        onClose={() => setDetailsDialog(false)}
+        maxWidth="md"
         fullWidth
       >
         <DialogTitle>
@@ -173,7 +173,7 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
                         {selectedMember.email}
                       </Typography>
                     </Box>
-                    
+
                     {selectedMember.phone && (
                       <Box>
                         <Typography variant="body2" color="text.secondary">
@@ -184,7 +184,7 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
                         </Typography>
                       </Box>
                     )}
-                    
+
                     {selectedMember.dateOfBirth && (
                       <Box>
                         <Typography variant="body2" color="text.secondary">
@@ -211,7 +211,7 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
                         {selectedMember.position?.title || 'Not assigned'}
                       </Typography>
                     </Box>
-                    
+
                     <Box>
                       <Typography variant="body2" color="text.secondary">
                         Department
@@ -220,7 +220,7 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
                         {selectedMember.department?.name || 'Not assigned'}
                       </Typography>
                     </Box>
-                    
+
                     {selectedMember.hireDate && (
                       <Box>
                         <Typography variant="body2" color="text.secondary">
@@ -231,7 +231,7 @@ const TeamMembersList = ({ teamMembers, onRefresh }) => {
                         </Typography>
                       </Box>
                     )}
-                    
+
                     {selectedMember.workLocation && (
                       <Box>
                         <Typography variant="body2" color="text.secondary">

@@ -69,25 +69,25 @@ const EnhancedPayslipTemplateConfiguration = () => {
   const [previewDialog, setPreviewDialog] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [logoPreview, setLogoPreview] = useState(null);
-  
+
   const [templateForm, setTemplateForm] = useState({
     name: '',
     description: '',
     isDefault: false,
-    
+
     // Fields (matching database schema)
     headerFields: [],
     earningsFields: [],
     deductionsFields: [],
     footerFields: [],
-    
+
     // Enhanced Styling (stored in styling JSON column)
     styling: {
       // Typography
       fontFamily: 'Arial, sans-serif',
       fontSize: '12px',
       headingFontSize: '16px',
-      
+
       // Colors
       primaryColor: '#1976d2',
       secondaryColor: '#424242',
@@ -96,7 +96,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
       borderColor: '#e0e0e0',
       textColor: '#000000',
       labelColor: '#666666',
-      
+
       // Layout
       pageSize: 'A4',
       orientation: 'portrait',
@@ -104,7 +104,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
       padding: '15px',
       borderWidth: '1px',
       borderStyle: 'solid',
-      
+
       // Company Info (nested in styling)
       companyInfo: {
         name: '',
@@ -119,10 +119,10 @@ const EnhancedPayslipTemplateConfiguration = () => {
         cin: '',
         pan: ''
       },
-      
+
       // Custom CSS
       customCSS: '',
-      
+
       // Watermark
       watermark: {
         enabled: false,
@@ -132,7 +132,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
         color: '#cccccc',
         rotation: -45
       },
-      
+
       // HTML Templates
       htmlTemplates: {
         header: '',
@@ -306,8 +306,8 @@ const EnhancedPayslipTemplateConfiguration = () => {
         setLogoPreview(base64);
         setTemplateForm(prev => ({
           ...prev,
-          styling: { 
-            ...prev.styling, 
+          styling: {
+            ...prev.styling,
             companyInfo: { ...prev.styling.companyInfo, logo: base64 }
           }
         }));
@@ -321,8 +321,8 @@ const EnhancedPayslipTemplateConfiguration = () => {
     setLogoPreview(null);
     setTemplateForm(prev => ({
       ...prev,
-      styling: { 
-        ...prev.styling, 
+      styling: {
+        ...prev.styling,
         companyInfo: { ...prev.styling.companyInfo, logo: null }
       }
     }));
@@ -365,7 +365,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
         await payrollService.createPayslipTemplate(templateForm);
         showNotification('✅ Template created successfully', 'success');
       }
-      
+
       setTemplateDialog(false);
       setActiveTab(0); // Reset to first tab
       loadTemplates();
@@ -429,18 +429,18 @@ const EnhancedPayslipTemplateConfiguration = () => {
 
   const renderFieldSection = (section, title, availableFields) => (
     <Accordion defaultExpanded>
-      <AccordionSummary 
+      <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls={`${section}-fields-content`}
         id={`${section}-fields-header`}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
           <Typography variant="h6">{title}</Typography>
-          <Chip 
-            label={`${templateForm[`${section}Fields`].length} selected`} 
-            size="small" 
+          <Chip
+            label={`${templateForm[`${section}Fields`].length} selected`}
+            size="small"
             color={templateForm[`${section}Fields`].length > 0 ? 'primary' : 'default'}
-            sx={{ ml: 'auto' }} 
+            sx={{ ml: 'auto' }}
           />
         </Box>
       </AccordionSummary>
@@ -482,16 +482,16 @@ const EnhancedPayslipTemplateConfiguration = () => {
             sx={{
               bgcolor: 'transparent',
               borderRadius: 1,
-              p: 1,
+              p: 1
             }}
           >
             {templateForm[`${section}Fields`].map((field, index) => (
               <ListItem
                 key={field.id}
-                sx={{ 
-                  border: 1, 
-                  borderColor: 'grey.300', 
-                  mb: 1, 
+                sx={{
+                  border: 1,
+                  borderColor: 'grey.300',
+                  mb: 1,
                   borderRadius: 1,
                   bgcolor: 'background.paper',
                   '&:hover': { bgcolor: 'action.hover' }
@@ -500,7 +500,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                 <Box sx={{ mr: 1, cursor: 'grab', display: 'flex', alignItems: 'center' }}>
                   <DragIcon color="action" />
                 </Box>
-                <ListItemText 
+                <ListItemText
                   primary={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography>{field.label}</Typography>
@@ -509,7 +509,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                       )}
                     </Box>
                   }
-                  secondary={`Type: ${field.type}`} 
+                  secondary={`Type: ${field.type}`}
                 />
                 <Box sx={{ display: 'flex', gap: 0.5, mr: 1 }}>
                   <Tooltip title="Move up">
@@ -654,15 +654,15 @@ const EnhancedPayslipTemplateConfiguration = () => {
         <Grid container spacing={3}>
           {templates.map((template) => (
             <Grid item xs={12} md={6} lg={4} key={template.id}>
-              <Card 
-                sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
                   flexDirection: 'column',
                   transition: 'all 0.2s',
-                  '&:hover': { 
-                    boxShadow: 6, 
-                    transform: 'translateY(-4px)' 
+                  '&:hover': {
+                    boxShadow: 6,
+                    transform: 'translateY(-4px)'
                   }
                 }}
               >
@@ -670,8 +670,8 @@ const EnhancedPayslipTemplateConfiguration = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     {template.styling?.companyInfo?.logo && (
-                      <Avatar 
-                        src={template.styling.companyInfo.logo} 
+                      <Avatar
+                        src={template.styling.companyInfo.logo}
                         variant="rounded"
                         sx={{ width: 40, height: 40 }}
                       />
@@ -684,7 +684,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                     <Chip label="Default" color="success" size="small" />
                   )}
                 </Box>
-                
+
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   {template.description || 'No description'}
                 </Typography>
@@ -692,12 +692,12 @@ const EnhancedPayslipTemplateConfiguration = () => {
                 <Divider sx={{ my: 2 }} />
 
                 <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap', gap: 1 }}>
-                  <Chip 
-                    label={`${(template.headerFields?.length || 0) + 
-                           (template.earningsFields?.length || 0) + 
-                           (template.deductionsFields?.length || 0) + 
-                           (template.footerFields?.length || 0)} Fields`} 
-                    size="small" 
+                  <Chip
+                    label={`${(template.headerFields?.length || 0) +
+                           (template.earningsFields?.length || 0) +
+                           (template.deductionsFields?.length || 0) +
+                           (template.footerFields?.length || 0)} Fields`}
+                    size="small"
                     variant="outlined"
                   />
                   {template.styling?.companyInfo?.logo && (
@@ -766,14 +766,14 @@ const EnhancedPayslipTemplateConfiguration = () => {
       )}
 
       {/* Enhanced Template Editor Dialog */}
-      <Dialog 
-        open={templateDialog} 
-        onClose={() => setTemplateDialog(false)} 
-        maxWidth="xl" 
+      <Dialog
+        open={templateDialog}
+        onClose={() => setTemplateDialog(false)}
+        maxWidth="xl"
         fullWidth
         disableEscapeKeyDown={false}
         keepMounted={false}
-        PaperProps={{ 
+        PaperProps={{
           sx: { height: '90vh' },
           role: 'dialog',
           'aria-labelledby': 'template-dialog-title'
@@ -785,9 +785,9 @@ const EnhancedPayslipTemplateConfiguration = () => {
               {selectedTemplate ? '✏️ Edit Template' : '➕ Create Template'}
             </Typography>
             <Stack direction="row" spacing={2} alignItems="center">
-              <Chip 
-                label={`Step ${activeTab + 1} of 5`} 
-                color="primary" 
+              <Chip
+                label={`Step ${activeTab + 1} of 5`}
+                color="primary"
                 variant="outlined"
                 size="small"
               />
@@ -798,45 +798,45 @@ const EnhancedPayslipTemplateConfiguration = () => {
           </Box>
         </DialogTitle>
         <DialogContent dividers>
-          <Tabs 
-            value={activeTab} 
+          <Tabs
+            value={activeTab}
             onChange={(e, val) => setActiveTab(val)}
             variant="scrollable"
             scrollButtons="auto"
             sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
             aria-label="Template configuration steps"
           >
-            <Tab 
-              label="1. Basic Info" 
-              id="tab-0" 
+            <Tab
+              label="1. Basic Info"
+              id="tab-0"
               aria-controls="tabpanel-0"
               icon={activeTab === 0 ? <Typography variant="caption">📝</Typography> : null}
               iconPosition="start"
             />
-            <Tab 
-              label="2. Company & Logo" 
-              id="tab-1" 
+            <Tab
+              label="2. Company & Logo"
+              id="tab-1"
               aria-controls="tabpanel-1"
               icon={activeTab === 1 ? <Typography variant="caption">🏢</Typography> : null}
               iconPosition="start"
             />
-            <Tab 
-              label="3. Fields" 
-              id="tab-2" 
+            <Tab
+              label="3. Fields"
+              id="tab-2"
               aria-controls="tabpanel-2"
               icon={activeTab === 2 ? <Typography variant="caption">📋</Typography> : null}
               iconPosition="start"
             />
-            <Tab 
-              label="4. Styling & Colors" 
-              id="tab-3" 
+            <Tab
+              label="4. Styling & Colors"
+              id="tab-3"
               aria-controls="tabpanel-3"
               icon={activeTab === 3 ? <Typography variant="caption">🎨</Typography> : null}
               iconPosition="start"
             />
-            <Tab 
-              label="5. Advanced" 
-              id="tab-4" 
+            <Tab
+              label="5. Advanced"
+              id="tab-4"
               aria-controls="tabpanel-4"
               icon={activeTab === 4 ? <Typography variant="caption">⚙️</Typography> : null}
               iconPosition="start"
@@ -848,7 +848,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <Alert severity="info" icon={<Typography>ℹ️</Typography>}>
-                  <strong>Getting Started:</strong> Give your template a unique name and description. 
+                  <strong>Getting Started:</strong> Give your template a unique name and description.
                   You can set it as default to use for all new payslips.
                 </Alert>
               </Grid>
@@ -862,7 +862,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                   error={templateForm.name.trim().length > 0 && templateForm.name.trim().length < 3}
                   helperText={
                     templateForm.name.trim().length > 0 && templateForm.name.trim().length < 3
-                      ? "Name must be at least 3 characters"
+                      ? 'Name must be at least 3 characters'
                       : "E.g., 'Monthly Salary Template' or 'Executive Payslip'"
                   }
                   autoFocus
@@ -925,8 +925,8 @@ const EnhancedPayslipTemplateConfiguration = () => {
                       <Box>
                         {logoPreview ? (
                           <Box sx={{ position: 'relative' }}>
-                            <Avatar 
-                              src={logoPreview} 
+                            <Avatar
+                              src={logoPreview}
                               variant="rounded"
                               sx={{ width: 120, height: 120 }}
                             />
@@ -940,7 +940,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                             </IconButton>
                           </Box>
                         ) : (
-                          <Avatar 
+                          <Avatar
                             variant="rounded"
                             sx={{ width: 120, height: 120, bgcolor: 'grey.200' }}
                           >
@@ -967,18 +967,18 @@ const EnhancedPayslipTemplateConfiguration = () => {
                         </Typography>
                       </Box>
                     </Box>
-                    
+
                     <Divider sx={{ my: 2 }} />
-                    
+
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
                         <FormControl fullWidth>
                           <InputLabel>Logo Position</InputLabel>
                           <Select
-                            value={["left","center","right"].includes(templateForm.styling.companyInfo.logoPosition) ? templateForm.styling.companyInfo.logoPosition : ""}
+                            value={['left','center','right'].includes(templateForm.styling.companyInfo.logoPosition) ? templateForm.styling.companyInfo.logoPosition : ''}
                             onChange={(e) => setTemplateForm(prev => ({
                               ...prev,
-                              styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, logoPosition: e.target.value }}
+                              styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, logoPosition: e.target.value } }
                             }))}
                           >
                             <MenuItem value="left">Left</MenuItem>
@@ -991,10 +991,10 @@ const EnhancedPayslipTemplateConfiguration = () => {
                         <FormControl fullWidth>
                           <InputLabel>Logo Size</InputLabel>
                           <Select
-                            value={["small","medium","large"].includes(templateForm.styling.companyInfo.logoSize) ? templateForm.styling.companyInfo.logoSize : ""}
+                            value={['small','medium','large'].includes(templateForm.styling.companyInfo.logoSize) ? templateForm.styling.companyInfo.logoSize : ''}
                             onChange={(e) => setTemplateForm(prev => ({
                               ...prev,
-                              styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, logoSize: e.target.value }}
+                              styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, logoSize: e.target.value } }
                             }))}
                           >
                             <MenuItem value="small">Small (60px)</MenuItem>
@@ -1023,7 +1023,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                           value={templateForm.styling.companyInfo.name}
                           onChange={(e) => setTemplateForm(prev => ({
                             ...prev,
-                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, name: e.target.value }}
+                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, name: e.target.value } }
                           }))}
                           required
                         />
@@ -1035,7 +1035,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                           value={templateForm.styling.companyInfo.address}
                           onChange={(e) => setTemplateForm(prev => ({
                             ...prev,
-                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, address: e.target.value }}
+                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, address: e.target.value } }
                           }))}
                           multiline
                           rows={2}
@@ -1049,7 +1049,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                           value={templateForm.styling.companyInfo.email}
                           onChange={(e) => setTemplateForm(prev => ({
                             ...prev,
-                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, email: e.target.value }}
+                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, email: e.target.value } }
                           }))}
                         />
                       </Grid>
@@ -1060,7 +1060,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                           value={templateForm.styling.companyInfo.phone}
                           onChange={(e) => setTemplateForm(prev => ({
                             ...prev,
-                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, phone: e.target.value }}
+                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, phone: e.target.value } }
                           }))}
                         />
                       </Grid>
@@ -1071,7 +1071,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                           value={templateForm.styling.companyInfo.website}
                           onChange={(e) => setTemplateForm(prev => ({
                             ...prev,
-                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, website: e.target.value }}
+                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, website: e.target.value } }
                           }))}
                         />
                       </Grid>
@@ -1082,7 +1082,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                           value={templateForm.styling.companyInfo.gst}
                           onChange={(e) => setTemplateForm(prev => ({
                             ...prev,
-                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, gst: e.target.value }}
+                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, gst: e.target.value } }
                           }))}
                         />
                       </Grid>
@@ -1093,7 +1093,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                           value={templateForm.styling.companyInfo.cin}
                           onChange={(e) => setTemplateForm(prev => ({
                             ...prev,
-                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, cin: e.target.value }}
+                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, cin: e.target.value } }
                           }))}
                         />
                       </Grid>
@@ -1104,7 +1104,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                           value={templateForm.styling.companyInfo.pan}
                           onChange={(e) => setTemplateForm(prev => ({
                             ...prev,
-                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, pan: e.target.value }}
+                            styling: { ...prev.styling, companyInfo: { ...prev.styling.companyInfo, pan: e.target.value } }
                           }))}
                         />
                       </Grid>
@@ -1118,7 +1118,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
           {/* Tab 3: Fields */}
           <TabPanel value={activeTab} index={2} contentSx={{ py: 3 }}>
             <Alert severity="info" icon={<Typography>📋</Typography>} sx={{ mb: 3 }}>
-              <strong>Configure Payslip Fields:</strong> Select which fields to include in your payslip template. 
+              <strong>Configure Payslip Fields:</strong> Select which fields to include in your payslip template.
               You can add, remove, and reorder fields in each section. Fields marked as "Auto-calculated" will be computed automatically.
             </Alert>
             <Stack spacing={2}>
@@ -1191,24 +1191,24 @@ const EnhancedPayslipTemplateConfiguration = () => {
                             role="button"
                           >
                             <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                              <Box 
-                                sx={{ 
-                                  width: 40, 
-                                  height: 40, 
-                                  bgcolor: theme.primary, 
+                              <Box
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  bgcolor: theme.primary,
                                   borderRadius: 1,
                                   boxShadow: 1
-                                }} 
+                                }}
                                 aria-hidden="true"
                               />
-                              <Box 
-                                sx={{ 
-                                  width: 40, 
-                                  height: 40, 
-                                  bgcolor: theme.secondary, 
+                              <Box
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  bgcolor: theme.secondary,
                                   borderRadius: 1,
                                   boxShadow: 1
-                                }} 
+                                }}
                                 aria-hidden="true"
                               />
                             </Box>
@@ -1323,7 +1323,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                         <FormControl fullWidth>
                           <InputLabel>Font Family</InputLabel>
                           <Select
-                            value={["Arial, sans-serif","'Times New Roman', serif","Helvetica, sans-serif","Georgia, serif","'Courier New', monospace"].includes(templateForm.styling.fontFamily) ? templateForm.styling.fontFamily : ""}
+                            value={['Arial, sans-serif',"'Times New Roman', serif",'Helvetica, sans-serif','Georgia, serif',"'Courier New', monospace"].includes(templateForm.styling.fontFamily) ? templateForm.styling.fontFamily : ''}
                             onChange={(e) => setTemplateForm(prev => ({
                               ...prev,
                               styling: { ...prev.styling, fontFamily: e.target.value }
@@ -1378,7 +1378,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                         <FormControl fullWidth>
                           <InputLabel>Page Size</InputLabel>
                           <Select
-                            value={["A4","Letter"].includes(templateForm.styling.pageSize) ? templateForm.styling.pageSize : ""}
+                            value={['A4','Letter'].includes(templateForm.styling.pageSize) ? templateForm.styling.pageSize : ''}
                             onChange={(e) => setTemplateForm(prev => ({
                               ...prev,
                               styling: { ...prev.styling, pageSize: e.target.value }
@@ -1393,7 +1393,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                         <FormControl fullWidth>
                           <InputLabel>Orientation</InputLabel>
                           <Select
-                            value={["portrait","landscape"].includes(templateForm.styling.orientation) ? templateForm.styling.orientation : ""}
+                            value={['portrait','landscape'].includes(templateForm.styling.orientation) ? templateForm.styling.orientation : ''}
                             onChange={(e) => setTemplateForm(prev => ({
                               ...prev,
                               styling: { ...prev.styling, orientation: e.target.value }
@@ -1449,7 +1449,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                         label="Enable Watermark"
                       />
                     </Box>
-                    
+
                     {templateForm.styling.watermark.enabled && (
                       <Grid container spacing={2}>
                         <Grid item xs={12} md={6}>
@@ -1503,7 +1503,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                           value={templateForm.styling.htmlTemplates.header}
                           onChange={(e) => setTemplateForm(prev => ({
                             ...prev,
-                            styling: { ...prev.styling, htmlTemplates: { ...prev.styling.htmlTemplates, header: e.target.value }}
+                            styling: { ...prev.styling, htmlTemplates: { ...prev.styling.htmlTemplates, header: e.target.value } }
                           }))}
                           multiline
                           rows={4}
@@ -1517,7 +1517,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                           value={templateForm.styling.htmlTemplates.footer}
                           onChange={(e) => setTemplateForm(prev => ({
                             ...prev,
-                            styling: { ...prev.styling, htmlTemplates: { ...prev.styling.htmlTemplates, footer: e.target.value }}
+                            styling: { ...prev.styling, htmlTemplates: { ...prev.styling.htmlTemplates, footer: e.target.value } }
                           }))}
                           multiline
                           rows={4}
@@ -1531,7 +1531,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                           value={templateForm.styling.htmlTemplates.disclaimer}
                           onChange={(e) => setTemplateForm(prev => ({
                             ...prev,
-                            styling: { ...prev.styling, htmlTemplates: { ...prev.styling.htmlTemplates, disclaimer: e.target.value }}
+                            styling: { ...prev.styling, htmlTemplates: { ...prev.styling.htmlTemplates, disclaimer: e.target.value } }
                           }))}
                           multiline
                           rows={2}
@@ -1579,7 +1579,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
 
             {/* Right side - Action buttons */}
             <Stack direction="row" spacing={1} sx={{ ml: 'auto' }}>
-              <Button 
+              <Button
                 onClick={() => {
                   setTemplateDialog(false);
                   setActiveTab(0);
@@ -1589,7 +1589,7 @@ const EnhancedPayslipTemplateConfiguration = () => {
                 Cancel
               </Button>
               {activeTab > 0 && (
-                <Button 
+                <Button
                   onClick={() => setActiveTab(activeTab - 1)}
                   variant="outlined"
                   startIcon={<span>←</span>}
@@ -1598,8 +1598,8 @@ const EnhancedPayslipTemplateConfiguration = () => {
                 </Button>
               )}
               {activeTab < 4 ? (
-                <Button 
-                  variant="contained" 
+                <Button
+                  variant="contained"
                   onClick={() => setActiveTab(activeTab + 1)}
                   endIcon={<span>→</span>}
                 >

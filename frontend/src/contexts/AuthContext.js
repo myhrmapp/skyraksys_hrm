@@ -45,17 +45,17 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.login(email, password);
       // Backend sets httpOnly cookies; response contains user data only
       const userData = response.user || response;
-      
+
       // Update state
       setUser(userData);
       setIsAuthenticated(true);
-      
+
       return { success: true, user: userData };
     } catch (error) {
       console.error('Login failed:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Login failed' 
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Login failed'
       };
     }
   };
@@ -66,9 +66,9 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: response.user };
     } catch (error) {
       console.error('Registration failed:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Registration failed' 
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Registration failed'
       };
     }
   };
@@ -91,9 +91,9 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: updatedUser };
     } catch (error) {
       console.error('Profile update failed:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Profile update failed' 
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Profile update failed'
       };
     }
   };
@@ -104,9 +104,9 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error('Password change failed:', error);
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Password change failed' 
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Password change failed'
       };
     }
   };
@@ -136,14 +136,14 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     isAuthenticated,
-    
+
     // Actions
     login,
     register,
     logout,
     updateProfile,
     changePassword,
-    
+
     // Role checks
     hasRole,
     hasAnyRole,

@@ -9,7 +9,7 @@ import api from '../../../services/api.service';
 import {
   Box, Card, CardContent, CardHeader, Divider, Grid,
   TextField, Switch, Button, Typography,
-  Alert, Chip, Tooltip, IconButton, Collapse,
+  Alert, Chip, Tooltip, IconButton, Collapse
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -18,7 +18,7 @@ import {
   Badge as BadgeIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
-  CheckCircle as CheckCircleIcon,
+  CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import { PreviewCard } from '../employees/components/IDCardModal';
 
@@ -31,7 +31,7 @@ const DEFAULT_SETTINGS = {
   showQrCode:     true,
   showDepartment: true,
   showDesignation:true,
-  showWebsite:    true,
+  showWebsite:    true
 };
 
 // Demo employee for the live preview
@@ -41,7 +41,7 @@ const DEMO_EMPLOYEE = {
   employeeId: 'SK022',
   department: { name: 'Technology' },
   position: { title: 'Software Engineer' },
-  photoUrl: null,
+  photoUrl: null
 };
 
 const ColorInput = ({ label, value, onChange }) => (
@@ -225,7 +225,7 @@ const IDCardCustomizer = () => {
                 { key: 'showQrCode',      label: 'Show QR Code',       desc: 'Links to employee profile' },
                 { key: 'showDesignation', label: 'Show Designation',   desc: 'Job title / position' },
                 { key: 'showDepartment',  label: 'Show Department',    desc: 'Department name' },
-                { key: 'showWebsite',     label: 'Show Website URL',   desc: 'Vertical side text' },
+                { key: 'showWebsite',     label: 'Show Website URL',   desc: 'Vertical side text' }
               ].map(({ key, label, desc }) => (
                 <Box key={key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
                   <Box>
@@ -253,7 +253,7 @@ const IDCardCustomizer = () => {
                 background: 'linear-gradient(135deg, #1A4B8C, #0099D4)',
                 fontWeight: 700,
                 py: 1.2,
-                '&:hover': { background: 'linear-gradient(135deg, #0D3361, #006FA3)' },
+                '&:hover': { background: 'linear-gradient(135deg, #0D3361, #006FA3)' }
               }}
             >
               Save Settings
@@ -296,7 +296,7 @@ const IDCardCustomizer = () => {
           <Alert severity="info" sx={{ mt: 2 }}>
             <Typography variant="body2" fontWeight={600}>How it works</Typography>
             <Typography variant="caption">
-              Changes saved here apply to all employee ID cards system-wide. 
+              Changes saved here apply to all employee ID cards system-wide.
               Employees and admins can view &amp; print cards from any Employee Profile page using the <strong>"ID Card"</strong> button.
             </Typography>
           </Alert>

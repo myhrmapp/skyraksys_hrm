@@ -48,7 +48,7 @@ const defaultAuth = {
   canManageEmployees: false,
   canApproveLeaves: false,
   canViewPayroll: false,
-  canManageSettings: false,
+  canManageSettings: false
 };
 
 /**
@@ -72,7 +72,7 @@ const buildAuthValue = (overrides = {}) => {
     canViewPayroll: ['admin', 'hr'].includes(role),
     canManageSettings: role === 'admin',
     hasRole: jest.fn((r) => r === role),
-    hasAnyRole: jest.fn((roles) => roles.includes(role)),
+    hasAnyRole: jest.fn((roles) => roles.includes(role))
   };
 };
 
@@ -99,7 +99,7 @@ export function renderWithProviders(
   const auth = authValue ? buildAuthValue(authValue) : defaultAuth;
   global.__TEST_AUTH_VALUE__ = auth;
   const qc = queryClient || new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: { queries: { retry: false } }
   });
 
   let AllTheProviders;
@@ -135,10 +135,10 @@ export function renderWithProviders(
                   </AuthContext.Provider>
                 </SnackbarProvider>
               </QueryClientProvider>
-            ),
-          },
+            )
+          }
         ],
-        { initialEntries: [route] },
+        { initialEntries: [route] }
       );
       return <RouterProvider router={router} />;
     };
@@ -148,7 +148,7 @@ export function renderWithProviders(
     ...render(ui, { wrapper: AllTheProviders, ...renderOptions }),
     // Expose helpers for test assertions
     auth,
-    queryClient: qc,
+    queryClient: qc
   };
 }
 
@@ -175,8 +175,8 @@ export const createMockUser = (role = 'employee') => ({
     id: 100,
     employeeId: 'EMP001',
     firstName: 'Test',
-    lastName: 'User',
-  },
+    lastName: 'User'
+  }
 });
 
 /**
@@ -195,7 +195,7 @@ export const createMockEmployee = (overrides = {}) => ({
   designation: 'Software Engineer',
   department: 'Engineering',
   basicSalary: 50000,
-  ...overrides,
+  ...overrides
 });
 
 /**
@@ -211,7 +211,7 @@ export const createMockLeaveRequest = (overrides = {}) => ({
   reason: 'Family vacation',
   status: 'Pending',
   appliedOn: '2026-01-15',
-  ...overrides,
+  ...overrides
 });
 
 /**
@@ -226,7 +226,7 @@ export const createMockTimesheet = (overrides = {}) => ({
   hours: 8,
   description: 'Development work',
   status: 'Pending',
-  ...overrides,
+  ...overrides
 });
 
 /**
@@ -246,7 +246,7 @@ export const createMockPayslip = (overrides = {}) => ({
   incomeTax: 5000,
   totalDeductions: 16000,
   status: 'Generated',
-  ...overrides,
+  ...overrides
 });
 
 /**
@@ -256,7 +256,7 @@ export const mockApiResponse = (data, status = 200) => ({
   ok: status >= 200 && status < 300,
   status,
   json: async () => data,
-  headers: new Headers(),
+  headers: new Headers()
 });
 
 /**
@@ -266,7 +266,7 @@ export const mockApiError = (message = 'API Error', status = 500) => ({
   ok: false,
   status,
   json: async () => ({ message, error: message }),
-  headers: new Headers(),
+  headers: new Headers()
 });
 
 /**

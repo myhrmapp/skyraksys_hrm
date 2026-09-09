@@ -132,7 +132,7 @@ const ForgotPassword = () => {
                       <InputAdornment position="start">
                         <EmailIcon color="action" />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                   sx={{ mb: 3 }}
                   data-testid="forgot-password-email"
@@ -155,7 +155,7 @@ const ForgotPassword = () => {
                     background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                     boxShadow: `0 4px 16px ${alpha(theme.palette.primary.main, 0.4)}`,
                     '&:hover': {
-                      background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`
                     }
                   }}
                 >

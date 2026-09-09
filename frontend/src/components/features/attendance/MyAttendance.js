@@ -46,14 +46,14 @@ export default function MyAttendance() {
   const { data: todayData, isLoading } = useQuery({
     queryKey: ['attendance', 'today'],
     queryFn: () => attendanceService.getToday().then(r => r.data).catch(() => null),
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: 60 * 1000 // 1 minute
   });
   const todayStatus = todayData ?? null;
 
   const { data: reportData } = useQuery({
     queryKey: ['attendance', 'monthly', year, month],
     queryFn: () => attendanceService.getMyReport(year, month).then(r => r.data),
-    staleTime: 2 * 60 * 1000,
+    staleTime: 2 * 60 * 1000
   });
   const monthlyReport = reportData ?? null;
 
@@ -65,13 +65,13 @@ export default function MyAttendance() {
   const checkInMutation = useMutation({
     mutationFn: () => attendanceService.checkIn(),
     onSuccess: () => { enqueueSnackbar('Checked in successfully!', { variant: 'success' }); invalidate(); },
-    onError: (err) => enqueueSnackbar(err.response?.data?.message || 'Check-in failed', { variant: 'error' }),
+    onError: (err) => enqueueSnackbar(err.response?.data?.message || 'Check-in failed', { variant: 'error' })
   });
 
   const checkOutMutation = useMutation({
     mutationFn: () => attendanceService.checkOut(),
     onSuccess: () => { enqueueSnackbar('Checked out successfully!', { variant: 'success' }); invalidate(); },
-    onError: (err) => enqueueSnackbar(err.response?.data?.message || 'Check-out failed', { variant: 'error' }),
+    onError: (err) => enqueueSnackbar(err.response?.data?.message || 'Check-out failed', { variant: 'error' })
   });
 
   const actionLoading = checkInMutation.isPending || checkOutMutation.isPending;

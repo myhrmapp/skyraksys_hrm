@@ -7,32 +7,32 @@ import { hasRouteAccess, getDefaultDashboard } from '../../utils/roleConfig';
 
 const UnauthorizedPage = ({ userRole }) => {
   const defaultDashboard = getDefaultDashboard(userRole);
-  
+
   return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         minHeight: '100vh',
         bgcolor: 'background.default',
         p: 3
       }}
     >
-      <Paper 
+      <Paper
         elevation={3}
-        sx={{ 
-          p: 6, 
+        sx={{
+          p: 6,
           textAlign: 'center',
           maxWidth: 500,
           borderRadius: 3
         }}
       >
-        <Box 
-          sx={{ 
-            width: 80, 
-            height: 80, 
-            borderRadius: '50%', 
+        <Box
+          sx={{
+            width: 80,
+            height: 80,
+            borderRadius: '50%',
             bgcolor: 'error.light',
             display: 'flex',
             alignItems: 'center',
@@ -49,8 +49,8 @@ const UnauthorizedPage = ({ userRole }) => {
         <Typography variant="body1" color="text.secondary" paragraph>
           You don't have permission to access this page. Please contact your administrator if you believe this is an error.
         </Typography>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           href={defaultDashboard}
           sx={{ mt: 2 }}
         >
@@ -67,12 +67,12 @@ const ProtectedRoute = ({ children, requiredRoles = null }) => {
 
   if (loading) {
     return (
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100vh' 
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh'
         }}
       >
         <CircularProgress />
@@ -88,10 +88,10 @@ const ProtectedRoute = ({ children, requiredRoles = null }) => {
   // Check role-based access if requiredRoles specified
   if (requiredRoles) {
     const userRole = user?.role;
-    const hasAccess = Array.isArray(requiredRoles) 
+    const hasAccess = Array.isArray(requiredRoles)
       ? requiredRoles.includes(userRole)
       : requiredRoles === userRole;
-    
+
     if (!hasAccess) {
       return <UnauthorizedPage userRole={userRole} />;
     }

@@ -31,7 +31,7 @@ import {
   Refresh as RefreshIcon,
   Computer as ServerIcon,
   Devices as ClientIcon,
-  Api as ApiIcon,
+  Api as ApiIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/AuthContext';
 import performanceService from '../../../services/performance.service';
@@ -45,28 +45,28 @@ const PerformanceDashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  
+
   // Server metrics (admin only)
   const [serverMetrics, setServerMetrics] = useState(null);
   const [apiMetrics, setApiMetrics] = useState(null);
-  
+
   // Client metrics (all users)
   const [clientMetrics, setClientMetrics] = useState(null);
   const [healthMetrics, setHealthMetrics] = useState(null);
-  
+
   const isAdmin = user?.role === 'admin';
 
   // Fetch server metrics (admin only)
   const fetchServerMetrics = useCallback(async () => {
     if (!isAdmin) return;
-    
+
     try {
       setLoading(true);
       const [serverRes, apiRes] = await Promise.all([
         performanceService.getServerMetrics(),
         performanceService.getAPIMetrics()
       ]);
-      
+
       if (serverRes.success) setServerMetrics(serverRes.data);
       if (apiRes.success) setApiMetrics(apiRes.data);
     } catch (error) {
@@ -84,7 +84,7 @@ const PerformanceDashboard = () => {
         Promise.resolve(performanceService.getClientMetrics()),
         performanceService.getHealthMetrics()
       ]);
-      
+
       setClientMetrics(clientRes);
       if (healthRes.success) setHealthMetrics(healthRes.data);
     } catch (error) {
@@ -120,29 +120,29 @@ const PerformanceDashboard = () => {
 
   const getServerPerformanceScore = () => {
     if (!serverMetrics || !apiMetrics) return 0;
-    
+
     let score = 100;
-    
+
     // API error rate penalty
     const errorRate = parseFloat(apiMetrics.requests?.errorRate || 0);
     if (errorRate > 5) score -= 20;
     if (errorRate > 10) score -= 30;
-    
+
     // Response time penalty
     const avgTime = apiMetrics.responseTime?.average || 0;
     if (avgTime > 500) score -= 15;
     if (avgTime > 1000) score -= 25;
-    
+
     // Memory usage penalty
     const memPercent = serverMetrics.memory?.system?.usagePercent || 0;
     if (memPercent > 80) score -= 20;
     if (memPercent > 90) score -= 30;
-    
+
     // CPU load penalty
     const cpuLoad = serverMetrics.cpu?.loadAverage?.['1min'] || 0;
     if (cpuLoad > 2) score -= 15;
     if (cpuLoad > 4) score -= 25;
-    
+
     return Math.max(0, Math.min(100, score));
   };
 
@@ -211,9 +211,9 @@ const PerformanceDashboard = () => {
               {percentage}% used
             </Typography>
           </Box>
-          <LinearProgress 
-            variant="determinate" 
-            value={percentage} 
+          <LinearProgress
+            variant="determinate"
+            value={percentage}
             color={percentage > 80 ? 'error' : percentage > 60 ? 'warning' : 'success'}
             sx={{ height: 6, borderRadius: 3 }}
           />
@@ -241,7 +241,7 @@ const PerformanceDashboard = () => {
             }
             label="Auto Refresh"
           />
-          <IconButton 
+          <IconButton
             onClick={activeTab === 0 ? fetchClientMetrics : fetchServerMetrics}
             disabled={loading}
             data-testid="perf-refresh-btn"
@@ -253,21 +253,21 @@ const PerformanceDashboard = () => {
 
       {/* Tab Navigation */}
       <Paper sx={{ mb: 3 }}>
-        <Tabs 
-          value={activeTab} 
+        <Tabs
+          value={activeTab}
           onChange={(e, newValue) => setActiveTab(newValue)}
           sx={{ px: 2 }}
         >
-          <Tab 
-            icon={<ClientIcon />} 
-            label="Client Performance" 
+          <Tab
+            icon={<ClientIcon />}
+            label="Client Performance"
             iconPosition="start"
             data-testid="perf-tab-client"
           />
           {isAdmin && (
-            <Tab 
-              icon={<ServerIcon />} 
-              label="Server Performance" 
+            <Tab
+              icon={<ServerIcon />}
+              label="Server Performance"
               iconPosition="start"
               data-testid="perf-tab-server"
             />
@@ -288,7 +288,7 @@ const PerformanceDashboard = () => {
           <Typography variant="h5" fontWeight="600" sx={{ mb: 3 }}>
             Client Performance Metrics
           </Typography>
-          
+
           {clientMetrics && (
             <Grid container spacing={3}>
               {/* Performance Score */}
@@ -408,10 +408,10 @@ const PerformanceDashboard = () => {
                       </Box>
                       <Box>
                         <Typography variant="caption" color="text.secondary">Connection Status</Typography>
-                        <Chip 
-                          label={clientMetrics.client.onLine ? "Online" : "Offline"} 
-                          color={clientMetrics.client.onLine ? "success" : "error"} 
-                          size="small" 
+                        <Chip
+                          label={clientMetrics.client.onLine ? 'Online' : 'Offline'}
+                          color={clientMetrics.client.onLine ? 'success' : 'error'}
+                          size="small"
                         />
                       </Box>
                     </Stack>
@@ -429,7 +429,7 @@ const PerformanceDashboard = () => {
           <Typography variant="h5" fontWeight="600" sx={{ mb: 3 }}>
             Server Performance Metrics
           </Typography>
-          
+
           {serverMetrics && apiMetrics && (
             <Grid container spacing={3}>
               {/* Server Performance Score */}
@@ -503,8 +503,8 @@ const PerformanceDashboard = () => {
                         <TableRow>
                           <TableCell>Environment</TableCell>
                           <TableCell align="right">
-                            <Chip 
-                              label={serverMetrics.server?.environment || 'unknown'} 
+                            <Chip
+                              label={serverMetrics.server?.environment || 'unknown'}
                               color={serverMetrics.server?.environment === 'production' ? 'success' : 'warning'}
                               size="small"
                             />
@@ -559,12 +559,12 @@ const PerformanceDashboard = () => {
 
       {/* Health Status for All Users */}
       {healthMetrics && (
-        <Alert 
-          severity={healthMetrics.server.status === 'healthy' ? 'success' : 'warning'} 
+        <Alert
+          severity={healthMetrics.server.status === 'healthy' ? 'success' : 'warning'}
           sx={{ mb: 3 }}
         >
-          Server Status: {healthMetrics.server.status.toUpperCase()} | 
-          Database: {healthMetrics.database.status} | 
+          Server Status: {healthMetrics.server.status.toUpperCase()} |
+          Database: {healthMetrics.database.status} |
           Uptime: {formatUptime(healthMetrics.server.uptime)}
         </Alert>
       )}

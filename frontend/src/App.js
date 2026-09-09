@@ -39,12 +39,12 @@ function App() {
       <ThemeProvider theme={modernTheme}>
         <CssBaseline />
         <LoadingProvider>
-            <SnackbarProvider 
+            <SnackbarProvider
               maxSnack={3}
               preventDuplicate
               anchorOrigin={{
                 vertical: 'top',
-                horizontal: 'right',
+                horizontal: 'right'
               }}
             >
               <AuthProvider>

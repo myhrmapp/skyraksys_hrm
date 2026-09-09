@@ -9,7 +9,7 @@ import EmployeeDashboard from '../EmployeeDashboard';
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
+  useNavigate: () => mockNavigate
 }));
 
 jest.mock('../../../../services/dashboard.service', () => {
@@ -18,8 +18,8 @@ jest.mock('../../../../services/dashboard.service', () => {
   }
   return {
     dashboardService: {
-      getEmployeeStats: jest.fn(),
-    },
+      getEmployeeStats: jest.fn()
+    }
   };
 });
 const { dashboardService } = require('../../../../services/dashboard.service');
@@ -29,22 +29,22 @@ const { dashboardService } = require('../../../../services/dashboard.service');
 const mockEmployeeStats = {
   leaveBalance: {
     annual: { remaining: 12, total: 20 },
-    sick: { remaining: 5, total: 7 },
+    sick: { remaining: 5, total: 7 }
   },
   pendingRequests: { leaves: 2, timesheets: 1 },
   recentActivity: [
     { id: 1, type: 'leave', action: 'Annual Leave approved', status: 'approved', date: '2026-02-10' },
-    { id: 2, type: 'timesheet', action: 'Weekly timesheet submitted', status: 'pending', date: '2026-02-12' },
+    { id: 2, type: 'timesheet', action: 'Weekly timesheet submitted', status: 'pending', date: '2026-02-12' }
   ],
   upcomingLeaves: [
-    { id: 1, type: 'Annual Leave', startDate: '2026-02-20', endDate: '2026-02-22', days: 3 },
+    { id: 1, type: 'Annual Leave', startDate: '2026-02-20', endDate: '2026-02-22', days: 3 }
   ],
   currentMonth: {
     hoursWorked: 120,
     expectedHours: 160,
     daysWorked: 15,
-    efficiency: 85,
-  },
+    efficiency: 85
+  }
 };
 
 const mockSuccessResponse = { success: true, data: mockEmployeeStats };
@@ -57,7 +57,7 @@ const renderDashboard = (overrides = {}) => {
   );
   return render(<EmployeeDashboard />, {
     authValue: { user: createMockUser('employee') },
-    ...overrides,
+    ...overrides
   });
 };
 
@@ -83,7 +83,7 @@ describe('EmployeeDashboard', () => {
       const dateStr = new Date().toLocaleDateString('en-US', {
         weekday: 'long',
         month: 'short',
-        day: 'numeric',
+        day: 'numeric'
       });
       expect(screen.getByText(dateStr)).toBeInTheDocument();
     });
@@ -91,7 +91,7 @@ describe('EmployeeDashboard', () => {
     it('shows a loading spinner while data is being fetched', () => {
       dashboardService.getEmployeeStats.mockReturnValue(new Promise(() => {})); // never resolves
       render(<EmployeeDashboard />, {
-        authValue: { user: createMockUser('employee') },
+        authValue: { user: createMockUser('employee') }
       });
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
@@ -150,7 +150,7 @@ describe('EmployeeDashboard', () => {
 
     it('shows zero values when stats are empty', async () => {
       renderDashboard({
-        response: { success: true, data: {} },
+        response: { success: true, data: {} }
       });
       await waitFor(() => {
         expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
@@ -257,8 +257,8 @@ describe('EmployeeDashboard', () => {
           { id: 2, type: 'timesheet', action: 'Activity 2', status: 'pending', date: '2026-02-09' },
           { id: 3, type: 'leave', action: 'Activity 3', status: 'approved', date: '2026-02-10' },
           { id: 4, type: 'timesheet', action: 'Activity 4', status: 'pending', date: '2026-02-11' },
-          { id: 5, type: 'leave', action: 'Activity 5', status: 'approved', date: '2026-02-12' },
-        ],
+          { id: 5, type: 'leave', action: 'Activity 5', status: 'approved', date: '2026-02-12' }
+        ]
       };
       renderDashboard({ response: { success: true, data: statsWithMany } });
       await screen.findByText('Activity 1');
@@ -287,7 +287,7 @@ describe('EmployeeDashboard', () => {
       dashboardService.getEmployeeStats.mockRejectedValue(new Error('Network error'));
       expect(() => {
         render(<EmployeeDashboard />, {
-          authValue: { user: createMockUser('employee') },
+          authValue: { user: createMockUser('employee') }
         });
       }).not.toThrow();
       // Should still render core structure after error

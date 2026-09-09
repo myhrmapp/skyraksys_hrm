@@ -18,7 +18,7 @@ import {
   Schedule as ScheduleIcon,
   BeachAccess as LeaveIcon,
   Assignment as TimesheetIcon,
-  CheckCircle as ApproveIcon,
+  CheckCircle as ApproveIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLoading } from '../../contexts/LoadingContext';
@@ -212,36 +212,36 @@ const ManagerDashboard = () => {
       {/* Tabs */}
       <Card>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs 
+          <Tabs
             data-testid="manager-tabs"
-            value={activeTab} 
-            onChange={handleTabChange} 
-            variant={isMobile ? "scrollable" : "standard"}
-            scrollButtons={isMobile ? "auto" : false}
+            value={activeTab}
+            onChange={handleTabChange}
+            variant={isMobile ? 'scrollable' : 'standard'}
+            scrollButtons={isMobile ? 'auto' : false}
           >
-            <Tab 
+            <Tab
               data-testid="manager-tab-team-members"
               label={
                 <Badge badgeContent={dashboardData.teamMembers.length} color="primary">
                   Team Members
                 </Badge>
-              } 
+              }
             />
-            <Tab 
+            <Tab
               data-testid="manager-tab-leave-approvals"
               label={
                 <Badge badgeContent={dashboardData.pendingLeaves.length} color="error">
                   Leave Approvals
                 </Badge>
-              } 
+              }
             />
-            <Tab 
+            <Tab
               data-testid="manager-tab-timesheet-approvals"
               label={
                 <Badge badgeContent={dashboardData.pendingTimesheets.length} color="error">
                   Timesheet Approvals
                 </Badge>
-              } 
+              }
             />
           </Tabs>
         </Box>
@@ -249,21 +249,21 @@ const ManagerDashboard = () => {
         {/* Tab Panels */}
         <CardContent>
           {activeTab === 0 && (
-            <TeamMembersList 
+            <TeamMembersList
               teamMembers={dashboardData.teamMembers}
               onRefresh={loadDashboardData}
             />
           )}
-          
+
           {activeTab === 1 && (
-            <ManagerLeaveApproval 
+            <ManagerLeaveApproval
               pendingLeaves={dashboardData.pendingLeaves}
               onApprovalUpdate={handleApprovalUpdate}
             />
           )}
-          
+
           {activeTab === 2 && (
-            <ManagerTimesheetApproval 
+            <ManagerTimesheetApproval
               pendingTimesheets={dashboardData.pendingTimesheets}
               onApprovalUpdate={handleApprovalUpdate}
             />

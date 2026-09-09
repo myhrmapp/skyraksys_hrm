@@ -91,8 +91,8 @@ const EmploymentInformationTab = ({ formData, errors, touchedFields = {}, onChan
         >
           {filteredPositions.length === 0 ? (
             <MenuItem value="" disabled>
-              {loadingRefData ? 'Loading positions...' : 
-               !formData.departmentId ? 'Please select a department first' : 
+              {loadingRefData ? 'Loading positions...' :
+               !formData.departmentId ? 'Please select a department first' :
                'No positions available for this department'}
             </MenuItem>
           ) : (
@@ -105,8 +105,8 @@ const EmploymentInformationTab = ({ formData, errors, touchedFields = {}, onChan
         </Select>
         <FormHelperText>
           {touchedFields.positionId && errors.positionId ? errors.positionId :
-           (formData.departmentId 
-             ? `${filteredPositions.length} position(s) available in selected department` 
+           (formData.departmentId
+             ? `${filteredPositions.length} position(s) available in selected department`
              : 'Select department first to see available positions')}
         </FormHelperText>
       </FormControl>
@@ -202,7 +202,7 @@ const EmploymentInformationTab = ({ formData, errors, touchedFields = {}, onChan
         }}
         onBlur={() => onBlur && onBlur('probationPeriod')}
         error={touchedFields.probationPeriod && !!errors.probationPeriod}
-        helperText={touchedFields.probationPeriod && errors.probationPeriod ? errors.probationPeriod : "Number of months (0-24)"}
+        helperText={touchedFields.probationPeriod && errors.probationPeriod ? errors.probationPeriod : 'Number of months (0-24)'}
         inputProps={{ min: 0, max: 24 }}
         placeholder="6"
       />
@@ -224,7 +224,7 @@ const EmploymentInformationTab = ({ formData, errors, touchedFields = {}, onChan
         }}
         onBlur={() => onBlur && onBlur('noticePeriod')}
         error={touchedFields.noticePeriod && !!errors.noticePeriod}
-        helperText={errors.noticePeriod || "Number of days (0-365)"}
+        helperText={errors.noticePeriod || 'Number of days (0-365)'}
         inputProps={{ min: 0, max: 365 }}
         placeholder="30"
       />

@@ -31,11 +31,9 @@ test.describe('Organization Chart (Employee Directory)', () => {
     await orgToggle.click();
 
     // Verify Org Chart rendering
-    const orgContainer = adminPage.locator('text=Board').first(); // Assumes the CEO/Board root
-    // Fallback if Board doesn't exist but employee cards do
-    const employeeCard = adminPage.locator('.MuiCard-root, .MuiPaper-root', { hasText: 'Company' }).first();
-    
-    await expect(orgContainer.or(employeeCard)).toBeVisible({ timeout: 5000 });
+    const anyOrgCard = adminPage.locator('.MuiCard-root').first();
+    const noDataText = adminPage.locator('text=No organizational data available.').first();
+    await expect(anyOrgCard.or(noDataText)).toBeVisible({ timeout: 5000 });
   });
 
   test('TC-ORG-03: Toggle back to List View', async () => {

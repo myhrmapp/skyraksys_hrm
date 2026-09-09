@@ -24,12 +24,12 @@ const variantConfig = {
   danger: { color: 'error', icon: DeleteIcon, confirmText: 'Delete' },
   warning: { color: 'warning', icon: WarningIcon, confirmText: 'Confirm' },
   info: { color: 'info', icon: InfoIcon, confirmText: 'OK' },
-  success: { color: 'success', icon: CheckCircleIcon, confirmText: 'Confirm' },
+  success: { color: 'success', icon: CheckCircleIcon, confirmText: 'Confirm' }
 };
 
 /**
  * Reusable MUI-based confirmation dialog to replace all window.confirm() usages.
- * 
+ *
  * Usage:
  *   <ConfirmDialog
  *     open={open}
@@ -77,7 +77,7 @@ const ConfirmDialog = ({
               width: 40,
               height: 40,
               borderRadius: '50%',
-              bgcolor: alpha(theme.palette[config.color].main, 0.1),
+              bgcolor: alpha(theme.palette[config.color].main, 0.1)
             }}
           >
             <IconComponent color={config.color} />
@@ -133,7 +133,7 @@ ConfirmDialog.propTypes = {
   onCancel: PropTypes.func.isRequired,
   loading: PropTypes.bool,
   maxWidth: PropTypes.string,
-  children: PropTypes.node,
+  children: PropTypes.node
 };
 
 export default ConfirmDialog;

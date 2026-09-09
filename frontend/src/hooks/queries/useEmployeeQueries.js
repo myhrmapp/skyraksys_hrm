@@ -12,7 +12,7 @@ export const employeeKeys = {
   lists: () => [...employeeKeys.all, 'list'],
   list: (filters) => [...employeeKeys.lists(), filters],
   details: () => [...employeeKeys.all, 'detail'],
-  detail: (id) => [...employeeKeys.details(), id],
+  detail: (id) => [...employeeKeys.details(), id]
 };
 
 /**
@@ -22,7 +22,7 @@ export const useEmployees = (filters = {}, options = {}) => {
   return useQuery({
     queryKey: employeeKeys.list(filters),
     queryFn: () => employeeService.getAll(filters),
-    ...options,
+    ...options
   });
 };
 
@@ -34,7 +34,7 @@ export const useEmployee = (id, options = {}) => {
     queryKey: employeeKeys.detail(id),
     queryFn: () => employeeService.getById(id),
     enabled: !!id,
-    ...options,
+    ...options
   });
 };
 
@@ -60,7 +60,7 @@ export const useCreateEmployee = () => {
     onError: (error) => {
       // Note: Error handling done in component for custom error formatting
       console.error('Create employee mutation error:', error);
-    },
+    }
   });
 };
 
@@ -85,7 +85,7 @@ export const useUpdateEmployee = () => {
     onError: (error) => {
       // Note: Error handling done in component for custom error formatting
       console.error('Update employee mutation error:', error);
-    },
+    }
   });
 };
 
@@ -106,9 +106,9 @@ export const useDeleteEmployee = () => {
       enqueueSnackbar('Employee deleted successfully', { variant: 'success' });
     },
     onError: (error) => {
-      enqueueSnackbar(error.message || 'Failed to delete employee', { 
-        variant: 'error' 
+      enqueueSnackbar(error.message || 'Failed to delete employee', {
+        variant: 'error'
       });
-    },
+    }
   });
 };

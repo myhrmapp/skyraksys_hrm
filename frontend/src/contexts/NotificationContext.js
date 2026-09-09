@@ -30,7 +30,7 @@ export const NotificationProvider = ({ children }) => {
       type: notification.type || 'info',
       read: Boolean(notification.read),
       createdAt: notification.createdAt || new Date().toISOString(),
-      ...notification,
+      ...notification
     };
 
     setNotifications((prev) => [entry, ...prev].slice(0, 50));
@@ -43,14 +43,14 @@ export const NotificationProvider = ({ children }) => {
       title,
       message,
       type,
-      ...rest,
+      ...rest
     });
 
     enqueueSnackbar(message, {
       variant: type,
       autoHideDuration,
       persist,
-      ...rest,
+      ...rest
     });
 
     return id;
@@ -89,12 +89,12 @@ export const NotificationProvider = ({ children }) => {
 
     // Connect to socket when context mounts and user is authenticated
     socketService.connect();
-    
+
     // Authenticate with socket to join user and role specific rooms
     if (user && user.id) {
-      socketService.emit('authenticate', { 
-        userId: user.id, 
-        role: user.role 
+      socketService.emit('authenticate', {
+        userId: user.id,
+        role: user.role
       });
     }
 
@@ -114,7 +114,7 @@ export const NotificationProvider = ({ children }) => {
     // Listen to real-time events
     const handleNewNotification = (notification) => {
       pushNotification(notification);
-      
+
       if (notification.isPopup) {
         setPopupNotification(notification);
       } else {
@@ -131,7 +131,7 @@ export const NotificationProvider = ({ children }) => {
     return () => {
       socketService.off('broadcast', handleNewNotification);
       socketService.off('new_notification', handleNewNotification);
-      // We don't disconnect globally because other contexts might need it, 
+      // We don't disconnect globally because other contexts might need it,
       // but if this is the only consumer, we could disconnect.
     };
   }, [pushNotification, enqueueSnackbar, isAuthenticated, user]);
@@ -177,7 +177,7 @@ export const NotificationProvider = ({ children }) => {
     showError,
     showWarning,
     showInfo,
-    showNotification,
+    showNotification
   }), [addNotification, clearAllNotifications, markAllAsRead, notifications, removeNotification, showError, showInfo, showNotification, showSuccess, showWarning]);
 
   return (
@@ -280,7 +280,7 @@ export const useApiNotifications = () => {
     showOperationSuccess,
     showSaveSuccess,
     showDeleteSuccess,
-    showUpdateSuccess,
+    showUpdateSuccess
   };
 };
 

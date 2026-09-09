@@ -9,7 +9,7 @@ import ProtectedRoute from '../ProtectedRoute';
 // Mock roleConfig utilities
 jest.mock('../../../utils/roleConfig', () => ({
   hasRouteAccess: jest.fn(() => true),
-  getDefaultDashboard: jest.fn(() => '/dashboard'),
+  getDefaultDashboard: jest.fn(() => '/dashboard')
 }));
 const { hasRouteAccess, getDefaultDashboard } = require('../../../utils/roleConfig');
 

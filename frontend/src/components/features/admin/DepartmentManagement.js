@@ -53,7 +53,7 @@ const DepartmentManagement = ({ embedded } = {}) => {
   const { enqueueSnackbar } = useSnackbar();
   const { setLoading } = useLoading();
   const { dialogProps, confirm } = useConfirmDialog();
-  
+
   // State
   const [departments, setDepartments] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -161,11 +161,11 @@ const DepartmentManagement = ({ embedded } = {}) => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = 'Department name is required';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -177,7 +177,7 @@ const DepartmentManagement = ({ embedded } = {}) => {
 
     try {
       setLoading(true);
-      
+
       const submitData = {
         ...formData,
         managerId: formData.managerId || null
@@ -190,7 +190,7 @@ const DepartmentManagement = ({ embedded } = {}) => {
         await http.post('/departments', submitData);
         enqueueSnackbar('Department created successfully', { variant: 'success' });
       }
-      
+
       handleCloseDialog();
       loadDepartments();
     } catch (error) {
@@ -302,7 +302,7 @@ const DepartmentManagement = ({ embedded } = {}) => {
                 <InputAdornment position="start">
                   <SearchIcon />
                 </InputAdornment>
-              ),
+              )
             }}
             sx={{ flexGrow: 1, minWidth: 300 }}
             data-testid="dept-search"
@@ -348,8 +348,8 @@ const DepartmentManagement = ({ embedded } = {}) => {
                   <TableCell>
                     {department.manager ? (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar 
-                          src={department.manager.photoUrl} 
+                        <Avatar
+                          src={department.manager.photoUrl}
                           alt={department.manager.firstName}
                           sx={{ width: 24, height: 24 }}
                         />
@@ -364,10 +364,10 @@ const DepartmentManagement = ({ embedded } = {}) => {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Chip 
-                      label={department.employees?.length || 0} 
-                      size="small" 
-                      variant="outlined" 
+                    <Chip
+                      label={department.employees?.length || 0}
+                      size="small"
+                      variant="outlined"
                     />
                   </TableCell>
                   <TableCell>
@@ -463,8 +463,8 @@ const DepartmentManagement = ({ embedded } = {}) => {
                   renderOption={(props, option) => (
                     <li {...props}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar 
-                          src={option.photoUrl} 
+                        <Avatar
+                          src={option.photoUrl}
                           alt={option.firstName}
                           sx={{ width: 24, height: 24 }}
                         />
@@ -525,7 +525,7 @@ const DepartmentManagement = ({ embedded } = {}) => {
 };
 
 DepartmentManagement.propTypes = {
-  embedded: PropTypes.bool,
+  embedded: PropTypes.bool
 };
 
 export default DepartmentManagement;

@@ -8,27 +8,27 @@
  */
 export const sanitizeEmployeeData = (formData) => {
   const sanitized = { ...formData };
-  
+
   // Remove spaces from Aadhaar number
   if (sanitized.aadhaarNumber) {
     sanitized.aadhaarNumber = sanitized.aadhaarNumber.replace(/\s/g, '');
   }
-  
+
   // Ensure PAN is uppercase
   if (sanitized.panNumber) {
     sanitized.panNumber = sanitized.panNumber.toUpperCase();
   }
-  
+
   // Ensure IFSC is uppercase
   if (sanitized.ifscCode) {
     sanitized.ifscCode = sanitized.ifscCode.toUpperCase();
   }
-  
+
   // Format phone number (remove non-digits)
   if (sanitized.phone) {
     sanitized.phone = sanitized.phone.replace(/\D/g, '');
   }
-  
+
   // Ensure dates are in ISO format
   const dateFields = ['hireDate', 'dateOfBirth', 'joiningDate', 'confirmationDate'];
   dateFields.forEach(field => {
@@ -39,7 +39,7 @@ export const sanitizeEmployeeData = (formData) => {
       }
     }
   });
-  
+
   // Remove empty string values for optional fields
   const optionalFields = [
     'middleName', 'phone', 'address', 'city', 'state', 'pinCode',
@@ -48,26 +48,26 @@ export const sanitizeEmployeeData = (formData) => {
     'bankName', 'bankAccountNumber', 'ifscCode', 'bankBranch', 'accountHolderName',
     'workLocation', 'dateOfBirth', 'joiningDate', 'confirmationDate'
   ];
-  
+
   optionalFields.forEach(field => {
     if (sanitized[field] === '') {
       delete sanitized[field];
     }
   });
-  
+
   // Set default values
   if (!sanitized.nationality) {
     sanitized.nationality = 'Indian';
   }
-  
+
   if (!sanitized.employmentType) {
     sanitized.employmentType = 'Full-time';
   }
-  
+
   if (!sanitized.status) {
     sanitized.status = 'Active';
   }
-  
+
   return sanitized;
 };
 
@@ -78,19 +78,19 @@ export const validateRequiredFields = (formData) => {
   const errors = {};
   const requiredFields = [
     'firstName',
-    'lastName', 
+    'lastName',
     'email',
     'hireDate',
     'departmentId',
     'positionId'
   ];
-  
+
   requiredFields.forEach(field => {
     if (!formData[field] || formData[field].toString().trim() === '') {
       errors[field] = `${field} is required`;
     }
   });
-  
+
   return {
     isValid: Object.keys(errors).length === 0,
     errors
@@ -102,7 +102,7 @@ export const validateRequiredFields = (formData) => {
  */
 export const validateDataFormats = (formData) => {
   const errors = {};
-  
+
   // Email validation
   if (formData.email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -110,7 +110,7 @@ export const validateDataFormats = (formData) => {
       errors.email = 'Please enter a valid email address';
     }
   }
-  
+
   // Phone validation (if provided)
   if (formData.phone) {
     const phoneRegex = /^[0-9]{10,15}$/;
@@ -118,7 +118,7 @@ export const validateDataFormats = (formData) => {
       errors.phone = 'Phone number should be 10-15 digits';
     }
   }
-  
+
   // Date validation
   const dateFields = ['hireDate', 'dateOfBirth', 'joiningDate', 'confirmationDate'];
   dateFields.forEach(field => {
@@ -127,14 +127,14 @@ export const validateDataFormats = (formData) => {
       if (isNaN(date.getTime())) {
         errors[field] = 'Please enter a valid date';
       }
-      
+
       // Hire date shouldn't be in future
       if (field === 'hireDate' && date > new Date()) {
         errors[field] = 'Hire date cannot be in the future';
       }
     }
   });
-  
+
   // Aadhaar validation (if provided)
   if (formData.aadhaarNumber) {
     const aadhaar = formData.aadhaarNumber.replace(/\s/g, '');
@@ -142,7 +142,7 @@ export const validateDataFormats = (formData) => {
       errors.aadhaarNumber = 'Aadhaar number should be 12 digits';
     }
   }
-  
+
   // PAN validation (if provided)
   if (formData.panNumber) {
     const pan = formData.panNumber.toUpperCase();
@@ -150,7 +150,7 @@ export const validateDataFormats = (formData) => {
       errors.panNumber = 'PAN should be in format: ABCDE1234F';
     }
   }
-  
+
   // IFSC validation (if provided)
   if (formData.ifscCode) {
     const ifsc = formData.ifscCode.toUpperCase();
@@ -158,14 +158,14 @@ export const validateDataFormats = (formData) => {
       errors.ifscCode = 'IFSC should be in format: SBIN0000123';
     }
   }
-  
+
   // PIN code validation (if provided)
   if (formData.pinCode) {
     if (!/^[0-9]{6}$/.test(formData.pinCode)) {
       errors.pinCode = 'PIN code should be 6 digits';
     }
   }
-  
+
   return {
     isValid: Object.keys(errors).length === 0,
     errors
@@ -178,7 +178,7 @@ export const validateDataFormats = (formData) => {
 export const validateEmployeeData = (formData) => {
   // First sanitize the data
   const sanitizedData = sanitizeEmployeeData(formData);
-  
+
   // Check required fields
   const requiredValidation = validateRequiredFields(sanitizedData);
   if (!requiredValidation.isValid) {
@@ -188,7 +188,7 @@ export const validateEmployeeData = (formData) => {
       sanitizedData
     };
   }
-  
+
   // Check data formats
   const formatValidation = validateDataFormats(sanitizedData);
   if (!formatValidation.isValid) {
@@ -198,7 +198,7 @@ export const validateEmployeeData = (formData) => {
       sanitizedData
     };
   }
-  
+
   return {
     isValid: true,
     errors: {},
@@ -228,7 +228,7 @@ export const validationMessages = {
  */
 export const getValidationQuickFixes = (errors) => {
   const fixes = [];
-  
+
   if (errors.firstName || errors.lastName) {
     fixes.push({
       type: 'error',
@@ -236,23 +236,23 @@ export const getValidationQuickFixes = (errors) => {
       fix: 'Enter valid first and last name'
     });
   }
-  
+
   if (errors.email) {
     fixes.push({
-      type: 'error', 
+      type: 'error',
       message: 'Email format is invalid',
       fix: 'Use format: user@domain.com'
     });
   }
-  
+
   if (errors.phone) {
     fixes.push({
       type: 'error',
-      message: 'Phone number format is invalid', 
+      message: 'Phone number format is invalid',
       fix: 'Enter 10-15 digits without spaces or special characters'
     });
   }
-  
+
   if (errors.hireDate) {
     fixes.push({
       type: 'error',
@@ -260,7 +260,7 @@ export const getValidationQuickFixes = (errors) => {
       fix: 'Use format: YYYY-MM-DD and ensure date is not in future'
     });
   }
-  
+
   if (errors.departmentId) {
     fixes.push({
       type: 'error',
@@ -268,15 +268,15 @@ export const getValidationQuickFixes = (errors) => {
       fix: 'Select a department from the dropdown'
     });
   }
-  
+
   if (errors.positionId) {
     fixes.push({
       type: 'error',
-      message: 'Position is required', 
+      message: 'Position is required',
       fix: 'Select a position from the dropdown'
     });
   }
-  
+
   if (errors.aadhaarNumber) {
     fixes.push({
       type: 'warning',
@@ -284,7 +284,7 @@ export const getValidationQuickFixes = (errors) => {
       fix: 'Enter 12 digits (spaces will be removed automatically)'
     });
   }
-  
+
   if (errors.panNumber) {
     fixes.push({
       type: 'warning',
@@ -292,7 +292,7 @@ export const getValidationQuickFixes = (errors) => {
       fix: 'Use format: ABCDE1234F (will be converted to uppercase)'
     });
   }
-  
+
   return fixes;
 };
 

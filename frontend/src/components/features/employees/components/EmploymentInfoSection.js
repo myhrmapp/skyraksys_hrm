@@ -17,10 +17,10 @@ import {
 } from '@mui/icons-material';
 import InfoField from './InfoField';
 
-const EmploymentInfoSection = ({ 
-  employee, 
-  editing, 
-  onChange, 
+const EmploymentInfoSection = ({
+  employee,
+  editing,
+  onChange,
   formatDate,
   departments,
   positions,

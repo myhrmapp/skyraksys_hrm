@@ -2,7 +2,7 @@ import http from '../http-common';
 
 // Performance service for both client and server metrics
 class PerformanceService {
-  
+
   // Admin-only: Get detailed server performance metrics
   async getServerMetrics() {
     try {
@@ -91,7 +91,7 @@ class PerformanceService {
       const paintEntries = performance.getEntriesByType('paint');
       const firstPaint = paintEntries.find(entry => entry.name === 'first-paint');
       const firstContentfulPaint = paintEntries.find(entry => entry.name === 'first-contentful-paint');
-      
+
       return {
         firstPaint: firstPaint ? Math.round(firstPaint.startTime) : null,
         firstContentfulPaint: firstContentfulPaint ? Math.round(firstContentfulPaint.startTime) : null
@@ -203,13 +203,13 @@ class PerformanceService {
 
     if (metrics.performance && metrics.performance.navigation) {
       const nav = metrics.performance.navigation;
-      
+
       // Page load time penalties
       if (nav.pageLoad > 3000) score -= 20;
       else if (nav.pageLoad > 2000) score -= 10;
       else if (nav.pageLoad > 1000) score -= 5;
 
-      // First paint penalties  
+      // First paint penalties
       if (nav.firstPaint && nav.firstPaint.firstContentfulPaint) {
         if (nav.firstPaint.firstContentfulPaint > 2000) score -= 15;
         else if (nav.firstPaint.firstContentfulPaint > 1000) score -= 8;

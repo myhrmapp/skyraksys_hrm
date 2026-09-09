@@ -194,7 +194,7 @@ export default function EnhancedInvoiceTemplateConfiguration() {
                 <Tab label="Labels & Taxes" />
                 <Tab label="Terms & Footer" />
               </Tabs>
-              
+
               <Box sx={{ p: 3 }}>
                 {activeTab === 0 && (
                   <Grid container spacing={3}>
@@ -256,10 +256,10 @@ export default function EnhancedInvoiceTemplateConfiguration() {
                         const isSelected = (editingTemplate.templateData.lineColumns || []).includes(col.id);
                         return (
                           <Grid item xs={6} sm={4} key={col.id}>
-                            <Chip 
-                              label={col.label} 
-                              color={isSelected ? "primary" : "default"} 
-                              variant={isSelected ? "filled" : "outlined"}
+                            <Chip
+                              label={col.label}
+                              color={isSelected ? 'primary' : 'default'}
+                              variant={isSelected ? 'filled' : 'outlined'}
                               onClick={() => toggleColumn(col.id)}
                               sx={{ width: '100%', justifyContent: 'flex-start' }}
                             />
@@ -275,12 +275,12 @@ export default function EnhancedInvoiceTemplateConfiguration() {
                     <Typography variant="h6" sx={{ mb: 2 }}>Tax Configuration</Typography>
                     <Grid container spacing={2} sx={{ mb: 4 }}>
                       <Grid item xs={12} sm={6}>
-                        <TextField 
-                          fullWidth 
-                          type="number" 
-                          label="Tax Percentage (e.g. 18 for 18% GST)" 
-                          value={editingTemplate.templateData.taxPercent ?? 18} 
-                          onChange={(e) => updateTemplateData('taxPercent', parseFloat(e.target.value))} 
+                        <TextField
+                          fullWidth
+                          type="number"
+                          label="Tax Percentage (e.g. 18 for 18% GST)"
+                          value={editingTemplate.templateData.taxPercent ?? 18}
+                          onChange={(e) => updateTemplateData('taxPercent', parseFloat(e.target.value))}
                         />
                       </Grid>
                     </Grid>
@@ -315,24 +315,24 @@ export default function EnhancedInvoiceTemplateConfiguration() {
                 {activeTab === 3 && (
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
-                      <TextField 
-                        fullWidth 
-                        multiline 
-                        rows={6} 
-                        label="Terms and Conditions" 
-                        value={editingTemplate.templateData.termsAndConditions || ''} 
-                        onChange={(e) => updateTemplateData('termsAndConditions', e.target.value)} 
+                      <TextField
+                        fullWidth
+                        multiline
+                        rows={6}
+                        label="Terms and Conditions"
+                        value={editingTemplate.templateData.termsAndConditions || ''}
+                        onChange={(e) => updateTemplateData('termsAndConditions', e.target.value)}
                         placeholder="Payment due within 15 days...\nPlease remit payment to..."
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <TextField 
-                        fullWidth 
-                        multiline 
-                        rows={3} 
-                        label="Footer Note" 
-                        value={editingTemplate.templateData.footerNote || ''} 
-                        onChange={(e) => updateTemplateData('footerNote', e.target.value)} 
+                      <TextField
+                        fullWidth
+                        multiline
+                        rows={3}
+                        label="Footer Note"
+                        value={editingTemplate.templateData.footerNote || ''}
+                        onChange={(e) => updateTemplateData('footerNote', e.target.value)}
                         placeholder="This is a system generated invoice."
                       />
                     </Grid>
@@ -377,7 +377,7 @@ export default function EnhancedInvoiceTemplateConfiguration() {
                 <Typography variant="body2" color="textSecondary" sx={{ mb: 2, minHeight: 40 }}>
                   {template.description || 'No description provided.'}
                 </Typography>
-                
+
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   <Chip size="small" variant="outlined" label={`Currency: ${template.currency}`} />
                   {!template.isActive && <Chip size="small" color="error" label="Inactive" />}

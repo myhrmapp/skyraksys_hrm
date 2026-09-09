@@ -27,7 +27,7 @@ export const usePerformanceMonitor = (componentName, options = {}) => {
   useEffect(() => {
     if (trackMounts) {
       const mountTime = Date.now() - mountStartTime.current;
-      
+
       if (logToConsole) {
         console.log(`📊 ${componentName} mounted in ${mountTime}ms`);
       }
@@ -46,14 +46,14 @@ export const usePerformanceMonitor = (componentName, options = {}) => {
       renderCount.current += 1;
 
       const isSlowRender = renderTime > threshold;
-      
+
       if (logToConsole && isSlowRender) {
         console.warn(`⚠️ Slow render detected: ${componentName} took ${renderTime}ms`);
       }
 
       setPerformanceData(prev => {
         const newTotalRenders = renderCount.current;
-        const newAverageRenderTime = 
+        const newAverageRenderTime =
           (prev.averageRenderTime * (newTotalRenders - 1) + renderTime) / newTotalRenders;
 
         return {
@@ -89,23 +89,23 @@ export const usePerformanceMonitor = (componentName, options = {}) => {
  */
 const calculatePerformanceScore = (data) => {
   const { averageRenderTime, slowRenders, totalRenders, mountTime } = data;
-  
+
   let score = 100;
-  
+
   // Penalize slow average render time
   if (averageRenderTime > 50) score -= 20;
   if (averageRenderTime > 100) score -= 20;
   if (averageRenderTime > 200) score -= 30;
-  
+
   // Penalize high percentage of slow renders
   const slowRenderPercentage = totalRenders > 0 ? (slowRenders / totalRenders) * 100 : 0;
   if (slowRenderPercentage > 10) score -= 15;
   if (slowRenderPercentage > 25) score -= 20;
-  
+
   // Penalize slow mount time
   if (mountTime > 500) score -= 10;
   if (mountTime > 1000) score -= 20;
-  
+
   return Math.max(0, score);
 };
 
@@ -127,7 +127,7 @@ export const useAPIPerformanceMonitor = () => {
 
     setApiMetrics(prev => {
       const newTotalRequests = prev.totalRequests + 1;
-      const newAverageResponseTime = 
+      const newAverageResponseTime =
         (prev.averageResponseTime * prev.totalRequests + responseTime) / newTotalRequests;
 
       return {
@@ -167,7 +167,7 @@ export const useBundleMonitor = () => {
     // Monitor webpack chunks if available
     if (typeof window !== 'undefined' && window.__webpack_require__) {
       const webpackRequire = window.__webpack_require__;
-      
+
       // Track loaded chunks
       const originalRequire = webpackRequire.e;
       webpackRequire.e = function(chunkId) {
@@ -175,7 +175,7 @@ export const useBundleMonitor = () => {
           ...prev,
           loadedChunks: new Set([...prev.loadedChunks, chunkId])
         }));
-        
+
         return originalRequire.call(this, chunkId);
       };
     }

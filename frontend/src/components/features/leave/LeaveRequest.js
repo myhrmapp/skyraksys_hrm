@@ -12,7 +12,7 @@ import {
   Select,
   Switch,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -32,13 +32,13 @@ const LeaveRequest = () => {
   const { data: leaveTypesData } = useQuery({
     queryKey: ['leaveTypes'],
     queryFn: () => leaveService.getLeaveTypes(),
-    enabled: !!user,
+    enabled: !!user
   });
-  
+
   const { data: balancesData } = useLeaveBalances(user?.employeeId, {
-    enabled: !!user?.employeeId,
+    enabled: !!user?.employeeId
   });
-  
+
   // Derive data from queries
   const leaveTypes = leaveTypesData?.data || leaveTypesData || [];
   const balances = balancesData?.data || balancesData || [];
@@ -48,7 +48,7 @@ const LeaveRequest = () => {
     d.setDate(d.getDate() - 14);
     return d;
   }, []);
-  
+
   // 🚀 Mutation for creating leave request
   const createMutation = useCreateLeaveRequest();
   const [form, setForm] = useState({
@@ -57,7 +57,7 @@ const LeaveRequest = () => {
     endDate: null,
     isHalfDay: false,
     halfDayType: '',
-    reason: '',
+    reason: ''
   });
   const [errors, setErrors] = useState({});
 
@@ -161,7 +161,7 @@ const LeaveRequest = () => {
       endDate: formatLocalDate(form.endDate),
       isHalfDay: form.isHalfDay,
       ...(form.isHalfDay && form.halfDayType ? { halfDayType: form.halfDayType } : {}),
-      reason: form.reason.trim(),
+      reason: form.reason.trim()
     };
 
     // 🚀 Use React Query mutation
@@ -294,7 +294,7 @@ const LeaveRequest = () => {
                             setForm((prev) => ({
                               ...prev,
                               isHalfDay: checked,
-                              halfDayType: checked ? prev.halfDayType : '',
+                              halfDayType: checked ? prev.halfDayType : ''
                             }));
                             setErrors((prev) => ({ ...prev, isHalfDay: undefined, halfDayType: undefined }));
                           }}
@@ -352,27 +352,27 @@ const LeaveRequest = () => {
 
                 <Grid item xs={12}>
                   <Box display="flex" justifyContent="flex-end" gap={2} mt={2}>
-                    <Button 
-                      variant="outlined" 
-                      onClick={() => navigate(-1)} 
+                    <Button
+                      variant="outlined"
+                      onClick={() => navigate(-1)}
                       data-testid="leave-cancel-btn"
                       sx={{ borderRadius: 2, px: 4, fontWeight: 600 }}
                     >
                       Cancel
                     </Button>
-                    <Button 
-                      type="submit" 
-                      variant="contained" 
+                    <Button
+                      type="submit"
+                      variant="contained"
                       data-testid="leave-submit-btn"
-                      sx={{ 
-                        borderRadius: 2, 
-                        px: 4, 
+                      sx={{
+                        borderRadius: 2,
+                        px: 4,
                         fontWeight: 600,
                         background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                         boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
                         '&:hover': {
                           background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                          boxShadow: '0 6px 20px 0 rgba(99, 102, 241, 0.39)',
+                          boxShadow: '0 6px 20px 0 rgba(99, 102, 241, 0.39)'
                         }
                       }}
                     >

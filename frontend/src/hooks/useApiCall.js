@@ -36,38 +36,38 @@ export const useApiCall = (initialData = null) => {
       if (ApiResponseHandler.isSuccess(response)) {
         const resultData = transformData ? transformData(response.data) : response.data;
         setData(resultData);
-        
+
         if (onSuccess) {
           onSuccess(resultData, response);
         }
-        
+
         return { success: true, data: resultData, response };
       } else {
         const errorMessage = ApiResponseHandler.getErrorMessage(response);
         setError(errorMessage);
-        
+
         if (!retainDataOnError) {
           setData(initialData);
         }
-        
+
         if (onError) {
           onError(errorMessage, response);
         }
-        
+
         return { success: false, error: errorMessage, response };
       }
     } catch (err) {
       const errorMessage = err.message || 'An unexpected error occurred';
       setError(errorMessage);
-      
+
       if (!retainDataOnError) {
         setData(initialData);
       }
-      
+
       if (onError) {
         onError(errorMessage, err);
       }
-      
+
       return { success: false, error: errorMessage, response: null };
     } finally {
       if (showLoading) {
@@ -116,7 +116,7 @@ export const useApiCall = (initialData = null) => {
     setData: setDataManually,
     setError: setErrorManually,
     clearError,
-    
+
     // Convenience getters
     hasData: data !== null && data !== undefined,
     hasError: error !== null,
@@ -179,20 +179,20 @@ export const useMultipleApiCalls = () => {
 
       if (ApiResponseHandler.isSuccess(response)) {
         const resultData = transformData ? transformData(response.data) : response.data;
-        
+
         setCalls(prev => ({
           ...prev,
           [key]: { ...prev[key], data: resultData, loading: false, error: null }
         }));
-        
+
         if (onSuccess) {
           onSuccess(resultData, response);
         }
-        
+
         return { success: true, data: resultData, response };
       } else {
         const errorMessage = ApiResponseHandler.getErrorMessage(response);
-        
+
         setCalls(prev => ({
           ...prev,
           [key]: {
@@ -202,16 +202,16 @@ export const useMultipleApiCalls = () => {
             data: retainDataOnError ? prev[key].data : null
           }
         }));
-        
+
         if (onError) {
           onError(errorMessage, response);
         }
-        
+
         return { success: false, error: errorMessage, response };
       }
     } catch (err) {
       const errorMessage = err.message || 'An unexpected error occurred';
-      
+
       setCalls(prev => ({
         ...prev,
         [key]: {
@@ -221,11 +221,11 @@ export const useMultipleApiCalls = () => {
           data: retainDataOnError ? prev[key].data : null
         }
       }));
-      
+
       if (onError) {
         onError(errorMessage, err);
       }
-      
+
       return { success: false, error: errorMessage, response: null };
     }
   }, [calls, registerCall]);
@@ -427,7 +427,7 @@ export const usePaginatedApiCall = (initialData = [], pageSize = 10) => {
     loadNextPage,
     refresh,
     reset,
-    
+
     // Convenience getters
     hasData: allData.length > 0,
     hasError: error !== null,

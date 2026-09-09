@@ -28,16 +28,16 @@ import payslipService from '../../services/payslip/payslipService';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { useAuth } from '../../contexts/AuthContext';
 
-const PayslipViewer = ({ 
-  open, 
-  onClose, 
+const PayslipViewer = ({
+  open,
+  onClose,
   employee,
   initialMonth = null,
   mode = 'view' // 'view', 'generate'
 }) => {
   const { showNotification } = useNotifications();
   const { user } = useAuth();
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [payslipData, setPayslipData] = useState(null);
@@ -58,11 +58,11 @@ const PayslipViewer = ({
     try {
       // Fetch payslip history and find the one for the selected month
       const history = await payslipService.getPayslipHistory(employee.id);
-      
+
       const targetMonth = selectedMonth.getMonth() + 1;
       const targetYear = selectedMonth.getFullYear();
-      
-      const foundPayslip = history.find(p => 
+
+      const foundPayslip = history.find(p =>
         p.month === targetMonth && p.year === targetYear
       );
 
@@ -83,19 +83,19 @@ const PayslipViewer = ({
     try {
       const month = selectedMonth.getMonth() + 1;
       const year = selectedMonth.getFullYear();
-      
+
       const response = await payslipService.generatePayslip(employee.id, month, year);
-      
+
       showNotification('Payslip generated successfully', 'success');
       setEditMode(false);
-      
+
       // If we have the data directly, set it, otherwise reload
       if (response.data && response.data.payslips && response.data.payslips.length > 0) {
          setPayslipData(response.data.payslips[0]);
       } else {
          await loadPayslipData();
       }
-      
+
     } catch (err) {
       setError(err.message || 'Failed to generate payslip.');
       console.error('Error generating payslip:', err);
@@ -106,7 +106,7 @@ const PayslipViewer = ({
 
   const handleFinalize = async () => {
     if (!payslipData?.id) return;
-    
+
     setLoading(true);
     try {
       await payslipService.finalizePayslip(payslipData.id);
@@ -183,11 +183,11 @@ const PayslipViewer = ({
                   </Tooltip>
                 )}
                 {canEdit && (
-                  <Tooltip title={editMode ? "View Mode" : "Generate New"}>
-                    <IconButton 
-                      onClick={() => setEditMode(!editMode)} 
+                  <Tooltip title={editMode ? 'View Mode' : 'Generate New'}>
+                    <IconButton
+                      onClick={() => setEditMode(!editMode)}
                       size="small"
-                      color={editMode ? "primary" : "default"}
+                      color={editMode ? 'primary' : 'default'}
                     >
                       {editMode ? <ViewIcon /> : <EditIcon />}
                     </IconButton>
@@ -209,7 +209,7 @@ const PayslipViewer = ({
             <Typography variant="h6" gutterBottom>
               Payslip Generation
             </Typography>
-            
+
             <Grid container spacing={3} alignItems="center">
               {/* Month Selection */}
               <Grid item xs={12} sm={6} md={4}>
@@ -228,7 +228,7 @@ const PayslipViewer = ({
                   }}
                   fullWidth
                   InputLabelProps={{
-                    shrink: true,
+                    shrink: true
                   }}
                 />
               </Grid>
@@ -245,7 +245,7 @@ const PayslipViewer = ({
                 </Button>
               </Grid>
             </Grid>
-            
+
             <Box sx={{ mt: 2 }}>
                <Typography variant="body2" color="textSecondary">
                   Note: Payslip generation uses the employee's active Salary Structure and approved Timesheets for the selected month.
@@ -289,7 +289,7 @@ const PayslipViewer = ({
             />
           </Box>
         )}
-        
+
         {/* Empty State */}
         {!loading && !payslipData && !editMode && !error && (
            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 8 }}>

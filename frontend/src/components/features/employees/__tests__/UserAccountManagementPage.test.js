@@ -14,8 +14,8 @@ jest.mock('../../../../services/employee.service', () => {
   }
   return {
     employeeService: {
-      getById: jest.fn(),
-    },
+      getById: jest.fn()
+    }
   };
 });
 const { employeeService } = require('../../../../services/employee.service');
@@ -30,8 +30,8 @@ jest.mock('../../../../services/auth.service', () => {
       lockUserAccount: jest.fn(),
       sendWelcomeEmail: jest.fn(),
       updateUserAccount: jest.fn(),
-      createUserAccount: jest.fn(),
-    },
+      createUserAccount: jest.fn()
+    }
   };
 });
 const { authService } = require('../../../../services/auth.service');
@@ -42,13 +42,13 @@ const mockShowNotification = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
-  useParams: () => ({ id: '1' }),
+  useParams: () => ({ id: '1' })
 }));
 
 jest.mock('../../../../contexts/NotificationContext', () => ({
   useNotifications: () => ({
-    showNotification: mockShowNotification,
-  }),
+    showNotification: mockShowNotification
+  })
 }));
 
 // Mock UserAccountManager to keep tests focused
@@ -86,8 +86,8 @@ const mockEmployeeWithAccount = {
     role: 'employee',
     isActive: true,
     isLocked: false,
-    forcePasswordChange: false,
-  },
+    forcePasswordChange: false
+  }
 };
 
 const mockEmployeeWithoutAccount = {
@@ -99,7 +99,7 @@ const mockEmployeeWithoutAccount = {
   status: 'Active',
   department: { name: 'HR' },
   position: { title: 'HR Specialist' },
-  user: null,
+  user: null
 };
 
 const mockEmployeeLockedAccount = {
@@ -108,8 +108,8 @@ const mockEmployeeLockedAccount = {
   user: {
     ...mockEmployeeWithAccount.user,
     id: 11,
-    isLocked: true,
-  },
+    isLocked: true
+  }
 };
 
 const mockEmployeeForcePasswordChange = {
@@ -118,8 +118,8 @@ const mockEmployeeForcePasswordChange = {
   user: {
     ...mockEmployeeWithAccount.user,
     id: 12,
-    forcePasswordChange: true,
-  },
+    forcePasswordChange: true
+  }
 };
 
 // ---------------------------------------------------------------------------
@@ -128,14 +128,14 @@ const mockEmployeeForcePasswordChange = {
 
 const setupEmployeeService = (employeeData = mockEmployeeWithAccount) => {
   employeeService.getById.mockResolvedValue({
-    data: { data: employeeData },
+    data: { data: employeeData }
   });
 };
 
 const renderAsAdmin = async (employeeData = mockEmployeeWithAccount) => {
   setupEmployeeService(employeeData);
   const result = render(<UserAccountManagementPage />, {
-    authValue: { user: createMockUser('admin') },
+    authValue: { user: createMockUser('admin') }
   });
   await waitFor(() => {
     expect(screen.getByText('User Account Management')).toBeInTheDocument();
@@ -146,7 +146,7 @@ const renderAsAdmin = async (employeeData = mockEmployeeWithAccount) => {
 const renderAsHR = async (employeeData = mockEmployeeWithAccount) => {
   setupEmployeeService(employeeData);
   const result = render(<UserAccountManagementPage />, {
-    authValue: { user: createMockUser('hr') },
+    authValue: { user: createMockUser('hr') }
   });
   await waitFor(() => {
     expect(screen.getByText('User Account Management')).toBeInTheDocument();
@@ -169,7 +169,7 @@ describe('UserAccountManagementPage', () => {
     it('redirects non-admin/non-hr users to /employees', () => {
       setupEmployeeService();
       render(<UserAccountManagementPage />, {
-        authValue: { user: createMockUser('employee') },
+        authValue: { user: createMockUser('employee') }
       });
 
       expect(mockShowNotification).toHaveBeenCalledWith(
@@ -182,7 +182,7 @@ describe('UserAccountManagementPage', () => {
     it('redirects manager role to /employees', () => {
       setupEmployeeService();
       render(<UserAccountManagementPage />, {
-        authValue: { user: createMockUser('manager') },
+        authValue: { user: createMockUser('manager') }
       });
 
       expect(mockNavigate).toHaveBeenCalledWith('/employees');
@@ -398,7 +398,7 @@ describe('UserAccountManagementPage', () => {
         () => new Promise(() => {}) // never resolves
       );
       render(<UserAccountManagementPage />, {
-        authValue: { user: createMockUser('admin') },
+        authValue: { user: createMockUser('admin') }
       });
 
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -407,7 +407,7 @@ describe('UserAccountManagementPage', () => {
     it('shows error alert when loading fails', async () => {
       employeeService.getById.mockRejectedValue(new Error('Network error'));
       render(<UserAccountManagementPage />, {
-        authValue: { user: createMockUser('admin') },
+        authValue: { user: createMockUser('admin') }
       });
 
       await waitFor(() => {
@@ -418,7 +418,7 @@ describe('UserAccountManagementPage', () => {
     it('shows Back to Employees button on error', async () => {
       employeeService.getById.mockRejectedValue(new Error('Not found'));
       render(<UserAccountManagementPage />, {
-        authValue: { user: createMockUser('admin') },
+        authValue: { user: createMockUser('admin') }
       });
 
       await waitFor(() => {
@@ -444,7 +444,7 @@ describe('UserAccountManagementPage', () => {
       const user = userEvent.setup();
       employeeService.getById.mockRejectedValue(new Error('Not found'));
       render(<UserAccountManagementPage />, {
-        authValue: { user: createMockUser('admin') },
+        authValue: { user: createMockUser('admin') }
       });
 
       await waitFor(() => {
@@ -552,7 +552,7 @@ describe('UserAccountManagementPage', () => {
       authService.resetUserPassword.mockResolvedValue({ success: true });
       // Re-mock getById for reload
       employeeService.getById.mockResolvedValue({
-        data: { data: mockEmployeeWithAccount },
+        data: { data: mockEmployeeWithAccount }
       });
 
       await renderAsAdmin(mockEmployeeWithAccount);
@@ -582,7 +582,7 @@ describe('UserAccountManagementPage', () => {
       const user = userEvent.setup();
       authService.lockUserAccount.mockResolvedValue({ success: true });
       employeeService.getById.mockResolvedValue({
-        data: { data: mockEmployeeWithAccount },
+        data: { data: mockEmployeeWithAccount }
       });
 
       await renderAsAdmin(mockEmployeeWithAccount);
@@ -612,7 +612,7 @@ describe('UserAccountManagementPage', () => {
       const user = userEvent.setup();
       authService.lockUserAccount.mockResolvedValue({ success: true });
       employeeService.getById.mockResolvedValue({
-        data: { data: mockEmployeeLockedAccount },
+        data: { data: mockEmployeeLockedAccount }
       });
 
       await renderAsAdmin(mockEmployeeLockedAccount);
@@ -751,7 +751,7 @@ describe('UserAccountManagementPage', () => {
       const user = userEvent.setup();
       authService.updateUserAccount.mockResolvedValue({ success: true });
       employeeService.getById.mockResolvedValue({
-        data: { data: mockEmployeeWithAccount },
+        data: { data: mockEmployeeWithAccount }
       });
 
       await renderAsAdmin(mockEmployeeWithAccount);
@@ -775,7 +775,7 @@ describe('UserAccountManagementPage', () => {
       const user = userEvent.setup();
       authService.createUserAccount.mockResolvedValue({ success: true });
       employeeService.getById.mockResolvedValue({
-        data: { data: mockEmployeeWithoutAccount },
+        data: { data: mockEmployeeWithoutAccount }
       });
 
       await renderAsAdmin(mockEmployeeWithoutAccount);
@@ -802,7 +802,7 @@ describe('UserAccountManagementPage', () => {
     it('displays correct role badge for admin user', async () => {
       const adminEmployee = {
         ...mockEmployeeWithAccount,
-        user: { ...mockEmployeeWithAccount.user, role: 'admin' },
+        user: { ...mockEmployeeWithAccount.user, role: 'admin' }
       };
       await renderAsAdmin(adminEmployee);
 
@@ -815,7 +815,7 @@ describe('UserAccountManagementPage', () => {
     it('displays correct role badge for HR user', async () => {
       const hrEmployee = {
         ...mockEmployeeWithAccount,
-        user: { ...mockEmployeeWithAccount.user, role: 'hr' },
+        user: { ...mockEmployeeWithAccount.user, role: 'hr' }
       };
       await renderAsAdmin(hrEmployee);
 
@@ -830,7 +830,7 @@ describe('UserAccountManagementPage', () => {
     it('displays correct role badge for manager user', async () => {
       const managerEmployee = {
         ...mockEmployeeWithAccount,
-        user: { ...mockEmployeeWithAccount.user, role: 'manager' },
+        user: { ...mockEmployeeWithAccount.user, role: 'manager' }
       };
       await renderAsAdmin(managerEmployee);
 
@@ -846,11 +846,11 @@ describe('UserAccountManagementPage', () => {
   describe('Error handling', () => {
     it('handles different response structures (nested data)', async () => {
       employeeService.getById.mockResolvedValue({
-        data: { data: mockEmployeeWithAccount },
+        data: { data: mockEmployeeWithAccount }
       });
 
       render(<UserAccountManagementPage />, {
-        authValue: { user: createMockUser('admin') },
+        authValue: { user: createMockUser('admin') }
       });
 
       await waitFor(() => {
@@ -861,11 +861,11 @@ describe('UserAccountManagementPage', () => {
 
     it('handles different response structures (single nest)', async () => {
       employeeService.getById.mockResolvedValue({
-        data: mockEmployeeWithAccount,
+        data: mockEmployeeWithAccount
       });
 
       render(<UserAccountManagementPage />, {
-        authValue: { user: createMockUser('admin') },
+        authValue: { user: createMockUser('admin') }
       });
 
       await waitFor(() => {
@@ -877,7 +877,7 @@ describe('UserAccountManagementPage', () => {
     it('shows notification when update fails', async () => {
       const user = userEvent.setup();
       authService.updateUserAccount.mockRejectedValue({
-        response: { data: { message: 'Update failed' } },
+        response: { data: { message: 'Update failed' } }
       });
 
       await renderAsAdmin(mockEmployeeWithAccount);

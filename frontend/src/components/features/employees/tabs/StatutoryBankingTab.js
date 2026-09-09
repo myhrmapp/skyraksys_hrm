@@ -154,7 +154,7 @@ const StatutoryBankingTab = ({ formData, errors, touchedFields = {}, onChange, o
         }}
       />
     </Grid>
-    
+
     <Grid item xs={12}>
       <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
         Banking Details

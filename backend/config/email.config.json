@@ -1,14 +1,15 @@
 {
-  "smtpHost": "smtp.audit-test.com",
+  "smtpHost": "smtp.gmail.com",
   "smtpPort": 587,
-  "smtpSecure": false,
-  "smtpUser": "audit@test.com",
+  "smtpSecure": true,
+  "smtpUser": "test@gmail.com",
   "smtpPassword": {
-    "encrypted": "f95cfe83ea8bd610ff",
-    "iv": "5c363fc3cf8c6da58781cd45acc7746b",
-    "authTag": "cb860b13dec07062f051dfbffb968e2e"
+    "encrypted": "b4f274c4c25a2c13f1f922",
+    "iv": "ef013c88ec9d7c95b32533456ed19680",
+    "authTag": "da987d4e045dcc4d90cd097b59de5e98"
   },
-  "emailFrom": "audit@test.com",
-  "updatedAt": "2026-09-06T07:40:14.354Z",
-  "updatedBy": "admin@env-test.com"
+  "emailFrom": "noreply@skyraksys.com",
+  "enabled": true,
+  "updatedAt": "2026-09-09T01:17:56.604Z",
+  "updatedBy": "admin.t34.1788916676294@test.com"
 }

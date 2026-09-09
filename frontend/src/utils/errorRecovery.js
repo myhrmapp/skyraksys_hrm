@@ -7,7 +7,7 @@ export class ErrorRecoveryManager {
     this.retryAttempts = new Map();
     this.operationHistory = new Map();
     this.globalRetryCount = 0;
-    
+
     // Configuration options
     this.config = {
       maxRetries: options.maxRetries || 3,
@@ -26,7 +26,7 @@ export class ErrorRecoveryManager {
 
     // Circuit breaker state
     this.circuitBreaker = new Map();
-    
+
     // Bind methods
     this.executeWithRetry = this.executeWithRetry.bind(this);
     this.shouldRetry = this.shouldRetry.bind(this);
@@ -70,24 +70,24 @@ export class ErrorRecoveryManager {
     while (attempt <= operationOptions.maxRetries) {
       try {
         this.log(`Executing operation ${operationId}, attempt ${attempt + 1}`, operationOptions.metadata);
-        
+
         // Execute operation with timeout if specified
-        const result = operationOptions.timeout 
+        const result = operationOptions.timeout
           ? await this.executeWithTimeout(operation, operationOptions.timeout)
           : await operation();
 
         // Success - reset counters and circuit breaker
         this.handleSuccess(operationId, circuitBreakerKey, startTime, attempt);
         operationOptions.onSuccess?.(result, attempt, Date.now() - startTime);
-        
+
         return result;
 
       } catch (error) {
         lastError = error;
         attempt++;
-        
+
         this.log(`Operation ${operationId} failed, attempt ${attempt}:`, error.message);
-        
+
         // Record failure for circuit breaker
         if (circuitBreakerKey) {
           this.recordFailure(circuitBreakerKey);
@@ -105,10 +105,10 @@ export class ErrorRecoveryManager {
 
         // Calculate delay with exponential backoff
         const delay = this.calculateDelay(attempt, operationOptions.baseDelay);
-        
+
         // Notify about retry
         operationOptions.onRetry?.(error, attempt, delay, operationId);
-        
+
         // Wait before retrying
         await this.sleep(delay);
       }
@@ -176,13 +176,13 @@ export class ErrorRecoveryManager {
   calculateDelay(attempt, baseDelay) {
     const exponentialDelay = baseDelay * Math.pow(this.config.backoffMultiplier, attempt - 1);
     const cappedDelay = Math.min(exponentialDelay, this.config.maxDelay);
-    
+
     // Add jitter to prevent thundering herd
     if (this.config.jitterEnabled) {
       const jitter = Math.random() * 0.3; // ±30% jitter
       return Math.floor(cappedDelay * (1 + jitter - 0.15));
     }
-    
+
     return cappedDelay;
   }
 
@@ -252,7 +252,7 @@ export class ErrorRecoveryManager {
   handleSuccess(operationId, circuitBreakerKey, startTime, attempts) {
     // Reset retry count on success
     this.retryAttempts.delete(operationId);
-    
+
     // Update operation history
     const operation = this.operationHistory.get(operationId);
     if (operation) {
@@ -283,7 +283,7 @@ export class ErrorRecoveryManager {
 
     this.retryAttempts.delete(operationId);
     this.globalRetryCount++;
-    
+
     this.log(`Operation ${operationId} failed permanently after ${attempts} attempts`);
   }
 
@@ -336,7 +336,7 @@ export class ErrorRecoveryManager {
   // Clean up old operation history to prevent memory leaks
   cleanup(olderThanMs = 24 * 60 * 60 * 1000) { // 24 hours default
     const cutoff = Date.now() - olderThanMs;
-    
+
     for (const [operationId, operation] of this.operationHistory.entries()) {
       if (operation.endTime && operation.endTime < cutoff) {
         this.operationHistory.delete(operationId);
@@ -377,7 +377,7 @@ export const recoveryStrategies = {
 
         const { accessToken } = await response.json();
         localStorage.setItem('accessToken', accessToken);
-        
+
         if (process.env.NODE_ENV === 'development') {
           console.log(`Token refreshed successfully for operation ${operationId}`);
         }
@@ -401,7 +401,7 @@ export const recoveryStrategies = {
     recover: async (error, operationId) => {
       // Wait for network to stabilize
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Check if online
       if (!navigator.onLine) {
         throw new Error('Still offline');
@@ -409,8 +409,8 @@ export const recoveryStrategies = {
 
       // Perform connectivity check
       try {
-        await fetch('/api/health', { 
-          method: 'HEAD', 
+        await fetch('/api/health', {
+          method: 'HEAD',
           timeout: 5000,
           cache: 'no-cache'
         });
@@ -462,7 +462,7 @@ export const recoveryStrategies = {
       // Extract retry-after header if present
       const retryAfter = error.response?.headers?.['retry-after'];
       const backoffTime = retryAfter ? parseInt(retryAfter) * 1000 : 5000;
-      
+
       if (process.env.NODE_ENV === 'development') {
         console.log(`Server overload detected for operation ${operationId}, backing off for ${backoffTime}ms`);
       }

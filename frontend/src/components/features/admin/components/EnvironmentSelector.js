@@ -53,7 +53,7 @@ const EnvironmentSelector = ({ selectedEnvironment, onEnvironmentChange, showWar
 
   const handleEnvironmentSelect = (envName) => {
     const environment = ENVIRONMENTS[envName];
-    
+
     if (envName === 'PROD' && showWarning) {
       setConfirmDialog({ open: true, env: environment });
     } else {
