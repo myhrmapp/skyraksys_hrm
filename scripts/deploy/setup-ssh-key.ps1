@@ -28,8 +28,21 @@
 
 $ServerIP = "46.225.73.94"
 $ServerUser = "Rakesh"
-$ServerPassword = 't]%eCt!49!0>'
+
+if (-not $env:SKYRAKSYS_SSH_PASSWORD) {
+    Write-Host "[ERROR] Environment variable SKYRAKSYS_SSH_PASSWORD is not set." -ForegroundColor Red
+    Write-Host "  Set it first:  `$env:SKYRAKSYS_SSH_PASSWORD = 'your_server_password'" -ForegroundColor Yellow
+    Write-Host "  Then re-run this script." -ForegroundColor Yellow
+    exit 1
+}
+$ServerPassword = $env:SKYRAKSYS_SSH_PASSWORD
+
 $PubKeyPath = "$env:USERPROFILE\.ssh\id_rsa_skyraksys.pub"
+if (-not (Test-Path $PubKeyPath)) {
+    Write-Host "[ERROR] SSH public key not found at $PubKeyPath" -ForegroundColor Red
+    Write-Host "  Generate one first using: ssh-keygen -t rsa -b 4096 -f $env:USERPROFILE\.ssh\id_rsa_skyraksys" -ForegroundColor Yellow
+    exit 1
+}
 $PubKey = (Get-Content $PubKeyPath -Raw).Trim()
 
 # Build the remote command to set up SSH key
