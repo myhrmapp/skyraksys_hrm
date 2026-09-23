@@ -25,7 +25,7 @@ You need an Ubuntu 22.04 (or newer) server with:
 
 ### 2. Your server SSH password
 
-You will need the SSH password for the `Rakesh` user on the server.
+You will need the SSH password for the server user (configured as `SERVER_USER` in `scripts/deploy/deploy.env`).
 Keep it ready — you will enter it once at the start.
 
 ### 3. A GitHub token (only if the repo is private)
@@ -154,7 +154,7 @@ Before deploying a new version, back up the database:
 
 ```bash
 # Run on the server
-docker compose exec postgres pg_dump -U skyraksys skyraksys_hrm > backup_$(date +%Y%m%d).sql
+docker compose exec postgres pg_dump -U hrm_admin skyraksys_hrm > backup_$(date +%Y%m%d).sql
 ```
 
 Keep this file safe. If anything goes wrong you can restore from it.
