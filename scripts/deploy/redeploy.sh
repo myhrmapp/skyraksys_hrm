@@ -29,7 +29,11 @@
 # ==============================================================================
 set -e
 
-APP_DIR="/home/Rakesh/skyraksys_hrm"
+# Configuration — sourced from deploy.env
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1090
+set -a; source "$SCRIPT_DIR/deploy.env"; set +a
+APP_DIR="/home/${SERVER_USER}/${APP_NAME}"
 COMPOSE="docker compose"
 
 echo "=========================================="

@@ -443,11 +443,11 @@ After=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/home/Rakesh/skyraksys_hrm
-ExecStart=/usr/bin/docker compose -f /home/Rakesh/skyraksys_hrm/docker-compose.yml up -d
-ExecStop=/usr/bin/docker compose -f /home/Rakesh/skyraksys_hrm/docker-compose.yml down
-User=Rakesh
-Group=Rakesh
+WorkingDirectory=/home/${SERVER_USER}/skyraksys_hrm
+ExecStart=/usr/bin/docker compose -f /home/${SERVER_USER}/skyraksys_hrm/docker-compose.yml up -d
+ExecStop=/usr/bin/docker compose -f /home/${SERVER_USER}/skyraksys_hrm/docker-compose.yml down
+User=${SERVER_USER}
+Group=${SERVER_USER}
 
 [Install]
 WantedBy=multi-user.target

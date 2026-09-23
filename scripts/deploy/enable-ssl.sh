@@ -36,9 +36,14 @@
 
 set -e
 
-DOMAIN="skyait.skyraksys.com"
-APP_DIR="/home/Rakesh/skyraksys_hrm"
-EMAIL="admin@skyraksys.com"
+# Configuration — sourced from deploy.env
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1090
+set -a; source "$SCRIPT_DIR/deploy.env"; set +a
+DOMAIN="${SERVER_DOMAIN}"
+APP_DIR="/home/${SERVER_USER}/${APP_NAME}"
+EMAIL="admin@${SERVER_DOMAIN}"
+
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -117,7 +122,7 @@ log_success "Certificate issued"
 log_info "Installing certificate into nginx/ssl/ ..."
 sudo cp /etc/letsencrypt/live/${DOMAIN}/fullchain.pem nginx/ssl/fullchain.pem
 sudo cp /etc/letsencrypt/live/${DOMAIN}/privkey.pem  nginx/ssl/privkey.pem
-sudo chown -R Rakesh:Rakesh nginx/ssl
+sudo chown -R "${SERVER_USER}:${SERVER_USER}" nginx/ssl
 log_success "Certificate files copied to nginx/ssl/"
 
 # ── Step 6: Start nginx with real cert ───────────────────────────────────────

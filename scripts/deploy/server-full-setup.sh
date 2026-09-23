@@ -24,7 +24,7 @@
 #
 # CREDENTIALS:
 #   All generated secrets saved at (chmod 600, Rakesh-only):
-#     /home/Rakesh/.deployment-credentials.txt
+#     /home/${SERVER_USER}/.deployment-credentials.txt
 #
 # WHEN TO USE:
 #   Once only — on a fresh or wiped Ubuntu 24.04 server.
@@ -58,12 +58,9 @@ fi
 # shellcheck disable=SC1090
 set -a; source "$DEPLOY_ENV"; set +a
 
-# Map env-file keys to local names
+# Derived paths — change SERVER_USER in deploy.env, these update automatically
 DOMAIN="${SERVER_DOMAIN}"
-SERVER_IP="${SERVER_IP}"
-APP_DIR="${APP_DIR}"
-GIT_REPO="${GIT_REPO}"
-GIT_BRANCH="${GIT_BRANCH}"
+APP_DIR="/home/${SERVER_USER}/${APP_NAME}"
 OLD_APP_DIR="/var/www/skyraksys_hrm"
 
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
@@ -170,7 +167,7 @@ if ! command -v docker &> /dev/null; then
     apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     
     # Add user to docker group
-    usermod -aG docker Rakesh
+    usermod -aG docker ${SERVER_USER}
     
     # Start Docker
     systemctl enable docker
@@ -195,7 +192,7 @@ echo ""
 # ============================================================================
 log_info "Step 3: Cloning repository..."
 
-cd /home/Rakesh
+cd "/home/${SERVER_USER}"
 
 if [ -d "$APP_DIR" ]; then
     log_warning "Directory exists, removing..."
@@ -277,7 +274,7 @@ EOF
 log_success "Environment configuration created"
 
 # Save credentials for reference
-cat > /home/Rakesh/.deployment-credentials.txt << EOF
+cat > /home/${SERVER_USER}/.deployment-credentials.txt << EOF
 SkyrakSys HRM — Deployment Credentials
 Generated: $(date)
 Server: ${SERVER_IP}
@@ -314,8 +311,8 @@ Server: ${SERVER_IP}
   ENCRYPTION_KEY:      ${ENCRYPTION_KEY}
 EOF
 
-chmod 600 /home/Rakesh/.deployment-credentials.txt
-chown Rakesh:Rakesh /home/Rakesh/.deployment-credentials.txt
+chmod 600 /home/${SERVER_USER}/.deployment-credentials.txt
+chown ${SERVER_USER}:${SERVER_USER} /home/${SERVER_USER}/.deployment-credentials.txt
 
 log_success "Credentials saved to ~/.deployment-credentials.txt"
 echo ""
@@ -401,7 +398,7 @@ if [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
     log_info "Existing Let's Encrypt certificate found — installing it."
     cp /etc/letsencrypt/live/${DOMAIN}/fullchain.pem nginx/ssl/
     cp /etc/letsencrypt/live/${DOMAIN}/privkey.pem nginx/ssl/
-    chown -R Rakesh:Rakesh nginx/ssl
+    chown -R ${SERVER_USER}:${SERVER_USER} nginx/ssl
     log_success "Real SSL certificate installed"
 else
     # No real cert — generate self-signed (10-year validity so it doesn't expire during dev/staging).
@@ -412,7 +409,7 @@ else
         -keyout nginx/ssl/privkey.pem \
         -out nginx/ssl/fullchain.pem \
         -subj "/C=US/ST=State/L=City/O=SkyrakSys/CN=${DOMAIN}" 2>/dev/null
-    chown -R Rakesh:Rakesh nginx/ssl
+    chown -R ${SERVER_USER}:${SERVER_USER} nginx/ssl
     log_success "Self-signed certificate created"
 fi
 
@@ -498,8 +495,8 @@ RemainAfterExit=yes
 WorkingDirectory=${APP_DIR}
 ExecStart=/usr/bin/docker compose -f ${APP_DIR}/docker-compose.yml up -d
 ExecStop=/usr/bin/docker compose -f ${APP_DIR}/docker-compose.yml down
-User=Rakesh
-Group=Rakesh
+User=${SERVER_USER}
+Group=${SERVER_USER}
 
 [Install]
 WantedBy=multi-user.target
