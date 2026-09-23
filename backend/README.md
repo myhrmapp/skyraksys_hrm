@@ -48,77 +48,31 @@ See [PHASE1_IMPLEMENTATION_SUMMARY.md](../PHASE1_IMPLEMENTATION_SUMMARY.md) for 
 
 ## Quick Start
 
-### 1. Install Dependencies
+**First time?** Follow the full step-by-step guide in [docs/SETUP.md](../docs/SETUP.md).
+It covers PostgreSQL setup, environment configuration, migrations, and seeding in one place.
+
+**Short version (if you know what you are doing):**
 
 ```bash
+# 1. Copy and fill in environment config
+cp .env.example .env
+# Edit .env: set DB_USER, DB_PASSWORD, JWT_SECRET, JWT_REFRESH_SECRET
+
+# 2. Install dependencies
 npm install
-```
 
-### 2. Environment Setup
-
-Create a `.env` file in the backend directory:
-
-```env
-# Environment
-NODE_ENV=development
-PORT=8080
-
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=skyraksys_hrm_dev
-DB_USER=postgres
-DB_PASSWORD=password
-
-# JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-JWT_REFRESH_SECRET=your-super-secret-refresh-jwt-key-change-this-in-production
-JWT_EXPIRES_IN=1h
-JWT_REFRESH_EXPIRES_IN=7d
-
-# Security
-BCRYPT_ROUNDS=12
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-```
-
-### 3. Database Setup
-
-#### Option A: Automatic Setup (Windows)
-Run the setup script from the project root:
-```bash
-setup-database.bat
-```
-
-#### Option B: Manual Setup
-
-1. Create PostgreSQL database:
-```sql
-CREATE DATABASE skyraksys_hrm_dev;
-```
-
-2. Run database synchronization:
-```bash
-npm run dev
-```
-The server will automatically sync the database schema on first run.
-
-3. Seed initial data:
-```bash
+# 3. Run migrations and seed data
+npx sequelize-cli db:migrate
 npx sequelize-cli db:seed:all
-```
 
-### 4. Start the Server
-
-```bash
-# Development mode with auto-reload
+# 4. Start the backend (development mode with auto-reload)
 npm run dev
-
-# Production mode
-npm start
 ```
 
-The server will start on `http://localhost:8080`
+The backend API runs on **http://localhost:5000**
+
+Health check: http://localhost:5000/health
+
 
 ## 📖 API Documentation
 

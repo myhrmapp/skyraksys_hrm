@@ -45,7 +45,14 @@ The repo currently follows a strict active-vs-archive split:
 - Historical reports, stale deployment notes, and generated outputs are archived under [archive/](archive) and remain reference-only.
 - Repo-wide operating rules are captured in [AGENTS.md](AGENTS.md), with detailed cleanup and audit guidance in [docs/WORKSPACE_AUDIT_AND_CLEANUP_PLAN.md](docs/WORKSPACE_AUDIT_AND_CLEANUP_PLAN.md), [docs/AGENT_TEAM_AND_BEST_PRACTICES.md](docs/AGENT_TEAM_AND_BEST_PRACTICES.md), and [docs/QA_AGENT_COVERAGE_MATRIX.md](docs/QA_AGENT_COVERAGE_MATRIX.md).
 
-## Quick Start (Docker)
+## Local Development (First Time Setup)
+
+**New to the project?** Follow the step-by-step guide:
+👉 **[docs/SETUP.md](docs/SETUP.md)** — covers Node.js, PostgreSQL, backend, and frontend setup from zero.
+
+---
+
+## Quick Start (Docker — Production)
 
 > Canonical production path: use Docker Compose from the repo root. Legacy deployment scripts in `scripts/deploy/` and older docs are archived for reference only and are not the default operational path.
 
