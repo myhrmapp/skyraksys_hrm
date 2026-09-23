@@ -1,7 +1,13 @@
 # Deployment Guide
 
-This guide takes you from a blank server to a running SkyrakSys HRM application.
-There are two paths depending on your operating system. **Pick one.**
+> **First time deploying to a Linux production server?**
+> Follow the step-by-step novice guide: **[PRODUCTION_LINUX_SETUP.md](PRODUCTION_LINUX_SETUP.md)**
+>
+> **Deploying from a Windows machine?** See the Windows path in that same guide,
+> or use the automated one-click script: `scripts/deploy/deploy-docker-from-windows.ps1`
+
+This document is a concise operational reference for teams already familiar with the stack.
+
 
 > **First-time setup only.** For day-to-day code updates after the initial deployment,
 > SSH into the server and run `bash redeploy.sh` instead.
