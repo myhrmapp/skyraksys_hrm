@@ -124,7 +124,7 @@ async function ensureSkyrakSeedAccounts() {
       user.firstName = account.firstName;
       user.lastName = account.lastName;
       user.isActive = true;
-      if (!user.password || user.password === 'admin123' || user.password === 'change_me') {
+      if (!user.password || user.password === 'Skyraksys123$' || user.password === 'change_me') {
         user.password = hash;
       }
       await user.save();

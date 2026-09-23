@@ -42,7 +42,7 @@ async function directValidationCheck() {
   try {
     const loginResponse = await axios.post('http://localhost:8080/api/auth/login', {
       email: 'admin@test.com',
-      password: 'admin123'
+      password: 'Skyraksys123$'
     });
     const token = loginResponse.data.data.accessToken;
     

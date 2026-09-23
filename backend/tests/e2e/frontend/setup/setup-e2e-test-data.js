@@ -14,7 +14,7 @@ class E2ETestDataSetup {
     this.testUsers = [
       {
         email: 'admin@test.com',
-        password: 'admin123',
+        password: 'Skyraksys123$',
         firstName: 'System',
         lastName: 'Administrator',
         role: 'admin',
@@ -86,7 +86,7 @@ class E2ETestDataSetup {
       try {
         const adminLogin = await axios.post(`${this.apiURL}/auth/login`, {
           email: 'admin@test.com',
-          password: 'admin123'
+          password: 'Skyraksys123$'
         });
         adminToken = adminLogin.data.accessToken;
         console.log('✅ Admin authentication successful');

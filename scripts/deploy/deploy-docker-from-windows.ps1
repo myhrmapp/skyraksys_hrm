@@ -151,7 +151,7 @@ Write-Info "Application URL (HTTPS — after SSL):               https://$DOMAIN
 Write-Info "API Health: http://$SERVER_IP/api/health"
 Write-Info "pgAdmin: http://$DOMAIN:8081"
 Write-Host ""
-Write-Warning "Default Login Accounts (password: admin123):"
+Write-Warning "Default Login Accounts (password: Skyraksys123$):"
 Write-Warning "  Super Admin : admin@skyraksys.com"
 Write-Warning "  HR Manager  : hr@skyraksys.com"
 Write-Warning "  Manager     : manager@skyraksys.com"

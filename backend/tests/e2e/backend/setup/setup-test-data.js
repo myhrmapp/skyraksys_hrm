@@ -193,7 +193,7 @@ async function setupComprehensiveTestData() {
     // Create Test Users and Employees
     console.log('Creating test users and employees...');
     
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const hashedPassword = await bcrypt.hash('Skyraksys123$', 10);
     
     const testUserData = [
       {
@@ -241,7 +241,7 @@ async function setupComprehensiveTestData() {
           emergencyContactRelation: 'Spouse',
           // Statutory Information
           aadhaarNumber: '123456789001',
-          panNumber: 'ADMIN1234A',
+          panNumber: 'Skyraksys123$4A',
           uanNumber: '123456789001',
           pfNumber: 'PF/ADM/001',
           esiNumber: 'ESI/ADM/001',

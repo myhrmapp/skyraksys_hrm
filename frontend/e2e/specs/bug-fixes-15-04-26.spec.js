@@ -534,7 +534,7 @@ test.describe('OVERALL: Login and session stability', () => {
   test('Admin can login successfully', async ({ page }) => {
     await page.goto('/login');
     await page.getByLabel(/email/i).fill('admin@skyraksys.com');
-    await page.locator('input[type="password"]').fill('admin123');
+    await page.locator('input[type="password"]').fill('Skyraksys123$');
     await page.getByRole('button', { name: /sign in|log in|login/i }).click();
     await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
     const url = page.url();
@@ -545,7 +545,7 @@ test.describe('OVERALL: Login and session stability', () => {
   test('Employee can login successfully', async ({ page }) => {
     await page.goto('/login');
     await page.getByLabel(/email/i).fill('employee1@skyraksys.com');
-    await page.locator('input[type="password"]').fill('admin123');
+    await page.locator('input[type="password"]').fill('Skyraksys123$');
     await page.getByRole('button', { name: /sign in|log in|login/i }).click();
     await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
     expect(page.url()).not.toContain('/login');
@@ -556,7 +556,7 @@ test.describe('OVERALL: Login and session stability', () => {
     // Login first to get cookie
     await page.goto('/login');
     await page.getByLabel(/email/i).fill('admin@skyraksys.com');
-    await page.locator('input[type="password"]').fill('admin123');
+    await page.locator('input[type="password"]').fill('Skyraksys123$');
     await page.getByRole('button', { name: /sign in|log in|login/i }).click();
     await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
 

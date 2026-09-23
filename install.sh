@@ -32,12 +32,12 @@ if [ ! -f .env.production ]; then
   exit 0
 fi
 
-PLACEHOLDER_PATTERN='REPLACE_WITH_|your-|your_email|your-smtp-host|example.com|admin123'
-if grep -E "REPLACE_WITH_|your-|example.com|admin123" .env.production >/dev/null 2>&1; then
+PLACEHOLDER_PATTERN='REPLACE_WITH_|your-|your_email|your-smtp-host|example.com|Skyraksys123$'
+if grep -E "REPLACE_WITH_|your-|example.com|Skyraksys123$" .env.production >/dev/null 2>&1; then
   echo "The .env.production file still contains placeholder values."
   echo "Open it and replace the placeholders with real values before continuing."
   echo ""
-  grep -nE "REPLACE_WITH_|your-|example.com|admin123" .env.production || true
+  grep -nE "REPLACE_WITH_|your-|example.com|Skyraksys123$" .env.production || true
   exit 1
 fi
 

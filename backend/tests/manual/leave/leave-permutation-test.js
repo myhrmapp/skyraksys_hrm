@@ -29,7 +29,7 @@ async function testLeaveSystemPermutations() {
 
     const adminLogin = await axios.post(`${BASE_URL}/auth/login`, {
       email: 'admin@test.com',
-      password: 'admin123'
+      password: 'Skyraksys123$'
     });
     adminToken = adminLogin.data.data.accessToken;
     console.log('✅ Admin authenticated');

@@ -46,8 +46,8 @@ class RealTimeE2EMonitor {
     };
     
     this.testLog = [];
-    this.employeeCredentials = { email: 'employee@test.com', password: 'admin123' };
-    this.managerCredentials = { email: 'manager@test.com', password: 'admin123' };
+    this.employeeCredentials = { email: 'employee@test.com', password: 'Skyraksys123$' };
+    this.managerCredentials = { email: 'manager@test.com', password: 'Skyraksys123$' };
   }
 
   logEvent(message) {

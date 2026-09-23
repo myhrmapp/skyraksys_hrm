@@ -87,7 +87,7 @@ class WorkflowE2ETest {
     console.log('🔍 Finding working user for workflow testing...');
     
     const testUsers = [
-      { email: 'admin@test.com', password: 'admin123', role: 'admin' },
+      { email: 'admin@test.com', password: 'Skyraksys123$', role: 'admin' },
       { email: 'john.doe@test.com', password: 'Password123!', role: 'employee' },
       { email: 'test@test.com', password: 'test123', role: 'user' }
     ];

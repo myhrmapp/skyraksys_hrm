@@ -166,7 +166,7 @@ class CompleteE2EValidator {
     console.log('----------------------------');
     
     const testCredentials = [
-      { email: 'admin@test.com', password: 'admin123', role: 'admin' },
+      { email: 'admin@test.com', password: 'Skyraksys123$', role: 'admin' },
       { email: 'test@test.com', password: 'test123', role: 'user' },
       { email: 'user@example.com', password: 'password', role: 'user' }
     ];

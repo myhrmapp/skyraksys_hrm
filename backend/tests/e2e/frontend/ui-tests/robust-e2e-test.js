@@ -23,7 +23,7 @@ class RobustE2ETestSuite {
     
     // Test users to validate
     this.testUsers = [
-      { email: 'admin@test.com', password: 'admin123', role: 'admin' },
+      { email: 'admin@test.com', password: 'Skyraksys123$', role: 'admin' },
       { email: 'john.doe@test.com', password: 'Password123!', role: 'employee' },
       { email: 'jane.smith@test.com', password: 'Password123!', role: 'employee' },
       { email: 'test@test.com', password: 'test123', role: 'user' }

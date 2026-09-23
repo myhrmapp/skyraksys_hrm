@@ -14,7 +14,7 @@ describe('Environment validation fails closed on weak or placeholder secrets', (
     process.env.JWT_REFRESH_SECRET = 'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789';
     process.env.ENCRYPTION_KEY = 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210';
     process.env.INVOICE_SECRET_PHRASE = 'REPLACE_WITH_INVOICE_PHRASE';
-    process.env.SEED_DEFAULT_PASSWORD = 'admin123';
+    process.env.SEED_DEFAULT_PASSWORD = 'Skyraksys123$';
   });
 
   afterAll(() => {

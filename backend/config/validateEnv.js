@@ -47,7 +47,7 @@ const envSchema = {
     minLength: 12,
     sensitive: true,
     requiredInProduction: true,
-    forbiddenPatterns: [/REPLACE_WITH_/i, /your-/i, /admin123/i, /change_me/i, /changeme/i, /password$/i, /skyraskyshrsecret/i],
+    forbiddenPatterns: [/REPLACE_WITH_/i, /your-/i, /Skyraksys123$/i, /change_me/i, /changeme/i, /password$/i, /skyraskyshrsecret/i],
     description: 'Bootstrap admin password for seeded environments'
   },
   INVOICE_SECRET_PHRASE: {
@@ -56,7 +56,7 @@ const envSchema = {
     minLength: 12,
     sensitive: true,
     requiredInProduction: true,
-    forbiddenPatterns: [/REPLACE_WITH_/i, /your-/i, /example/i, /default/i, /secret$/i, /skyraskyshrsecret/i, /admin123/i],
+    forbiddenPatterns: [/REPLACE_WITH_/i, /your-/i, /example/i, /default/i, /secret$/i, /skyraskyshrsecret/i, /Skyraksys123$/i],
     description: 'Invoice encryption secret phrase'
   },
   
@@ -135,7 +135,7 @@ const envSchema = {
     sensitive: true,
     minLength: 32,
     requiredInProduction: true,
-    forbiddenPatterns: [/REPLACE_WITH_/i, /your-/i, /change_me/i, /changeme/i, /example/i, /default/i, /admin123/i],
+    forbiddenPatterns: [/REPLACE_WITH_/i, /your-/i, /change_me/i, /changeme/i, /example/i, /default/i, /Skyraksys123$/i],
     description: 'Production vault key for encrypting payroll and salary data'
   },
   

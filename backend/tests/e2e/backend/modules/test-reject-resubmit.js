@@ -8,7 +8,7 @@ async function testRejectResubmitWorkflow() {
   // Admin login (for approval/rejection)
   const adminLogin = await axios.post(`${BASE_URL}/auth/login`, {
     email: 'admin@test.com',
-    password: 'admin123'
+    password: 'Skyraksys123$'
   });
   const adminToken = adminLogin.data.data.accessToken;
   

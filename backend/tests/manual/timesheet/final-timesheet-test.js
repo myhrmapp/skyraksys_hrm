@@ -10,7 +10,7 @@ async function finalTimesheetTest() {
   try {
     const loginResponse = await axios.post(`${BASE_URL}/auth/login`, {
       email: 'admin@test.com',
-      password: 'admin123'
+      password: 'Skyraksys123$'
     });
     token = loginResponse.data.data.accessToken;
     console.log('✅ Login successful');

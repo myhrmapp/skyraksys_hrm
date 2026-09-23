@@ -179,11 +179,11 @@ NODE_ENV=production npx sequelize-cli db:seed:all
 ### 3. Default Login Credentials
 | Email | Password | Role |
 |-------|----------|------|
-| admin@skyraksys.com | `admin123` | admin |
-| hr@skyraksys.com | `admin123` | hr |
-| lead@skyraksys.com | `admin123` | manager |
-| employee1@skyraksys.com | `admin123` | employee |
-| employee2@skyraksys.com | `admin123` | employee |
+| admin@skyraksys.com | `Skyraksys123$` | admin |
+| hr@skyraksys.com | `Skyraksys123$` | hr |
+| lead@skyraksys.com | `Skyraksys123$` | manager |
+| employee1@skyraksys.com | `Skyraksys123$` | employee |
+| employee2@skyraksys.com | `Skyraksys123$` | employee |
 
 **⚠️ CRITICAL**: Change all passwords immediately after first login!
 
@@ -281,7 +281,7 @@ curl -X POST http://your-server:5000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@skyraksys.com",
-    "password": "admin123"
+    "password": "Skyraksys123$"
   }'
 ```
 **Expected**: JSON response with `token` and `refreshToken`.
@@ -293,7 +293,7 @@ curl -X POST http://your-server:5000/api/auth/login \
 - [ ] All 18 migrations executed successfully
 - [ ] Seeder ran and created 5 users
 - [ ] Admin login works with default credentials
-- [ ] All passwords changed from `admin123` to secure passwords
+- [ ] All passwords changed from `Skyraksys123$` to secure passwords
 - [ ] `SEED_DEMO_DATA=false` set in `.env` (prevents re-seeding)
 - [ ] JWT secrets are unique and secured
 - [ ] CORS_ORIGIN matches your frontend URL
@@ -349,7 +349,7 @@ NODE_ENV=production npx sequelize-cli db:seed:all
 ### Issue: Login Fails After Seeding
 **Check**:
 1. Bcrypt rounds match (should be 12)
-2. Default password is exactly `admin123`
+2. Default password is exactly `Skyraksys123$`
 3. Check backend logs for specific error
 
 ---

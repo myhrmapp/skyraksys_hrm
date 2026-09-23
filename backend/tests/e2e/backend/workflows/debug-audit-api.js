@@ -7,7 +7,7 @@ async function testAuditAPI() {
     // Login as admin
     const loginResp = await axios.post(`${BASE_URL}/auth/login`, {
       email: 'admin@skyraksys.com',
-      password: 'admin123'
+      password: 'Skyraksys123$'
     });
     
     const token = loginResp.data.data.accessToken;

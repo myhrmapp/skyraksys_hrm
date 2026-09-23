@@ -23,7 +23,7 @@ services:
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
       CORS_ORIGIN: ${CORS_ORIGIN:-https://skyait.skyraksys.com,http://skyait.skyraksys.com,http://46.225.73.94}
       TRUST_PROXY: "true"
-      SEED_DEFAULT_PASSWORD: ${SEED_DEFAULT_PASSWORD:-admin123}
+      SEED_DEFAULT_PASSWORD: ${SEED_DEFAULT_PASSWORD:-Skyraksys123$}
       EMAIL_FROM: ${EMAIL_FROM:-noreply@skyraksys.com}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}

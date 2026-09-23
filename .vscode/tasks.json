@@ -522,7 +522,7 @@
 		{
 			"label": "live-login-default-admin",
 			"type": "shell",
-			"command": "cd backend && curl -sS -D - -o /tmp/live_auth_login.out -H \"Content-Type: application/json\" -X POST -d '{\"email\":\"admin@skyraksys.com\",\"password\":\"admin123\"}' http://localhost:5000/api/auth/login && echo \"---BODY---\" && cat /tmp/live_auth_login.out",
+			"command": "cd backend && curl -sS -D - -o /tmp/live_auth_login.out -H \"Content-Type: application/json\" -X POST -d '{\"email\":\"admin@skyraksys.com\",\"password\":\"Skyraksys123$\"}' http://localhost:5000/api/auth/login && echo \"---BODY---\" && cat /tmp/live_auth_login.out",
 			"isBackground": false,
 			"group": "test"
 		},
@@ -536,7 +536,7 @@
 		{
 			"label": "verify-live-db-passwords",
 			"type": "shell",
-			"command": "cd backend && node -e \"const db=require('./models'); const bcrypt=require('bcryptjs'); (async()=>{ await db.sequelize.authenticate(); const users=await db.User.findAll({attributes:['email','role','password','isActive'], raw:true, paranoid:false}); console.log(JSON.stringify(users,null,2)); const target=await db.User.findOne({where:{email:'admin@skyraksys.com'}, attributes:['password'], raw:true, paranoid:false}); for (const c of ['admin123','StrongSeedPassword2026!']) { console.log('COMPARE', c, await bcrypt.compare(c, target.password)); } process.exit(0); })().catch(e=>{ console.error(e); process.exit(1); });\"",
+			"command": "cd backend && node -e \"const db=require('./models'); const bcrypt=require('bcryptjs'); (async()=>{ await db.sequelize.authenticate(); const users=await db.User.findAll({attributes:['email','role','password','isActive'], raw:true, paranoid:false}); console.log(JSON.stringify(users,null,2)); const target=await db.User.findOne({where:{email:'admin@skyraksys.com'}, attributes:['password'], raw:true, paranoid:false}); for (const c of ['Skyraksys123$','StrongSeedPassword2026!']) { console.log('COMPARE', c, await bcrypt.compare(c, target.password)); } process.exit(0); })().catch(e=>{ console.error(e); process.exit(1); });\"",
 			"isBackground": false,
 			"group": "test"
 		},

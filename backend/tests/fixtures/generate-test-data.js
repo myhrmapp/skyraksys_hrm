@@ -17,7 +17,7 @@ if (!fs.existsSync(fixturesDir)) {
 const testData = {
   Users: [
     {
-      firstName: 'Admin', lastName: 'User', email: 'admin@skyraksys.com', password: 'admin123', role: 'admin', isActive: true, scenario: 'Admin Login'
+      firstName: 'Admin', lastName: 'User', email: 'admin@skyraksys.com', password: 'Skyraksys123$', role: 'admin', isActive: true, scenario: 'Admin Login'
     },
     {
       firstName: 'HR', lastName: 'Manager', email: 'hr@skyraksys.com', password: 'hr123', role: 'hr', isActive: true, scenario: 'HR Operations'

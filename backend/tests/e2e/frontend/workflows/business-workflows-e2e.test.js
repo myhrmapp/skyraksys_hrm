@@ -206,7 +206,7 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
       
       const userData = {
         email: 'admin@company.com',  // Use valid TLD (.test is not recognized by Joi)
-        password: 'admin123',
+        password: 'Skyraksys123$',
         role: 'admin'
       };
       
@@ -238,7 +238,7 @@ describe('🏢 COMPREHENSIVE BUSINESS WORKFLOW E2E TESTS', () => {
           .set('Content-Type', 'application/json')
           .send({
             email: 'admin@company.com',
-            password: 'admin123'
+            password: 'Skyraksys123$'
           });
         
         if (loginRes.status !== 200) {

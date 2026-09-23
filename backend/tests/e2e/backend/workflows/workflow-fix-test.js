@@ -5,7 +5,7 @@ const colors = require('colors');
 // Test configuration
 const BASE_URL = 'http://localhost:8080/api';
 const TEST_USERS = {
-  admin: { email: 'admin@test.com', password: 'admin123', token: null }
+  admin: { email: 'admin@test.com', password: 'Skyraksys123$', token: null }
 };
 
 let passCount = 0;
@@ -55,7 +55,7 @@ async function setupTestData() {
   try {
     const loginResponse = await axios.post(`${BASE_URL}/auth/login`, {
       email: 'admin@test.com',
-      password: 'admin123'
+      password: 'Skyraksys123$'
     });
     
     if (loginResponse.data.success) {

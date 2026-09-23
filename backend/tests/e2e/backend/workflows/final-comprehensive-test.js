@@ -7,10 +7,10 @@ const BASE_URL = 'http://localhost:5000/api';
 
 // Test users
 const TEST_USERS = {
-  admin: { email: 'admin@skyraksys.com', password: 'admin123', token: null, name: 'Admin User' },
-  hr: { email: 'hr@skyraksys.com', password: 'admin123', token: null, name: 'HR Manager' },
-  manager: { email: 'lead@skyraksys.com', password: 'admin123', token: null, name: 'Manager' },
-  employee: { email: 'employee1@skyraksys.com', password: 'admin123', token: null, name: 'Employee' }
+  admin: { email: 'admin@skyraksys.com', password: 'Skyraksys123$', token: null, name: 'Admin User' },
+  hr: { email: 'hr@skyraksys.com', password: 'Skyraksys123$', token: null, name: 'HR Manager' },
+  manager: { email: 'lead@skyraksys.com', password: 'Skyraksys123$', token: null, name: 'Manager' },
+  employee: { email: 'employee1@skyraksys.com', password: 'Skyraksys123$', token: null, name: 'Employee' }
 };
 
 let passCount = 0;

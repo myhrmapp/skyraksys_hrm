@@ -10,7 +10,7 @@ async function testHistoryAPI() {
     const loginAttempts = [
       { email: 'employee@company.com', password: 'employee123' },
       { email: 'employee@company.com', password: 'password' },
-      { email: 'employee@company.com', password: 'admin123' },
+      { email: 'employee@company.com', password: 'Skyraksys123$' },
       { email: 'john@company.com', password: 'password' },
       { email: 'test@company.com', password: 'password' }
     ];

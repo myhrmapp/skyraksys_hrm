@@ -6,10 +6,10 @@ const BASE_URL = 'http://localhost:8080/api';
 
 // Known test users (from existing demo data)
 const TEST_USERS = {
-  admin: { email: 'admin@test.com', password: 'admin123', token: null, name: 'Admin User' },
-  hr: { email: 'hr@test.com', password: 'admin123', token: null, name: 'HR Manager' },
-  manager: { email: 'manager@test.com', password: 'admin123', token: null, name: 'Manager' },
-  employee: { email: 'employee@test.com', password: 'admin123', token: null, name: 'Employee' }
+  admin: { email: 'admin@test.com', password: 'Skyraksys123$', token: null, name: 'Admin User' },
+  hr: { email: 'hr@test.com', password: 'Skyraksys123$', token: null, name: 'HR Manager' },
+  manager: { email: 'manager@test.com', password: 'Skyraksys123$', token: null, name: 'Manager' },
+  employee: { email: 'employee@test.com', password: 'Skyraksys123$', token: null, name: 'Employee' }
 };
 
 let passCount = 0;

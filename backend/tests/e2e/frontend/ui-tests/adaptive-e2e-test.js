@@ -26,8 +26,8 @@ class AdaptiveE2ETestSuite {
     
     // Common test credentials to try
     this.potentialUsers = [
-      { email: 'admin@test.com', password: 'admin123', role: 'admin' },
-      { email: 'admin@example.com', password: 'admin123', role: 'admin' },
+      { email: 'admin@test.com', password: 'Skyraksys123$', role: 'admin' },
+      { email: 'admin@example.com', password: 'Skyraksys123$', role: 'admin' },
       { email: 'test@test.com', password: 'test123', role: 'user' },
       { email: 'john.doe@test.com', password: 'Password123!', role: 'employee' },
       { email: 'jane.smith@test.com', password: 'Password123!', role: 'employee' },

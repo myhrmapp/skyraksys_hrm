@@ -102,10 +102,10 @@ module.exports = defineConfig({
 
 | Role | Email | Password | Persona |
 |------|-------|----------|---------|
-| Admin | `admin@skyraksys.com` | `admin123` | System Administrator |
-| HR | `hr@skyraksys.com` | `admin123` | HR Manager |
-| Manager | `lead@skyraksys.com` | `admin123` | Team Lead |
-| Employee | `employee1@skyraksys.com` | `admin123` | Alice Brown |
+| Admin | `admin@skyraksys.com` | `Skyraksys123$` | System Administrator |
+| HR | `hr@skyraksys.com` | `Skyraksys123$` | HR Manager |
+| Manager | `lead@skyraksys.com` | `Skyraksys123$` | Team Lead |
+| Employee | `employee1@skyraksys.com` | `Skyraksys123$` | Alice Brown |
 
 ### 2.5 Test Spec Inventory
 

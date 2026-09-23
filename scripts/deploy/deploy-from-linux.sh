@@ -256,7 +256,7 @@ SMTP_PASSWORD=
 
 # ===== Frontend =====
 REACT_APP_API_URL=/api
-SEED_DEFAULT_PASSWORD=admin123
+SEED_DEFAULT_PASSWORD=Skyraksys123$
 
 # ===== pgAdmin =====
 PGADMIN_EMAIL=admin@skyraksys.com
@@ -278,7 +278,7 @@ Generated: $(date)
   App (HTTP domain): http://skyait.skyraksys.com
   App (HTTPS):       https://skyait.skyraksys.com
 
-=== Default Login Accounts (password: admin123) ===
+=== Default Login Accounts (password: Skyraksys123$) ===
   Super Admin : admin@skyraksys.com
   HR Manager  : hr@skyraksys.com
   Manager     : manager@skyraksys.com
@@ -484,7 +484,7 @@ log_info "Application URL (HTTPS — after SSL):               https://skyait.sk
 log_info "API Health: http://46.225.73.94/api/health"
 log_info "pgAdmin: http://skyait.skyraksys.com:8081 (if enabled)"
 echo ""
-log_warning "Default Login Accounts (password: admin123):"
+log_warning "Default Login Accounts (password: Skyraksys123$):"
 log_warning "  Super Admin : admin@skyraksys.com"
 log_warning "  HR Manager  : hr@skyraksys.com"
 log_warning "  Manager     : manager@skyraksys.com"

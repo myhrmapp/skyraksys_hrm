@@ -252,7 +252,7 @@ REACT_APP_API_URL=/api
 # ===== Seeded Account Default Password =====
 # All demo/seed accounts use this password on first deploy.
 # Shown in ~/.deployment-credentials.txt — change via the app after first login.
-SEED_DEFAULT_PASSWORD=admin123
+SEED_DEFAULT_PASSWORD=Skyraksys123$
 
 # ===== pgAdmin Configuration =====
 PGADMIN_EMAIL=admin@skyraksys.com
@@ -279,13 +279,13 @@ Server: ${SERVER_IP}
   pgAdmin:                            http://${DOMAIN}:8081
 
 === Default Login Accounts ===
-  All accounts use password: admin123
+  All accounts use password: Skyraksys123$
   Change passwords after first login!
 
-  Super Admin : admin@skyraksys.com    / admin123
-  HR Manager  : hr@skyraksys.com       / admin123
-  Manager     : manager@skyraksys.com  / admin123
-  Employee    : employee@skyraksys.com / admin123
+  Super Admin : admin@skyraksys.com    / Skyraksys123$
+  HR Manager  : hr@skyraksys.com       / Skyraksys123$
+  Manager     : manager@skyraksys.com  / Skyraksys123$
+  Employee    : employee@skyraksys.com / Skyraksys123$
 
 === Database ===
   Name:     skyraksys_hrm
@@ -547,7 +547,7 @@ log_info "Application URL (HTTPS):       https://${DOMAIN}  ← after SSL setup"
 log_info "API Health: http://${DOMAIN}/api/health"
 log_info "pgAdmin: http://${DOMAIN}:8081"
 echo ""
-log_warning "Default Login Accounts (password: admin123):"
+log_warning "Default Login Accounts (password: Skyraksys123$):"
 log_warning "  Super Admin : admin@skyraksys.com"
 log_warning "  HR Manager  : hr@skyraksys.com"
 log_warning "  Manager     : manager@skyraksys.com"

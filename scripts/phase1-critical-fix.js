@@ -35,9 +35,9 @@ const criticalFiles = [
     lines: [565, 566, 567],
     issue: 'Logs test passwords',
     code: [
-      'console.log(`- admin@test.com (password: admin123) - System Administrator`);',
-      'console.log(`- hr@test.com (password: admin123) - HR Manager`);',
-      'console.log(`- manager@test.com (password: admin123) - Engineering Manager`);'
+      'console.log(`- admin@test.com (password: Skyraksys123$) - System Administrator`);',
+      'console.log(`- hr@test.com (password: Skyraksys123$) - HR Manager`);',
+      'console.log(`- manager@test.com (password: Skyraksys123$) - Engineering Manager`);'
     ],
     fix: 'REPLACE - Remove password from message OR comment out for test file'
   },

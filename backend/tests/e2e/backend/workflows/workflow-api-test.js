@@ -26,7 +26,7 @@ async function testWorkflowAPIs() {
     try {
       const adminLogin = await axios.post(`${apiURL}/auth/login`, {
         email: 'admin@test.com',
-        password: 'admin123'
+        password: 'Skyraksys123$'
       });
       
       if (adminLogin.data && adminLogin.data.accessToken) {

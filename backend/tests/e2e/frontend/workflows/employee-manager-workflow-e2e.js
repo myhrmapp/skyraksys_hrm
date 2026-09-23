@@ -25,8 +25,8 @@ class EmployeeManagerWorkflowTest {
       leaveApproval: false
     };
     
-    this.employeeCredentials = { email: 'employee@test.com', password: 'admin123' };
-    this.managerCredentials = { email: 'manager@test.com', password: 'admin123' };
+    this.employeeCredentials = { email: 'employee@test.com', password: 'Skyraksys123$' };
+    this.managerCredentials = { email: 'manager@test.com', password: 'Skyraksys123$' };
   }
 
   recordResult(step, success, details = '') {

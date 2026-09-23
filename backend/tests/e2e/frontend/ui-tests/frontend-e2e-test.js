@@ -147,7 +147,7 @@ class FrontendE2ETests {
       if (emailInput && passwordInput && loginButton) {
         // Fill login form
         await this.page.type('input[type="email"], input[name="email"]', 'admin@skyraksys.com');
-        await this.page.type('input[type="password"], input[name="password"]', 'Admin123!');
+        await this.page.type('input[type="password"], input[name="password"]', 'Skyraksys123$!');
         
         await this.takeScreenshot('login-form-filled');
         

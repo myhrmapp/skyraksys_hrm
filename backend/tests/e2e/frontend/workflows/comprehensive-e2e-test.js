@@ -25,7 +25,7 @@ class ComprehensiveE2ETestSuite {
     this.testUsers = {
       admin: { 
         email: 'admin@test.com', 
-        password: 'admin123', 
+        password: 'Skyraksys123$', 
         role: 'admin',
         permissions: ['all']
       },

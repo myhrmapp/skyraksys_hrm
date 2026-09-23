@@ -94,7 +94,7 @@ async function testAuth() {
   console.log('══════════════════════════════════════');
 
   // Admin login
-  let res = await req('POST', '/api/auth/login', { email: 'admin@skyraksys.com', password: 'admin123' });
+  let res = await req('POST', '/api/auth/login', { email: 'admin@skyraksys.com', password: 'Skyraksys123$' });
   check('POST /api/auth/login (admin)', res, 200);
   const cookies = extractCookies(res.headers);
   adminToken = cookies.accessToken || '';
@@ -106,12 +106,12 @@ async function testAuth() {
   }
 
   // HR login
-  res = await req('POST', '/api/auth/login', { email: 'hr@skyraksys.com', password: 'admin123' });
+  res = await req('POST', '/api/auth/login', { email: 'hr@skyraksys.com', password: 'Skyraksys123$' });
   check('POST /api/auth/login (hr)', res, 200);
   hrToken = extractCookies(res.headers).accessToken || '';
 
   // Employee login
-  res = await req('POST', '/api/auth/login', { email: 'employee1@skyraksys.com', password: 'admin123' });
+  res = await req('POST', '/api/auth/login', { email: 'employee1@skyraksys.com', password: 'Skyraksys123$' });
   check('POST /api/auth/login (employee)', res, 200);
   employeeToken = extractCookies(res.headers).accessToken || '';
 

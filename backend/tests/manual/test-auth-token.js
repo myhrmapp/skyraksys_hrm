@@ -58,7 +58,7 @@ try {
     console.log('   You need to log in with an admin or hr account to access payslip templates.');
     console.log('\n   Default admin credentials (if they exist):');
     console.log('   Email: admin@skyraksys.com');
-    console.log('   Password: admin123');
+    console.log('   Password: Skyraksys123$');
     console.log('\n   OR');
     console.log('\n   Email: hr@skyraksys.com');
     console.log('   Password: hr123');

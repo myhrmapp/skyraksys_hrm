@@ -46,7 +46,7 @@ module.exports = {
       }
 
       const defaultPassword = process.env.SEED_DEFAULT_PASSWORD;
-      if (!defaultPassword || defaultPassword.length < 12 || /REPLACE_WITH_|your-|admin123|change_me|changeme|password$/i.test(defaultPassword)) {
+      if (!defaultPassword || defaultPassword.length < 12 || /REPLACE_WITH_|your-|Skyraksys123$|change_me|changeme|password$/i.test(defaultPassword)) {
         throw new Error('SEED_DEFAULT_PASSWORD must be set to a strong non-default value before seeding demo credentials.');
       }
 
