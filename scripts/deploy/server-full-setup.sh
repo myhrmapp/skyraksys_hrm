@@ -47,13 +47,24 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Configuration
-DOMAIN="skyait.skyraksys.com"
-SERVER_IP="46.225.73.94"
-APP_DIR="/home/Rakesh/skyraksys_hrm"
+# Configuration — loaded from deploy.env (edit that file to retarget to a new server)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEPLOY_ENV="$SCRIPT_DIR/deploy.env"
+if [ ! -f "$DEPLOY_ENV" ]; then
+  echo "[ERROR] deploy.env not found at $DEPLOY_ENV"
+  echo "  This file should exist alongside server-full-setup.sh"
+  exit 1
+fi
+# shellcheck disable=SC1090
+set -a; source "$DEPLOY_ENV"; set +a
+
+# Map env-file keys to local names
+DOMAIN="${SERVER_DOMAIN}"
+SERVER_IP="${SERVER_IP}"
+APP_DIR="${APP_DIR}"
+GIT_REPO="${GIT_REPO}"
+GIT_BRANCH="${GIT_BRANCH}"
 OLD_APP_DIR="/var/www/skyraksys_hrm"
-GIT_REPO="https://github.com/myhrmapp/skyraksys_hrm.git"
-GIT_BRANCH="skyraksys_hrm"
 
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }

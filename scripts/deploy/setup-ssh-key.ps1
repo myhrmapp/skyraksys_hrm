@@ -26,8 +26,19 @@
     USER:      Rakesh
 #>
 
-$ServerIP = "46.225.73.94"
-$ServerUser = "Rakesh"
+# ── Load central deploy config ─────────────────────────────────────────────────
+$ConfigFile = Join-Path $PSScriptRoot "deploy.env"
+if (-not (Test-Path $ConfigFile)) {
+    Write-Host "[ERROR] deploy.env not found at $ConfigFile" -ForegroundColor Red
+    Write-Host "  This file should exist alongside this script." -ForegroundColor Yellow
+    exit 1
+}
+Get-Content $ConfigFile | Where-Object { $_ -match '^\s*[^#]\S+=\S' } | ForEach-Object {
+    $key, $val = $_ -split '=', 2
+    Set-Variable -Name $key.Trim() -Value $val.Trim()
+}
+$ServerIP   = $SERVER_IP
+$ServerUser = $SERVER_USER
 
 if (-not $env:SKYRAKSYS_SSH_PASSWORD) {
     Write-Host "[ERROR] Environment variable SKYRAKSYS_SSH_PASSWORD is not set." -ForegroundColor Red

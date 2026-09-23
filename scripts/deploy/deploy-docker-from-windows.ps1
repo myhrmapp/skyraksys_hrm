@@ -25,10 +25,21 @@
 
 $ErrorActionPreference = "Stop"
 
-# Configuration
-$SERVER_IP = "46.225.73.94"
-$SERVER_USER = "Rakesh"
-$DOMAIN = "skyait.skyraksys.com"
+# ── Load central deploy config ─────────────────────────────────────────────────
+$ConfigFile = Join-Path $PSScriptRoot "deploy.env"
+if (-not (Test-Path $ConfigFile)) {
+    Write-Host "[ERROR] deploy.env not found at $ConfigFile" -ForegroundColor Red
+    Write-Host "  This file should exist alongside this script." -ForegroundColor Yellow
+    exit 1
+}
+Get-Content $ConfigFile | Where-Object { $_ -match '^\s*[^#]\S+=\S' } | ForEach-Object {
+    $key, $val = $_ -split '=', 2
+    Set-Variable -Name $key.Trim() -Value $val.Trim()
+}
+
+$SERVER_USER  = $SERVER_USER
+$SERVER_IP    = $SERVER_IP
+$DOMAIN       = $SERVER_DOMAIN
 
 # SERVER_PASSWORD is read from the environment variable SKYRAKSYS_SSH_PASSWORD.
 # Set it before running this script:

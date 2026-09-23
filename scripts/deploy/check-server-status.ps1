@@ -21,10 +21,26 @@
 # SERVER:    skyait.skyraksys.com (46.225.73.94)
 # ==============================================================================
 
-$SERVER_IP = "46.225.73.94"
-$SERVER_USER = "Rakesh"
-$SERVER_PASSWORD = 't]%eCt!49!0>'
+# ── Load central deploy config ─────────────────────────────────────────────────
+$ConfigFile = Join-Path $PSScriptRoot "deploy.env"
+if (-not (Test-Path $ConfigFile)) {
+    Write-Host "[ERROR] deploy.env not found at $ConfigFile" -ForegroundColor Red; exit 1
+}
+Get-Content $ConfigFile | Where-Object { $_ -match '^\s*[^#]\S+=\S' } | ForEach-Object {
+    $key, $val = $_ -split '=', 2
+    Set-Variable -Name $key.Trim() -Value $val.Trim()
+}
+$SERVER_IP   = $SERVER_IP
+$SERVER_USER = $SERVER_USER
+
+if (-not $env:SKYRAKSYS_SSH_PASSWORD) {
+    Write-Host "[ERROR] SKYRAKSYS_SSH_PASSWORD env var not set." -ForegroundColor Red
+    Write-Host "  Set it:  `$env:SKYRAKSYS_SSH_PASSWORD = 'your_password'" -ForegroundColor Yellow
+    exit 1
+}
+$SERVER_PASSWORD = $env:SKYRAKSYS_SSH_PASSWORD
 $HOST_KEY = "ssh-ed25519 255 SHA256:HvzjAjWL17DE7CUYaDoU3762yW3hLPrjoSCLTb3RY5k"
+
 
 function Write-Info { Write-Host "[INFO] $args" -ForegroundColor Cyan }
 function Write-Success { Write-Host "[SUCCESS] $args" -ForegroundColor Green }

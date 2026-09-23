@@ -43,14 +43,19 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Configuration
-SERVER_IP="46.225.73.94"
-SERVER_USER="Rakesh"
-SERVER_DOMAIN="skyait.skyraksys.com"
-APP_DIR="/home/Rakesh/skyraksys_hrm"
-GIT_REPO="https://github.com/myhrmapp/skyraksys_hrm.git"
-GIT_BRANCH="skyraksys_hrm"
-BACKUP_DIR="/home/Rakesh/backups"
+# Configuration — loaded from deploy.env (edit that file to retarget to a new server)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEPLOY_ENV="$SCRIPT_DIR/deploy.env"
+if [ ! -f "$DEPLOY_ENV" ]; then
+  echo "[ERROR] deploy.env not found at $DEPLOY_ENV"
+  echo "  This file should exist alongside deploy-from-linux.sh"
+  exit 1
+fi
+# shellcheck disable=SC1090
+set -a; source "$DEPLOY_ENV"; set +a
+
+SERVER_DOMAIN="${SERVER_DOMAIN}"
+BACKUP_DIR="/home/${SERVER_USER}/backups"
 
 # Parse command line arguments
 CLEAN_DEPLOY=false
