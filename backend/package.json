@@ -1,6 +1,6 @@
 {
   "name": "skyraksys-hrm-backend",
-  "version": "1.0.0",
+  "version": "3.1.0",
   "description": "Human Resources Management System Backend API",
   "main": "server.js",
   "scripts": {
