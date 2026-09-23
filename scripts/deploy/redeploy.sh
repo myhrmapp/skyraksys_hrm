@@ -33,7 +33,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1090
 set -a; source "$SCRIPT_DIR/deploy.env"; set +a
-APP_DIR="/home/${SERVER_USER}/${APP_NAME}"
+# APP_DIR comes from deploy.env (default: /opt/skyraksys_hrm)
 COMPOSE="docker compose"
 
 echo "=========================================="

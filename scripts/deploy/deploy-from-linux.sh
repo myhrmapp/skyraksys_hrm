@@ -54,8 +54,10 @@ fi
 # shellcheck disable=SC1090
 set -a; source "$DEPLOY_ENV"; set +a
 
+# All config (SERVER_IP, SERVER_USER, SERVER_DOMAIN, APP_DIR, GIT_REPO, GIT_BRANCH, APP_NAME)
+# is sourced from deploy.env above. APP_DIR is /opt/skyraksys_hrm by default.
 SERVER_DOMAIN="${SERVER_DOMAIN}"
-BACKUP_DIR="/home/${SERVER_USER}/backups"
+BACKUP_DIR="/opt/skyraksys_hrm_backups"
 
 # Parse command line arguments
 CLEAN_DEPLOY=false

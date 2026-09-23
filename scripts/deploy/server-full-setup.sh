@@ -58,10 +58,9 @@ fi
 # shellcheck disable=SC1090
 set -a; source "$DEPLOY_ENV"; set +a
 
-# Derived paths — change SERVER_USER in deploy.env, these update automatically
+# Derived — sourced directly from deploy.env (APP_DIR, GIT_REPO, GIT_BRANCH, SERVER_USER, etc.)
 DOMAIN="${SERVER_DOMAIN}"
-APP_DIR="/home/${SERVER_USER}/${APP_NAME}"
-OLD_APP_DIR="/var/www/skyraksys_hrm"
+OLD_APP_DIR="/var/www/skyraksys_hrm"   # legacy path — cleaned up during setup
 
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
@@ -192,23 +191,29 @@ echo ""
 # ============================================================================
 log_info "Step 3: Cloning repository..."
 
-cd "/home/${SERVER_USER}"
+# Ensure the parent directory exists (e.g. /opt) and is accessible
+PARENT_DIR="$(dirname "$APP_DIR")"
+mkdir -p "$PARENT_DIR"
 
 if [ -d "$APP_DIR" ]; then
-    log_warning "Directory exists, removing..."
+    log_warning "Directory $APP_DIR exists, removing..."
     rm -rf "$APP_DIR"
 fi
 
-log_info "Cloning from GitHub..."
-git clone -b "$GIT_BRANCH" "$GIT_REPO" skyraksys_hrm
+log_info "Cloning from GitHub into $APP_DIR ..."
+git clone -b "$GIT_BRANCH" "$GIT_REPO" "$APP_DIR"
 
 if [ ! -d "$APP_DIR" ]; then
     log_error "Failed to clone repository"
     exit 1
 fi
 
+# Set ownership so the deploy user can manage the app without sudo
+chown -R "${SERVER_USER}:${SERVER_USER}" "$APP_DIR"
+chmod -R 755 "$APP_DIR"
+
 cd "$APP_DIR"
-log_success "Repository cloned successfully"
+log_success "Repository cloned to $APP_DIR"
 echo ""
 
 # ============================================================================
