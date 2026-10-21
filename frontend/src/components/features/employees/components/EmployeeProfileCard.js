@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -22,6 +22,7 @@ import {
 } from '@mui/icons-material';
 import PhotoUploadSimple from '../../../common/PhotoUploadSimple';
 import { buildPhotoUrl } from '../../../../utils/photoUrl';
+import { generateQRCodeDataUrl, buildEmployeeVCard } from '../../../../utils/qrCodeHelper';
 
 const EmployeeProfileCard = ({
   employee,
@@ -43,6 +44,21 @@ const EmployeeProfileCard = ({
   };
 
   const statusColor = getStatusColor(employee.status || 'active');
+
+  const [profileQr, setProfileQr] = useState('');
+
+  useEffect(() => {
+    let isMounted = true;
+    if (employee && (employee.id || employee.employeeId)) {
+      const vcard = buildEmployeeVCard(employee);
+      generateQRCodeDataUrl(vcard, { width: 100, color: '#1A4B8C' }).then((url) => {
+        if (isMounted) setProfileQr(url);
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [employee]);
 
   return (
     <Fade in={true}>
@@ -203,6 +219,44 @@ const EmployeeProfileCard = ({
                 )}
               </Stack>
             </Grid>
+
+            {/* Employee QR Code */}
+            {!editing && (
+              <Grid item xs={12} sm="auto" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pl: { sm: 2 } }}>
+                <Tooltip title="Scan to save employee contact card (vCard)">
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      bgcolor: '#fff',
+                      borderRadius: 3,
+                      border: '1px solid rgba(0,0,0,0.08)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                      textAlign: 'center',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {profileQr ? (
+                      <img
+                        src={profileQr}
+                        alt="Employee QR Code"
+                        width={90}
+                        height={90}
+                        style={{ display: 'block', borderRadius: 4 }}
+                      />
+                    ) : (
+                      <Box sx={{ width: 90, height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Typography variant="caption" color="text.secondary">Loading QR...</Typography>
+                      </Box>
+                    )}
+                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#1A4B8C', mt: 0.5, letterSpacing: '0.05em' }}>
+                      SCAN CONTACT
+                    </Typography>
+                  </Box>
+                </Tooltip>
+              </Grid>
+            )}
           </Grid>
         </CardContent>
       </Card>

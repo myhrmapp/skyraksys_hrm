@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon, Print as PrintIcon, Badge as BadgeIcon } from '@mui/icons-material';
 import { buildPhotoUrl } from '../../../../utils/photoUrl';
+import { generateQRCodeDataUrl, buildEmployeeVCard } from '../../../../utils/qrCodeHelper';
 import api from '../../../../services/api.service';
 
 // Default branding — used as fallback if API call fails
@@ -30,24 +31,12 @@ const DEFAULT_SETTINGS = {
 };
 
 /** Generate the self-contained inline-CSS HTML for the ID card. No MUI needed. */
-const buildCardHTML = (employee, cfg) => {
+const buildCardHTML = (employee, cfg, qrSrc = '') => {
   const fullName  = `${employee?.firstName || ''} ${employee?.lastName || ''}`.trim();
   const empId     = employee?.employeeId || '—';
   const dept      = employee?.department?.name || employee?.departmentName || '';
   const desig     = employee?.position?.title  || employee?.positionTitle  || '';
   const photoSrc  = buildPhotoUrl(employee?.photoUrl) || '';
-  const vcard = `BEGIN:VCARD
-VERSION:3.0
-N:${employee?.lastName || ''};${employee?.firstName || ''};;;
-FN:${employee?.firstName || ''} ${employee?.lastName || ''}
-ORG:Skyraksys
-TITLE:${employee?.position?.title || ''}
-TEL;TYPE=WORK,VOICE:${employee?.contactNumber || ''}
-EMAIL;TYPE=PREF,INTERNET:${employee?.user?.email || ''}
-END:VCARD`;
-  const qrValue   = encodeURIComponent(vcard);
-  const qrColor   = cfg.accentColor.replace('#', '');
-  const qrSrc     = `https://api.qrserver.com/v1/create-qr-code/?data=${qrValue}&size=140x140&color=${qrColor}&bgcolor=FFFFFF&margin=4`;
 
   const gradient  = `linear-gradient(175deg, ${cfg.primaryColor} 0%, ${cfg.accentColor} 100%)`;
   const topStripe = `linear-gradient(90deg, ${cfg.primaryColor}, ${cfg.accentColor})`;
@@ -156,24 +145,29 @@ END:VCARD`;
 };
 
 // ─── Preview card (MUI version shown in modal) ───────────────────────────────
-export const PreviewCard = ({ employee, cfg }) => {
+export const PreviewCard = ({ employee, cfg, qrSrc }) => {
   const fullName = `${employee?.firstName || ''} ${employee?.lastName || ''}`.trim();
   const empId    = employee?.employeeId || '—';
   const dept     = employee?.department?.name || employee?.departmentName || '';
   const desig    = employee?.position?.title  || employee?.positionTitle  || '';
   const photoSrc = buildPhotoUrl(employee?.photoUrl) || '';
-  const vcard = `BEGIN:VCARD
-VERSION:3.0
-N:${employee?.lastName || ''};${employee?.firstName || ''};;;
-FN:${employee?.firstName || ''} ${employee?.lastName || ''}
-ORG:Skyraksys
-TITLE:${employee?.position?.title || ''}
-TEL;TYPE=WORK,VOICE:${employee?.contactNumber || ''}
-EMAIL;TYPE=PREF,INTERNET:${employee?.user?.email || ''}
-END:VCARD`;
-  const qrValue  = encodeURIComponent(vcard);
-  const qrColor  = cfg.accentColor.replace('#', '');
-  const qrSrc    = `https://api.qrserver.com/v1/create-qr-code/?data=${qrValue}&size=130x130&color=${qrColor}&bgcolor=FFFFFF&margin=4`;
+
+  const [localQr, setLocalQr] = useState(qrSrc || '');
+
+  useEffect(() => {
+    if (qrSrc) {
+      setLocalQr(qrSrc);
+      return;
+    }
+    let isMounted = true;
+    const vcard = buildEmployeeVCard(employee);
+    generateQRCodeDataUrl(vcard, { color: cfg.accentColor, width: 140 }).then((url) => {
+      if (isMounted) setLocalQr(url);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [employee, cfg.accentColor, qrSrc]);
 
   return (
     <Box sx={{
@@ -233,7 +227,13 @@ END:VCARD`;
             <Box sx={{ textAlign: 'center' }}>
               <Typography sx={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase', mb: 1 }}>Employee QR Code</Typography>
               <Box sx={{ border: '2px solid rgba(0,0,0,0.08)', borderRadius: 2, p: 0.5, display: 'inline-block', bgcolor: '#fff' }}>
-                <img src={qrSrc} alt="QR Code" width={110} height={110} style={{ display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+                {localQr ? (
+                  <img src={localQr} alt="QR Code" width={110} height={110} style={{ display: 'block' }} />
+                ) : (
+                  <Box sx={{ width: 110, height: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Typography sx={{ fontSize: '0.65rem', color: '#999' }}>Loading...</Typography>
+                  </Box>
+                )}
               </Box>
             </Box>
           )}
@@ -253,6 +253,7 @@ END:VCARD`;
 // ─── Modal ───────────────────────────────────────────────────────────────────
 const IDCardModal = ({ open, onClose, employee }) => {
   const [settings, setSettings] = useState({});
+  const [qrSrc, setQrSrc] = useState('');
 
   // Load customizations from backend API
   useEffect(() => {
@@ -271,13 +272,26 @@ const IDCardModal = ({ open, onClose, employee }) => {
 
   const cfg = { ...DEFAULT_SETTINGS, ...settings };
 
+  useEffect(() => {
+    let isMounted = true;
+    if (open && employee) {
+      const vcard = buildEmployeeVCard(employee);
+      generateQRCodeDataUrl(vcard, { color: cfg.accentColor, width: 140 }).then((url) => {
+        if (isMounted) setQrSrc(url);
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [open, employee, cfg.accentColor]);
+
   const [printing, setPrinting] = useState(false);
 
   const handlePrint = () => {
     setPrinting(true);
 
     // Build fully inline-styled HTML — no external CSS dependency
-    const cardHTML = buildCardHTML(employee, cfg);
+    const cardHTML = buildCardHTML(employee, cfg, qrSrc);
     const name = `${employee?.firstName || ''} ${employee?.lastName || ''}`.trim();
 
     const win = window.open('', '_blank', 'width=500,height=760');
@@ -361,7 +375,7 @@ const IDCardModal = ({ open, onClose, employee }) => {
       </DialogTitle>
 
       <DialogContent sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-        <PreviewCard employee={employee} cfg={cfg} />
+        <PreviewCard employee={employee} cfg={cfg} qrSrc={qrSrc} />
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2.5, gap: 1, justifyContent: 'center' }}>

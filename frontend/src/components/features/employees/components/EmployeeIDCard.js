@@ -5,9 +5,10 @@
  * Uses a QR code API (no extra npm package needed).
  * Settings are passed as props from the admin customization panel.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import { buildPhotoUrl } from '../../../../utils/photoUrl';
+import { generateQRCodeDataUrl, buildEmployeeVCard } from '../../../../utils/qrCodeHelper';
 
 const DEFAULT_SETTINGS = {
   primaryColor: '#1A4B8C',       // Brand navy blue
@@ -29,19 +30,18 @@ const EmployeeIDCard = React.forwardRef(({ employee, settings = {} }, ref) => {
   const designation = employee?.position?.title || employee?.positionTitle || '';
   const photoSrc = buildPhotoUrl(employee?.photoUrl);
 
-  // QR code encodes the employee as a vCard (Option B)
-  const vcard = `BEGIN:VCARD
-VERSION:3.0
-N:${employee?.lastName || ''};${employee?.firstName || ''};;;
-FN:${employee?.firstName || ''} ${employee?.lastName || ''}
-ORG:Skyraksys
-TITLE:${employee?.position?.title || ''}
-TEL;TYPE=WORK,VOICE:${employee?.contactNumber || ''}
-EMAIL;TYPE=PREF,INTERNET:${employee?.user?.email || ''}
-END:VCARD`;
+  const [qrSrc, setQrSrc] = useState('');
 
-  const qrValue = encodeURIComponent(vcard);
-  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?data=${qrValue}&size=130x130&color=${cfg.primaryColor.replace('#', '')}&bgcolor=FFFFFF&margin=4`;
+  useEffect(() => {
+    let isMounted = true;
+    const vcard = buildEmployeeVCard(employee);
+    generateQRCodeDataUrl(vcard, { color: cfg.primaryColor, width: 140 }).then((dataUrl) => {
+      if (isMounted) setQrSrc(dataUrl);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [employee, cfg.primaryColor]);
 
   return (
     <Box
@@ -214,14 +214,19 @@ END:VCARD`;
                   bgcolor: '#fff'
                 }}
               >
-                <img
-                  src={qrSrc}
-                  alt="QR Code"
-                  width={110}
-                  height={110}
-                  style={{ display: 'block' }}
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
+                {qrSrc ? (
+                  <img
+                    src={qrSrc}
+                    alt="QR Code"
+                    width={110}
+                    height={110}
+                    style={{ display: 'block' }}
+                  />
+                ) : (
+                  <Box sx={{ width: 110, height: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Typography sx={{ fontSize: '0.65rem', color: '#999' }}>Loading...</Typography>
+                  </Box>
+                )}
               </Box>
             </Box>
           )}

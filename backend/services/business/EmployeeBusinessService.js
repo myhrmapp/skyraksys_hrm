@@ -137,7 +137,9 @@ class EmployeeBusinessService extends BaseBusinessService {
 
     // Ensure we don't accidentally try to update salary structure via this endpoint
     // Salary updates MUST go through the dedicated updateCompensation endpoint
+    // Process employee fields
     const employeeData = { ...data };
+    const incomingSalary = employeeData.salaryStructure || employeeData.salary;
     if (employeeData.salary) {
       delete employeeData.salary;
     }
@@ -148,6 +150,11 @@ class EmployeeBusinessService extends BaseBusinessService {
     // Update employee fields
     if (Object.keys(employeeData).length > 0) {
       await this.employeeDataService.update(id, employeeData);
+    }
+
+    // If salary structure is provided in update, update compensation too
+    if (incomingSalary && ['admin', 'hr'].includes(currentUser.role)) {
+      await this.updateCompensation(id, incomingSalary, currentUser);
     }
     
     // If email changed, update user account
@@ -188,23 +195,38 @@ class EmployeeBusinessService extends BaseBusinessService {
     }
 
     // Map validated API fields to SalaryStructure model fields
-    // Frontend sends nested { salary: { basicSalary, allowances: {...}, deductions: {...} } }
-    const salary = salaryData.salary || salaryData;
+    // Handles both nested frontend format and flat database format
+    const salary = salaryData.salary || salaryData.salaryStructure || salaryData;
+    const isAllowancesObj = salary.allowances && typeof salary.allowances === 'object';
+    const isDeductionsObj = salary.deductions && typeof salary.deductions === 'object';
+
     const mappedData = {
-      basicSalary: salary.basicSalary,
-      hra: salary.allowances?.hra || 0,
-      allowances: (
-        parseFloat(salary.allowances?.transport || 0) +
-        parseFloat(salary.allowances?.medical || 0) +
-        parseFloat(salary.allowances?.food || 0) +
-        parseFloat(salary.allowances?.communication || 0) +
-        parseFloat(salary.allowances?.special || 0) +
-        parseFloat(salary.allowances?.other || 0)
-      ),
-      pfContribution: salary.deductions?.pf || 0,
-      tds: salary.deductions?.incomeTax || 0,
-      professionalTax: salary.deductions?.professionalTax || 0,
-      otherDeductions: salary.deductions?.other || 0,
+      basicSalary: Number(salary.basicSalary) || 0,
+      hra: salary.hra !== undefined
+        ? Number(salary.hra) || 0
+        : (isAllowancesObj ? Number(salary.allowances.hra) || 0 : 0),
+      allowances: isAllowancesObj
+        ? (
+            parseFloat(salary.allowances?.transport || 0) +
+            parseFloat(salary.allowances?.medical || 0) +
+            parseFloat(salary.allowances?.food || 0) +
+            parseFloat(salary.allowances?.communication || 0) +
+            parseFloat(salary.allowances?.special || 0) +
+            parseFloat(salary.allowances?.other || 0)
+          )
+        : (Number(salary.allowances) || 0),
+      pfContribution: salary.pfContribution !== undefined
+        ? Number(salary.pfContribution) || 0
+        : (isDeductionsObj ? Number(salary.deductions.pf || salary.deductions.pfContribution) || 0 : 0),
+      tds: salary.tds !== undefined
+        ? Number(salary.tds) || 0
+        : (isDeductionsObj ? Number(salary.deductions.incomeTax || salary.deductions.tds) || 0 : 0),
+      professionalTax: salary.professionalTax !== undefined
+        ? Number(salary.professionalTax) || 0
+        : (isDeductionsObj ? Number(salary.deductions.professionalTax) || 0 : 0),
+      otherDeductions: salary.otherDeductions !== undefined
+        ? Number(salary.otherDeductions) || 0
+        : (isDeductionsObj ? Number(salary.deductions.other || salary.deductions.otherDeductions) || 0 : 0),
       currency: salary.currency || 'INR',
       effectiveFrom: salary.effectiveFrom || require('../../utils/dateUtils').formatDateLocal(),
       isActive: true,

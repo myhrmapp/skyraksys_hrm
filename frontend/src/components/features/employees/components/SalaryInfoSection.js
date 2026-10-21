@@ -50,7 +50,7 @@ const SalaryInfoSection = ({
           </IconButton>
         </Box>
 
-        {showSalary ? (
+        {(showSalary || editing) ? (
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <InfoField
@@ -69,9 +69,11 @@ const SalaryInfoSection = ({
             <Grid item xs={12} sm={6}>
               <InfoField
                 label="Total Allowances (HRA + Other)"
-                value={totalAllowances}
-                editing={false} // Calculated field
+                value={editing ? (salary.allowances !== undefined ? salary.allowances : totalAllowances) : totalAllowances}
+                editing={editing}
                 type="number"
+                testId="salary-allowances"
+                onChange={(val) => onChange('salaryStructure.allowances', val)}
                 InputProps={{
                   startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>
                 }}
@@ -81,9 +83,11 @@ const SalaryInfoSection = ({
             <Grid item xs={12} sm={6}>
               <InfoField
                 label="Total Deductions (PF, TDS, etc.)"
-                value={totalDeductions}
-                editing={false} // Calculated field
+                value={editing ? (salary.pfContribution !== undefined ? salary.pfContribution : totalDeductions) : totalDeductions}
+                editing={editing}
                 type="number"
+                testId="salary-deductions"
+                onChange={(val) => onChange('salaryStructure.pfContribution', val)}
                 InputProps={{
                   startAdornment: <InputAdornment position="start">{salary.currency || CURRENCY_SYMBOL}</InputAdornment>
                 }}
