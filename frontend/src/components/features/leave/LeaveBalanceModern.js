@@ -143,6 +143,13 @@ const LeaveBalanceModern = () => {
     }
   };
 
+  const extractErrorMessage = (err, defaultMsg) => {
+    if (err.response?.status === 409) {
+      return 'A leave balance for this employee and leave type already exists for the selected year.';
+    }
+    return err.response?.data?.message || err.response?.data?.error || err.message || defaultMsg;
+  };
+
   const handleBulkInit = async () => {
     if (Object.keys(bulkInitData).length === 0) {
       setError('Please set allocations for at least one leave type');
@@ -175,7 +182,7 @@ const LeaveBalanceModern = () => {
       setBulkInitData({});
       await loadData();
     } catch (err) {
-      setError('Failed to initialize leave balances: ' + err.message);
+      setError(extractErrorMessage(err, 'Failed to initialize leave balances'));
     } finally {
       setLoading(false);
     }
@@ -205,7 +212,7 @@ const LeaveBalanceModern = () => {
       });
       await loadData();
     } catch (err) {
-      setError('Failed to create leave balance: ' + err.message);
+      setError(extractErrorMessage(err, 'Failed to create leave balance'));
     } finally {
       setLoading(false);
     }
@@ -224,7 +231,7 @@ const LeaveBalanceModern = () => {
       setEditData({});
       await loadData();
     } catch (err) {
-      setError('Failed to update leave balance: ' + err.message);
+      setError(extractErrorMessage(err, 'Failed to update leave balance'));
     } finally {
       setLoading(false);
     }
@@ -250,7 +257,7 @@ const LeaveBalanceModern = () => {
       setBalanceToDelete(null);
       await loadData();
     } catch (err) {
-      setError('Failed to delete leave balance: ' + err.message);
+      setError(extractErrorMessage(err, 'Failed to delete leave balance'));
     } finally {
       setLoading(false);
     }

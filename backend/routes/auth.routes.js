@@ -535,6 +535,13 @@ router.put('/users/:userId/lock',
         lockoutUntil: null
       });
 
+      if (isLocked) {
+        await RefreshToken.update(
+          { isRevoked: true, revokedAt: new Date() },
+          { where: { userId, isRevoked: false } }
+        );
+      }
+
       res.json({
         success: true,
         message: `User account ${isLocked ? 'locked' : 'unlocked'} successfully`,

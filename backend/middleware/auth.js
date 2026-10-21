@@ -94,13 +94,16 @@ const authenticateToken = async (req, res, next) => {
       },
     });
 
-    if (!user || !user.isActive) {
+    if (!user || !user.isActive || user.isLocked) {
       LogHelper.logAuthEvent('token_invalid_user', false, {
-        reason: !user ? 'User not found' : 'User is inactive',
+        reason: !user ? 'User not found' : (user.isLocked ? 'User account is locked' : 'User is inactive'),
         userId: decoded.id,
         email: decoded.email
       }, req);
-      return res.status(401).json({ success: false, message: 'User not found or is inactive.' });
+      return res.status(user?.isLocked ? 403 : 401).json({
+        success: false,
+        message: user?.isLocked ? 'Account is locked. Please contact your administrator.' : 'User not found or is inactive.'
+      });
     }
 
     // Log successful authentication

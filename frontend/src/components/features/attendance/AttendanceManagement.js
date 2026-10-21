@@ -345,17 +345,22 @@ export default function AttendanceManagement() {
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <Autocomplete
-              options={employeeList}
-              getOptionLabel={(option) =>
-                typeof option === 'string'
-                  ? option
-                  : `${option.firstName} ${option.lastName} (${option.employeeId})`
-              }
-              value={employeeList.find(e => e.id === markForm.employeeId) || null}
+              options={Array.isArray(employeeList) ? employeeList : []}
+              getOptionLabel={(option) => {
+                if (!option) return '';
+                if (typeof option === 'string') return option;
+                const name = `${option.firstName || ''} ${option.lastName || ''}`.trim();
+                const code = option.employeeId || option.id || '';
+                return code ? `${name || 'Employee'} (${code})` : name || 'Employee';
+              }}
+              value={(Array.isArray(employeeList) ? employeeList : []).find(e => e.id === markForm.employeeId || e.employeeId === markForm.employeeId) || null}
               onChange={(_, newVal) => {
                 setMarkForm({ ...markForm, employeeId: newVal?.id || '' });
               }}
-              isOptionEqualToValue={(option, value) => option.id === value?.id}
+              isOptionEqualToValue={(option, value) => {
+                if (!option || !value) return false;
+                return option.id === value.id || (option.employeeId && option.employeeId === value.employeeId);
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -363,7 +368,10 @@ export default function AttendanceManagement() {
                   required
                   fullWidth
                   placeholder="Search by name or ID..."
-                  inputProps={{ 'data-testid': 'attendance-employee-select' }}
+                  inputProps={{
+                    ...params.inputProps,
+                    'data-testid': 'attendance-employee-select'
+                  }}
                 />
               )}
               freeSolo={false}
