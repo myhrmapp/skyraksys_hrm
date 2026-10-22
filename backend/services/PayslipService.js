@@ -604,7 +604,8 @@ class PayslipService {
     await payslip.update({
       status: 'finalized',
       finalizedAt: new Date(),
-      approvedBy: currentUser.id
+      finalizedBy: currentUser.id,
+      isLocked: true
     });
 
     return payslip;
@@ -672,7 +673,8 @@ class PayslipService {
           await payslip.update({
             status: 'finalized',
             finalizedAt: new Date(),
-            approvedBy: currentUser.id
+            finalizedBy: currentUser.id,
+            isLocked: true
           }, { transaction });
           results.successful.push({ id, payslipNumber: payslip.payslipNumber });
         } catch (error) {

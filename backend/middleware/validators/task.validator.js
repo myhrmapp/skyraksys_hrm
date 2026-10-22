@@ -17,14 +17,18 @@ const taskSchema = {
     availableToAll: Joi.boolean().default(false),
     status: Joi.string().valid('Not Started', 'In Progress', 'Completed', 'On Hold').default('Not Started'),
     priority: Joi.string().valid('Low', 'Medium', 'High', 'Critical').default('Medium'),
-    dueDate: Joi.date().iso().optional().allow(null),
-    estimatedHours: Joi.number().positive().precision(2).optional().allow(null),
+    dueDate: Joi.date().iso().optional().allow(null, ''),
+    estimatedHours: Joi.number().min(0).precision(2).optional().allow(null, ''),
+    actualHours: Joi.number().min(0).precision(2).optional().allow(null, ''),
+    progress: Joi.number().min(0).max(100).optional().allow(null),
     isActive: Joi.boolean().default(true)
   }),
   
   update: Joi.object({
+    id: Joi.string().uuid().optional(),
     name: Joi.string().min(2).max(200).optional(),
-    description: Joi.string().max(1000).optional(),
+    description: Joi.string().max(1000).optional().allow('', null),
+    projectId: Joi.string().uuid().optional(),
     assignedTo: Joi.alternatives().try(
       Joi.string().uuid(),
       Joi.string().allow(''),
@@ -34,10 +38,11 @@ const taskSchema = {
     status: Joi.string().valid('Not Started', 'In Progress', 'Completed', 'On Hold').optional(),
     priority: Joi.string().valid('Low', 'Medium', 'High', 'Critical').optional(),
     dueDate: Joi.date().iso().optional().allow(null, ''),
-    estimatedHours: Joi.number().positive().precision(2).optional(),
-    actualHours: Joi.number().min(0).precision(2).optional(),
+    estimatedHours: Joi.number().min(0).precision(2).optional().allow(null, ''),
+    actualHours: Joi.number().min(0).precision(2).optional().allow(null, ''),
+    progress: Joi.number().min(0).max(100).optional().allow(null),
     isActive: Joi.boolean().optional()
-  })
+  }).unknown(true)
 };
 
 module.exports = { taskSchema };

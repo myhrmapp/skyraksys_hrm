@@ -64,7 +64,7 @@ import {
   MonetizationOn as PaidIcon,
   HourglassEmpty as DraftIcon
 } from '@mui/icons-material';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { useAuth } from '../../../contexts/AuthContext';
 import http from '../../../http-common';
@@ -86,6 +86,7 @@ const ModernPayrollManagement = () => {
   const { enqueueSnackbar } = useSnackbar();
   const { isAdmin, isHR } = useAuth();
   const { dialogProps, confirm } = useConfirmDialog();
+  const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState(0);
   const [paymentMethod] = useState('');
@@ -328,15 +329,24 @@ const ModernPayrollManagement = () => {
       const response = await http.post('/payslips/generate', payload);
 
       if (response.data.success) {
-        enqueueSnackbar(
-          response.data.message || 'Payslips generated successfully',
-          { variant: 'success' }
-        );
-        setActiveTab(0); // Return to Overview after generation
+        const count = response.data.data?.count;
+        if (count === 0) {
+          enqueueSnackbar(
+            response.data.message || 'Generated 0 payslips. Verify employee salary structures.',
+            { variant: 'warning' }
+          );
+        } else {
+          enqueueSnackbar(
+            response.data.message || 'Payslips generated successfully',
+            { variant: 'success' }
+          );
+          setActiveTab(2); // Automatically switch to Process Payments tab so drafts are immediately visible!
+        }
         setSelectedEmployees([]);
         setOvertimeOverrides({});
         setValidationResults(null);
         refetchPayslips();
+        queryClient.invalidateQueries({ queryKey: ['payslips'] });
       } else {
         enqueueSnackbar(response.data.message || 'Generation failed', { variant: 'error' });
       }
@@ -367,12 +377,22 @@ const ModernPayrollManagement = () => {
             departmentId: filters.departmentId || undefined
           });
           if (response.data.success) {
-            enqueueSnackbar('Payslips generated for all employees', { variant: 'success' });
+            const count = response.data.data?.count;
+            if (count === 0) {
+              enqueueSnackbar(
+                response.data.message || 'Generated 0 payslips. Verify employee salary structures.',
+                { variant: 'warning' }
+              );
+            } else {
+              enqueueSnackbar(response.data.message || 'Payslips generated for all employees', { variant: 'success' });
+              setActiveTab(2);
+            }
             refetchPayslips();
+            queryClient.invalidateQueries({ queryKey: ['payslips'] });
           }
         } catch (error) {
           console.error('Generate all error:', error);
-          enqueueSnackbar('Failed to generate payslips', { variant: 'error' });
+          enqueueSnackbar(error.response?.data?.message || 'Failed to generate payslips', { variant: 'error' });
         } finally {
           setOperationLoading(false);
         }
@@ -386,12 +406,13 @@ const ModernPayrollManagement = () => {
       const response = await http.put(`/payslips/${payslipId}/finalize`);
 
       if (response.data.success) {
-        enqueueSnackbar('Payslip finalized successfully', { variant: 'success' });
+        enqueueSnackbar(response.data.message || 'Payslip finalized successfully', { variant: 'success' });
         refetchPayslips();
+        queryClient.invalidateQueries({ queryKey: ['payslips'] });
       }
     } catch (error) {
       console.error('Finalize error:', error);
-      enqueueSnackbar('Failed to finalize payslip', { variant: 'error' });
+      enqueueSnackbar(error.response?.data?.message || 'Failed to finalize payslip', { variant: 'error' });
     } finally {
       setOperationLoading(false);
     }
@@ -403,12 +424,13 @@ const ModernPayrollManagement = () => {
       const response = await http.put(`/payslips/${payslipId}/mark-paid`);
 
       if (response.data.success) {
-        enqueueSnackbar('Payslip marked as paid', { variant: 'success' });
+        enqueueSnackbar(response.data.message || 'Payslip marked as paid', { variant: 'success' });
         refetchPayslips();
+        queryClient.invalidateQueries({ queryKey: ['payslips'] });
       }
     } catch (error) {
       console.error('Mark paid error:', error);
-      enqueueSnackbar('Failed to mark as paid', { variant: 'error' });
+      enqueueSnackbar(error.response?.data?.message || 'Failed to mark as paid', { variant: 'error' });
     } finally {
       setOperationLoading(false);
     }
@@ -460,6 +482,33 @@ const ModernPayrollManagement = () => {
     } catch (error) {
       console.error('Export error:', error);
       enqueueSnackbar('Failed to export Excel', { variant: 'error' });
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await http.get('/payslips/reports/export', {
+        params: {
+          month: filters.month,
+          year: filters.year,
+          format: 'csv'
+        },
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/csv' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `payslips-${filters.month}-${filters.year}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      enqueueSnackbar('CSV exported successfully', { variant: 'success' });
+    } catch (error) {
+      console.error('Export error:', error);
+      enqueueSnackbar('Failed to export CSV', { variant: 'error' });
     }
   };
 
@@ -530,6 +579,7 @@ const ModernPayrollManagement = () => {
             }
             setSelectedPayslipIds([]);
             refetchPayslips();
+            queryClient.invalidateQueries({ queryKey: ['payslips'] });
           }
         } catch (error) {
           console.error('Bulk finalize error:', error);
@@ -578,6 +628,7 @@ const ModernPayrollManagement = () => {
             }
             setSelectedPayslipIds([]);
             refetchPayslips();
+            queryClient.invalidateQueries({ queryKey: ['payslips'] });
           }
         } catch (error) {
           console.error('Bulk mark paid error:', error);
@@ -623,6 +674,7 @@ const ModernPayrollManagement = () => {
             }
             setSelectedPayslipIds([]);
             refetchPayslips();
+            queryClient.invalidateQueries({ queryKey: ['payslips'] });
           }
         } catch (error) {
           console.error('Error deleting payslips:', error);
@@ -1185,11 +1237,21 @@ const ModernPayrollManagement = () => {
   // PAYSLIPS TABLE
   // =====================================================
 
-  const PayslipsTable = ({ statusFilter = null, title = null }) => (
+  const PayslipsTable = ({ statusFilter = null, title = null, isReportsTab = false }) => (
     <Paper>
       {title && (
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
           <Typography variant="h6">{title}</Typography>
+          {isReportsTab && (
+            <Stack direction="row" spacing={1}>
+              <Button size="small" variant="outlined" startIcon={<ExportIcon />} onClick={handleExportExcel}>
+                Export Excel
+              </Button>
+              <Button size="small" variant="outlined" startIcon={<DownloadIcon />} onClick={handleExportCSV}>
+                Export CSV
+              </Button>
+            </Stack>
+          )}
         </Box>
       )}
       <Box sx={{ p: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -1423,10 +1485,10 @@ const ModernPayrollManagement = () => {
                         <ViewIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Download PDF">
+                    <Tooltip title="Download Payslip PDF">
                       <IconButton
                         size="small"
-                        aria-label="Download PDF"
+                        aria-label="Download Payslip PDF"
                         onClick={() => handleDownloadPDF(payslip.id, payslip.payslipNumber)}
                       >
                         <DownloadIcon fontSize="small" />
@@ -1728,6 +1790,122 @@ const ModernPayrollManagement = () => {
     </Dialog>
   );
 
+  // =====================================================
+  // TAB 3: REPORTS TAB
+  // =====================================================
+
+  const ReportsTab = () => {
+    const totalGross = payslips.reduce((sum, p) => sum + (parseFloat(p.grossEarnings) || 0), 0);
+    const totalDeductions = payslips.reduce((sum, p) => sum + (parseFloat(p.totalDeductions) || 0), 0);
+    const totalNet = payslips.reduce((sum, p) => sum + (parseFloat(p.netPay) || 0), 0);
+    const finalizedCount = payslips.filter(p => p.status === 'finalized').length;
+    const paidCount = payslips.filter(p => p.status === 'paid').length;
+    const draftCount = payslips.filter(p => p.status === 'draft').length;
+
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {/* Reports Header & Bulk Period Exports */}
+        <Card sx={{ p: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            justifyContent="space-between"
+            alignItems={{ xs: 'flex-start', md: 'center' }}
+            spacing={2}
+          >
+            <Box>
+              <Typography variant="h5" fontWeight={700}>Payroll Summary Reports</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Generate and export period-wide payroll reports, employee registers, and financial summaries for {periodLabel}
+              </Typography>
+            </Box>
+            <Stack direction="row" spacing={1.5} flexWrap="wrap">
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<ExportIcon />}
+                onClick={handleExportExcel}
+                data-testid="payroll-report-export-excel-btn"
+              >
+                Export Period Report (Excel)
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<DownloadIcon />}
+                onClick={handleExportCSV}
+                data-testid="payroll-report-export-csv-btn"
+              >
+                Export Period Report (CSV)
+              </Button>
+            </Stack>
+          </Stack>
+        </Card>
+
+        {/* Period Financial KPI Cards */}
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #6366f1' }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase">
+                Period Payslips
+              </Typography>
+              <Typography variant="h4" fontWeight={800} color="primary.main" sx={{ mt: 0.5 }}>
+                {payslips.length}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {draftCount} Draft · {finalizedCount} Finalized · {paidCount} Paid
+              </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #3b82f6' }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase">
+                Gross Earnings
+              </Typography>
+              <Typography variant="h4" fontWeight={800} color="info.main" sx={{ mt: 0.5 }}>
+                {formatCurrency(totalGross)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Company gross payroll for {periodLabel}
+              </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #ef4444' }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase">
+                Total Deductions
+              </Typography>
+              <Typography variant="h4" fontWeight={800} color="error.main" sx={{ mt: 0.5 }}>
+                {formatCurrency(totalDeductions)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                PF, PT, TDS &amp; statutory deductions
+              </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #10b981' }}>
+              <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase">
+                Net Payout
+              </Typography>
+              <Typography variant="h4" fontWeight={800} color="success.main" sx={{ mt: 0.5 }}>
+                {formatCurrency(totalNet)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Total disbursed / net payable
+              </Typography>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Detailed Payslips Breakdown Table */}
+        <PayslipsTable
+          title="Payslips — Reports"
+          isReportsTab={true}
+        />
+      </Box>
+    );
+  };
+
   // Main Render
   if (!isAdmin && !isHR) {
     return (
@@ -1765,11 +1943,7 @@ const ModernPayrollManagement = () => {
             title="Payslips — Payment Processing"
           />
         )}
-        {activeTab === 3 && (
-          <PayslipsTable
-            title="Payslips — Reports"
-          />
-        )}
+        {activeTab === 3 && <ReportsTab />}
       </Box>
 
       <ViewPayslipDialog />

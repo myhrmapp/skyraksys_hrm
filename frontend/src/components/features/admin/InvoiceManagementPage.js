@@ -26,9 +26,11 @@ import {
   Tabs,
   Tab,
   TextField,
-  Typography
+  Typography,
+  InputAdornment,
+  Tooltip
 } from '@mui/material';
-import { Add, Delete, Edit, Inbox as InboxIcon, Refresh, PictureAsPdf } from '@mui/icons-material';
+import { Add, Delete, Edit, Inbox as InboxIcon, Refresh, PictureAsPdf, Visibility, VisibilityOff, HelpOutline, Lock } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import { invoiceService } from '../../../services/invoice.service';
 import http from '../../../http-common';
@@ -102,6 +104,8 @@ const InvoiceManagementPage = () => {
   const [filters, setFilters] = useState({ month: '', year: '', status: '' });
   const [secretPhrase, setSecretPhrase] = useState('');
   const [sensitiveDataHidden, setSensitiveDataHidden] = useState(false);
+  const [showSecretPhrase, setShowSecretPhrase] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [phraseForm, setPhraseForm] = useState({
     password: '',
     currentPhrase: '',
@@ -415,7 +419,12 @@ const InvoiceManagementPage = () => {
             India-only vendor billing for permanent and contractor employees based on supported hours
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Tooltip title="Data Vault & Encryption Guide">
+            <IconButton color="primary" onClick={() => setHelpOpen(true)} aria-label="Security Help">
+              <HelpOutline />
+            </IconButton>
+          </Tooltip>
           <Button variant="outlined" onClick={openPhraseDialog}>Change Phrase</Button>
           <Button startIcon={<Refresh />} onClick={loadData} disabled={loading}>Refresh</Button>
         </Stack>
@@ -434,11 +443,25 @@ const InvoiceManagementPage = () => {
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
         <TextField
           fullWidth
-          type="password"
+          type={showSecretPhrase ? 'text' : 'password'}
           label="HR Secret Phrase"
           placeholder="Enter the shared invoice secret phrase"
           value={secretPhrase}
           onChange={(e) => setSecretPhrase(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle secret phrase visibility"
+                  onClick={() => setShowSecretPhrase(!showSecretPhrase)}
+                  edge="end"
+                  size="small"
+                >
+                  {showSecretPhrase ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                </IconButton>
+              </InputAdornment>
+            )
+          }}
         />
         <Button variant="contained" onClick={unlockInvoiceData} disabled={loading} sx={{ minWidth: 160 }}>
           Unlock Data
@@ -776,6 +799,33 @@ const InvoiceManagementPage = () => {
         <DialogActions>
           <Button onClick={() => setPhraseDialogOpen(false)}>Cancel</Button>
           <Button variant="contained" onClick={rotateSecretPhrase}>Update Phrase</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={helpOpen} onClose={() => setHelpOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Lock color="primary" /> Invoice Data Vault &amp; Security Guide
+        </DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body1" paragraph>
+            <strong>Why is a Secret Phrase required?</strong>
+          </Typography>
+          <Typography variant="body2" color="text.secondary" paragraph>
+            To protect sensitive financial records and contractor billing rates, invoice items and rates are encrypted at rest using AES-256 GCM encryption.
+          </Typography>
+          <Typography variant="body1" paragraph>
+            <strong>Key Features:</strong>
+          </Typography>
+          <Typography variant="body2" component="div">
+            <ul>
+              <li><strong>Unlock Data:</strong> Enter your organization&apos;s designated HR secret passphrase and click &quot;Unlock Data&quot; to decrypt and view sensitive hourly billing rates and invoice line items.</li>
+              <li><strong>Change Phrase:</strong> HR administrators can rotate the secret passphrase at any time using their HR account password and current passphrase. All existing stored invoices will be automatically re-encrypted with the new key.</li>
+              <li><strong>Locked Mode:</strong> When locked, sensitive amounts are masked from view for standard viewing compliance.</li>
+            </ul>
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setHelpOpen(false)} variant="contained">Got it</Button>
         </DialogActions>
       </Dialog>
 

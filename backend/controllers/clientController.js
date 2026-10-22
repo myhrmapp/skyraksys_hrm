@@ -1,9 +1,27 @@
 const clientDataService = require('../services/data/ClientDataService');
 
+const sanitizeClientData = (data) => {
+  const sanitized = { ...data };
+  const textFields = ['companyName', 'contactPerson', 'email', 'phone', 'address', 'gstin', 'notes'];
+  textFields.forEach(field => {
+    if (sanitized[field] !== undefined) {
+      if (typeof sanitized[field] === 'string') {
+        const trimmed = sanitized[field].trim();
+        sanitized[field] = trimmed === '' ? null : trimmed;
+      }
+    }
+  });
+  return sanitized;
+};
+
 exports.createClient = async (req, res, next) => {
   try {
+    const payload = sanitizeClientData(req.body);
+    if (!payload.companyName) {
+      return res.status(400).json({ success: false, message: 'Company Name is required' });
+    }
     const client = await clientDataService.create({
-      ...req.body,
+      ...payload,
       createdBy: req.user.id
     });
     res.status(201).json({ success: true, data: client });
@@ -39,8 +57,9 @@ exports.getClientById = async (req, res, next) => {
 
 exports.updateClient = async (req, res, next) => {
   try {
+    const payload = sanitizeClientData(req.body);
     const client = await clientDataService.update(req.params.id, {
-      ...req.body,
+      ...payload,
       updatedBy: req.user.id
     });
     res.status(200).json({ success: true, data: client });

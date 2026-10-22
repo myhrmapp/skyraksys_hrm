@@ -17,7 +17,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(255),
       allowNull: true,
       validate: {
-        isEmail: true
+        isValidEmail(value) {
+          if (value && value.trim() !== '') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+              throw new Error('Must be a valid email address');
+            }
+          }
+        }
+      },
+      set(val) {
+        this.setDataValue('email', val && typeof val === 'string' && val.trim() ? val.trim().toLowerCase() : null);
       }
     },
     phone: {

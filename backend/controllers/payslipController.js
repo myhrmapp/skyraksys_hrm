@@ -224,9 +224,15 @@ const PayslipController = {
         currentUser
       );
 
+      const message = result.count > 0
+        ? `Generated ${result.count} payslip(s) successfully`
+        : (result.errors && result.errors.length > 0)
+          ? `Generated 0 payslips: ${result.errors[0]?.message || 'Selected employees could not be generated'}`
+          : 'Generated 0 payslips. Verify employee salary structures.';
+
       return res.status(201).json(ApiResponse.success(
         result,
-        `Generated ${result.count} payslip(s) successfully`
+        message
       ));
     } catch (error) {
       next(error);
@@ -259,9 +265,15 @@ const PayslipController = {
         currentUser
       );
 
+      const message = result.count > 0
+        ? `Generated ${result.count} payslip(s) for all employees`
+        : (result.errors && result.errors.length > 0)
+          ? `Generated 0 payslips: ${result.errors[0]?.message || 'No eligible employees found'}`
+          : 'Generated 0 payslips. Verify employee salary structures.';
+
       return res.json(ApiResponse.success(
         result,
-        `Generated ${result.count} payslip(s) for all employees`
+        message
       ));
     } catch (error) {
       next(error);

@@ -66,22 +66,33 @@ export default function ClientManagement() {
   };
 
   const handleSave = async () => {
-    if (!form.companyName) {
+    if (!form.companyName || !form.companyName.trim()) {
       enqueueSnackbar('Company Name is required', { variant: 'warning' });
       return;
     }
     try {
+      const payload = {
+        ...form,
+        companyName: form.companyName.trim(),
+        contactPerson: form.contactPerson?.trim() || null,
+        email: form.email?.trim() || null,
+        phone: form.phone?.trim() || null,
+        address: form.address?.trim() || null,
+        gstin: form.gstin?.trim() || null,
+        notes: form.notes?.trim() || null
+      };
+
       if (form.id) {
-        await clientService.update(form.id, form);
+        await clientService.update(form.id, payload);
         enqueueSnackbar('Client updated', { variant: 'success' });
       } else {
-        await clientService.create(form);
+        await clientService.create(payload);
         enqueueSnackbar('Client created', { variant: 'success' });
       }
       handleClose();
       fetchClients();
     } catch (err) {
-      enqueueSnackbar('Failed to save client', { variant: 'error' });
+      enqueueSnackbar(err.response?.data?.message || 'Failed to save client', { variant: 'error' });
     }
   };
 
