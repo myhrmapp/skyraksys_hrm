@@ -1445,7 +1445,7 @@ const ModernPayrollManagement = () => {
                 );
               }
               return filteredPayslips.map((payslip) => (
-                <TableRow key={payslip.id} hover>
+                <TableRow key={payslip.id} hover data-testid={`payroll-payslip-row-${payslip.id}`}>
                   <TableCell padding="checkbox">
                     <Checkbox
                       checked={selectedPayslipIds.includes(payslip.id)}
@@ -1481,7 +1481,12 @@ const ModernPayrollManagement = () => {
                   </TableCell>
                   <TableCell align="right">
                     <Tooltip title="View Details">
-                      <IconButton size="small" aria-label="View details" onClick={() => handleViewPayslip(payslip)}>
+                      <IconButton
+                        size="small"
+                        aria-label="View details"
+                        onClick={() => handleViewPayslip(payslip)}
+                        data-testid={`payroll-view-btn-${payslip.id}`}
+                      >
                         <ViewIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -1490,6 +1495,7 @@ const ModernPayrollManagement = () => {
                         size="small"
                         aria-label="Download Payslip PDF"
                         onClick={() => handleDownloadPDF(payslip.id, payslip.payslipNumber)}
+                        data-testid={`payroll-pdf-btn-${payslip.id}`}
                       >
                         <DownloadIcon fontSize="small" />
                       </IconButton>
@@ -1501,6 +1507,7 @@ const ModernPayrollManagement = () => {
                           aria-label="Finalize payslip"
                           color="primary"
                           onClick={() => handleFinalizePayslip(payslip.id)}
+                          data-testid={`payroll-finalize-btn-${payslip.id}`}
                         >
                           <LockIcon fontSize="small" />
                         </IconButton>
@@ -1513,6 +1520,7 @@ const ModernPayrollManagement = () => {
                           aria-label="Edit payslip"
                           color="warning"
                           onClick={() => handleEditPayslip(payslip)}
+                          data-testid={`payroll-edit-btn-${payslip.id}`}
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
@@ -1525,6 +1533,7 @@ const ModernPayrollManagement = () => {
                           aria-label="Mark as paid"
                           color="success"
                           onClick={() => handleMarkAsPaid(payslip.id)}
+                          data-testid={`payroll-mark-paid-btn-${payslip.id}`}
                         >
                           <PaymentIcon fontSize="small" />
                         </IconButton>
@@ -1844,7 +1853,7 @@ const ModernPayrollManagement = () => {
         {/* Period Financial KPI Cards */}
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #6366f1' }}>
+            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #6366f1' }} data-testid="payroll-report-count-card">
               <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase">
                 Period Payslips
               </Typography>
@@ -1857,7 +1866,7 @@ const ModernPayrollManagement = () => {
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #3b82f6' }}>
+            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #3b82f6' }} data-testid="payroll-report-gross-card">
               <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase">
                 Gross Earnings
               </Typography>
@@ -1870,7 +1879,7 @@ const ModernPayrollManagement = () => {
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #ef4444' }}>
+            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #ef4444' }} data-testid="payroll-report-deductions-card">
               <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase">
                 Total Deductions
               </Typography>
@@ -1883,7 +1892,7 @@ const ModernPayrollManagement = () => {
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #10b981' }}>
+            <Card sx={{ p: 2.5, borderRadius: 3, borderLeft: '4px solid #10b981' }} data-testid="payroll-report-net-card">
               <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase">
                 Net Payout
               </Typography>
@@ -1928,10 +1937,10 @@ const ModernPayrollManagement = () => {
 
       <Paper sx={{ mb: 3 }}>
         <Tabs data-testid="payroll-tabs" value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
-          <Tab label="Overview" icon={<AssessmentIcon />} iconPosition="start" />
-          <Tab label="Generate" icon={<GenerateIcon />} iconPosition="start" />
-          <Tab label="Process Payments" icon={<PaymentIcon />} iconPosition="start" />
-          <Tab label="Reports" icon={<AssessmentIcon />} iconPosition="start" />
+          <Tab label="Overview" icon={<AssessmentIcon />} iconPosition="start" data-testid="payroll-tab-overview" />
+          <Tab label="Generate" icon={<GenerateIcon />} iconPosition="start" data-testid="payroll-tab-generate" />
+          <Tab label="Process Payments" icon={<PaymentIcon />} iconPosition="start" data-testid="payroll-tab-payments" />
+          <Tab label="Reports" icon={<AssessmentIcon />} iconPosition="start" data-testid="payroll-tab-reports" />
         </Tabs>
       </Paper>
 

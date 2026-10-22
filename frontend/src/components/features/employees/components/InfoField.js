@@ -43,6 +43,9 @@ const InfoField = ({
         variant="outlined"
         size="small"
         data-testid={testId}
+        inputProps={{
+          'data-testid': testId ? `${testId}-input` : undefined
+        }}
         InputProps={InputProps}
         InputLabelProps={type === 'date' ? { shrink: true } : undefined}
         sx={{

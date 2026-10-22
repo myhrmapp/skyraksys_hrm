@@ -124,7 +124,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)} data-testid="task-error-alert">
           {error}
         </Alert>
       )}
@@ -138,6 +138,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
             name="name"
             value={formData.name}
             onChange={handleChange}
+            inputProps={{ 'data-testid': 'task-name-input' }}
           />
         </Grid>
 
@@ -150,6 +151,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
             onChange={handleChange}
             multiline
             rows={3}
+            inputProps={{ 'data-testid': 'task-description-input' }}
           />
         </Grid>
 
@@ -162,6 +164,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
                 value={projects.some(p => p.id === formData.projectId) ? formData.projectId : ""}
                 onChange={handleChange}
                 label="Project"
+                inputProps={{ 'data-testid': 'task-project-select' }}
               >
                 {projects.map(project => (
                   <MenuItem key={project.id} value={project.id}>
@@ -180,6 +183,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
                 name="availableToAll"
                 checked={formData.availableToAll}
                 onChange={handleChange}
+                inputProps={{ 'data-testid': 'task-available-all-checkbox' }}
               />
             }
             label="Available to all employees"
@@ -195,6 +199,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
                 value={employees.some(e => e.id === formData.assignedTo) ? formData.assignedTo : ""}
                 onChange={handleChange}
                 label="Assign To"
+                inputProps={{ 'data-testid': 'task-assignee-select' }}
               >
                 <MenuItem value="">None</MenuItem>
                 {employees.map(employee => (
@@ -215,6 +220,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
               value={["Not Started","In Progress","Completed","On Hold"].includes(formData.status) ? formData.status : ""}
               onChange={handleChange}
               label="Status"
+              inputProps={{ 'data-testid': 'task-status-select' }}
             >
               <MenuItem value="Not Started">Not Started</MenuItem>
               <MenuItem value="In Progress">In Progress</MenuItem>
@@ -232,6 +238,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
               value={["Low","Medium","High","Critical"].includes(formData.priority) ? formData.priority : ""}
               onChange={handleChange}
               label="Priority"
+              inputProps={{ 'data-testid': 'task-priority-select' }}
             >
               <MenuItem value="Low">Low</MenuItem>
               <MenuItem value="Medium">Medium</MenuItem>
@@ -249,7 +256,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
             type="number"
             value={formData.estimatedHours}
             onChange={handleChange}
-            inputProps={{ min: 0, step: 0.5 }}
+            inputProps={{ min: 0, step: 0.5, 'data-testid': 'task-estimated-hours-input' }}
           />
         </Grid>
       </Grid>
@@ -260,6 +267,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
           variant="contained"
           disabled={loading}
           fullWidth
+          data-testid="task-submit-btn"
         >
           {loading ? 'Saving...' : (task ? 'Update Task' : 'Create Task')}
         </Button>
@@ -268,6 +276,7 @@ const TaskForm = ({ task, projectId, onSave, onCancel }) => {
           onClick={onCancel}
           disabled={loading}
           fullWidth
+          data-testid="task-cancel-btn"
         >
           Cancel
         </Button>

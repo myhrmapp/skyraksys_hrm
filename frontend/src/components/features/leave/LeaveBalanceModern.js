@@ -147,7 +147,8 @@ const LeaveBalanceModern = () => {
     if (err.response?.status === 409) {
       return 'A leave balance for this employee and leave type already exists for the selected year.';
     }
-    return err.response?.data?.message || err.response?.data?.error || err.message || defaultMsg;
+    const detail = err.response?.data?.message || err.response?.data?.error || err.message;
+    return detail ? `${defaultMsg}: ${detail}` : defaultMsg;
   };
 
   const handleBulkInit = async () => {

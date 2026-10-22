@@ -173,16 +173,20 @@ export default function AttendanceManagement() {
       headerName: 'Employee',
       flex: 1,
       minWidth: 200,
-      valueGetter: (params) => {
-        const emp = params.row.employee;
-        return emp ? `${emp.firstName} ${emp.lastName} (${emp.employeeId})` : params.row.employeeId;
+      valueGetter: (params, rowArg) => {
+        const row = params?.row || rowArg || params;
+        const emp = row?.employee;
+        return emp ? `${emp.firstName} ${emp.lastName} (${emp.employeeId})` : row?.employeeId;
       }
     },
     {
       field: 'department',
       headerName: 'Department',
       width: 150,
-      valueGetter: (params) => params.row.employee?.department?.name || '—'
+      valueGetter: (params, rowArg) => {
+        const row = params?.row || rowArg || params;
+        return row?.employee?.department?.name || '—';
+      }
     },
     {
       field: 'checkIn',
@@ -240,7 +244,11 @@ export default function AttendanceManagement() {
       filterable: false,
       renderCell: (params) => (
         <Tooltip title="Edit/Correct">
-          <IconButton size="small" onClick={() => handleEditRow(params.row)}>
+          <IconButton
+            size="small"
+            data-testid={`attendance-edit-btn-${params.row?.id}`}
+            onClick={() => handleEditRow(params.row)}
+          >
             <EditIcon fontSize="small" />
           </IconButton>
         </Tooltip>

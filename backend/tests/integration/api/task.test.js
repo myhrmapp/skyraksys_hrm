@@ -137,6 +137,29 @@ describe('Task API Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
     });
+
+    it('TC-051: should allow updating task with empty description and null estimatedHours', async () => {
+      const task = await helper.createTask({
+        projectId: testProject.id,
+        description: 'Initial description',
+        estimatedHours: 10
+      });
+      const updateData = {
+        name: `TC-051 Task ${Date.now()}`,
+        projectId: testProject.id,
+        description: '',
+        estimatedHours: null
+      };
+
+      const response = await request(app)
+        .put(`/api/tasks/${task.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(updateData);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.description).toBe('');
+    });
   });
 
   // Test 5: Delete task

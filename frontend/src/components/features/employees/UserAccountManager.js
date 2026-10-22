@@ -191,8 +191,12 @@ const UserAccountManager = ({
         onUpdate(updateData);
       } else {
         const userId = employee.user?.id || employee.id;
-        // Update account details (email and role)
-        await authService.updateUserAccount(userId, { email: updateData.email, role: updateData.role });
+        // Update account details (email, role, enableLogin)
+        await authService.updateUserAccount(userId, {
+          email: updateData.email,
+          role: updateData.role,
+          enableLogin: updateData.enableLogin
+        });
         // If password is provided, update it via the dedicated password reset endpoint
         if (updateData.password) {
           await authService.resetUserPassword(userId, updateData.password);
@@ -301,6 +305,7 @@ const UserAccountManager = ({
                     checked={userData.enableLogin}
                     onChange={handleEnableLoginChange}
                     color="primary"
+                    inputProps={{ 'data-testid': 'user-account-enable-login-switch' }}
                   />
                 }
                 label={
@@ -375,6 +380,7 @@ const UserAccountManager = ({
                     helperText={userData.email ? 'This email will be used for login' : 'Employee email will be used automatically'}
                     required
                     placeholder={employee?.email || 'Enter email address'}
+                    inputProps={{ 'data-testid': 'user-account-email-input' }}
                   />
                   {userData.email && (
                     <Typography variant="caption" color="success.main" sx={{ mt: 1, display: 'block' }}>
@@ -391,7 +397,12 @@ const UserAccountManager = ({
                     <Typography variant="subtitle1">Password Management</Typography>
                     <Box>
                       <Tooltip title="Generate Random Password">
-                        <IconButton onClick={generateRandomPassword} size="small" aria-label="Generate random password">
+                        <IconButton
+                          onClick={generateRandomPassword}
+                          size="small"
+                          aria-label="Generate random password"
+                          data-testid="user-account-random-password-btn"
+                        >
                           <RefreshIcon />
                         </IconButton>
                       </Tooltip>
@@ -413,12 +424,14 @@ const UserAccountManager = ({
                         type={showPassword ? 'text' : 'password'}
                         value={userData.password}
                         onChange={(e) => setUserData(prev => ({ ...prev, password: e.target.value }))}
+                        inputProps={{ 'data-testid': 'user-account-password-input' }}
                         InputProps={{
                           endAdornment: (
                             <IconButton
                               onClick={() => setShowPassword(!showPassword)}
                               edge="end"
                               aria-label={showPassword ? 'Hide password' : 'Show password'}
+                              data-testid="user-account-toggle-password-visibility"
                             >
                               {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                             </IconButton>
@@ -440,17 +453,7 @@ const UserAccountManager = ({
                             ? 'Passwords do not match'
                             : ''
                         }
-                        InputProps={{
-                          endAdornment: (
-                            <IconButton
-                              onClick={() => setShowPassword(!showPassword)}
-                              edge="end"
-                              aria-label={showPassword ? 'Hide password' : 'Show password'}
-                            >
-                              {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                            </IconButton>
-                          )
-                        }}
+                        inputProps={{ 'data-testid': 'user-account-confirm-password-input' }}
                         required
                       />
                     </Grid>
@@ -461,6 +464,7 @@ const UserAccountManager = ({
                       <Switch
                         checked={userData.forcePasswordChange}
                         onChange={(e) => setUserData(prev => ({ ...prev, forcePasswordChange: e.target.checked }))}
+                        inputProps={{ 'data-testid': 'user-account-force-password-change-switch' }}
                       />
                     }
                     label="Force password change on first login"
@@ -484,12 +488,13 @@ const UserAccountManager = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose} data-testid="user-account-cancel-btn">Cancel</Button>
         <Button
           onClick={handleSave}
           variant="contained"
           disabled={loading}
           startIcon={loading ? <CircularProgress size={20} /> : <KeyIcon />}
+          data-testid="user-account-save-btn"
         >
           {mode === 'create' ? 'Setup Account' : 'Update Account'}
         </Button>

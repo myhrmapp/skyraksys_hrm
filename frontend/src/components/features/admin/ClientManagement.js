@@ -129,16 +129,23 @@ export default function ClientManagement() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             InputProps={{ startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} /> }}
+            inputProps={{ 'data-testid': 'client-search-input' }}
             sx={{ width: 300 }}
           />
-          <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={() => handleOpen()}>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpen()}
+            data-testid="client-add-btn"
+          >
             Add Client
           </Button>
         </CardContent>
       </Card>
 
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer component={Paper} data-testid="client-table-container">
+        <Table data-testid="client-table">
           <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
             <TableRow>
               <TableCell><strong>Company Name</strong></TableCell>
@@ -152,23 +159,42 @@ export default function ClientManagement() {
           </TableHead>
           <TableBody>
             {filteredClients.map((client) => (
-              <TableRow key={client.id} hover>
+              <TableRow key={client.id} hover data-testid={`client-row-${client.id}`}>
                 <TableCell>{client.companyName}</TableCell>
                 <TableCell>{client.contactPerson || '-'}</TableCell>
                 <TableCell>{client.email || '-'}</TableCell>
                 <TableCell>{client.phone || '-'}</TableCell>
                 <TableCell>{client.gstin || '-'}</TableCell>
                 <TableCell>
-                  <Chip size="small" label={client.isActive ? 'Active' : 'Inactive'} color={client.isActive ? 'success' : 'default'} />
+                  <Chip
+                    size="small"
+                    label={client.isActive ? 'Active' : 'Inactive'}
+                    color={client.isActive ? 'success' : 'default'}
+                    data-testid={`client-status-chip-${client.id}`}
+                  />
                 </TableCell>
                 <TableCell align="right">
-                  <IconButton color="primary" onClick={() => handleOpen(client)}><EditIcon /></IconButton>
-                  <IconButton color="error" onClick={() => handleDelete(client.id)}><DeleteIcon /></IconButton>
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleOpen(client)}
+                    data-testid={`client-edit-btn-${client.id}`}
+                    aria-label={`Edit ${client.companyName}`}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDelete(client.id)}
+                    data-testid={`client-delete-btn-${client.id}`}
+                    aria-label={`Delete ${client.companyName}`}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
             {filteredClients.length === 0 && (
-              <TableRow>
+              <TableRow data-testid="client-empty-row">
                 <TableCell colSpan={7} align="center" sx={{ py: 3 }}>No clients found.</TableCell>
               </TableRow>
             )}
@@ -176,39 +202,104 @@ export default function ClientManagement() {
         </Table>
       </TableContainer>
 
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth data-testid="client-dialog">
         <DialogTitle>{form.id ? 'Edit Client' : 'Add New Client'}</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField fullWidth label="Company Name" name="companyName" value={form.companyName} onChange={handleChange} required />
+              <TextField
+                fullWidth
+                label="Company Name"
+                name="companyName"
+                value={form.companyName}
+                onChange={handleChange}
+                required
+                inputProps={{ 'data-testid': 'client-company-name-input' }}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Contact Person" name="contactPerson" value={form.contactPerson} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="Contact Person"
+                name="contactPerson"
+                value={form.contactPerson}
+                onChange={handleChange}
+                inputProps={{ 'data-testid': 'client-contact-person-input' }}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="GSTIN / Tax ID" name="gstin" value={form.gstin} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="GSTIN / Tax ID"
+                name="gstin"
+                value={form.gstin}
+                onChange={handleChange}
+                inputProps={{ 'data-testid': 'client-gstin-input' }}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="Email"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                inputProps={{ 'data-testid': 'client-email-input' }}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Phone" name="phone" value={form.phone} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="Phone"
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                inputProps={{ 'data-testid': 'client-phone-input' }}
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth label="Address" name="address" multiline rows={3} value={form.address} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="Address"
+                name="address"
+                multiline
+                rows={3}
+                value={form.address}
+                onChange={handleChange}
+                inputProps={{ 'data-testid': 'client-address-input' }}
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth label="Notes" name="notes" multiline rows={2} value={form.notes} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="Notes"
+                name="notes"
+                multiline
+                rows={2}
+                value={form.notes}
+                onChange={handleChange}
+                inputProps={{ 'data-testid': 'client-notes-input' }}
+              />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel control={<Switch checked={form.isActive} onChange={handleChange} name="isActive" />} label="Active Status" />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={form.isActive}
+                    onChange={handleChange}
+                    name="isActive"
+                    inputProps={{ 'data-testid': 'client-is-active-switch' }}
+                  />
+                }
+                label="Active Status"
+              />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained" color="primary">Save Client</Button>
+          <Button onClick={handleClose} data-testid="client-cancel-btn">Cancel</Button>
+          <Button onClick={handleSave} variant="contained" color="primary" data-testid="client-save-btn">Save Client</Button>
         </DialogActions>
       </Dialog>
     </Box>

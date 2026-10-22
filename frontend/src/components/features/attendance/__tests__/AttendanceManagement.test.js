@@ -18,7 +18,7 @@ jest.mock('@mui/x-data-grid', () => {
             {columns.map((col) => {
               let value = row[col.field];
               try {
-                if (col.valueGetter) value = col.valueGetter(value, row);
+                if (col.valueGetter) value = col.valueGetter({ value, row }, row);
               } catch { /* ignore v6/v7 compat */ }
               if (col.renderCell) {
                 try {

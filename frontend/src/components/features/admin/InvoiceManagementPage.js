@@ -421,12 +421,12 @@ const InvoiceManagementPage = () => {
         </Box>
         <Stack direction="row" spacing={1} alignItems="center">
           <Tooltip title="Data Vault & Encryption Guide">
-            <IconButton color="primary" onClick={() => setHelpOpen(true)} aria-label="Security Help">
+            <IconButton color="primary" onClick={() => setHelpOpen(true)} aria-label="Security Help" data-testid="invoice-help-btn">
               <HelpOutline />
             </IconButton>
           </Tooltip>
-          <Button variant="outlined" onClick={openPhraseDialog}>Change Phrase</Button>
-          <Button startIcon={<Refresh />} onClick={loadData} disabled={loading}>Refresh</Button>
+          <Button variant="outlined" onClick={openPhraseDialog} data-testid="invoice-change-phrase-open-btn">Change Phrase</Button>
+          <Button startIcon={<Refresh />} onClick={loadData} disabled={loading} data-testid="invoice-refresh-btn">Refresh</Button>
         </Stack>
       </Stack>
 
@@ -448,6 +448,7 @@ const InvoiceManagementPage = () => {
           placeholder="Enter the shared invoice secret phrase"
           value={secretPhrase}
           onChange={(e) => setSecretPhrase(e.target.value)}
+          inputProps={{ 'data-testid': 'invoice-secret-phrase-input' }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -456,6 +457,7 @@ const InvoiceManagementPage = () => {
                   onClick={() => setShowSecretPhrase(!showSecretPhrase)}
                   edge="end"
                   size="small"
+                  data-testid="invoice-toggle-phrase-visibility"
                 >
                   {showSecretPhrase ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                 </IconButton>
@@ -463,14 +465,20 @@ const InvoiceManagementPage = () => {
             )
           }}
         />
-        <Button variant="contained" onClick={unlockInvoiceData} disabled={loading} sx={{ minWidth: 160 }}>
+        <Button
+          variant="contained"
+          onClick={unlockInvoiceData}
+          disabled={loading}
+          sx={{ minWidth: 160 }}
+          data-testid="invoice-unlock-btn"
+        >
           Unlock Data
         </Button>
       </Stack>
 
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-        <Tab label="Invoices" />
-        <Tab label="Templates" />
+      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }} data-testid="invoice-tabs">
+        <Tab label="Invoices" data-testid="invoice-tab-invoices" />
+        <Tab label="Templates" data-testid="invoice-tab-templates" />
       </Tabs>
 
       {tab === 0 && (
@@ -508,7 +516,7 @@ const InvoiceManagementPage = () => {
                 </FormControl>
                 <Button variant="outlined" onClick={loadData}>Apply</Button>
               </Stack>
-              <Button variant="contained" startIcon={<Add />} onClick={openCreateInvoice}>
+              <Button variant="contained" startIcon={<Add />} onClick={openCreateInvoice} data-testid="invoice-new-btn">
                 New Invoice
               </Button>
             </Stack>
@@ -521,7 +529,7 @@ const InvoiceManagementPage = () => {
                 action={{ label: 'New Invoice', onClick: openCreateInvoice }}
               />
             ) : (
-              <Table size="small">
+              <Table size="small" data-testid="invoice-table">
                 <TableHead>
                   <TableRow>
                     <TableCell>Invoice #</TableCell>
@@ -534,7 +542,7 @@ const InvoiceManagementPage = () => {
                 </TableHead>
                 <TableBody>
                   {invoices.map((invoice) => (
-                    <TableRow key={invoice.id} hover>
+                    <TableRow key={invoice.id} hover data-testid={`invoice-row-${invoice.id}`}>
                       <TableCell>{invoice.invoiceNumber}</TableCell>
                       <TableCell>{invoice.clientCompany}</TableCell>
                       <TableCell>{invoice.billingMonth}/{invoice.billingYear}</TableCell>
@@ -543,13 +551,39 @@ const InvoiceManagementPage = () => {
                         <Chip size="small" label={invoice.status.toUpperCase()} color={getStatusChipColor(invoice.status)} />
                       </TableCell>
                       <TableCell>
-                        <IconButton size="small" onClick={() => downloadPdf(invoice.id)} color="primary"><PictureAsPdf fontSize="small" /></IconButton>
-                        <IconButton size="small" onClick={() => openEditInvoice(invoice)} disabled={invoice.isSensitiveDataHidden}><Edit fontSize="small" /></IconButton>
-                        <IconButton size="small" color="error" onClick={() => requestDeleteInvoice(invoice.id)} disabled={invoice.isSensitiveDataHidden}><Delete fontSize="small" /></IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => downloadPdf(invoice.id)}
+                          color="primary"
+                          data-testid={`invoice-pdf-btn-${invoice.id}`}
+                          aria-label={`Download PDF for ${invoice.invoiceNumber}`}
+                        >
+                          <PictureAsPdf fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => openEditInvoice(invoice)}
+                          disabled={invoice.isSensitiveDataHidden}
+                          data-testid={`invoice-edit-btn-${invoice.id}`}
+                          aria-label={`Edit ${invoice.invoiceNumber}`}
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => requestDeleteInvoice(invoice.id)}
+                          disabled={invoice.isSensitiveDataHidden}
+                          data-testid={`invoice-delete-btn-${invoice.id}`}
+                          aria-label={`Delete ${invoice.invoiceNumber}`}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
                         <FormControl size="small" sx={{ minWidth: 110, ml: 1 }}>
                           <Select
                             value={invoice.status}
                             onChange={(e) => updateInvoiceStatus(invoice.id, e.target.value)}
+                            inputProps={{ 'data-testid': `invoice-status-select-${invoice.id}` }}
                           >
                             <MenuItem value="draft">Draft</MenuItem>
                             <MenuItem value="sent">Sent</MenuItem>
@@ -802,7 +836,7 @@ const InvoiceManagementPage = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={helpOpen} onClose={() => setHelpOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={helpOpen} onClose={() => setHelpOpen(false)} maxWidth="sm" fullWidth data-testid="invoice-help-dialog">
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Lock color="primary" /> Invoice Data Vault &amp; Security Guide
         </DialogTitle>
@@ -825,7 +859,7 @@ const InvoiceManagementPage = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setHelpOpen(false)} variant="contained">Got it</Button>
+          <Button onClick={() => setHelpOpen(false)} variant="contained" data-testid="invoice-help-close-btn">Got it</Button>
         </DialogActions>
       </Dialog>
 

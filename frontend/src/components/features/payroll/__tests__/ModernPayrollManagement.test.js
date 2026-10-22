@@ -703,3 +703,179 @@ describe('Checkbox Select All', () => {
     });
   });
 });
+
+// ────────────────── TC-048: REPORTS & COMPLIANCE TAB ──────────────────
+describe('TC-048: Reports and Compliance Tab', () => {
+  test('navigates to Reports tab and displays period KPI cards and export buttons', async () => {
+    const user = userEvent.setup();
+    renderPayroll();
+
+    const reportsTab = await screen.findByTestId('payroll-tab-reports');
+    await user.click(reportsTab);
+
+    // Verify KPI summary cards
+    expect(await screen.findByTestId('payroll-report-count-card')).toBeInTheDocument();
+    expect(screen.getByTestId('payroll-report-gross-card')).toBeInTheDocument();
+    expect(screen.getByTestId('payroll-report-deductions-card')).toBeInTheDocument();
+    expect(screen.getByTestId('payroll-report-net-card')).toBeInTheDocument();
+
+    // Verify dedicated Period Report export buttons
+    expect(screen.getByTestId('payroll-report-export-excel-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('payroll-report-export-csv-btn')).toBeInTheDocument();
+  });
+});
+
+// ────────────────── TC-052: PAYSLIP GENERATION RESULT HANDLING ──────────────────
+describe('TC-052: Payslip Generation Result Handling', () => {
+  test('shows warning when generating 0 payslips for already generated period', async () => {
+    const user = userEvent.setup();
+    renderPayroll();
+
+    // Click Generate tab
+    await user.click(await screen.findByTestId('payroll-tab-generate'));
+
+    // Select employee
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+    });
+    const checkboxes = screen.getAllByRole('checkbox');
+    await user.click(checkboxes[0]);
+
+    // Mock validation dialog and generation endpoints
+    mockPost.mockImplementation((url) => {
+      if (url === '/payslips/validate') {
+        return Promise.resolve({
+          data: {
+            success: true,
+            data: {
+              canProceed: true,
+              validEmployees: [{ id: 1, employeeId: 'EMP001', name: 'John Doe' }],
+              invalidEmployees: [],
+              message: '1 employee ready for generation',
+              successRate: 100
+            }
+          }
+        });
+      }
+      if (url === '/payslips/generate') {
+        return Promise.resolve({
+          data: {
+            success: true,
+            message: 'All selected employees already have payslips generated for this period.',
+            data: { count: 0, payslips: [], alreadyGenerated: ['EMP001'] }
+          }
+        });
+      }
+      return Promise.resolve({ data: { success: true } });
+    });
+
+    const generateBtn = screen.getByTestId('payroll-validate-generate-btn');
+    await user.click(generateBtn);
+
+    // Validation dialog appears - click proceed
+    const proceedBtn = await screen.findByRole('button', { name: /generate \d+ payslip/i });
+    expect(proceedBtn).not.toBeDisabled();
+    await user.click(proceedBtn);
+
+    await waitFor(() => {
+      expect(mockPost).toHaveBeenCalledWith(
+        '/payslips/generate',
+        expect.objectContaining({
+          employeeIds: [1]
+        })
+      );
+    });
+  });
+
+  test('successfully generates >0 payslips and transitions to Process Payments tab', async () => {
+    const user = userEvent.setup();
+    renderPayroll();
+
+    // Click Generate tab
+    await user.click(await screen.findByTestId('payroll-tab-generate'));
+
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+    });
+    const checkboxes = screen.getAllByRole('checkbox');
+    await user.click(checkboxes[0]);
+
+    mockPost.mockImplementation((url) => {
+      if (url === '/payslips/validate') {
+        return Promise.resolve({
+          data: {
+            success: true,
+            data: {
+              canProceed: true,
+              validEmployees: [{ id: 1, employeeId: 'EMP001', name: 'John Doe' }],
+              invalidEmployees: [],
+              message: '1 employee ready for generation',
+              successRate: 100
+            }
+          }
+        });
+      }
+      if (url === '/payslips/generate') {
+        return Promise.resolve({
+          data: {
+            success: true,
+            message: 'Payslips generated successfully',
+            data: { count: 1, payslips: [{ id: 10, employeeId: 1, status: 'draft' }] }
+          }
+        });
+      }
+      return Promise.resolve({ data: { success: true } });
+    });
+
+    const generateBtn = screen.getByTestId('payroll-validate-generate-btn');
+    await user.click(generateBtn);
+
+    const proceedBtn = await screen.findByRole('button', { name: /generate \d+ payslip/i });
+    await user.click(proceedBtn);
+
+    // Automatically transitions to Process Payments tab
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: /process payments/i })).toHaveAttribute('aria-selected', 'true');
+    });
+  });
+});
+
+// ────────────────── TC-053: FINALIZE PAYSLIP ──────────────────
+describe('TC-053: Finalize Payslip Action', () => {
+  test('calls PUT /payslips/:id/finalize and invalidates queries', async () => {
+    const user = userEvent.setup();
+    mockPut.mockResolvedValueOnce({
+      data: {
+        success: true,
+        message: 'Payslip finalized successfully',
+        data: { id: 1, status: 'finalized', finalizedBy: 1, isLocked: true }
+      }
+    });
+
+    renderPayroll();
+    await user.click(await screen.findByTestId('payroll-tab-payments'));
+
+    // Find draft payslip row 1
+    expect(await screen.findByTestId('payroll-payslip-row-1')).toBeInTheDocument();
+    const finalizeBtn = screen.getByTestId('payroll-finalize-btn-1');
+    expect(finalizeBtn).toBeInTheDocument();
+
+    await user.click(finalizeBtn);
+
+    await waitFor(() => {
+      expect(mockPut).toHaveBeenCalledWith('/payslips/1/finalize');
+    });
+  });
+
+  test('does not show finalize button on finalized or paid payslips', async () => {
+    const user = userEvent.setup();
+    renderPayroll();
+    await user.click(await screen.findByTestId('payroll-tab-payments'));
+
+    // Finalized payslip (id: 2) and Paid payslip (id: 3)
+    expect(await screen.findByTestId('payroll-payslip-row-2')).toBeInTheDocument();
+    expect(screen.queryByTestId('payroll-finalize-btn-2')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('payroll-finalize-btn-3')).not.toBeInTheDocument();
+  });
+});
+

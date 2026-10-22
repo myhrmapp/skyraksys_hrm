@@ -22,6 +22,7 @@ jest.mock('../../../../services/leave-balance-admin.service', () => {
     }
   };
 });
+import LeaveBalanceModern from '../LeaveBalanceModern';
 const { leaveBalanceAdminService } = require('../../../../services/leave-balance-admin.service');
 
 // ── helpers ────────────────────────────────────────────────────────
@@ -87,12 +88,7 @@ const setupMocks = (overrides = {}) => {
 
 const renderComponent = async (opts = {}) => {
   setupMocks(opts.mocks || {});
-  const result = render(
-    React.createElement(
-      require('../LeaveBalanceModern').default
-    ),
-    adminAuth
-  );
+  const result = render(<LeaveBalanceModern />, adminAuth);
   // wait for initial data load
   await waitFor(() => {
     expect(leaveBalanceAdminService.getEmployees).toHaveBeenCalled();
