@@ -269,7 +269,7 @@ const Layout = () => {
             <img
               src="/logo-full.png"
               alt="SKYRAKSYS Technologies"
-              style={{ maxWidth: '160px', width: '100%', height: 'auto' }}
+              style={{ maxWidth: '160px', width: '100%', height: 'auto', objectFit: 'contain' }}
             />
           </Box>
           <Box sx={{ height: '2px', background: 'linear-gradient(90deg, transparent, #FF8C00, #FF3399, #9B30FF, transparent)', borderRadius: 2, mt: 1.5 }} />
@@ -458,7 +458,7 @@ const Layout = () => {
             <img
               src="/logo-full.png"
               alt="SKYRAKSYS Technologies"
-              style={{ height: '30px', width: 'auto', marginRight: '8px' }}
+              style={{ height: '32px', maxWidth: '160px', width: 'auto', objectFit: 'contain', marginRight: '8px' }}
             />
           </Box>
 

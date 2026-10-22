@@ -67,12 +67,21 @@ const TimesheetApproval = ({ embedded } = {}) => {
   const queryClient = useQueryClient();
   const { dialogProps, confirm } = useConfirmDialog();
 
-  // 🚀 React Query for pending timesheets (team-scoped via /approval/pending)
+  const [statusFilter, setStatusFilter] = useState('');
+
+  // 🚀 React Query for timesheets (pending approvals by default, or filtered by status / history)
   const { data: timesheetsData, isLoading: loading, refetch } = useQuery({
-    queryKey: ['timesheets', 'pending'],
-    queryFn: () => timesheetService.getPendingApprovals(),
+    queryKey: ['timesheets', 'approvals', statusFilter],
+    queryFn: () => {
+      if (statusFilter && statusFilter !== 'Submitted') {
+        const params = { limit: 100 };
+        if (statusFilter !== 'ALL') params.status = statusFilter;
+        return timesheetService.getAll(params);
+      }
+      return timesheetService.getPendingApprovals();
+    },
     select: (response) => {
-      const allTimesheets = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+      const allTimesheets = Array.isArray(response?.data) ? response.data : (response?.data?.data || (Array.isArray(response) ? response : []));
       return allTimesheets.sort((a, b) => new Date(b.weekStartDate) - new Date(a.weekStartDate));
     }
   });
@@ -116,7 +125,6 @@ const TimesheetApproval = ({ embedded } = {}) => {
   const [comments, setComments] = useState('');
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [projectFilter, setProjectFilter] = useState('');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
@@ -127,7 +135,7 @@ const TimesheetApproval = ({ embedded } = {}) => {
   // M-04: compute derived data with useMemo — no intermediate state / no cascading effects
   const filteredTimesheets = useMemo(() => {
     let filtered = timesheets.filter((ts) => {
-      if (statusFilter && ts.status !== statusFilter) return false;
+      if (statusFilter && statusFilter !== 'ALL' && ts.status?.toLowerCase() !== statusFilter.toLowerCase()) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const name = `${ts.employee?.firstName ?? ''} ${ts.employee?.lastName ?? ''}`.toLowerCase();
@@ -357,10 +365,12 @@ const TimesheetApproval = ({ embedded } = {}) => {
     page * rowsPerPage + rowsPerPage
   );
 
-  const renderSummaryCard = (title, value, icon, color, subtitle) => (
+  const renderSummaryCard = (title, value, icon, color, subtitle, onClick) => (
     <Card
+      onClick={onClick}
       sx={{
         height: '100%',
+        cursor: onClick ? 'pointer' : 'default',
         background: 'rgba(255, 255, 255, 0.7)',
         backdropFilter: 'blur(20px)',
         border: '1px solid',
@@ -505,7 +515,8 @@ const TimesheetApproval = ({ embedded } = {}) => {
             summary.totalPending,
             <PendingIcon />,
             '#ff9800',
-            `${summary.employees} employees`
+            `${summary.employees} employees (Click to filter)`,
+            () => setStatusFilter('')
           )}
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -523,7 +534,8 @@ const TimesheetApproval = ({ embedded } = {}) => {
             summary.approved,
             <ApprovedIcon />,
             '#4caf50',
-            'This period'
+            'This period (Click to view)',
+            () => setStatusFilter('Approved')
           )}
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -532,7 +544,8 @@ const TimesheetApproval = ({ embedded } = {}) => {
             summary.rejected,
             <RejectedIcon />,
             '#f44336',
-            'Requires revision'
+            'Requires revision (Click to view)',
+            () => setStatusFilter('Rejected')
           )}
         </Grid>
       </Grid>
@@ -581,11 +594,11 @@ const TimesheetApproval = ({ embedded } = {}) => {
                     data-testid="ts-approval-status-select-wrapper"
                     inputProps={{ 'data-testid': 'ts-approval-status-select' }}
                   >
-                    <MenuItem value="">All Statuses</MenuItem>
-                    <MenuItem value="Draft">Draft</MenuItem>
-                    <MenuItem value="Submitted">Pending Approval</MenuItem>
+                    <MenuItem value="">Pending Approvals (Default)</MenuItem>
                     <MenuItem value="Approved">Approved</MenuItem>
                     <MenuItem value="Rejected">Rejected</MenuItem>
+                    <MenuItem value="Draft">Draft</MenuItem>
+                    <MenuItem value="ALL">All Statuses (History)</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -773,11 +786,25 @@ const TimesheetApproval = ({ embedded } = {}) => {
                   <Box sx={{ textAlign: 'center' }}>
                     <FilterIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
                     <Typography variant="h6" color="textSecondary" gutterBottom>
-                      No timesheets found
+                      {!statusFilter || statusFilter === 'Submitted'
+                        ? 'All caught up! No pending timesheets waiting for approval'
+                        : 'No timesheets found'}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Try adjusting your filters or search criteria
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: (!statusFilter || statusFilter === 'Submitted') ? 2 : 0 }}>
+                      {!statusFilter || statusFilter === 'Submitted'
+                        ? 'All submitted timesheets have been reviewed. You can check previous decisions in the status filter.'
+                        : 'Try adjusting your filters or search criteria'}
                     </Typography>
+                    {(!statusFilter || statusFilter === 'Submitted') && (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => setStatusFilter('ALL')}
+                        sx={{ mt: 1, borderRadius: 2 }}
+                      >
+                        View All Timesheets & History
+                      </Button>
+                    )}
                   </Box>
                 </TableCell>
               </TableRow>

@@ -216,7 +216,7 @@ router.post('/', authenticateToken, authorize('admin', 'hr'), async (req, res, n
       });
     }
 
-    const { title, description, departmentId, level } = value;
+    const { title, description, departmentId, level, code, minSalary, maxSalary, requirements, responsibilities, isActive } = value;
 
     // Check if department exists
     const department = await Department.findByPk(departmentId);
@@ -231,7 +231,13 @@ router.post('/', authenticateToken, authorize('admin', 'hr'), async (req, res, n
       title,
       description,
       departmentId,
-      level: level || 'Entry'
+      level: level || 'Entry',
+      ...(code !== undefined && { code }),
+      ...(minSalary !== undefined && { minSalary }),
+      ...(maxSalary !== undefined && { maxSalary }),
+      ...(requirements !== undefined && { requirements }),
+      ...(responsibilities !== undefined && { responsibilities }),
+      ...(isActive !== undefined && { isActive })
     });
 
     const createdPosition = await Position.findByPk(position.id, {

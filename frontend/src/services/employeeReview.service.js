@@ -11,7 +11,7 @@ class EmployeeReviewService {
    */
   async getAll(params = {}) {
     const response = await http.get('/employee-reviews', { params });
-    return response.data;
+    return response.data?.data !== undefined ? response.data.data : response.data;
   }
 
   /**
@@ -19,7 +19,7 @@ class EmployeeReviewService {
    */
   async getById(id) {
     const response = await http.get(`/employee-reviews/${id}`);
-    return response.data;
+    return response.data?.data !== undefined ? response.data.data : response.data;
   }
 
   /**
@@ -27,7 +27,7 @@ class EmployeeReviewService {
    */
   async create(data) {
     const response = await http.post('/employee-reviews', data);
-    return response.data;
+    return response.data?.data !== undefined ? response.data.data : response.data;
   }
 
   /**
@@ -37,7 +37,7 @@ class EmployeeReviewService {
    */
   async update(id, data) {
     const response = await http.put(`/employee-reviews/${id}`, data);
-    return response.data;
+    return response.data?.data !== undefined ? response.data.data : response.data;
   }
 
   /**
@@ -45,7 +45,7 @@ class EmployeeReviewService {
    */
   async updateStatus(id, data) {
     const response = await http.put(`/employee-reviews/${id}/status`, data);
-    return response.data;
+    return response.data?.data !== undefined ? response.data.data : response.data;
   }
 
   /**
@@ -60,7 +60,7 @@ class EmployeeReviewService {
    */
   async delete(id) {
     const response = await http.delete(`/employee-reviews/${id}`);
-    return response.data;
+    return response.data?.data !== undefined ? response.data.data : response.data;
   }
 
   /**
@@ -68,7 +68,7 @@ class EmployeeReviewService {
    */
   async getDashboardStats() {
     const response = await http.get('/employee-reviews/meta/dashboard');
-    return response.data;
+    return response.data?.data !== undefined ? response.data.data : response.data;
   }
 }
 

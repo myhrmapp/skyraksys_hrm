@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Grid,
   Typography,
@@ -13,10 +13,16 @@ import {
   Switch,
   Alert,
   Box,
-  Checkbox
+  Checkbox,
+  InputAdornment,
+  IconButton
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const userAccount = formData.userAccount || {
     enableLogin: false,
     role: 'employee',
@@ -117,7 +123,7 @@ const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur
               id="password"
               name="password"
               label="Password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={userAccount.password}
               onChange={(e) => onChange('userAccount.password', e.target.value)}
               onBlur={() => onBlur && onBlur('userAccount.password')}
@@ -125,6 +131,19 @@ const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur
               helperText={errors['userAccount.password'] || 'Minimum 8 characters (uppercase, lowercase, number, special character)'}
               required={!formData.id} // Required for new users if login enabled
               inputProps={{ 'data-testid': 'user-password-input' }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
             />
           </Grid>
 
@@ -134,7 +153,7 @@ const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur
               id="confirmPassword"
               name="confirmPassword"
               label="Confirm Password"
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               value={userAccount.confirmPassword}
               onChange={(e) => onChange('userAccount.confirmPassword', e.target.value)}
               onBlur={() => onBlur && onBlur('userAccount.confirmPassword')}
@@ -142,6 +161,19 @@ const UserAccountTab = ({ formData, errors, touchedFields = {}, onChange, onBlur
               helperText={errors['userAccount.confirmPassword']}
               required={!formData.id}
               inputProps={{ 'data-testid': 'user-confirm-password-input' }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      edge="end"
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
             />
           </Grid>
         </>

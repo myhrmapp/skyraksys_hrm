@@ -5,7 +5,7 @@ import socketService from '../services/socket.service';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box } from '@mui/material';
 import { useAuth } from './AuthContext';
 
-const NotificationContext = createContext(null);
+export const NotificationContext = createContext(null);
 
 /**
  * Notification system — now powered by notistack for consistency.

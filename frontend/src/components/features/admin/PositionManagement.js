@@ -450,8 +450,8 @@ const PositionManagement = ({ embedded } = {}) => {
                     />
                   </TableCell>
                   <TableCell>
-                    {position.minSalary && position.maxSalary ? (
-                      `₹${position.minSalary?.toLocaleString()} - ₹${position.maxSalary?.toLocaleString()}`
+                    {position.minSalary != null && position.maxSalary != null && position.minSalary !== '' && position.maxSalary !== '' ? (
+                      `₹${Number(position.minSalary).toLocaleString()} - ₹${Number(position.maxSalary).toLocaleString()}`
                     ) : (
                       'Not Set'
                     )}

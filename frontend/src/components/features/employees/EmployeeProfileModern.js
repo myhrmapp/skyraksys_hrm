@@ -97,7 +97,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
   // If mode is 'self', the 'id' might be undefined in the hook if we didn't pass it, but the hook fetches 'me'.
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : 'grey.50', py: 4, pb: editing ? 12 : 4 }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : 'grey.50', py: 4, pb: editing ? 16 : 4 }}>
       <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3 }}>
 
         {/* Header with Actions */}
@@ -185,7 +185,7 @@ const EmployeeProfileModern = ({ mode = 'admin' }) => {
           sx={{
             position: 'fixed',
             bottom: 0,
-            left: 0,
+            left: { xs: 0, md: '260px' },
             right: 0,
             bgcolor: 'white',
             borderTop: '2px solid',

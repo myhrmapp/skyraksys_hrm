@@ -256,7 +256,7 @@ const UserAccountManager = ({
                 <Grid item xs={6}>
                   <Typography variant="caption" color="text.secondary">Position</Typography>
                   <Typography variant="body2" fontWeight={500}>
-                    {employee?.position?.name || employee?.positionName || 'N/A'}
+                    {employee?.position?.title || employee?.position?.name || employee?.designation || employee?.positionName || 'N/A'}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
@@ -440,6 +440,17 @@ const UserAccountManager = ({
                             ? 'Passwords do not match'
                             : ''
                         }
+                        InputProps={{
+                          endAdornment: (
+                            <IconButton
+                              onClick={() => setShowPassword(!showPassword)}
+                              edge="end"
+                              aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            >
+                              {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                            </IconButton>
+                          )
+                        }}
                         required
                       />
                     </Grid>

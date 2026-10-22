@@ -125,14 +125,14 @@ export const useEmployeeProfile = (mode = 'admin') => {
 
   // 🚀 Populate employee data from React Query when available (admin/manager mode)
   useEffect(() => {
-    if (mode !== 'self' && employeeData && !employee?.id) {
+    if (mode !== 'self' && employeeData && (!employee?.id || !editing)) {
       setEmployee(employeeData);
       setOriginalEmployee({ ...employeeData });
       if (employeeData.photoUrl) {
         setPhotoPreview(buildPhotoUrl(employeeData.photoUrl));
       }
     }
-  }, [employeeData, mode, employee?.id]);
+  }, [employeeData, mode, editing]);
 
   // When navigated here with editMode=true (e.g. from employee list), redirect to full tab form
   useEffect(() => {

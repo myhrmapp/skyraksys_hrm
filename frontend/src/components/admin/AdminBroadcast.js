@@ -89,8 +89,8 @@ const AdminBroadcast = ({ embedded } = {}) => {
   };
 
   return (
-    <Container maxWidth={embedded ? false : 'md'} sx={{ py: embedded ? 0 : 4, px: embedded ? 0 : 2, mt: embedded ? -3 : 0 }}>
-      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
+    <Container maxWidth={embedded ? false : 'md'} sx={{ py: embedded ? 3 : 4, px: embedded ? { xs: 2, md: 3 } : 2 }}>
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Paper elevation={0} sx={{ p: 1.5, borderRadius: 2, bgcolor: 'primary.50' }}>
           <CampaignIcon color="primary" sx={{ fontSize: 32 }} />
         </Paper>

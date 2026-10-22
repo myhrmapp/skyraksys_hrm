@@ -60,8 +60,7 @@ export const useCreateEmployeeReview = () => {
   return useMutation({
     mutationFn: (data) => employeeReviewService.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.all });
       enqueueSnackbar('Review created successfully', { variant: 'success' });
     },
     onError: (error) => {
@@ -82,9 +81,7 @@ export const useUpdateEmployeeReview = () => {
   return useMutation({
     mutationFn: ({ id, data }) => employeeReviewService.update(id, data),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.detail(id) });
-      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.all });
       enqueueSnackbar('Review updated successfully', { variant: 'success' });
     },
     onError: (error) => {
@@ -105,9 +102,7 @@ export const useUpdateReviewStatus = () => {
   return useMutation({
     mutationFn: ({ id, data }) => employeeReviewService.updateStatus(id, data),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.detail(id) });
-      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.all });
       enqueueSnackbar('Review status updated', { variant: 'success' });
     },
     onError: (error) => {
@@ -128,8 +123,7 @@ export const useDeleteEmployeeReview = () => {
   return useMutation({
     mutationFn: (id) => employeeReviewService.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: employeeReviewKeys.all });
       enqueueSnackbar('Review deleted successfully', { variant: 'success' });
     },
     onError: (error) => {

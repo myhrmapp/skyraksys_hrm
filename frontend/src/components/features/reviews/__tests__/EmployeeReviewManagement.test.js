@@ -132,7 +132,7 @@ describe('EmployeeReviewManagement Component', () => {
   test('should render component with header and title', () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
 
-    expect(screen.getByText(/Employee Review Management/i)).toBeInTheDocument();
+    expect(screen.getByText(/Employee Reviews/i)).toBeInTheDocument();
   });
 
   // Test 2: Displays review list for admin
@@ -176,26 +176,26 @@ describe('EmployeeReviewManagement Component', () => {
   test('should show create button for admin users', () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
 
-    expect(screen.getByRole('button', { name: /create review/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /new review|create review/i })).toBeInTheDocument();
   });
 
   // Test 6: Hides "Create Review" button for employees
   test('should hide create button for regular employees', () => {
     renderWithProviders(<EmployeeReviewManagement />, mockEmployeeAuth);
 
-    expect(screen.queryByRole('button', { name: /create review/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /new review|create review/i })).not.toBeInTheDocument();
   });
 
   // Test 7: Opens create dialog when button clicked
   test('should open create dialog when create button is clicked', async () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
 
-    const createButton = screen.getByRole('button', { name: /create review/i });
+    const createButton = screen.getByRole('button', { name: /new review|create review/i });
     fireEvent.click(createButton);
 
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
-      expect(screen.getByText(/new review/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/new review/i).length).toBeGreaterThan(0);
     });
   });
 
@@ -204,8 +204,8 @@ describe('EmployeeReviewManagement Component', () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
 
     await waitFor(() => {
-      expect(screen.getByText('Completed')).toBeInTheDocument();
-      expect(screen.getByText('Pending Approval')).toBeInTheDocument();
+      expect(screen.getAllByText('Completed').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Pending Approval').length).toBeGreaterThan(0);
     });
   });
 
@@ -218,7 +218,7 @@ describe('EmployeeReviewManagement Component', () => {
     expect(screen.getByText('Jane Smith')).toBeInTheDocument();
 
     // Apply status filter
-    const statusFilter = screen.getByLabelText(/status/i);
+    const statusFilter = screen.getByTestId('reviews-status-filter').querySelector('input');
     fireEvent.change(statusFilter, { target: { value: 'completed' } });
 
     await waitFor(() => {
@@ -260,8 +260,7 @@ describe('EmployeeReviewManagement Component', () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
 
     // Check pagination exists
-    const pagination = screen.getByRole('navigation', { name: /pagination/i });
-    expect(pagination).toBeInTheDocument();
+    expect(screen.getByText(/1–10 of 25/i)).toBeInTheDocument();
   });
 
   // Test 12: Opens edit dialog when edit button clicked
@@ -269,8 +268,8 @@ describe('EmployeeReviewManagement Component', () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
 
     await waitFor(() => {
-      const editButtons = screen.getAllByRole('button', { name: /edit/i });
-      fireEvent.click(editButtons[0]);
+      const editButton = screen.getByRole('button', { name: /edit review for/i });
+      fireEvent.click(editButton);
     });
 
     await waitFor(() => {
@@ -294,7 +293,7 @@ describe('EmployeeReviewManagement Component', () => {
     renderWithProviders(<EmployeeReviewManagement />, mockAdminAuth);
 
     await waitFor(() => {
-      const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
+      const deleteButtons = screen.getAllByRole('button', { name: /delete review for/i });
       fireEvent.click(deleteButtons[0]);
     });
 

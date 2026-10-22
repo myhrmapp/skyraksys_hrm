@@ -53,8 +53,8 @@ export const useCreateEmployee = () => {
       return employeeService.create(data);
     },
     onSuccess: (newEmployee) => {
-      // Invalidate employee list queries
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      // Invalidate all employee queries (lists, counts, details)
+      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       // Note: Success message handled in component for more detailed feedback
     },
     onError: (error) => {
@@ -78,8 +78,8 @@ export const useUpdateEmployee = () => {
         employeeKeys.detail(id),
         updatedEmployee
       );
-      // Invalidate list queries
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      // Invalidate all employee queries (lists, counts, details)
+      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       // Note: Success message handled in component for more detailed feedback
     },
     onError: (error) => {
@@ -101,8 +101,8 @@ export const useDeleteEmployee = () => {
     onSuccess: (_, id) => {
       // Remove from cache
       queryClient.removeQueries({ queryKey: employeeKeys.detail(id) });
-      // Invalidate list queries
-      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+      // Invalidate all employee queries
+      queryClient.invalidateQueries({ queryKey: employeeKeys.all });
       enqueueSnackbar('Employee deleted successfully', { variant: 'success' });
     },
     onError: (error) => {

@@ -123,9 +123,11 @@ const EmployeeReviewManagement = () => {
   const statusMutation = useUpdateReviewStatus();
   const deleteMutation = useDeleteEmployeeReview();
 
-  const reviews = useMemo(() => reviewsData?.reviews || [], [reviewsData]);
-  const totalCount = reviewsData?.totalCount || 0;
-  const employees = employeesData?.data || employeesData || [];
+  const reviews = useMemo(() => {
+    return reviewsData?.reviews || reviewsData?.data?.reviews || (Array.isArray(reviewsData) ? reviewsData : []);
+  }, [reviewsData]);
+  const totalCount = reviewsData?.totalCount ?? reviewsData?.data?.totalCount ?? reviews.length;
+  const employees = employeesData?.data || (Array.isArray(employeesData) ? employeesData : []);
 
   // Filtered reviews (client-side search on top of server-side filters)
   const filteredReviews = useMemo(() => {
@@ -253,7 +255,7 @@ const EmployeeReviewManagement = () => {
   }, []);
 
   // Dashboard stats
-  const stats = dashboardData || {};
+  const stats = dashboardData?.data || dashboardData || {};
   const statusCounts = useMemo(() => {
     const counts = { draft: 0, pending_employee_input: 0, pending_approval: 0, completed: 0, archived: 0 };
     (stats.reviewsByStatus || []).forEach((s) => {

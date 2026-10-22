@@ -89,9 +89,9 @@ export const useEmployeeList = () => {
     error: queryError,
     refetch: loadEmployees
   } = useEmployees(filters, {
-    keepPreviousData: true, // Smooth pagination without loading flicker
+    refetchOnMount: 'always',
     refetchOnWindowFocus: false,
-    staleTime: 2 * 60 * 1000 // 2 minutes cache
+    staleTime: 30 * 1000 // 30 seconds cache
   });
 
   // 🚀 FIXED: Extract data from normalized response

@@ -195,6 +195,7 @@ jest.mock('./contexts/NotificationContext', () => {
   }
   return {
   __esModule: true,
+  NotificationContext: require('react').createContext(null),
   NotificationProvider: ({ children }) => children,
   useNotifications: () => ({
     notifications: [],

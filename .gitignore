@@ -59,6 +59,7 @@ Thumbs.db
 
 # Test coverage
 coverage/
+*matrix-final-results*
 
 # PM2
 .pm2/
